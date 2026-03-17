@@ -25,3 +25,48 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: PINN
+      description: 物理信息神经网络与神经算子求解偏微分方程论文检索
+      enabled: true
+      keywords:
+        - keyword: pde pinn neural operator
+          keyword_cn: 偏微分方程 物理信息神经网络 神经算子
+          query: p
+        - keyword: PINN
+          keyword_cn: 物理信息神经网络
+          query: Physics-informed neural networks for partial differential equations
+        - keyword: Neural Operator
+          keyword_cn: 神经算子
+          query: Neural operator methods for solving PDEs
+        - keyword: DeepONet
+          keyword_cn: 深度算子网络
+          query: Deep operator networks for differential equations
+        - keyword: FNO
+          keyword_cn: 傅里叶神经算子
+          query: Fourier Neural Operator for scientific computing
+        - keyword: PDE solver
+          keyword_cn: 偏微分方程求解器
+          query: Deep learning based partial differential equation solvers
+      intent_queries:
+        - query: Recent advances in physics informed neural networks and neural operators
+          query_cn: 物理信息神经网络与神经算子的最新进展
+          enabled: true
+          source: manual
+          note: ''
+        - query: Comparison between PINNs and neural operators for PDE solving
+          query_cn: PINN与神经算子在求解偏微分方程中的对比
+          enabled: true
+          source: manual
+          note: ''
+        - query: Applications of neural operators in computational fluid dynamics
+          query_cn: 神经算子在计算流体力学中的应用
+          enabled: true
+          source: manual
+          note: ''
+        - query: Hybrid physics informed machine learning for differential equations
+          query_cn: 求解微分方程的混合物理信息机器学习方法
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-17T12:42:18.063Z'
