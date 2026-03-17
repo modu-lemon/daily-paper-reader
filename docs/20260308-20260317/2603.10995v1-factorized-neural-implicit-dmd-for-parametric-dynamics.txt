@@ -1,0 +1,759 @@
+Title: Factorized Neural Implicit DMD for Parametric Dynamics
+
+URL Source: https://arxiv.org/pdf/2603.10995v1
+
+Published Time: Thu, 12 Mar 2026 01:25:26 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# Factorized Neural Implicit DMD for Parametric Dynamics 
+
+Siyuan Chen * 1 Zhecheng Wang * 2 Yixin Chen 2 Yue Chang 2 Peter Yichen Chen 1 Eitan Grinspun 2
+
+Jonathan Panuelos 2
+
+# Abstract 
+
+A data-driven, model-free approach to modeling the temporal evolution of physical systems miti-gates the need for explicit knowledge of the gov-erning equations. Even when physical priors such as partial differential equations are available, such systems often reside in high-dimensional state spaces and exhibit nonlinear dynamics, making traditional numerical solvers computationally ex-pensive and ill-suited for real-time analysis and control. Consider the problem of learning a para-metric flow of a dynamical system: with an initial field and a set of physical parameters, we aim to predict the system’s evolution over time in a way that supports long-horizon rollouts, generalization to unseen parameters, and spectral analysis. We propose a physics-coded neural field param-eterization of the Koopman operator’s spectral decomposition. Unlike a physics-constrained neu-ral field (Raissi et al., 2019), which fits a single solution surface, and neural operators (Li et al., 2021; Lu et al., 2021), which directly approximate the solution operator at fixed time horizons, our model learns a factorized flow operator that decou-ples spatial modes and temporal evolution. This structure exposes underlying eigenvalues, modes, and stability of the underlying physical process to enable stable long-term rollouts, interpolation across parameter spaces, and spectral analysis. We demonstrate the efficacy of our method on a range of dynamics problems, showcasing its ability to accurately predict complex spatiotempo-ral phenomena while providing insights into the system’s dynamic behavior. 
+
+> 1
+
+Department of Computer Science, University of British Columbia, Vancouver, Canada 2Department of Computer Sci-ence, University of Toronto, Toronto, Canada. Correspondence to: Zhecheng Wang <zhecheng@cs.toronto.edu >.
+
+Preprint. March 12, 2026. 
+
+# 1. Introduction 
+
+Accurate and efficient prediction of parametric partial differ-ential equations (PDEs) with machine learning techniques has gained significant attention. In many practical settings, the governing dynamics depend on a variety of physical parameters, including geometric descriptors, boundary con-ditions, initial conditions, and flow parameters such as vis-cosity. Learning models that can capture both the under-lying dynamics and their dependence on such parameters remains challenging, particularly when long-term stability, interpretability, and generalization across unseen parameter configurations are required. Recent advances in Physics-informed Neural Net-work (Raissi et al., 2019) and Neural Operators (Li et al., 2021; Lu et al., 2021) have demonstrated strong approximation capability for PDE solution operators. However, these approaches model the learned dynamics as black-box mappings over fixed temporal sequences, offering limited interpretability and often suffering from error accumulation or instability under long-term rollout. As an alternative, Koopman operator theory (Koopman, 1931) formulates nonlinear dynamical systems through linear evolution in an appropriately lifted space, enabling spectral analysis, modal decomposition, and stable time integration. While Koopman-based neural operators (Xiong et al., 2024) have recently shown promise, they typically rely on a high-dimensional latent operator that is implicitly defined and lacks explicit physical or spectral structure, limiting generalization across varying parameter settings and geometric configurations. In this work, we propose a physics-coded neural Koop-man framework for learning parametric PDE dynamics with explicit spectral structure and robust long-term prediction. Specifically, we adopt a reduced-order modeling perspective and characterize the system evolution with a parameterized DMD operator, whose eigenfunctions ( Φ) and eigenvalues (Λ) are modeled by neural fields conditioned on physical parameters. This formulation yields a compact, low-rank representation of the dynamics that supports efficient dy-namic modeling for unseen PDE instances within the same family, and enables continuous-space evaluation. We learn Koopman eigenfunctions as complex-conjugate pairs by 1
+
+> arXiv:2603.10995v1 [cs.LG] 11 Mar 2026 Factorized Neural Implicit DMD for Parametric Dynamics
+
+jointly estimating their real and imaginary parts to form a single mode. Each learned pair is then fixed, and subsequent eigenfunctions are trained sequentially with orthogonality 
+
+enforced against all previously learned modes, yielding a well-conditioned spectral decomposition and improved in-terpretability in terms of coherent spatial modes and their associated frequencies and growth/decay rates. We evaluate our method on a diverse set of parametric PDE benchmarks, including Burgers’ equation with varying vis-cosities, two-dimensional Navier–Stokes flow in the double shear layer configuration, the K ´arm ´an vortex street past a circular obstacle, and flow over parameterized airfoil ge-ometries with varying shape and inflow orientation. Across all tasks, our model achieves accurate long-term predic-tion, improved stability, and strong generalization compared with representative neural operators, autoregressive, and Koopman-based baselines. Moreover, the learned modes ex-hibit clear physical interpretability, capturing coherent flow structures and dominant dynamical patterns across different parameter settings and geometric configurations. In summary, our main contributions are: • a physics-coded neural Koopman framework for gener-alization to unseen PDE instances and robust long-term prediction; • neural field parameterizations of Φ and Λ conditioned on code parameters, enabling compact low-rank dy-namics and continuous-space evaluation; • a sequential learning strategy for complex-conjugate modes with orthogonality constraints, improving sta-bility, conditioning, and interpretability.      
+
+> Figure 1. Physics-Coded Neural DMD Pipeline. From left to right: (1) Input dataset at full resolution, (2) Nonlinear optimization using spatial coordinates and physics code, (3) Neural DMD output with continuous eigenvectors Φand eigenvalues Λenabling space–time– physics reconstruction.
+
+# 2. Related Works 
+
+In this section, we review prior work on data-driven mod-eling of PDE dynamics, neural operator learning, and au-toregressive spatio-temporal prediction under the context of reduced-order spectral representations. We analyze their limitations and position our formulation in relation to these methods, highlighting how our proposed method addresses the resulting gaps. 
+
+2.1. Koopman and Linear Latent Dynamics for PDEs 
+
+Koopman theory (Koopman, 1931) provides a principled framework for capturing nonlinear dynamics through a glob-ally linear representation, enabling modal decomposition and reduced-order modeling of complex systems like PDEs and fluid flows (Mezi ´c, 2013; Rowley et al., 2009; Nakao & Mezi´ c, 2020). 
+
+Dynamic Mode Decomposition (DMD) offers a practical, data-driven approximation of the Koopman operator by iden-tifying a linear propagator from temporal snapshots. Orig-inally developed for engineering modal analysis (Schmid, 2010), DMD has been leveraged for efficient prediction in high-DoF simulations (Chen et al., 2025). To enhance its fidelity, extensions such as OptDMD (Askham & Kutz, 2018) and BOP-DMD (Sashidhar & Kutz, 2022) incorpo-rate advanced optimization and ensemble techniques, while continuous-time variants broaden the approach to nonlinear domains (Rosenfeld et al., 2022). 
+
+Koopman Autoencoders extend this paradigm by learning latent spaces where evolution becomes approximately linear, improving long-term forecasting stability and interpretabil-ity (Lusch et al., 2018). Subsequent developments enforce bidirectional consistency, invertibility, and spectral stabi-lization to better preserve physical structure (Azencot et al., 2020; Meng et al., 2024; Choi et al., 2024). Separately, recent methods like ResKoopNet (Xu et al., 2025) aim to improve spectral approximation by explicitly minimizing the spectral residual to compute Koopman eigenpairs, ad-dressing limitations in identifying the operator’s complete spectrum. These advances connect classical Koopman the-ory to modern machine learning, as comprehensively re-viewed by Brunton et al. (Brunton et al., 2022). 
+
+2.2. Neural operators and PDE surrogates 
+
+Neural operators provide an alternative framework for modeling dynamics by learning mesh-agnostic mappings between function spaces, rather than finite-dimensional vectors. Prominent architectures include DeepONet (Lu et al., 2021) and the Fourier Neural Operator (FNO) (Li et al., 2021), which can generalize to unseen initial condi-tions and discretizations. The Koopman Neural Operator (KNO) (Xiong et al., 2024) directly bridges this paradigm with Koopman theory by integrating a latent linear evolution operator within the FNO architecture, aiming to combine the representation power of neural operators with the structured temporal dynamics of the Koopman framework. 2Factorized Neural Implicit DMD for Parametric Dynamics 
+
+2.3. Autoregressive and sequence-to-sequence models for PDE 
+
+Autoregressive models have long been used to represent PDE dynamics. Early work explored direct autoregressive formulations (Bar-Sinai et al., 2019; Greenfeld et al., 2019; Hsieh et al., 2019). Subsequent approaches improved effi-ciency and stability through methods like temporal bundling (Brandstetter et al., 2022) and error accumulation analysis with stabilization strategies (McCabe et al., 2023). Recently, token-based sequence-to-sequence models, in-spired by the success of autoregressive language models (Radford & Narasimhan, 2018), have become effective for scientific modeling. Several works apply autoregressive transformers to PDE learning. For instance, (Serrano et al., 2025) uses an in-context learning approach for parametric PDEs, while (Morel et al., 2025) infers operator parameters without an explicit decoder. (Koupa ¨ı et al., 2025) devel-ops a structured generative neural operator for uncertainty quantification, and (Holzschuh et al., 2025) proposes a trans-former that treats spatio-temporal states as tokens. These represent a rapidly growing subset of research exploring token-based formulations for PDE operators. In contrast to these nonlinear autoregressive models, our approach conditions on previous states but retains a linear reduced basis and linear time integration. This design yields faster inference and is inherently agnostic to the time step size. 
+
+# 3. Physics-Coded Continuous Parameterization of the Koopman Operator 
+
+We start with a continuous spatio-temporal dynamical sys-tem of some state u defined by, 
+
+∂tu(x, t ; ξ) = f (u(x, t ; ξ), x; ξ) (1) with spatial coordinates x ∈ Ω ⊂ Rd, time t ≥ 0, and physics code ξ ∈ Rm. Physics code represents a parametric encoding of the physical configuration (e.g., boundary con-ditions, initial conditions, latent variables) that remains fixed per sequence. Eq. (1) thus defines a family of autonomous dynamical systems parameterized by ξ.
+
+3.1. Continuous, Conditioned Koopman Expansion 
+
+Let F t 
+
+> ξ
+
+denotes the flow map induced by Eq. (1) subject to ξ, i.e. u(·, t ; ξ) = F t 
+
+> ξ
+
+(u(·, 0; ξ)) . The ξ-conditioned Koopman operator Kt 
+
+> ξ
+
+acts linearly on observables g of the state via 
+
+(Kt
+
+> ξ
+
+g)( u) = g F t 
+
+> ξ
+
+(u) , (2) and admits eigenfunctions {ψi(·; ξ)}i≥1 with associated continuous-time eigenvalues ωi(ξ) ∈ C such that 
+
+Kt
+
+> ξ
+
+ψi(·; ξ) = eωi(ξ)t ψi(·; ξ). (3) For the vector-valued observable g(u) = u, suppose that g
+
+admits the Koopman expansion 
+
+g(u)( x) = 
+
+> ∞
+
+X
+
+> i=1
+
+ϕi(x; ξ) ψi(u; ξ), (4) where ϕi are Koopman modes corresponding to their respec-tive ψi. Evaluating along trajectories yields 
+
+u(x, t ; ξ) = 
+
+> ∞
+
+X
+
+> i=1
+
+zi(t; ξ) ϕi(x; ξ), (5) 
+
+zi(t; ξ) := ψi(u(·, t ; ξ); ξ). (6) Here, zi(t; ξ) are now time-dependent mode coefficients corresponding to ϕi. For a discrete sampling interval ∆t,letting λi(ξ) := eωi(ξ)∆ t gives the linear evolution: 
+
+u(x, t + ∆ t; ξ) = 
+
+> ∞
+
+X
+
+> i=1
+
+λi(ξ) zi(t; ξ) ϕi(x; ξ), (7) 
+
+zi(t + ∆ t; ξ) = λi(ξ) zi(t; ξ). (8) Further details are provided in Appendix B. 
+
+3.2. Truncation and Time Discretization 
+
+For computational tractability, we truncate Eq. (5) into a finite dimension r, producing the approximate expansion: 
+
+u(x, t ; ξ) ≈ z(t; ξ)T Φ(x; ξ), (9) defined by the finite-dimensional reduced state 
+
+z(t; ξ) = Pri=1 zi(t; ξ) ei, and ξ-conditioned basis functions Φ(x; ξ) = Pri=1 ϕi(x; ξ) ei. Physically, such truncation captures the top r most important modes, omitting smaller details. Truncating Eq. (8) gives the linear evolution of the modal coefficients: 
+
+z(t + ∆ t; ξ) = Λ(ξ) z(t; ξ), (10) with a diagonal matrix of eigenvalues Λ(ξ) =diag ( λ1(ξ), λ 2(ξ), . . . , λ r (ξ)) , λi(ξ) = eωi(ξ)∆ t.
+
+3.3. Neural Field Parameterization of Physics Sequences 
+
+To allow for generalization across sequences with different physical settings, we parameterize both the basis functions 
+
+Φ and the eigenvalue operator Λ using a neural field condi-tioned on both coordinates x and physics code ξ.We thus express the basis functions Φθ as a continuous neural field function Φθ (x; ξ) = Pri=1 ϕi(x; ξ)ei, where 
+
+θ denotes learnable network parameters. Similarly, another network Λη will parameterize the eigenvalues (vector) as 
+
+Λη (ξ) = diag ( λ1(ξ), λ 2(ξ), . . . , λ r (ξ)) , with network pa-rameters η.3Factorized Neural Implicit DMD for Parametric Dynamics 
+
+Conjugate-Pair Parameterization Rather than explicitly parameterizing the full r × r truncated Koopman matrix, we directly parameterize the temporal evolution of the modal coefficients using complex spectral parameters ωi(ξ), ac-cording to Eq. (10). Given a complex modal eigenvalue ωi(ξ) = αi(ξ) + iβ i(ξ),the real term represents the growth/decay rate and the imag-inary term represents the oscillatory frequency. The field 
+
+u then is composed of basis functions each corresponding to a specific modal frequency βi. These basis functions naturally come in conjugate pairs ; for each complex basis function ϕp(x; ξ), there exists a conjugate basis function 
+
+ϕp+P (x; ξ) = ϕp(x; ξ), with the corresponding eigenval-ues ωp(ξ) = αp(ξ)+ iβ p(ξ) and ωp+P (ξ) = ωp(ξ), respec-tively. As the coefficient zp(t) evolves over time, the state oscillates between the real and imaginary components of each conjugate pair, which we refer to as a mode , reflecting the system’s dynamic behavior. Consequently, each primary mode is represented by two basis functions and corresponding eigenvalues: 
+
+ϕp = ϕ(r) 
+
+> p
+
++ iϕ (i) 
+
+> p
+
+, ϕp+P = ϕ(r) 
+
+> p
+
+− iϕ (i) 
+
+> p
+
+,wp = w(r) 
+
+> p
+
++ iw (i) 
+
+> p
+
+, w p+P = w(r) 
+
+> p
+
+− iw (i) 
+
+> p
+
+,
+
+Both Φθ and Λη are parameterized as two real channels: one for the real part and one for the imaginary part. 
+
+Prediction and Evolution: To predict future states from a given sequence, we first obtain the modal coefficients 
+
+z(ti; ξ) by using the least squares inverse: 
+
+Φ† 
+
+> θ
+
+(ξ) = ( ΦHθ Φθ )−1ΦHθ . (11) We can then project the initial full state u(x, t i; ξ) onto the learned basis Φθ (x; ξ) with z(ti; ξ) = Φ† 
+
+> θ
+
+(ξ)u(ti; ξ).Once the modal coefficients are obtained, future states (tj > t i) are predicted using the matrix exponential of the Koopman operator: 
+
+ˆu(x, t j ; ξ) = Φθ (x; ξ) · exp [ Λη (ξ)( tj − ti)] · z(ti; ξ).
+
+(12) 
+
+3.4. Optimization of the Neural Field Model 
+
+We optimize the network parameters θ and η by combining a multi-step prediction term with the deflation technique. The optimization pipeline consists of two key components: (1) short/long horizon prediction, (2) peeling off modes. 3.4.1. S HORT /L ONG HORIZON PREDICTION 
+
+We train the networks Φθ and Λη to approximate continuous basis functions and eigenvalues. To ensure both local ac-curacy and stable long-term rollouts, we introduce a mixed objective that jointly enforces short-horizon prediction fi-delity and long-horizon temporal consistency. Concretely, we combine a one-step prediction loss in the original DMD formulation (Schmid, 2010) with a multi-step OptDMD-style loss (Askham & Kutz, 2018). The total training objective is 
+
+L = α Lshort 
+
+| {z } 
+
+> DMD
+
++ β Llong 
+
+|{z} 
+
+> OptDMD
+
+, (13) where α and β are the per-term weights. 
+
+Short-Horizon Prediction The short-horizon loss en-forces accurate one-step transitions between consecutive snapshots, analogous to standard DMD supervision: 
+
+Lshort = 
+
+> N−1
+
+X
+
+> i=0
+
+u(x, t i+1 ; ξ) − Φθ Λη Φ† 
+
+> θ
+
+ˆu(x, t i; ξ) 22
+
+.
+
+(14) 
+
+Long-Horizon Prediction Short-horizon supervision alone does not constrain accumulated errors over long roll-outs. To prevent short-horizon overfitting, we additionally enforce multi-step consistency using repeated application of the Koopman operator, following an OptDMD-style for-mulation: 
+
+Llong =
+
+> N
+
+X
+
+> j=1
+
+u(x, t j ; ξ) − Φθ Λjη Φ† 
+
+> θ
+
+ˆu(x, t 0; ξ) 22
+
+. (15) 3.4.2. STAGE -WISE DEFLATION FOR SPECTRAL MODES 
+
+Following Sec. 3.3, a trajectory can be decomposed into multiple spectral modes at different frequencies, where each mode is represented by a conjugate pair of basis functions and eigenvalues. In practice, however, learning all modes jointly often produces highly correlated modes: many modes compete for the same low-frequency band, leading to redundant bases. To promote clearer spectral separation, we encourage the learned basis functions corresponding to different modes to be orthogonal under conjugate orthogonality . Naive or-thogonality regularization often leads to poor conditioning and unstable optimization; Fig. 5 shows that jointly learn-ing all modes with such a regularizer results in noisy and highly correlated modes (e.g., the 2nd and 3rd modes). In-stead, we adopt a stage-wise deflation strategy that enforces orthogonality by construction. Suppose the first (p − 1) modes have already been learned. At stage p, we freeze all previously learned basis-function and eigenvalue networks, and perform the following steps: 1. Evaluate the frozen networks to obtain Φ<p (x; ξ) and compute its pseudoinverse Φ†
+
+> <p
+
+.4Factorized Neural Implicit DMD for Parametric Dynamics 
+
+2. Evaluate the current networks to produce a raw can-didate mode ˜ϕp(x; ξ) and its associated eigenvalue 
+
+ωp(ξ), with gradients enabled. 3. Deflate the raw mode by removing its projection onto the span of previously learned modes: 
+
+ϕp ←  I − Φ<p Φ†
+
+> <p
+
+ ˜ϕp, (16) where Φ<p and Φ† 
+
+> <p
+
+are treated as stop-gradient oper-ators so that gradients flow only through ˜ϕp.Finally, we append the conjugate counterpart ϕp+P = ϕp
+
+and eigenvalue ωp+P (ξ) = ωp(ξ), solve the modal coeffi-cients via least squares, and minimize the prediction loss. Backpropagation updates only the stage-p networks, yield-ing progressively de-correlated modes with less spectral overlap. 
+
+# 4. Experiments 
+
+We evaluate the proposed neural implicit DMD operator 
+
+(denoted as INR-DMD where INR stands for Implicit Neu-ral Representation ) on a diverse set of dynamical systems, covering physics-coded PDE families with varying physical conditions. Specifically, we report results on Burgers’ equa-tion with varying viscosity (Sec. 4.1), 2D Navier–Stokes vorticity dynamics (Sec. 4.2), the K ´arm ´an vortex street with parametrized geometry and boundary conditions (Sec. 4.3) and an inflow airfoil with a six-dimensional shape space (Sec. 4.4). All datasets are generated using high-fidelity numerical solvers. All training and evaluation experiments were conducted on a single RTX 4090 GPU. 
+
+Baselines. Per discussion in Sec. 2, we compare against Consistent Koopman-AE (KAE) (Azencot et al., 2020), Fourier Neural Operator (FNO) (Li et al., 2021), Koop-man Neural Operator (KNO) (Xiong et al., 2024), Parametric DMD (P-DMD) (Andreuzzi et al., 2023), PDE-Transformer (PDE-T) (Holzschuh et al., 2025) and ResKoopNet (RKN) (Xu et al., 2025). 
+
+Metrics and timing. Prediction accuracy is evaluated us-ing the relative mean squared error (rMSE) between the predicted state fields and the ground truth at each time step, computed on a test set consisting of unseen code parameters. Inference efficiency is measured by the average prediction time per frame in milliseconds. Each number is rounded to three decimal places.          
+
+> Figure 2. Burgers’ Equation. Spatio-temporal visualization of the solution u(x, t )for the same test case (horizontal axis: x,vertical axis: t,u(0 ,0) corresponds to the bottom-left corner of each subplot.
+
+4.1. Burgers’ Equation 
+
+We study the 1D viscous Burgers’ equation 
+
+∂tu(x, t ) + ∂x
+
+ u(x, t )2
+
+2
+
+
+
+= ν ∂ xx u(x, t ),x ∈ (0 , 1) , t ∈ (0 , 1] , u(x, 0) = u0(x),
+
+(17) where the viscosity ν serves as the physics code . We eval-uate generalization across a family of PDEs by varying 
+
+ν ∈ [0 .001 , 0.01] . During training, we uniformly sample 10 viscosity values and generate reference trajectories. For testing, we evaluate on 9 unseen viscosities. Further details on the dataset generation are provided in App. A.5. 
+
+Results We outperform all baselines both qualitatively and quantitatively, as shwon in Table 2. Our method achieves the lowest error while using the third-smallest number of param-eters (the smaller models, KNO and KAE, incur 100× slower inference time and 10× prediction error). As shown in Fig. 8, only our method and P-DMD can accurately capture and simulate the variations induced by changing viscosity; more-over, compared with P-DMD, our approach achieves this with only 1/5 of the parameters and a 60× speedup in infer-ence time, demonstrating robust generalization within the physical parameter space. 
+
+4.2. Double Shear Layer 
+
+We consider the 2D incompressible Navier–Stokes equa-tions in vorticity form 
+
+∂tω + u · ∇ ω = ν ∆ω + f, (18) with initial condition ω(·, 0) = ω0. The initial condition is a double shear layer that triggers Kelvin–Helmholtz in-stability, producing vortex roll-up and strong nonlinear in-teractions. We simulate for t = 8 .0, storing 160 snapshots. Each sequence differs by the initial shear-layer separation 
+
+s ∈ [0 .2, 0.4] . We uniformly sample 11 values for training 5Factorized Neural Implicit DMD for Parametric Dynamics     
+
+> Figure 3. K´arm ´an vortex street. Qualitative comparison of flow-field predictions under varying obstacle positions. KAE and P-DMD exhibit a noticeable double-shadow artifact (see zoom-ins), while our neural-field parameterization yields smoother transitions across physics conditions and remains close to the ground truth (GT). All heatmaps share the same color scale.
+
+and randomly select 10 others for testing. See App. A.6 for dataset generation details. 
+
+Results Our method achieves the lowest error while main-taining the fastest inference speed. Compared to methods with a comparable number of parameters (KAE and KNO), our approach is significantly faster and yields more than an order-of-magnitude reduction in error. Qualitatively, our method best captures the vortex structures arising from dif-ferent initial conditions, demonstrating strong generalization across varying initial states. 
+
+4.3. K´ arm´ an Vortex Street 
+
+We further evaluate generalization under parametrized boundary conditions using the K ´arm ´an vortex street bench-mark. All data are generated using the lattice Boltzmann method (LBM), of which the governing kinetic equation is the Boltzmann equation (Shan et al., 2006) 
+
+∂f
+
+∂t + v · ∇ f = Ω( f ) + F · ∇ v f , (19) where f denotes the distribution function, F is external forces, and Ω is the collision operator that relaxes f towards the local equilibrium f eq (Coreixas et al., 2017). The macro-scopic quantities, such as density ρ and velocity u, can be recovered from the distribution f .Compared to the previous experiments on fixed-domain PDEs, this setting is substantially more challenging because it introduces fluid–solid coupling : the flow evolution is explicitly conditioned on the presence and location of a solid obstacle, and changing the cylinder placement alters the boundary constraints and the resulting wake dynamics. Here, the cylinder location serves as the physics code. We vary the obstacle x-coordinate within [0 .35 , 0.45] . We con-sider 21 distinct cylinder placements, randomly select 11 locations for training, and evaluate on the remaining 10 un-seen locations for testing. All data sequences are simulated for 200 time steps. 
+
+Results In this example, our method outperforms all base-lines across all evaluated metrics, including memory usage, inference time, and error. As shown in Fig. 10, our approach accurately reconstructs the boundary conditions and the re-sulting K ´arm ´an vortex street for different initial positions of the circular obstacle, demonstrating generalization to boundary conditions with varying spatial configurations. 
+
+4.4. Airfoil with Shape Space         
+
+> Figure 4. Physics code for airfoil parameterization and qual-itative rollouts. Top: Illustration of the physics code that maps a6-dimensional parameter vector to an airfoil geometry, includ-ing a radar-style view of the six CST parameters (upper/lower surface controls, trailing-edge thickness, and clockwise rotation).
+> Bottom: Representative examples showing the generated airfoil shapes (left) and the corresponding flow-field predictions over time (right), comparing ground truth (GT) with Ours under different parameter settings in the test set. All heatmaps share the same color scale.
+
+Building upon the K ´arm ´an vortex street experiment, we ex-plore a more challenging airfoil shape parameterized by six variables: {Au0, A u1, A l0, A l1, t e, θ cw }, where Au0, A u1
+
+6Factorized Neural Implicit DMD for Parametric Dynamics 
+
+control the upper surface, Al0, A l1 the lower surface, te the trailing-edge thickness, and θcw the clockwise rotation an-gle. This creates a six-dimensional parameter space with complex fluid–solid coupling. We sample 43 parameter points, varying Au0 ∈ [0 .40 , 0.50] , Al0 ∈ [−0.20 , −0.10] ,and θcw ∈ [0 ◦, 10 ◦]. 27 points are used for training, 16 for testing. See Sec. A.8 for dataset details. 
+
+Results In this example, our method achieves the best performance across all evaluated metrics, including error, inference time, and memory consumption. As shown in Fig. 4, our approach captures the distinct patterns induced by varying airfoil geometries and angles, demonstrating generalization along the shape (geometry) axis. 
+
+4.5. Ablation Study 
+
+Our full model comprises several coupled design choices for learning a finite-dimensional Koopman representation that enables robust long-horizon rollouts and interpretable spectra. We first sweep model size (varying the number of neurons and layers) to select a reasonable default capacity, and then ablate individual components one at a time. To iso-late their individual contributions, we ablate one component at a time, keeping all other settings fixed (same latent rank r,training steps, optimizer, and identical train/test splits). We conduct ablations on the K ´arm ´an vortex street benchmark under geometry-conditioned settings (Sec. 4.3).     
+
+> Table 1. Ablation study of key design choices on K ´arm ´an vortex street. ↓: lower is better.
+
+Variant # params error ↓
+
+Ours 316,510 8.093 × 10 −7
+
+w/o Orthogonality 316,510 1.156 × 10 −6
+
+w/o Long Horizon 316,510 5.697 × 10 −4
+
+w/o Deflation 354,172 1.819 × 10 −4
+
+w/o Conj. Pairing 316,510 4.089 × 10 −6
+
+w/o Orthogonality. With only deflation and conjugate pairing, the lack of orthogonality constraint causes the model to diverge over long horizons (Fig. 6), increasing the rollout error from 8.093 × 10 −7 to 5.697 × 10 −4, and yields noisier, more correlated basis functions with notice-able mode mixing (Fig. 5). 
+
+w/o Long Horizon Loss. Removing long horizon loss leads to numerical instability over long horizons (Fig. 6), increasing rollout error from 8.093 × 10 −7 to 5.697 × 10 −4
+
+and producing noisier, more correlated bases with mode mixing compared to the smoother, more physically consis-tent modes learned with long horizon supervision (Fig. 5). 
+
+w/o Deflation. Training all modes jointly end-to-end with only a conjugate-orthogonality regularizer is insufficient, yielding markedly less conjugate-orthogonal and noisier modes (especially Modes 2–3; Fig. 5) and reducing rollout stability, with error increasing from 8.093 ×10 −7 to 4.089 ×
+
+10 −4 (Table 1). 
+
+w/o Conjugate Pairing. Removing the explicit conjugate-pairing constraint and learning r complex modes indepen-dently produces a less symmetric spectrum (Fig. 5) and de-grades long-horizon stability, increasing rollout error from 
+
+8.093 × 10 −7 to 4.089 × 10 −6.
+
+Quantitative results. Table 1 summarizes model param-eter and rollout errors. Across all benchmarks, the full INR-DMD consistently achieves the lowest rollout error, Notably, removing deflation yields the largest degradation in rollout errors. 
+
+# 5. Discussion 
+
+We present a physics-coded neural Koopman framework for modeling parametric PDE dynamics. The method rep-resents spatial modes and temporal evolution using neural fields conditioned on physical codes, yielding a structured latent representation in which space, time, and physics are parameterized separately. This formulation supports long-horizon rollouts and interpolation across unseen physical configurations. Unlike black-box sequence models that directly regress fu-ture states, our approach exposes a linear evolution in a learned latent space. This structure accounts for the im-proved stability and efficiency observed in our experiments, as well as robust generalization across variations in physical parameters, boundary conditions, and geometry. Ablation results further confirm that enforcing explicit spectral struc-ture and long-horizon consistency is essential for reliable performance. 
+
+# 6. Conclusion 
+
+We introduced a physics-coded neural Koopman framework for learning parametric PDE dynamics with explicit spectral structure, where physics-conditioned neural fields parame-terize spatial modes and temporal evolution to enable stable long-term rollout, efficient inference, and generalization across varying physical parameters, boundary conditions, and geometries, while achieving the lowest prediction error with near-minimal memory and inference cost across all benchmarks. These results indicate that learning parameter-conditioned Koopman representations provides a viable alternative to black-box autoregressive models for parametric PDEs. 7Factorized Neural Implicit DMD for Parametric Dynamics 
+
+Figure 5. Comparison of basis functions (real part) for the full INR-DMD and ablations. For the deflation baseline, we show the basis learned at each stage; for the non-deflation baseline, we visualize the four lowest-frequency modes. The full pipeline learns clean, symmetric, frequency-separated bases with low inter-mode correlation, whereas removing orthogonality, long-horizon loss, or deflation yields noisier and highly correlated modes, and removing conjugate pairing breaks spectral symmetry. 
+
+Table 2. Results on multiple physics conditions. 
+
+Exp. #P #S Model #Params Time Error (ms) ↓ ↓
+
+Burgers’ Equation 1 10 KAE 35,408 1.269 2.35 ×10 −2
+
+FNO 287,425 1.864 2.23 ×10 −2
+
+KNO 4,417 2.577 5.70 ×10 −3
+
+P-DMD 253,575 0.381 1.35 ×10 −3
+
+PDE-T N/A N/A N/A RKN 5,820,249 0.032 2.70 ×10 −3
+
+INR-DMD 25,540 0.006 1.35 ×10 −4
+
+Double Shear 1 11 KAE 271,952 1.278 4.78 ×10 −2
+
+FNO 1,188,353 2.976 DNF KNO 263,297 6.990 5.64 ×10 −2
+
+P-DMD 1,170,152 5.445 5.24 ×10 −3
+
+PDE-T 33,190,328 32.56 4.41 ×10 −2
+
+RKN 218,967,897 1.827 7.62 ×10 −3
+
+INR-DMD 378,264 0.107 4.59 ×10 −3
+
+Exp. #P #S Model #Params Time Error (ms) ↓ ↓
+
+K´ arm´ an Vortex 1 11 KAE 678,192 1.210 5.24 ×10 −6
+
+FNO 1,188,514 2.600 DNF KNO N/A N/A N/A P-DMD 2,436,392 13.56 8.88 ×10 −7
+
+PDE-T N/A N/A N/A RKN OOM OOM OOM INR-DMD 316,510 0.073 7.77 ×10 −7
+
+Airfoil 6 27 KAE 2,164,304 1.288 7.74 ×10 −6
+
+FNO 1,188,514 2.813 8.57 ×10 −6
+
+KNO N/A N/A N/A P-DMD 6,181,752 34.50 5.91 ×10 −6
+
+PDE-T 33,190,328 33.06 8.67 ×10 −2
+
+RKN OOM OOM OOM INR-DMD 316,510 0.384 4.21 ×10 −6
+
+Note: ↓: lower is better; our method is in gray . #P : physics condition dimension; #S : number of trajectories in training set; N/A: failed to train; DNF: numerical overflow; OOM: out of memory. 
+
+Figure 6. Short-horizon vs. long-horizon loss weighting sweep. 
+
+We vary the prediction loss weights from (α, β ) = (0 , 1) to (1 , 0) ,where α and β are short/long horizon loss weights respectively. The curve reports the resulting rollout error (lower is better) on the K´ arm´ an vortex street example. 
+
+More broadly, this work underscores the benefit of incor-porating explicit dynamical structure into neural models to improve reliability and interpretability in scientific machine learning. 
+
+# 7. Impact Statement 
+
+This work advances the field of scientific machine learning. A primary impact of our method is improved interpretability for learned dynamics. By constructing a fully transparent, linear model via a neural representation, we provide a coun-terpoint to black-box neural operators, which can aid in scientific validation and discovery. Furthermore, our approach has a positive computational 8Factorized Neural Implicit DMD for Parametric Dynamics 
+
+impact. Long-term simulation is reduced to efficient matrix multiplications, eliminating the need for repeated, energy-intensive neural network evaluations. This significantly lowers the computational cost and energy footprint of sim-ulations, making them more accessible for deployment on standard hardware, including CPU-only systems. We fore-see no unique negative societal consequences beyond those typical of the field. 
+
+# References 
+
+Andreuzzi, F., Demo, N., and Rozza, G. A dynamic mode decomposition extension for the forecasting of parametric dynamical systems. SIAM Journal on Ap-plied Dynamical Systems , 22(3):2432–2458, 2023. doi: 10.1137/22m1481658. Askham, T. and Kutz, J. N. Variable projection methods for an optimized dynamic mode decomposition. SIAM Journal on Applied Dynamical Systems , 17(1):380–416, 2018. doi: 10.1137/M1124176. Azencot, O., Erichson, N. B., Lin, V., and Mahoney, M. Forecasting sequential data using consistent koopman autoencoders. In Proceedings of the 37th International Conference on Machine Learning , 2020. Bar-Sinai, Y., Hoyer, S., Hickey, J., and Brenner, M. P. Learning data-driven discretizations for partial differen-tial equations. Proceedings of the National Academy of Sciences , 116(31):15344–15349, 2019. doi: 10.1073/ pnas.1814058116. Brandstetter, J., Worrall, D., and Welling, M. Message passing neural pde solvers. In Proceedings of the 10th International Conference on Learning Representations ,2022. Brunton, S. L., Budi ˇsi ´c, M., Kaiser, E., and Kutz, J. N. Modern koopman theory for dynamical systems. SIAM Rev. , pp. 229–340, 2022. doi: 10.1137/21M1401243. Chen, S. and Doolen, G. D. Lattice Boltzmann Method for Fluid Flows. Annual Review of Fluid Mechanics , 30:329– 364, January 1998. doi: 10.1146/annurev.fluid.30.1.329. Chen, S., Chen, Y., Benchekroun, O., Panuelos, J., Chang, Y., Grinspun, E., and Wang, Z. Fast subspace fluid simulation with a temporally-aware basis. ACM Trans-actions on Graphics (TOG) , 44(4):1–18, 2025. doi: 10.1145/3730826. Choi, J., Krishnan, S., and Park, J. Koopman autoencoder via singular value decomposition for data-driven long-term prediction. In 2024 IEEE 34th International Work-shop on Machine Learning for Signal Processing (MLSP) ,pp. 1–6. IEEE, 2024. Coreixas, C., Wissocq, G., Puigt, G., Boussuge, J.-F. m. c., and Sagaut, P. Recursive regularization step for high-order lattice boltzmann methods. Phys. Rev. E , 96:033306, Sep 2017. Greenfeld, D., Galun, M., Basri, R., Yavneh, I., and Kim-mel, R. Learning to optimize multigrid pde solvers. In 
+
+Proceedings of the 36th International Conference on Ma-chine Learning , 2019. Holzschuh, B., Liu, Q., Kohl, G., and Thuerey, N. Pde-transformer: Efficient and versatile transformers for physics simulations. In Proceedings of the 42nd Interna-tional Conference on Machine Learning , 2025. Hsieh, J.-T., Zhao, S., Eismann, S., Mirabella, L., and Er-mon, S. Learning neural pde solvers with convergence guarantees. In Proceedings of the 7th International Con-ference on Learning Representations , 2019. Koopman, B. O. Hamiltonian systems and transformation in hilbert space. Proceedings of the National Academy of Sciences , 17(5):315–318, 1931. doi: 10.1073/pnas.17.5. 315. Koupa ¨ı, A. K., Boudec, L. L., Serrano, L., and Gallinari, P. Enma: Tokenwise autoregression for generative neu-ral pde operators. In Proceedings of the 39th Annual Conference on Neural Information Processing Systems ,2025. Li, Z., Kovachki, N., Azizzadenesheli, K., Liu, B., Bhat-tacharya, K., Stuart, A., and Anandkumar, A. Fourier neural operator for parametric partial differential equa-tions. In Proceedings of the 9th International Conference on Learning Representations , 2021. Lu, L., Jin, P., Pang, G., Zhang, Z., and Karniadakis, G. E. Learning nonlinear operators via deeponet based on the universal approximation theorem of operators. Nature machine intelligence , 3(3):218–229, 2021. doi: 10.1038/ s42256-021-00302-5. Lusch, B., Kutz, J. N., and Brunton, S. L. Deep learning for universal linear embeddings of nonlinear dynamics. 
+
+Nature communications , 9(1):4950, 2018. doi: 10.1038/ s41467-018-07210-0. McCabe, M., Harrington, P., Subramanian, S., and Brown, J. Towards stability of autoregressive neural operators. 
+
+Transactions on Machine Learning Research , 2023. Meng, Y., Huang, J., and Qiu, Y. Koopman operator learning using invertible neural networks. Journal of Computa-tional Physics , 501:112795, 2024. doi: 10.1016/j.jcp. 2024.112795. 9Factorized Neural Implicit DMD for Parametric Dynamics 
+
+Mezi ´c, I. Analysis of fluid flows via spectral prop-erties of the koopman operator. Annual Review of Fluid Mechanics , 45:357–378, 2013. doi: 10.1146/ annurev-fluid-011212-140652. Morel, R., Han, J., and Oyallon, E. Disco: learning to discover an evolution operator for multi-physics-agnostic prediction. In Proceedings of the 42nd International Conference on Machine Learning , 2025. Nakao, H. and Mezi ´c, I. Spectral analysis of the koopman operator for partial differential equations. Chaos: An Interdisciplinary Journal of Nonlinear Science , 30(11): 113131, 2020. doi: 10.1063/5.0011470. Radford, A. and Narasimhan, K. Improving language un-derstanding by generative pre-training. 2018. Raissi, M., Perdikaris, P., and Karniadakis, G. E. Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. Journal of Computational physics , 378:686–707, 2019. doi: 10.1016/j.jcp.2018.10. 045. Rosenfeld, J. A., Kamalapurkar, R., Gruss, L. F., and John-son, T. T. Dynamic mode decomposition for continu-ous time systems with the liouville operator. Journal of Nonlinear Science , 32:1–30, 2022. doi: 10.1007/ s00332-021-09746-w. Rowley, C. W., Mezi ´c, I., Bagheri, S., Schlatter, P., and Henningson, D. S. Spectral analysis of nonlinear flows. 
+
+Journal of Fluid Mechanics , 641:115–127, 2009. doi: 10.1017/S0022112009992059. Sashidhar, D. and Kutz, J. N. Bagging, optimized dynamic mode decomposition for robust, stable forecasting with spatial and temporal uncertainty quantification. Philo-sophical Transactions of the Royal Society A: Mathe-matical, Physical and Engineering Sciences , 380(2229): 20210199, 2022. doi: 10.1098/rsta.2021.0199. Schmid, P. J. Dynamic mode decomposition of numerical and experimental data. Journal of fluid mechanics , 656: 5–28, 2010. doi: 10.1017/S0022112010001217. Serrano, L., Koupa ¨ı, A. K., Wang, T. X., Erbacher, P., and Gallinari, P. Zebra: In-context generative pretraining for solving parametric pdes. In Proceedings of the 42nd International Conference on Machine Learning , 2025. Shan, X., Yuan, X.-F., and Chen, H. Kinetic theory represen-tation of hydrodynamics: a way beyond the navier–stokes equation. J. Fluid Mech. , 550:413–441, 2006. Xiong, W., Huang, X., Zhang, Z., Deng, R., Sun, P., and Tian, Y. Koopman neural operator as a mesh-free solver of non-linear partial differential equations. Journal of Computational Physics , 513:113194, 2024. doi: 10.1016/ j.jcp.2024.113194. Xu, Y., Shao, K., Logothetis, N., and Shen, Z. Reskoopnet: Learning koopman representations for complex dynam-ics with spectral residuals. In Proceedings of the 42nd International Conference on Machine Learning , 2025. 10 Factorized Neural Implicit DMD for Parametric Dynamics 
+
+# A. Implementation Details  
+
+> Table 3. Network architectures and loss configurations across experiments.
+
+Experiments ϕ MLP λ MLP α β # Modes Burgers’ Equation 64 × 3 (Sine) 64 × 3 (ELU) 0.90 0.10 2
+
+Double Shear 128 × 3 (Sine) 64 × 3 (ELU) 0.05 0.95 6
+
+K´ arm´ an Vortex Street 128 × 3 (Sine) 64 × 3 (ELU) 0.10 0.90 5
+
+Airfoil 128 × 3 (Sine) 64 × 3 (ELU) 0.05 0.95 5
+
+A.1. Pseudoinverse 
+
+Eq. (11) requires the computation of a pseudoinverse. In practice, differentiating through a pseudoinverse in automatic differentiation frameworks incurs substantial memory overhead, since large intermediate tensors must be retained for gradient computation. We therefore implement this operation as an equivalent least-squares solve, achieving the same numerical result while avoiding the high memory cost of backpropagating through the pseudoinverse. 
+
+A.2. Optimization 
+
+All networks are trained using the Adam optimizer. For the ϕ networks, we use a learning rate of 1 × 10 −4 with 
+
+(β1, β 2) = (0 .9, 0.99) , ϵ = 10 −15 , and L2 weight decay 1 × 10 −6. A cosine annealing learning rate scheduler is applied with a minimum learning rate of 1 × 10 −6. For the λ networks, Adam is used with learning rates in {10 −5, 10 −3}
+
+depending on the experiment, while keeping all other optimizer parameters identical. All experiments are trained with batch size 16 for up to 500 epochs. 
+
+A.3. Architecture Justification 
+
+We test different neuron counts and layer depths, and select 128 neurons with 3 layers as the default, balancing model capacity against overall size (Fig. 7). 
+
+A.4. Baselines 
+
+We compare against six representative baselines: KAE, FNO, KNO, P-DMD, PDE-T, and RKN. For fair comparison, all baselines are trained and evaluated on the same train/test splits and rollout protocols, and we report metrics computed over the entire trajectory. 
+
+KAE. We follow the optimization and training settings reported in KAE (Azencot et al., 2020): We use Adam with 
+
+PyTorch default hyperparameters, apply gradient clipping at 0.05 , then train for 2000 epochs with batch size 20 using step-based rollout training (steps = 8 , steps back = 8 , backward = 1 ) with pre-conditioning enabled. We adopt a step-decay learning-rate schedule with decay factor 0.2; since our dataset differs from that used in KAE, we extend the learning-rate update milestones to 100 , 300 , 600 , 1000 , 1500 to ensure stable convergence. 
+
+FNO. We follow the optimization and training settings reported in FNO (Li et al., 2021): We use two settings depending on the data dimensionality. 1D FNO: we set the Fourier rank to 16 , use Adam with learning rate 10 −3, apply L2 weight decay of 1 × 10 −4, and train with batch size B = 20 ; all other optimizer hyperparameters follow PyTorch ’s default settings. We use a StepLR scheduler ( torch.optim.lr scheduler.StepLR ) with step size = 100 and γ = 0 .5, and train for 500 epochs. 2D FNO: we set the Fourier rank to 12 along each spatial dimension and keep the remaining settings identical. 
+
+KNO. We follow the optimization and training settings reported in KNO (Xiong et al., 2024): We use Adam with PyTorch 
+
+default hyperparameters and a StepLR schedule with step size = 100 and γ = 0 .5, training for 500 epochs. For 1D dataset, we set rank = 16 , operator size = 16 , and operator power = 8 ; for 2D dataset, we set rank = 16 , operator size = 32 , and operator power = 8 . It is worth noting that KNO cannot handle sequences of fields with spatial dimension greater than 1; therefore, KNO is not applicable to the K´ arm´ an and airfoil datasets. 11 Factorized Neural Implicit DMD for Parametric Dynamics   
+
+> Figure 7. Architecture ablation on network width and depth. We evaluate the impact of the number of neurons per layer (64, 128, 256) and network depth (3 vs. 5 layers) on the training loss. While increasing model capacity generally reduces the loss, the improvement saturates beyond 128 neurons. Deeper networks do not consistently outperform shallower ones under the same width. In our experiments, we choose the 3-layer configuration with 128 neurons as our default setting.
+
+P-DMD. We follow the optimization and training settings reported in P-DMD (Andreuzzi et al., 2023): We use the same number of basis functions as in our method for each experiment. Note that one mode corresponds to two basis functions (a conjugate pair); accordingly, for P-DMD we use 4 basis functions for Burgers’ equation, 12 for Double Shear, 10 for K´ arm´ an vortex street, and 10 for the airfoil benchmark. 
+
+PDE-T. We follow the optimization and training settings reported in PDE-T (Holzschuh et al., 2025): We keep all hyperparameters consistent with the default configuration (batch size = 8 , base learning rate = 4 × 10 −5, patch size = 4 ,in channels = 2 , out channels = 2 , and sample size = 128 ). Note that PDE-T does not support 1D datasets, and thus we do not report results on Burgers’ equation. 
+
+RKN. We follow the optimization and training settings reported in RKN (Xu et al., 2025): We use Adam with lr = 10 −5,with all other optimizer hyperparameters set to PyTorch defaults. We set the dictionary size to 300 and train for 200 
+
+steps with batch size 256 . We use a custom learning-rate scheduler that decays the current learning rate by a factor of 0.8
+
+whenever the training loss increases between consecutive steps. Notably, RKN is highly memory-intensive: for the K ´arm ´an vortex street and airfoil benchmarks, it runs out of GPU memory even after reducing the batch size and model size, so we do not report RKN results on these two datasets. 
+
+A.5. Burgers Equation 
+
+We solve the 1D viscous Burgers equation on the periodic domain x ∈ [0 , 1) , t ∈ [0 , 1] :
+
+∂tu + u ∂ xu = ν ∂ xx u, u(x, 0) = u0(x), u(0 , t ) = u(1 , t ), ∂xu(0 , t ) = ∂xu(1 , t ). (20) The initial condition u0 is a periodic Gaussian random field (GRF): 
+
+u0(x) = m +
+
+> K
+
+X
+
+> k=1
+
+
+
+αk cos  2πk (x − 12 ) + βk sin  2πk (x − 12 )
+
+, (21) with αk, β k ∼ N (0 , λ 2
+
+> k
+
+) and λk = √2 |σ|
+
+
+
+(2 πk )2 + τ 2
+
+−γ/ 2
+
+.
+
+In our generator, we set m = 0 and use K = s/ 2 with s = 1024 grid points. We fix γ = 2 .5, τ = 7 .0, σ = 49 .0, and simulate to T = 1 .0 with 200 time steps using a Fourier pseudo-spectral solver with 2/3 de-aliasing and an ETDRK4 time integrator. The viscosity ν is the code parameter, sampled uniformly from 0.1 to 0.001 (19 codes). 12 Factorized Neural Implicit DMD for Parametric Dynamics 
+
+A.6. Double Shear Layer 
+
+We consider the 2D incompressible Navier–Stokes equations in vorticity form . Let ω(x, z, t ) denote the scalar vorticity and 
+
+u(x, z, t ) = ( u(x, z, t ), w (x, z, t )) the velocity field. The PDE is initialized by prescribing the vorticity field at t = 0 ,
+
+ω(x, z, 0) = ω0(x, z ), (x, z ) ∈ (0 , L x) × (0 , L z ), (22) where ω0 = ∇ × u(·, 0) = ∂xw(·, 0) − ∂z u(·, 0) is computed from the velocity initial condition in Eq. (23) . We use a 
+
+double shear layer initial condition, parameterized by the shear separation s ∈ [0 .2, 0.4] , defined via the velocity field 
+
+
+
+u(x, z, 0) = umax 
+
+
+
+tanh 
+
+ z − z1
+
+δ
+
+
+
+− tanh 
+
+ z − z2
+
+δ
+
+
+
+− 1
+
+
+
++ ε sin 
+
+ 4πx Lx
+
+ "
+
+exp −
+
+ z − z1
+
+δ
+
+2!
+
++ exp −
+
+ z − z2
+
+δ
+
+2!# 
+
+,w(x, z, 0) = ε ξ (x, z ),
+
+(x, z ) ∈ (0 , L x) × (0 , L z ), (23) where z1 = ( Lz − s)/2 and z2 = ( Lz + s)/2, umax = 1 , and ϵ = 0 .01 , δ = 0 .05 , and ξ(x, z ) is standard Gaussian noise sampled i.i.d. over the grid. so that the two layers are separated by a distance s. In our dataset, the separation s is the code parameter: we uniformly sample 21 values of s over [0 .2, 0.4] . We use a rectangular domain of size Lx = 2 and 
+
+Lz = 1 , discretized on a uniform grid of size 128 × 64 . The corresponding initial vorticity ω0 = ∇ × u(·, 0) consists of two oppositely signed shear layers centered at z1 and z2, with a small sinusoidal perturbation localized near each layer and additional Gaussian noise in the transverse velocity component. This setup triggers Kelvin–Helmholtz roll-up and subsequent vortex merging dynamics. We simulate each trajectory over t ∈ [0 .0, 10 .0] . Since the solution changes only mildly during the initial transient ( t < 2.0), we train on the window t ∈ [2 .0, 10 .0] , from which we uniformly sample 160 
+
+snapshots per trajectory. 
+
+A.7. K´ arm´ an Vortex Street 
+
+We generate a two-dimensional cylinder wake dataset using the lattice Boltzmann method (LBM) (Chen & Doolen, 1998), where the cylinder induces vortex shedding. The computational domain is discretized on a uniform lattice of resolution 201 × 51 , corresponding to a physical domain of length 1 m in the x direction. All fields are defined on lattice nodes (i, j ), where i ∈ { 0, . . . , 200 } and j ∈ { 0, . . . , 50 }.The lattice spacing is uniform in both directions. The code parameter is the center location of a circular cylinder, c = ( cx, c y ), specified in lattice coordinates. We fix 
+
+cy = 25 and vary cx ∈ { 70 , 71 , . . . , 90 }, uniformly sampling 21 values. The cylinder radius is fixed to R = 5 in lattice units. Varying cx translates the obstacle within the fixed lattice domain and alters the wake development, producing distinct vortex-shedding trajectories in the generated LBM simulations. All simulations are performed with inflow velocity u = (0 .1, 0.0) and kinematic viscosity ν = 0 .01 . We impose a Dirichlet inlet at the left boundary, a zero-gradient outflow at the right boundary, and no-slip walls at the top and bottom boundaries. Each simulation is run for 200 frames. 
+
+A.8. Airfoil 
+
+We build an airfoil-flow dataset using the same lattice Boltzmann simulation setup as in the Sec. A.7, but with a uniform Cartesian lattice of size 256 × 128 .The airfoil boundary is parameterized by a six-parameter Class–Shape Transformation (CST) model with parameter vector 
+
+[Au0, A u1, A l0, A l1, t e, θ cw ],
+
+where Au0 and Au1 control the upper-surface shape, Al0 and Al1 control the lower-surface shape, te specifies the trailing-edge thickness, and θcw is a clockwise rotation angle about the fixed center (0 .5, 0.0) .We define the class function 
+
+C(x) = xN1 (1 − x)N2 , (N1, N 2) = (0 .5, 1.0) ,
+
+13 Factorized Neural Implicit DMD for Parametric Dynamics 
+
+and sample x ∈ [0 , 1] using cosine spacing x = 12 (1 − cos β) with β ∈ [0 , π ]. Using a first-order Bernstein basis 
+
+B0(x) = 1 − x and B1(x) = x, we form the shape functions 
+
+Su(x) = Au0B0(x) + Au1B1(x), Sl(x) = Al0B0(x) + Al1B1(x).
+
+The upper and lower surfaces are then given by 
+
+zu(x) = C(x)Su(x) + 12 tex, zl(x) = C(x)Sl(x) − 12 tex. 
+
+The resulting point set is assembled into a closed airfoil curve and finally rotated clockwise by θcw about (0 .5, 0.0) .In our parameter sweep, we vary Au0 ∈ [0 .40 , 0.50] , Al0 ∈ [−0.20 , −0.10] , and θcw ∈ [0 ◦, 10 ◦] within the specified ranges, while fixing Au1 = 0 .08 , Al1 = −0.02 , and te = 0 .002 . We construct the training set by sampling 27 codes uniformly over the specified parameter ranges, and sample an additional 16 codes at random from the same ranges for testing, resulting in 43 airfoil codes in total. Each simulation is run for 200 frames. 
+
+# B. Koopman Operator and the DMD Operator 
+
+This supplemental section introduces the Koopman operator and Dynamic Mode Decomposition (DMD) , and explains how the DMD operator can be interpreted as a finite-dimensional approximation of Koopman spectral objects from data. 
+
+B.1. Nonlinear dynamics and the observable viewpoint 
+
+Consider a continuous-time system 
+
+˙x = f (x), x(t) ∈ Rn, (24) or an equivalent discrete-time dynamical system 
+
+xk+1 = F (xk), xk ∈ Rn. (25) Koopman theory shifts perspective from the nonlinear evolution of the state x to the linear evolution of observables 
+
+(functions of the state). Without loss of generality, let g : Rn → Cm be a vector-valued observable. 
+
+B.2. The Koopman operator: definition and key properties (1) Discrete-time Koopman operator. The Koopman operator K acts on observables g as: 
+
+(Kg)( x) = g(F (x)) . (26) In words, K propagates the observable g one timestep, being an equivalent operation as evolving the state x through F and evaluating the observable at the new state. 
+
+(2) Linearity. Crucially, even if F is nonlinear, K is linear :
+
+K(ag 1 + bg 2) = a Kg1 + b Kg2, (27) because K acts on a space of functions (observables), not directly on states. 
+
+(3) Koopman eigenfunctions, eigenvalues, and modes. Let φj be an eigenfunction with eigenvalue λj . Then 
+
+Kφj = λj φj , (28) and along trajectories xk,
+
+φj (xk) = λkj φj (x0). (29) For a vector-valued observable g(x) ∈ Cm, under suitable assumptions one can express 
+
+g(xk) = 
+
+> ∞
+
+X
+
+> j=1
+
+ϕj φj (x0) λkj , (30) where ϕj ∈ Cm are the Koopman modes associated with the observable g.14 Factorized Neural Implicit DMD for Parametric Dynamics 
+
+B.3. DMD: a data-driven linear operator for time evolution 
+
+DMD is a data-driven method that fits a best linear map that advances measured snapshots forward in time. 
+
+(1) Snapshot matrices. Given snapshots sampled at uniform time intervals, 
+
+x1, x 2, . . . , x m+1 , (31) form 
+
+X = [ x1, x 2, . . . , x m], X′ = [ x2, x 3, . . . , x m+1 ]. (32) 
+
+(2) The DMD operator. DMD seeks a matrix A such that 
+
+X′ ≈ AX (33) in a least-squares sense. The minimizer is 
+
+A = X′X+, (34) where X+ denotes the Moore–Penrose pseudoinverse of X. This A is called the DMD operator .
+
+(3) Low-rank (projected) DMD. In practice, a rank-r truncated SVD is used: 
+
+X ≈ Ur Σr V ∗ 
+
+> r
+
+. (35) The reduced operator is eA = U ∗ 
+
+> r
+
+X′Vr Σ−1 
+
+> r
+
+. (36) Its eigen-decomposition is given by eAw j = μj wj , (37) where μj are DMD eigenvalues. One common form for the corresponding DMD modes is 
+
+ψj = 1
+
+μj
+
+X′Vr Σ−1 
+
+> r
+
+wj , (38) (with equivalent expressions depending on the exact algorithmic variant). If the sampling interval is ∆t, discrete-time eigenvalues can be mapped to continuous-time growth/decay rates and frequencies by 
+
+ωj = log( μj )∆t . (39) 
+
+B.4. Relationship between Koopman and DMD 
+
+The Koopman operator is generally infinite-dimensional, acting on an (infinite) function space. DMD, by contrast, produces a finite-dimensional matrix A that advances data snapshots. If the snapshots xk are treated as evaluations of some observable g(x) (often g(x) = x, i.e., direct state measurements), and the span of the chosen observables is approximately invariant under K, then DMD approximates the action of the Koopman operator projected onto that finite-dimensional observable subspace. In this sense, DMD provides numerical estimates of Koopman spectral quantities (eigenvalues and modes) associated with the measured observables. More broadly, if one uses a lifted observable map yk = Ψ( xk) (e.g., polynomial features, kernels, or neural-network embeddings), then applying the same regression/DMD procedure yields EDMD / kernel DMD, which approximates Koopman on the span of Ψ.15 Factorized Neural Implicit DMD for Parametric Dynamics 
+
+Figure 8. Burgers’ Equation across testing set viscosities. Spatiotemporal solutions u(x, t ) are shown as heatmaps. Each row corresponds to a different viscosity value from the testing set (increasing from top to bottom, as indicated on the left). Columns compare the ground truth (GT) with predictions from Ours , FNO, KAE, P-DMD, KNO, and RKN. All panels use the same color scale. 
+
+16 Factorized Neural Implicit DMD for Parametric Dynamics 
+
+Figure 9. Double Shear Layer Over Time. Snapshots of the solution field at four time instants (left to right, increasing time as indicated by the arrow) with shear separation = 0 .21 . Rows show the ground truth (GT) and predictions from Ours , FNO, KAE, P-DMD, KNO, PDE-T, and RKN. All panels share the same color scale. 
+
+17 Factorized Neural Implicit DMD for Parametric Dynamics 
+
+Figure 10. K ´arm ´an Vortex Street Over Time. Snapshots of the solution field at five time instants (left to right, increasing time as indicated by the arrow) with the cylinder placed at x = 0 .435 . Rows show the ground truth (GT) and predictions from Ours, FNO, KAE, and P-DMD. All panels share the same color scale. 
+
+18

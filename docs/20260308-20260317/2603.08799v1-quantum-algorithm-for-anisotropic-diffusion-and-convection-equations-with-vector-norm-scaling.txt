@@ -1,0 +1,559 @@
+Title: Quantum algorithm for anisotropic diffusion and convection equations with vector norm scaling
+
+URL Source: https://arxiv.org/pdf/2603.08799v1
+
+Published Time: Wed, 11 Mar 2026 00:03:18 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# Quantum algorithm for anisotropic di ff usion and convection equations with vector norm scaling 
+
+Julien Zylberman 1, Thibault Fredon 2, Nuno F.Loureiro 2, and Fabrice Debbasch 11 Sorbonne Université, Observatoire de Paris, Université PSL, CNRS, LUX, F-75005 Paris, France  
+
+> 2
+
+Plasma Science and Fusion Center, Massachusetts Institute of Technology, Cambridge, Massachusetts 02139, USA 
+
+Abstract. In this work, we tackle the resolution of partial di ff erential equations (PDEs) on digital quantum computers. Two fundamental PDEs are addressed: the anisotropic di ff usion equation and the anisotropic con-vection equation. We present a quantum numerical scheme consisting of three steps: quantum state preparation, evolution with diagonal operators, and measurement of observables of interest. The evolution step relies on a high-order centered finite di ff erence and a product formula approxima-tion, also known as Trotterization. We provide novel vector-norm analysis to bound the di ff erent sources of error. We prove that the number of time-steps required in the evolution can be reduced by a factor Θ(16 n) for the di ff usion equation, and Θ(4 n) for the convection equation, where n is the number of qubits per dimension, an exponential reduction compared to the previously established operator-norm analysis. 
+
+Keywords: quantum algorithms · partial di ff erential equations · quantum computing · quantum numerical scheme · convection equation · di ff usion equation 
+
+## 1 Introduction 
+
+The development of quantum numerical schemes for solving linear and non-linear partial di ff erential equations is an active field of research, with open question about the computational e ffi ciency, the reachable accuracies and the potential speedups when compared to classical methods. While the simulation of quantum systems by quantum computers has been extensively studied [1, 2, 3, 4, 5, 6], the simulation of classical (non-quantum) systems requires the development of novel quantum numerical schemes. Those need to take into account non-quantum evolution, i.e., non-unitary or non-linear evolution, that are not directly implementable on quantum computers. In the following, we address the problem of solving anisotropic convection and anisotropic di ff usion equations on quantum computers. First, we intro-duce a quantum numerical scheme based on high-order central finite di ff erence and product formula approximation, also known as Trotter-splitting. Then, we present a numerical analysis based on vector norm instead of generic operator  
+
+> arXiv:2603.08799v1 [quant-ph] 9 Mar 2026 2J.Zylberman et al.
+
+norm analysis 3. We show that the vector norm analysis predicts a reduction of the number of time-steps by an exponential factor O(4 n) for the anisotropic con-vection equation, and by a factor O(16 n) for the anisotropic di ff usion equation, where n is the number of qubits per dimension. 
+
+## 2 Problem and approach 
+
+The first considered PDE is the d-dimensional anisotropic di ff usion equation: 
+
+∂t φ = ∇ · (K(x, t )∇φ), (1) where φ is the unknown, ∇ = ( ∂x1 , . . . , ∂ xd ) and K(x, t ) = diag (κ1(x, t ), . . . , κ d (x, t )) is a space- and time-dependent thermal conductivity. The second PDE of interest is the d-dimensional anisotropic convection equation: 
+
+∂t f + c(x, t ).∇f = 0 , (2) where c(x, t ) = ( c1(x, t ), . . . , c d (x, t )) is a space- and time-dependent velocity field. Both equations are defined on the d-dimensional torus Td , i.e., the box [0 , 1] d
+
+with periodic boundary conditions, with a time t ∈ [0 , T ] for some T > 0, and with initial conditions φ(x, t = 0) = φ0(x) and f (x, t = 0) = f0(x) respectively. Additionally, we assume that the cj and the κj functions are 2 p + 1 di ff erentiable, for some integer p, and do not depend on the j-th variables: ∀j ∈ { 1, . . . , d },
+
+∂xj cj = 0, ∂xj κj = 0 4.
+
+Real-space encoding. In order to numerically solve these equations on quantum computers, we defined the real space encoding of the solution function into a 
+
+n = n1 + ... + nd qubit state as: |f ⟩t = Px f (x, t ) |x⟩ ∈ H , where H = Hx1 ⊗ ... ⊗ H xd
+
+is the Hilbert space associated to the n entangled qubits and each Hxj is a 2 nj -dimensional Hilbert space. The ket vector |x⟩ is defined as the tensor product of the ket vector of each space |x⟩ = |x1⟩ ⊗ ... ⊗ | xd ⟩. Each ket vector |xj ⟩ is defined as 
+
+|xj ⟩ = |q0⟩ ⊗ ... ⊗ | qnj −1⟩, with xj = Pnj −1 
+
+> k=0
+
+qk /2k+1 ∈ { 0, . . . , 2nj − 1} being the dyadic expansion of x and ∀k, q k ∈ { 0, 1}.
+
+Quantum state preparation. The quantum numerical scheme is based on three steps. The first one is a quantum state preparation routine that encodes the initial condition into an n-qubit state: φ0 → | φ0⟩ = 1
+
+> N
+
+Px φ0(x) |x⟩, f0 → | f0⟩ = 
+
+> 1
+> N′
+
+Px f0(x) |x⟩, where N , N ′ are normalization constants. Many quantum state preparation routines have been published in the litterature: exact protocols         
+
+> 3In the literature, quantum algorithms for simulating Hamiltonian systems, or solving di ff erential equations, often have a complexity given in terms of the spectral norm of the associated operator, such as the Hamiltonian or the operator ˆAwhen solving a linear ordinary di ff erential equation ∂tf= ˆAf .
+> 4This assumption will be necessary to derive an e ffi cient quantum circuit made only of quantum Fourier transforms and diagonal operators for the evolution step.
+
+Quantum algorithm for anisotropic di ff usion and convection equations 3
+
+generically require a number of quantum gates proportionate to the number of components of the target quantum states. In other word, optimal circuit size 5 for preparing arbitrary n-qubit state is O(2 n) [7, 8, 9]. Fortunately, e ffi cient methods 6 have been developed for qubit states depending on di ff erentiable functions, which leverage the structure of the state by using Walsh, Fourier or polynomial series [10, 11, 12, 13]. 
+
+|x1⟩ Quantum State Preparation: Walsh Series Loader Fourier Series Loader Polynomial Series Loader ... 
+
+Evolution: Diagonal operations and QFTs 
+
+Measurement protocol: Hadamard test Swap test Quantum Amplitude Estimation 
+
+→ T ⟨f | ˆO |f ⟩T or T ⟨φ| ˆO |φ⟩T
+
+|x2⟩
+
+|xd ⟩
+
+|f0⟩ or |φ0⟩ |f ⟩T or |φ⟩T
+
+Fig. 1: Quantum numerical scheme associated with the resolution of the d-dimensional convection or di ff usion equations with position- and time- depen-dent coe ffi cients. 
+
+Evolution. The second step reproduces the PDE evolution using primitive quan-tum gates, evolving the initial qubit state |φ0⟩ (resp. |f0⟩) toward a qubit state that encodes the PDE’s solution at a target time T > 0: |φ0⟩ → | φ⟩T = 1 
+
+> N′′
+
+Px φ(x, T ) |x⟩
+
+(resp. |f0⟩ → | f ⟩T = 1 
+
+> N′′
+
+Px f (x, T ) |x⟩). The evolution step is based on a high-order centered finite di ff erence ∂xi φ(x, t ) → (1 /∆xi ) Ppk=−p ak φ(x+k∆xi , t )+ O(∆x2pi ), where a0 = 0 and, for k ∈ {− p, −p + 1 , ...p − 1, p }\{ 0}, ak = ( −1) k+1 (p!) 2/(k(p − k)!( p +
+
+k)!) 7. The finite di ff erence recasts the PDE problems as ordinary di ff erential equation (ODE) problems: 
+
+∂t | ˜f ⟩t = −i(
+
+> d
+
+X
+
+> j=1
+
+ˆcj (t) ˆ Dj ) | ˜f ⟩t (3) 
+
+∂t | ˜φ⟩t = −(
+
+> d
+
+X
+
+> j=1
+
+ˆκj (t) ˆ D2 
+
+> j
+
+) | ˜φ⟩t , (4)  
+
+> 5
+
+The size of a quantum circuit is the number of primitive quantum gates.  
+
+> 6
+
+A quantum circuit is said e ffi cient is its circuit complexity expressed in terms of size, depth and ancilla qubits that scale polynomially with n and 1 /ϵ . 
+
+> 7
+
+The ak coe ffi cients are the finite di ff erence coe ffi cients, solution of the system of equations Ppk=−p ak kj = δj, 14 J.Zylberman et al. 
+
+with the initial conditions | ˜φ⟩t=0 = |φ0⟩, | ˜f ⟩t=0 = |f0⟩ and where ˆDj = ˆI1 ⊗ · · · ⊗ 
+
+ˆIj−1 ⊗ − i    
+
+> Ppk=−pak( ˆSj)k
+> ∆xj
+
+⊗ ˆIj+1 ⊗ · · · ⊗ ˆId is the discrete derivative operator associated with the j-th axis and ˆcj (t) = cj ( ˆX, t ), ˆκj (t) = κj ( ˆX, t ) with ˆX = ( ˆX1, ... ˆXd ), ˆXj =ˆI1 ⊗ · · · ⊗ ˆIj−1 ⊗ PXj Xj |Xj ⟩ ⟨ Xj | ⊗ ˆIj+1 ⊗ · · · ⊗ ˆId .The solutions of the ODEs are given by time-ordered evolution operators as: | ˜f ⟩t = T e−i R t    
+
+> 0
+> Pdj=1 ˆcj(s) ˆ Djds
+
+|f0⟩ and | ˜φ⟩t = T e− R t    
+
+> 0
+> Pdj=1 ˆκj(s) ˆ D2
+> jds
+
+|φ0⟩, where T is the time-ordering operator. In general, it is not possible to implement directly time-ordered exponentials on computers, whether classical or quantum. To overcome this issue, we consider first order product formula to decompose the time-ordered evolution operators into e ffi ciently implementable unitary operators. The standard product formula denoted by the index s and the generalized one denoted by g are defined as [14]: ˆUs(t + h, t ) = 
+
+←−−−
+
+> d
+
+Y
+
+> j=1
+
+exp −ih ˆcj (t + h) ˆ Dj
+
+, ˆUg (t + h, t ) = 
+
+←−−−
+
+> d
+
+Y
+
+> j=1
+
+exp −i
+
+Z t+ht
+
+ˆcj (s)ds ˆDj
+
+!
+
+ˆVs(t + h, t ) = 
+
+←−−−
+
+> d
+
+Y
+
+> j=1
+
+exp −h ˆκj (t + h) ˆ D2
+
+> j
+
+, ˆVg (t + h, t ) = 
+
+←−−−
+
+> d
+
+Y
+
+> j=1
+
+exp −
+
+Z t+ht
+
+ˆκj (s)ds ˆD2
+
+> j
+
+!
+
+(5) where ←−−−−Qdj=1 Aj = Ad ...A 1 is a product with decreasing indexes for non-commuting operators. The product formula approximation is as accurate as h is small. There-fore, we discretize the time span [0 , T ] into L equal segments and we define | ˜φα ⟩t
+
+and | ˜fα ⟩t , with α = s, g , the qubit states given by L trotterized-time-steps as: 
+
+| ˜φα ⟩T =
+
+> L
+
+Y
+
+> l=1
+
+ˆVα ( lT L , (l − 1) TL ) |φ0⟩| ˜fα ⟩T =
+
+> L
+
+Y
+
+> l=1
+
+ˆUα ( lT L , (l − 1) TL ) |f0⟩
+
+(6) The implementation of the operators ˆVα and ˆUα is performed using quantum Fourier transforms and diagonal operators. The quantum Fourier transform (QFT) diagonalizes the discrete derivative operators ˆDj as ˆDj = QFT −1 
+
+> j
+
+(PXj d(Xj )
+
+|Xj ⟩ ⟨ Xj |) QFT j , where QFT j is the QFT acting on the j-th register and d(Xj ) = 
+
+> 2
+> ∆xj
+
+Ppq=0 aq sin 2πqX j
+
+ is one of the eigenvalues of the operator ˆDj . Consequently, the operators ˆD2 
+
+> j
+
+and each of the exponential defined in Equation 5 are also diag-onalized by the QFT. The associated quantum circuit is well established for the QFT [15]. The diagonal operators depends on di ff erentiable functions and can be effi ciently implemented using (sparse) Walsh or Fourier series approximations [16, 11]. Quantum algorithm for anisotropic di ff usion and convection equations 5
+
+Measurement protocol. The last step of the numerical scheme is the extraction of information from the final qubit state |φ⟩T (resp. |f ⟩T ) using measurement protocols such as quantum amplitude estimation, the Hadamard test or the Swap test [15, 17, 18, 19, 20, 21]. These protocols enable the measurement of averaged values of observables |φ⟩T → T ⟨φ| ˆO |φ⟩T , where ˆO is designed to correspond to relevant information, such as the value of the solution at a given position, the average position of the solution, its standard deviation, or higher-order moments. 
+
+## 3 Error analysis 
+
+Space discretization error. The quantum numerical scheme introduced two approximations: the space-discretization error and the product formula er-ror. The first one is quantified by the di ff erence between |f ⟩t , the normal-ized vector encoding the solution of the convection equation Eq.(2) at time 
+
+t, and | ˜f ⟩t , the solution of the ODE Eq.(3). One can bound their di ff erence by writing the following equation for |f ⟩t : ∂t |f ⟩t = −i Pdj=1 ˆcj (t) ˆDj |f ⟩t + |r(t)⟩ with 
+
+|r(t)⟩ = Pdj=1 ˆcj (t)( i ˆDj |f ⟩t − | ∂xj f ⟩t ). The solution of this equation is given by variation of parameter formula as |f ⟩t = ˆU (t, 0) |f0⟩ + R t 
+
+> 0
+
+ˆU (t, s ) |r(s)⟩ ds , where ˆU
+
+is the time-ordered evolution operator associated with the ODE Eq.(3). The variation of parameter formula makes it possible to bound the di ff erence as 
+
+|| | f ⟩t − | ˜f ⟩t || 2,N ≤ t max s∈[0 ,t ] ∥ | r(s)⟩ ∥ 2,N . Then, using Taylor inequality, one can show i ˆDj |f ⟩ = |∂xj f ⟩ + O(( ∆xj )2p). Finally, the di ff erence is bounded as ∥ | ˜f ⟩T −|f ⟩T ∥2,N ≤ tK Pdj=1 || cj || ∞(∆xj )2p, where K is a constant depending on p and the maximum value over j ∈ { 0, ..., d } and time of the (2 p + 1) derivative of f0 with respect to axis j. Since ∆x = 1 /2n, one can choose a number of qubits associated with the j-th axis as nj = ⌈ 12p log 2(T K ∥cj ∥∞/ϵ )⌉ to ensure an ϵ approximation level. One can proceed analogously to bound the discretization error associated with the di ff usion equation. Since the di ff usion equation has a non-unitary evolution 8, one needs to consider the di ff erence between the normalized vectors as: ∥ | ˜φ⟩t  
+
+> ∥| ˜φ⟩t∥2,N
+
+− |φ⟩t  
+
+> ∥| φ⟩t∥2,N
+
+∥2,N ≤ T K Pdj=1 ∥κj ∥∞(∆xj )2p, where K is independent of N
+
+and depends on the the 2 p + 1 derivatives of φ.
+
+Product formula approximation. A direct expansion of the Trotter formula gives 
+
+∥ei( ˆ H1+ ˆ H2)∆t − ei ˆH1∆t ei ˆH2∆t  |ψ⟩ ∥ 2,N = ∆t2 
+
+> 2
+
+∥[ ˆH2, ˆH1] |ψ⟩ ∥ 2,N + O(∆t3). In the liter-ature on quantum algorithms, most of the scaling uses the operator norm inequality by bounding the commutator as ∥[ ˆH2, ˆH1] |ψ⟩ ∥ 2,N ≤ ∥ [ ˆH2, ˆH1]∥2 ≤          
+
+> 8The evolution operator ˆUassociated with the discretized convection equation Eq.(3) is unitary thanks to the central finite di ff erence and the assumption that ∀j, ∂ xjcj= 0, while the evolution operator associated with the discretized di ff usion equation Eq.(4) is non-unitary, but has a spectral norm ∥ˆV∥ ≤ 1.
+
+6 J.Zylberman et al. 
+
+2∥ ˆH1∥2∥ ˆH2∥2 9. However, in the case of the convection or the di ff usion equa-tion, the summand ˆHj depends on the discrete derivative operator such as 
+
+∥ ˆHj ∥2 = ∥cj ˆDj ∥2 = O(1 /∆xj ) = O(2 nj ) or ∥ ˆHj ∥2 = ∥κj ˆD2 
+
+> j
+
+∥2 = O(1 /∆x2 
+
+> j
+
+) = O(4 nj ), resulting in exponential-with-n error bounds. In the following, we overcome these exponential scaling by considering the action of the operator ˆDj on the qubit state encoding the solution |f ⟩t (or |φ⟩t ), deriving a novel bound in vector norm with terms of the form ∥[ ˆH2, ˆH1] |f ⟩t ∥2,N = O(1). Precisely, one can prove that for the convection equation and α = s, g :
+
+|| | ˜fα ⟩T − | ˜f ⟩T || ≤ aα
+
+T 2
+
+L + rα (7) where rα contains higher order terms that are asymptotically negligible in the large L → +∞ limit and 
+
+ag = 12
+
+> d−1
+
+X
+
+> j=1
+> d
+
+X
+
+> m=j+1
+
+∥cj ∥∞∥∂xj cm∥∞ max  
+
+> t∈[0 ,T ]
+
+∥∂xm ft ∥2,N 
+
+∥f0∥2,N 
+
++ ∥cm∥∞∥∂xm cj ∥∞ max  
+
+> t∈[0 ,T ]
+
+∥∂xj ft ∥2,N 
+
+∥f0∥2,N 
+
+!
+
+as = ag + 12
+
+> d
+
+X
+
+> j=1
+
+∥∂t cj ∥∞ max  
+
+> t∈[0 ,T ]
+
+∥∂xj ft ∥2,N 
+
+∥f0∥2,N 
+
+≤ ag + d
+
+2 max   
+
+> 1≤j≤d,t ∈[0 ,T ]
+
+|| ∂t cj || ∞
+
+|| ∂xj ft || 2,N 
+
+|| f0|| 2,N 
+
+Remark that || ∂xm ft || 2,N /|| f0|| 2,N converges toward || ∂xm ft || L2 /|| f0|| L2 = || ∂xm f0|| L2 /|| f0|| L2
+
+in the large N limits, which depends only on f010 .Similarly, for the di ff usion equation, one can show: 
+
+| ˜φα ⟩T
+
+∥ | ˜φα ⟩T ∥2,N 
+
+− | ˜φ⟩T
+
+∥ | ˜φ⟩T ∥2,N 2,N 
+
+≤ a′
+
+> α
+
+T 2
+
+L + r′ 
+
+> α
+
+(8) where r′ 
+
+> α
+
+contains higher order terms that are asymptotically negligible and 
+
+a′ 
+
+> g
+
+= 12
+
+> d−1
+
+X
+
+> j=1
+> d
+
+X
+
+> m=j+1
+
+∥κj ∥∞∥∂2 
+
+> xj
+
+κm∥∞ max  
+
+> t∈[0 ,T ]
+
+∥∂2 
+
+> xm
+
+φt ∥2,N 
+
+∥ ˜φT ∥2,N 
+
++ ∥κm∥∞∥∂2 
+
+> xm
+
+κj ∥∞ max  
+
+> t∈[0 ,T ]
+
+∥∂2 
+
+> xj
+
+φt ∥2,N 
+
+∥ ˜φT ∥2,N 
+
+!
+
+a′ 
+
+> s
+
+= a′ 
+
+> g
+
++ 12
+
+> d
+
+X
+
+> j=1
+
+∥∂t κj ∥∞ max  
+
+> t∈[0 ,T ]
+
+∥∂2 
+
+> xj
+
+φt ∥2,N 
+
+∥ ˜φT ∥2,N 
+
+≤ ag + d
+
+2 max   
+
+> 1≤j≤d,t ∈[0 ,T ]
+
+|| ∂t κj || ∞
+
+|| ∂2 
+
+> xj
+
+φt || 2,N 
+
+|| ˜φT || 2,N  
+
+> 9
+
+The first reference introducing vector norm analysis for quantum algorithm is [14], which address the problem of solving the Schrödinger equation with a bounded po-tential, i.e., in the case where ˆH1 is asymptotically unbounded and ˆH2 is bounded. Our results generalize their approach since all the summands are composed of dis-crete derivative operators that are asymptotically unbounded for the convection and di ff usion equations.  
+
+> 10
+
+The L2 norm of any derivative of f is constant over time, equal to its initial value at time t = 0. Quantum algorithm for anisotropic di ff usion and convection equations 7
+
+where || ˜φT || 2,N = || QFT ˜φT || 2,N ≥ | ⟨ 0|⊗n QFT |φ⟩T | = | PX ˜φ(X, T )|/√N = | PX φ0(X)|/√N ,where the average value of ˜φ is conserved over time and equal to the average value of φ0. Then, by assuming that the average value of φ0 is non-zero, one deduce that 1 /|| ˜φT || 2,N ≤ √N / (| PX φ0(X)|) N →+∞
+
+−−−−−−−→ 1/(√N ⟨φ0⟩Td ) with ⟨φ0⟩Td =
+
+R 
+
+> Td
+
+φ0(x)dx and ∥∂2 
+
+> xm
+
+φt ∥2,N /∥ ˜φT ∥2,N ≤ √N ∥∂2 
+
+> xm
+
+φt ∥2,N /| PX φ0(X)| N →+∞
+
+−−−−−−−→ || ∂xm φt || L2 / ⟨φ0⟩Td .In both case, the product formula approximation scales as O(T 2/L ), with a prefactor independent of the discretization step. Consequently, the number of time steps L to reach an arbitrary precision ϵ > 0 should scale as L = O(T 2/ϵ ). It represents an exponential-with-n reduction compared to operator norm analysis that predicts a number of time-step scaling with the operator norms 
+
+∥ ˆD2 
+
+> j
+
+∥2 = O(4 nj ) for the convection equation, and ∥ ˆD4 
+
+> j
+
+∥2 = O(16 nj ) for the di ff u-sion equation. 
+
+## 4 Conclusion 
+
+In this work, we introduced quantum numerical schemes for an anisotropic convection equation and for an anisotropic di ff usion equation. The numerical schemes are composed of three steps: a quantum state preparation to load the initial condition into a qubit state; an evolution step made of diagonal operators and quantum Fourier transforms; and a measurement protocol to estimate quantities of interest from the numerical solution. We presented an error analysis of the space discretization and product formula approximations. In particular, we introduced novel computations based on vector norm analysis to prove that the required number of time-steps needed to reach a given accuracy ϵ > 0 can be reduced by an exponential-with-n factor, compared to operator norm analysis. These results pave the way for the development of e ffi cient quantum numerical schemes for other PDE problems such as the Vlasov equation or the Fokker-Planck equation and for the development of novel numerical analysis for other types of quantum numerical schemes. 
+
+## 5 Acknowledgement 
+
+This preprint has not undergone peer review or any post-submission improve-ments or corrections. The Version of Record of this contribution is published in 
+
+Quantum Engineering Sciences and Technologies for Industry and Services (QUEST-IS 2025), and is available online at https://doi.org/10.1007/978-3-032-13855-2_ 23 .
+
+## References 
+
+[1] Ivan Kassal et al. “Polynomial-time quantum algorithm for the simulation of chemical dynamics”. In: Proceedings of the National Academy of Sciences 
+
+105.48 (2008), pp. 18681–18686. 8 J.Zylberman et al. 
+
+[2] Ian D Kivlichan et al. “Bounding the costs of quantum simulation of many-body physics in real space”. In: Journal of Physics A: Mathematical and Theoretical 50.30 (2017), p. 305301. [3] Ryan Babbush et al. “Exponentially more precise quantum simulation of fermions in the configuration interaction representation”. In: Quantum Science and Technology 3.1 (2017), p. 015006. [4] Guang Hao Low and Isaac L Chuang. “Optimal Hamiltonian simulation by quantum signal processing”. In: Physical review letters 118.1 (2017), p. 010501. [5] Guang Hao Low and Isaac L Chuang. “Hamiltonian simulation by qubiti-zation”. In: Quantum 3 (2019), p. 163. [6] Ryan Babbush et al. “Quantum simulation of chemistry with sublinear scaling in basis size”. In: npj Quantum Information 5.1 (2019), p. 92. [7] Xiao-Ming Zhang, Tongyang Li, and Xiao Yuan. “Quantum state prepara-tion with optimal circuit depth: Implementations and applications”. In: 
+
+Physical Review Letters 129.23 (2022), p. 230504. [8] Pei Yuan and Shengyu Zhang. “Optimal (controlled) quantum state prepa-ration and improved unitary synthesis by quantum circuits with any number of ancillary qubits”. In: Quantum 7 (2023), p. 956. [9] Xiaoming Sun et al. “Asymptotically optimal circuit depth for quantum state preparation and general unitary synthesis”. In: IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems 42.10 (2023), pp. 3301–3314. [10] Julien Zylberman and Fabrice Debbasch. “E ffi cient quantum state prepa-ration with walsh series”. In: Physical Review A 109.4 (2024), p. 042401. [11] Julien Zylberman et al. “E ffi cient quantum circuits for non-unitary and unitary diagonal operators with space-time-accuracy trade-o ff s”. In: ACM Transactions on Quantum Computing (2024). [12] Mudassir Moosa et al. “Linear-depth quantum circuits for loading fourier approximations of arbitrary functions”. In: Quantum Science and Technol-ogy 9.1 (2023), p. 015002. [13] Matthias Rosenkranz et al. “Quantum state preparation for multivariate functions”. In: Quantum 9 (2025), p. 1703. [14] Dong An, Di Fang, and Lin Lin. “Time-dependent unbounded Hamilto-nian simulation with vector norm scaling”. In: Quantum 5 (May 2021), p. 459. issn : 2521-327X. url : http://dx.doi.org/10.22331/q-2021-05-26-459 .[15] Michael A Nielsen and Isaac L Chuang. Quantum computation and quan-tum information . Cambridge university press, 2010. [16] Jonathan Welch et al. “E ffi cient quantum circuits for diagonal unitaries without ancillas”. In: New Journal of Physics 16.3 (2014), p. 033040. [17] Gilles Brassard et al. “Quantum amplitude amplification and estimation”. In: arXiv preprint quant-ph/0005055 (2000). [18] Dmitry Grinko et al. “Iterative quantum amplitude estimation”. In: npj Quantum Information 7.1 (2021), p. 52. Quantum algorithm for anisotropic di ff usion and convection equations 9
+
+[19] Patrick Rall and Bryce Fuller. “Amplitude estimation from quantum signal processing”. In: Quantum 7 (2023), p. 937. [20] Tudor Giurgica-Tiron et al. “Low depth algorithms for quantum amplitude estimation”. In: Quantum 6 (2022), p. 745. [21] Zhong-Xia Shang and Qi Zhao. “Estimating quantum amplitudes can be exponentially improved”. In: arXiv preprint arXiv:2408.13721 (2024).
