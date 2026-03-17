@@ -1,0 +1,1646 @@
+Title: MCMC Informed Neural Emulators for Uncertainty Quantification in Dynamical Systems
+
+URL Source: https://arxiv.org/pdf/2603.10987v1
+
+Published Time: Thu, 12 Mar 2026 01:25:25 GMT
+
+Number of Pages: 25
+
+Markdown Content:
+# MCMC Informed Neural Emulators for Uncertainty Quantification in Dynamical Systems 
+
+## Heikki Haario a, Zhi-Song Liu a, Martin Simon b and Hendrik Weichel b,c ,∗
+
+> a
+
+Lappeenranta-Lahti University of Technology LUT, Lahti, Finland 
+
+> b
+
+Frankfurt University of Applied Sciences, Frankfurt am Main, Germany 
+
+> c
+
+University of Huddersfield, Huddersfield, United Kingdom 
+
+A R T I C L E I N F O 
+
+Keywords :Neural Emulators MCMC AutoEncoders Uncertainty Quantification Neural ODE Attention Mechanism 
+
+A B S T R A C T 
+
+Neural networks are a commonly used approach to replace physical models with computationally cheap surrogates. Parametric uncertainty quantification can be included in training, assuming that an accurate prior distribution of the model parameters is available. Here we study the common opposite situation, where direct screening or random sampling of model parameters leads to exhaustive training times and evaluations at unphysical parameter values. Our solution is to decouple uncertainty quantification from network architecture. Instead of sampling network weights, we introduce the model-parameter distribution as an input to network training via Markov chain Monte Carlo (MCMC). In this way, the surrogate achieves the same uncertainty quantification as the underlying physical model, but with substantially reduced computation time. The approach is fully agnostic with respect to the neural network choice. In our examples, we present a quantile emulator for prediction and a novel autoencoder-based ODE network emulator that can flexibly estimate different trajectory paths corresponding to different ODE model parameters. Moreover, we present a mathematical analysis that provides a transparent way to relate potential performance loss to measurable distribution mismatch. 
+
+## 1. Introduction 
+
+Neural networks are increasingly used as emulators, i.e., surrogates for computationally intensive simulation models in physics and chemistry. Beyond accelerating simulations, they can also incorporate complex features that are difficult to encode in traditional solvers. A prominent example is Physics-Informed Neural Networks (PINNs), which embed physical laws into the training objective and can serve as fast surrogates using precomputed data [33, 42, 18, 2]. PINNs have been applied to forward and inverse problems in chemical kinetics [15, 1, 46, 6], physics [19, 26, 23], and finance [12, 8, 16, 30]. Despite these successes, integrating principled uncertainty quantification (UQ) into neural emulators remains challenging. A standard approach to UQ is via Bayesian Neural Networks (BNNs) [29, 27], which treat network weights as random variables and approximate posterior uncertainty using methods such as MCMC, variational inference, or Monte Carlo dropout. While powerful, BNNs can be difficult to scale: the weight space is high-dimensional, selecting informative priors is non-trivial, and approximate posteriors may yield miscalibrated uncertainty, especially in regimes with limited data or model misspecification. In this work, we propose an alternative, modular approach to Bayesian UQ for neural emulation: the MCMC Informed Neural Emulator (MINE). The key idea is to decouple Bayesian inference from function approximation. We first perform posterior inference offline using MCMC on the original simulator (or any black-box/legacy model) to obtain samples from the parameter posterior 𝑝 (𝜽 ∣ 𝒚 ). We then train deterministic neural surrogates on posterior-informed data, i.e., input–output pairs concentrated in regions of parameter space consistent with the observed data. This approach, related to recent work on training-distribution selection [10], directly targets the quantity of interest in Bayesian prediction, without requiring Bayesian architectures at inference time. Concretely, we provide two complementary surrogate components: a quantile (interval) emulator and a forward emulator for operator learning. The two components serve different deployment needs: the quantile emulator provides immediate interval estimates which is particularly useful when deterministic, low-latency uncertainty summaries suffice, while the forward emulator enables fast posterior predictive sampling which is useful for downstream stochastic pipelines. 
+
+> ∗
+
+Corresponding author 
+
+hendrik.weichel@fra-uas.com (H. Weichel) 
+
+: Page 1 of 25 
+
+> arXiv:2603.10987v1 [cs.LG] 11 Mar 2026 MCMC Informed Neural Emulators
+
+This paradigm exploits a practical advantage of Bayesian posterior sampling: MCMC concentrates computation on plausible parameter regions instead of exhaustively covering the full parameter space. To illustrate the scale, consider a simulator with a runtime of one second and 20 parameters, each discretized into 10 values. A brute-force grid would require 10 20 simulator evaluations, i.e., 10 20 seconds, which is approximately 3 × 10 12 years. In contrast, a posterior chain with 10 5 simulator evaluations takes on the order of a day (about 28 hours at one second per evaluation). The MINE paradigm leverages such posterior samples to reduce the data-generation burden dramatically, while focusing learning on the statistically relevant regions. The MINE paradigm is conceptually distinct from embedding uncertainty directly into the neural network. Unlike BNNs, which attempt to represent uncertainty through probabilistic weight distributions and require posterior approximation in weight space, MINE externalizes uncertainty through Bayesian parameter inference performed offline. Where, e.g., Bayesian PINNs [44] place Bayesian inference inside the surrogate by treating network weights probabilistically and estimating their posterior, we instead run MCMC offline on the simulator’s physical parameters and then train deterministic emulators on posterior-informed data, thus avoiding weight-space sampling at inference time. This approach is complementary to surrogate-assisted inference methods such as using surrogates to accelerate MCMC (assuming that draws from a prior are possible): here, we assume posterior sampling can be performed offline, with minimal prior knowledge such as positivity constraints only, and then amortize Bayesian prediction through deterministic surrogates trained on posterior-informed data. The MINE paradigm can be understood independently from architectural families such as Neural Ordinary Differential Equations (Neural ODEs) [7, 28, 22, 45, 48, 21], even though it may utilize these architectures in its realizations. Neural ODEs model continuous-time dynamics via neural-parameterized vector fields and have been used, for example, to emulate chemical reaction systems [39, 24]. However, standard Neural ODE formulations do not provide Bayesian UQ natively; Bayesian extensions (e.g., Bayesian Neural ODEs or neural SDE variants) incorporate uncertainty internally but typically require sampling at inference time and can introduce additional computational overhead. In contrast, the MINE framework achieves UQ through offline posterior sampling and trains deterministic emulators on posterior-informed data. The forward emulator realization may use a Neural ODE/neural operator backbone, but the UQ mechanism is architecture-agnostic and lives outside the network. Relative to PINNs, the MINE framework is generally equation-free in training and is particularly suitable when governing equations are unknown, non-differentiable, or when one must interface with black-box simulators. Nevertheless, physics-informed loss terms can be incorporated when available. Finally, compared to Statistics-Informed Neural Networks (SINNs) [17, 47], which aim to reproduce full statistical properties of stochastic trajectories, the MINE paradigm targets Bayesian predictive uncertainty for quantities of interest via posterior-informed training data and produces deterministic outputs at inference time (either conditional on sampled 
+
+𝜽 for posterior draws, or directly as quantiles for intervals). A central modeling consideration is what uncertainty is represented . The MINE framework directly captures 
+
+posterior/parameter uncertainty through 𝑝 (𝜽 ∣ 𝒚 ) and its propagation to predictions. In addition, any observation noise and stochasticity encoded in the likelihood 𝑝 (𝒚 ∣ 𝜽 ) can be reflected in the posterior predictive distribution. Like any surrogate approach, MINE also introduces emulator error ; throughout the paper we therefore evaluate both predictive accuracy and uncertainty calibration to assess how closely the emulators match the offline Bayesian reference. 
+
+Contributions. The main contributions of this work are: 1. We formalize the MCMC Informed Neural Emulator (MINE) paradigm, which decouples Bayesian posterior inference (via MCMC on a simulator) from deterministic function approximation (via neural networks trained on posterior-informed data). We provide a Wasserstein-based stability analysis showing that the deployment risk of any Lipschitz-bounded emulator is controlled by its training risk plus an explicit penalty proportional to the distribution relative to the deployment distribution, with constants depending only on Lipschitz moduli and second moments. This yields a principled justification that MCMC-informed training, training on (or near) the deployment/posterior law is bound-optimal, and it quantifies how finite-chain posterior approximations degrade performance. 2. We present two complementary MINE realizations: a quantile (interval) emulator that directly learns predictive quantiles to avoid sampling at inference time and a forward emulator trained on posterior-informed input–output pairs that enables efficient posterior predictive draws without additional simulator calls. 3. For the forward emulator component, we instantiate the paradigm with a concrete, high-performing architecture: an AutoEncoder-based ODE neural network (AEODE) with time embeddings and attention. We emphasize, however, that MINE is architecture-agnostic and can employ alternative neural ODE/neural operator backbones. We evaluate the proposed framework on two representative examples: (a) a chemical kinetics ODE  
+
+> :Page 2 of 25 MCMC Informed Neural Emulators
+
+model with six chemical species and (b) the FaIR simple climate model, which simulates global temperature response to greenhouse gas (GHG) emissions. In addition, we provide experiments comparing AEODE against alternative ODE-style surrogate architectures to motivate our design choices. The remainder of this paper is structured as follows: Section 2 introduces preliminaries on Bayesian UQ with MCMC and presents two running examples. Section 3 introduces MCMC-informed training for neural emulators including a rigorous mathematical foundation for this framework, and Section 4 details the two MINE realizations. Section 5 describes experimental settings, and Section 6 presents results on predictive fidelity, calibration, and efficiency. Section 7 concludes. 
+
+## 2. Preliminaries 
+
+2.1. Uncertainty quantification via Markov chain Monte Carlo 
+
+Markov chain Monte Carlo sampling is a standard workhorse when it comes to quantifying and propagating both parametric and input uncertainties in mathematical models. We begin with a standard Bayesian inverse problem setup: Let 𝜽 ∈ Θ ⊂ ℝ𝑑 denote the physical parameters of a model, 𝒚 ∈ ℝ𝑛 the observed data, and 𝐹 ∶  × Θ → ℝ𝑛 
+
+the forward model mapping the (controlled) input factors 𝒙 ∈  given the parameters 𝜽 ∈ Θ to observables. We formulate the inverse parameter calibration problem in a statistical setting, applying Bayes’ Theorem to obtain a mathematical expression for the posterior probability density of the model parameters. This posterior density can be explored numerically to receive the uncertainties. Let us formally write our model as 
+
+𝒚 = 𝐹 (𝒙 ∣ 𝜽 ) + 𝜺 ,
+
+where 𝜺 presents the measurement noise. The posterior distribution of 𝜽 - that is, those values of 𝜽 that agree with data - is given by the Bayes’ formula 
+
+𝑝 (𝜽 ∣ 𝒚 ) = 𝑝 (𝒚 ∣ 𝜽 )𝑝 (𝜽 )
+
+∫ 𝑝 (𝒚 ∣ 𝜽 )𝑝 (𝜽 )𝑑 𝜽 , (1) where 𝑝 (𝜽 ∣ 𝒚 ) denotes the posterior of 𝜽 for given data 𝒚 , 𝑝 (𝒚 ∣ 𝜽 ) gives the likelihood of 𝒚 for given 𝜽 , and 𝑝 (𝜽 )
+
+denotes the prior distribution of 𝜽 . The Bayes’ formula gives a framework to solve the inverse parameter calibration problem. The key benefit is that instead of a single optimal fit for the parameter 𝜽 it provides the posterior distribution, 
+
+all parameter values that agree with given data. Consequently, any model prediction can be performed as an ensemble, using various parameters 𝜽 sampled from the posterior. In this way, the uncertainty of parameter values for model predictions is quantified. However, a direct evaluation of the Bayes’ formula is only possible in some trivial cases. Therefore, we generate a representative set of samples {𝜽 (𝑖 )}𝑁 𝑖 =1 from the posterior using a Markov Chain Monte Carlo (MCMC) algorithm. MCMC methods provide a way to computationally implement the Bayes Theorem, i.e., to approximate the posterior distribution of the parameters, without explicitly evaluating the formula. Especially, the direct computation of the multidimensional integral is avoided. Instead of trying to sample directly from the unknown posterior distribution, a known proposal distribution is used, and the samples from it are either accepted or rejected depending on the values of the current and proposed (non-normalized) likelihood values 𝑝 (𝒚 ∣ 𝜽 )𝑝 (𝜽 ). Also, setting 
+
+𝑝 (𝜽 ), possible prior knowledge of the parameters may require expert knowledge. In our cases, we rely on either obvious physical constraints such as positivity or employ the assumptions used in literature. By iteratively repeating the MCMC steps – propose, accept/reject – a chain of the values 𝜽 is created, that can be proven to converge towards the true parameter posterior. However, the convergence may be impractically slow if the size and shape of the proposal distribution do not align with the underlying true distribution. This issue can be avoided by using adaptive methods that learn how to improve the proposal on the fly. We use the Delayed Rejection Adaptive Metropolis (DRAM), [11] that employs several multidimensional Gaussian proposal distributions, and updates the covariances of them based on the earlier sampled members in the chain. Once we have calibrated the model using input-output pairs, such as, e.g., historical inputs 𝒙 hist and outputs 𝒚 hist 
+
+in our climate model example,to obtain an MCMC chain {𝜽 (𝑖 )}𝑁 𝑖 =1 , we are interested in propagating the corresponding parametric uncertainty into the future. That is, for each sample 𝜽 (𝑖 ) in the chain, we evaluate the forward model 
+
+𝐹 (𝒙 ∣ 𝜽 (𝑖 )) for potentially new data points 𝒙 , obtaining the corresponding outputs {𝐹 (𝒙 ∣ 𝜽 (𝑖 ))} 𝑁 𝑖 =1 . This corresponds to drawing from the posterior predictive distribution 
+
+𝑝 (𝒚 ∣ 𝒚 hist , 𝒙 hist ; 𝒙 ) = ∫ 𝑝 (𝒚 ∣ 𝒙 , 𝜽 )𝑝 (𝜽 ∣ 𝒚 hist , 𝒙 hist )𝑑 𝜽 . (2)  
+
+> :Page 3 of 25 MCMC Informed Neural Emulators
+
+In some practical applications, one is interested in drawing from this posterior predictive distribution directly, in others, statistics such as relevant point estimates (e.g., means or medians) and measures of uncertainty (e.g., variances or credible intervals) suffice. Therefore, our framework offers two approaches to emulate: (1) the forward operator 
+
+𝐹 (𝒙 ∣ 𝜽 ) combined with (2) relevant quantiles of the posterior predictive distribution. Both emulators are fully deterministic for given 𝜽 , whose values can be randomly drawn from the sampled MCMC chain. 
+
+2.2. Running Examples 
+
+We will use two examples to clarify the use of MCMC sampling as a tool within the MINE framework for physical models: a low-dimensional system from chemical kinetics, and a moderately high-dimensional simple climate model. While the former is a standard test example, the latter is a nice example for practically relevant high-dimensional settings while still being tractable on a standard computer. 
+
+2.2.1. Chemical Kinetics Model 
+
+Consider the kinetic system between six chemical species 𝐴, 𝐵, 𝐶, 𝐷, 𝐸, 𝐹 :
+
+𝐴 + 𝐵 → 𝐶 + 𝐹 (3) 
+
+𝐴 + 𝐶 → 𝐷 + 𝐹 (4) 
+
+𝐴 + 𝐷 → 𝐸 + 𝐹 (5) where the reaction rates of the three reactions have to be estimated by the concentration data available of the component 
+
+𝐴 . This example, called ’Himmel’ in the following, is taken from [14], also available as a demo example of the MCMC library package in Matlab 1.By denoting the three reaction constants as named 𝜃 1, 𝜃 2, 𝜃 3, we can write the respective ODE system as 
+
+𝑑𝐴 𝑑𝑡 = − 𝜃 1𝐴𝐵 − 𝜃 2𝐴𝐶 − 𝜃 3𝐴𝐷 (6) 
+
+𝑑𝐵 𝑑𝑡 = − 𝜃 1𝐴𝐵 (7) 
+
+𝑑𝐶 𝑑𝑡 = 𝜃 1𝐴𝐵 − 𝜃 2𝐴𝐶 (8) 
+
+𝑑𝐷 𝑑𝑡 = 𝜃 2𝐴𝐶 − 𝜃 3𝐴𝐷 (9) 
+
+𝑑𝐸 𝑑𝑡 = 𝜃 3𝐴𝐷 (10) Figure 1 shows how the model fits the data. In addition to the standard least squares fit it also shows the model solutions accepted by the MCMC sampling. The measurement noise is assumed to be i.i.d. Gaussian, with the noise variance estimated by the residuals of the fit. We see how the accepted model solutions agree with noise, i.e., they roughly just cover the measured concentration values. Figure 2 presents the pairwise 2D scatter plots of the parameters, as obtained by running an MCMC chain of length 5000 samples. In the context of our Bayesian inverse problem setup 𝐹 (𝒙 ∣ 𝜽 ) is the forward operator corresponding to the ODE which returns the concentration of chemicals 𝐴 through 𝐹 in time 𝑡 , namely 𝒚 . This forward operator 𝐹 (𝒙 ∣ 𝜽 ) has the input parameters 𝒙 that contain the initial concentrations of the six chemical species 𝐴 through 𝐹 , and 𝜽 which holds the reaction constants 𝜃 1, 𝜃 2, 𝜃 3.
+
+2.2.2. The FaIR Simple Climate Model 
+
+The Finite Amplitude Impulse Response (FaIR) model, see [37, 20], is a surrogate-type so-called simple climate model, which aims to imitate the key features of more complicated earth system models. More precisely, the increase in temperature due to greenhouse gas emissions is modeled via a simplified carbon cycle in four main carbon reservoirs, namely geological, deep ocean, biosphere, and ocean mixed layer. We focus in this work on the FaIR version 1.6, cf. [37], where the model dynamics are driven by annual greenhouse gas emissions as the primary input. For each year, the atmospheric concentrations of greenhouse gases are computed by accounting for their accumulation or decay,  
+
+> 1https://github.com/mjlaine/mcmcstat
+> :Page 4 of 25
+
+MCMC Informed Neural Emulators 0 100 200 300 400 500 600 
+
+> Timestep
+> 0.000
+> 0.005
+> 0.010
+> 0.015
+> 0.020
+> mole/liter
+> A Data
+> A
+> B
+> C
+> D
+> E
+
+Figure 1: Himmel data fitting. 12 13 14 15 16 17            
+
+> 1.4
+> 1.5
+> 1.6
+> 1.7
+> 2
+> 12 13 14 15 16 17
+> 3
+> 0.24
+> 0.26
+> 0.28
+> 0.30
+> 0.32
+> 0.34
+> 1
+> 1.40 1.45 1.50 1.55 1.60 1.65 1.70
+> 3
+> 0.24
+> 0.26
+> 0.28
+> 0.30
+> 0.32
+> 0.34
+
+Figure 2: 2D scatter of Himmel parameters. 
+
+which results from exchanges with the aforementioned carbon cycle reservoirs, acting either as sinks or sources. These processes unfold over different timescales, depending on the specific reservoir involved and the prevailing temperature. The governing equations for the amounts 𝑅 𝑖 of a certain greenhouse gas (GHG) in each reservoir are given by 
+
+d𝑅 𝑖 
+
+d𝑡 = 𝑎 𝑖 𝐸 GHG (𝑡 ) − 𝑅 𝑖 
+
+𝛼 (𝑇 (𝑡 )) 𝜏 𝑖 
+
+, 𝑖 = 1 , ..., 4,
+
+: Page 5 of 25 MCMC Informed Neural Emulators 1900 1920 1940 1960 1980 2000 2020  
+
+> Years
+> 0.25
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> 1.25
+> 1.50
+> Temperature[°C]
+> Figure 3: FaIR calibration results (until 2005) and sampling from posterior predictive distribution (from 2005). With historical temperature measurements in red, to the median, 90% credible interval and 99% credible interval in blue.
+
+where 𝐸 GHG (𝑡 ) depicts the emission at time 𝑡 , which are the core input factors to the model; 𝑎 𝑖 contains the reservoir fractions ( ∑4 
+
+> 𝑖 =1
+
+𝑎 𝑖 = 1 ); 𝜏 𝑖 represents the lifespan of GHG in reservoir 𝑖 ; and 𝛼 (⋅) regulates the timescale adjustment through accounting for the temperature dependence of lifespan in each reservoir. FaIR also calculates non-CO 2 greenhouse gas concentrations from emissions, aerosol forcing from aerosol precursor emissions, tropospheric and stratospheric ozone forcing from precursor emissions, and forcings from black carbon on snow, stratospheric methane oxidation to water vapor, contrails, and change in land use. Forcings from volcanic eruptions and solar irradiance fluctuations are supplied externally. These forcings are then converted to a temperature change. The model comprises a total of 20 physical parameters, each controlling specific aspects of the carbon cycle, radiative forcing, and climate response processes. In order to generate reliable climate projections, the FaIR model must be calibrated against historical data, including atmospheric greenhouse gas concentrations and global mean surface temperatures. The calibration process involves estimating the values of the model parameters such that the model output best fits the observed data over a historical time span. A key challenge in this process is the quantification of parameter uncertainty . If uncertainties in parameter estimates are ignored or underestimated, the model may exhibit a systematic bias toward higher or lower temperature responses, commonly referred to as “hot” or “cold” biases, respectively. Such biases can distort projections and misinform policy decisions. To address this critical issue, a Bayesian parameter calibration framework has been proposed in [43]. It incorporates prior knowledge and enables rigorous quantification of uncertainty in the parameter estimates. In the context of our Bayesian inverse problem setup 𝜽 ∈ ℝ20 is the vector of the physical FaIR parameters to be estimated, 𝐹 (𝒙 ∣ 𝜽 ) is the forward model with the output 𝒚 ∈ ℝ𝑛 which denotes the vector of observed temperature anomalies at discrete time points 𝑡 1, … , 𝑡 𝑛 in the future, given the emission vector 𝒙 ∈ ℝ𝑛 at these time points. 
+
+Parameterizing the emission pathway for scenario predictions In this work we are interested in quantifying both the parameter and input emission uncertainty. Therefore, we parametrize the emission input through two parameters, namely 𝐸 0, the absolute amount of GHG emissions in the base year, and 𝑠 , the emission pathway for the following  
+
+> :Page 6 of 25 MCMC Informed Neural Emulators
+
+years. 𝑠 could be one of the SSP-RCP scenarios, which are a comprehensive set of plausible emission scenarios based on several socioeconomic narratives for the future [31]. In practical applications, we are interested in drawing from the corresponding posterior predictive distribution, cf. Equation (2) given by 
+
+𝑝 (𝑦 ∣ 𝒚 hist , 𝒙 hist ; 𝒙 = 𝑔 (𝑠, 𝐸 0)) = ∫ 𝑝 (𝑦 ∣ 𝒙 , 𝜽 ) 𝑝 (𝜽 ∣ 𝒚 hist , 𝒙 hist ) 𝑑 𝜽 (11) where 𝒚 hist are the historical temperature observations, 𝒙 hist the historical emissions, and 𝑔 (𝑠, 𝐸 0) is a known function, which parameterizes the emission vector 𝒙 into scenario 𝑠 and the base-year emissions 𝐸 0. As we will use separable Hilbert spaces later on, we embed the categorical variable 𝑠 into ℝ𝑘 , e.g. via one-hot or scalar encoding. Let us illustrate this setting, which is practically relevant, e.g., in financial climate risk management, see [4, 43], using Figure 3 below: To determine the posterior distribution of the FaIR parameters, 𝑝 (𝜽 ∣ 𝒚 ℎ𝑖𝑠𝑡 , 𝒙 ℎ𝑖𝑠𝑡 ), a DRAM MCMC calibration as described in Section 2 has been applied. The Figure 3 shows the median, the 90% credible interval, and the 99% interval of the posterior predictive distribution and the data points the parameters were fitted to. The chains of the calibration can be seen in Figure 11 in Appendix B. For some use cases, one is interested in generating temperature pathways for given input parameters, whereas in other cases, one is merely interested in the spread of the distribution at a discrete point in the future, say, in the year 2100 in accordance with the Paris agreement. 
+
+## 3. MCMC Informed Training 
+
+Our aim is to construct surrogate models that (i) emulate the underlying physical forward model and (ii) reproduce the uncertainty summaries induced by the Bayesian posterior over parameters. In the simple chemical kinetics example with fixed initial conditions shown in Figure 1, the first task is particularly transparent: we draw parameter samples 
+
+{𝜽 (𝑠 )} from the posterior, evaluate the simulator to obtain concentration values (𝐴 𝑡 , … , 𝐸 𝑡 ) at time points of interest 𝑡 ,and fit a regression model that maps the parameters to concentrations, i.e., 𝜽 ↦ (𝐴 𝑡 , … , 𝐸 𝑡 ) (independently for each 𝑡 in Figure 1). Since this example has only three input parameters, even a second-degree polynomial provides an excellent fit (with 𝑅 2 ≈ 0 .99 ) across all positive concentrations. In addition to forward emulation, we also consider learning posterior-informed point estimates , such as conditional means, as a function of the initial state. Here, the input is the vector of initial concentrations (𝐴 0, … , 𝐸 0), and the target is the concentration of a selected chemical species at time 𝑡 .Training pairs {( 𝒙 (𝑖 ), 𝑦 (𝑖 ))} 𝑛 𝑖 =1 are generated by sampling initial conditions 𝒙 (𝑖 ) independently from relevant intervals, sampling 𝜽 independently from the posterior distribution, and running the ODE system to obtain the corresponding output 𝑦 (𝑖 ) at time 𝑡 . This yields a direct mapping from initial concentrations to posterior-informed predictions at time 
+
+𝑡 , which again can be captured by simple regression using MSE loss in this low-dimensional example. Thus, in low-dimensional settings, a simple regressor can already serve as an MCMC Informed forward surrogate, whereas more elaborate methods are required as the input dimension increases. The FaIR model is our running example for such a moderately high-dimensional setting: When training an emulator of the forward model, taking 𝜽 and 𝒙 as inputs, we aim to reproduce how the model behaves under uncertainty in both input emissions and model parameters. As we have already discussed, these uncertainties come from two sources: input uncertainty, i.e., different initial values for the base-year emissions 𝐸 0 and plausible future emission pathways 
+
+𝑠 . Together, these define the input distribution 𝑝 (𝒙 ), describing which parts of the emission space we consider likely or relevant. The second source of uncertainty is parameter uncertainty, encoded into the distribution 𝑝 (𝜽 ∣ 𝒚 hist , 𝒙 hist )
+
+of model parameters and obtained from MCMC calibration against historical temperature and emission data. The most favorable case is when the statistical conditions used to generate training data closely match those encountered at deployment. When we have a credible target distribution for the inputs and parameters the emulator will face in practice—which we refer to as the deployment law 𝜈 dep —it is natural to use this information to guide training-data generation. In the FaIR setting, conditional on a fixed emissions scenario, the uncertainty in future model outputs induced by parameter uncertainty is naturally represented by the posterior predictive distribution. Accordingly, drawing training samples from the calibrated posterior (or an approximation thereof) concentrates training on high-probability regions of the intended predictive setting and reduces reliance on extrapolation at prediction time. In this sense, the MCMC posterior obtained from calibration provides a practical proxy for the deployment environment. In practice, however, we only approximate the true posterior using a finite MCMC chain, and the distribution of emissions scenarios at prediction time may be uncertain or application-dependent. As a result, the training distribution may differ from the true deployment distribution (e.g., due to incomplete MCMC mixing or unbalanced scenario coverage), and performance can degrade under distribution shift. To quantify this effect, we provide a Wasserstein-based stability  
+
+> :Page 7 of 25 MCMC Informed Neural Emulators
+
+bound under standard regularity assumptions (Lipschitz continuity and finite second moments). The Lipschitz theory for out-of-distribution error bounds has been studied recently in [10] and the theory provided in this section is inspired by this work. The proofs for all of the results stated in the remainder of this section can be found in the A. Let 
+
+(, ⟨⋅, ⋅⟩ ), (Θ , ⟨⋅, ⋅⟩Θ), (, ⟨⋅, ⋅⟩ ) be separable Hilbert spaces and set 
+
+ ∶=  × Θ , ‖(𝒙 , 𝜽 )‖2 
+
+> 
+
+= ‖𝒙 ‖2 
+
+> 
+
++ ‖𝜽 ‖2Θ.
+
+Assume the (true) forward model 𝐹 ∶  →  is Lipschitz, 
+
+‖𝐹 (𝑢 ) − 𝐹 (𝑣 )‖ ≤ 𝐿 ‖𝑢 − 𝑣 ‖ for all 𝑢, 𝑣 ∈  , ‖𝐹 (0) ‖ < ∞,
+
+and that the hypothesis class  satisfies, for every emulator  ∈ ,
+
+Lip( ) ≤ 𝑅, ‖(0) ‖ ≤ 𝐵. 
+
+For 𝜈 ∈ 2( ) (the set of probability measures on  with finite second moment), define the squared-error risk 
+
+𝜈 () ∶= 𝔼 𝑢 ∼𝜈 ‖𝐹 (𝑢 ) − (𝑢 )‖2 
+
+> 
+
+.
+
+Let 𝑊 2 denote the 2–Wasserstein distance on  equipped with the metric ‖⋅‖ ; see Villani [41] or Santambrogio [36] for definitions and properties. Set 
+
+𝐶 1 ∶= 𝐿 + 𝑅, 𝐶 2 ∶= ‖𝐹 (0) ‖ + 𝐵, 
+
+and for 𝜈, 𝜈 ′ ∈ 2( ) define 
+
+𝑐 (𝜈, 𝜈 ′) ∶= 𝐶 21
+
+√
+
+2(𝔼 𝜈 ‖𝑢 ‖2 
+
+> 
+
++ 𝔼 𝜈 ′ ‖𝑢 ‖2
+
+> 
+
+) + 2 𝐶 1𝐶 2.
+
+Finally, for a prescribed deployment law 𝜈 dep ∈ 2( ) define the bound objective 
+
+𝐽 (𝜈 ) ∶= inf  
+
+> ∈
+
+𝜈 () + 𝑐 (𝜈, 𝜈 dep ) 𝑊 2(𝜈, 𝜈 dep ).
+
+Lemma 1. For any 𝜈, 𝜈 ′ ∈ 2( ) and any  ∈ ,
+
+𝜈 ′ () ≤  𝜈 () + 𝑐 (𝜈, 𝜈 ′) 𝑊 2(𝜈, 𝜈 ′). (12) By Lemma 1, a smaller Wasserstein distance implies a smaller upper bound on the increase in expected risk attributable to distribution mismatch. Note, however, that although the bound scales linearly with 𝑊 2(𝜈, 𝜈 dep ), the prefactor 𝑐 (𝜈, 𝜈 dep ) depends on the second moments of 𝜈 and 𝜈 dep , so the risk-shift guarantee is most informative when these moments are uniformly controlled (e.g., on a bounded operating domain). The following Proposition upper-bounds the best achievable deployment risk: 
+
+Proposition 1 (Bound-optimality at the deployment law) . For any 𝜈 ∈ 2( ),
+
+𝐽 (𝜈 ) ≥ 𝐽 (𝜈 dep ) = inf  
+
+> ∈
+
+𝜈 dep (), (13) 
+
+with equality at 𝜈 = 𝜈 dep . Moreover, 
+
+0 ≤ 𝐽 (𝜈 ) − 𝐽 (𝜈 dep ) ≤ 2 𝑐 (𝜈, 𝜈 dep ) 𝑊 2(𝜈, 𝜈 dep ). (14) So, if we know or can approximate 𝜈 dep , then training distribution matching is bound-optimal. In the multi-scenario setting where the deployment environment selects scenario laws {𝜈 𝑘 }𝐾 𝑘 =1 with probabilities {𝑤 𝑘 }𝐾 𝑘 =1 , the resulting deployment law is the mixture 𝜈 mix = ∑𝑘 𝑤 𝑘 𝜈 𝑘 , and the same analysis motivates training on 𝜈 mix :
+
+Corollary 1. Over all 𝜈 ∈ 2( ), 𝜈 mix is a minimizer of 𝐽 (𝜈 ), and 
+
+inf  
+
+> 𝜈
+
+𝐽 (𝜈 ) = inf  
+
+> ∈
+
+𝜈 mix (), 0 ≤ 𝐽 (𝜈 ) − 𝐽 (𝜈 mix ) ≤ 2𝑐 (𝜈, 𝜈 mix )𝑊 2(𝜈, 𝜈 mix ). (15)  
+
+> :Page 8 of 25 MCMC Informed Neural Emulators
+
+Finally, when the posterior is approximated by an empirical MCMC measure ̂𝜋 𝑁 , we obtain an explicit bound on the degradation in 𝐽 in terms of 𝑊 2(̂𝜋 𝑁 , 𝜋 ), which vanishes as the empirical chain converges in Wasserstein distance under standard conditions: The posterior distribution 𝜋 (𝜽 ∣ 𝒚 hist , 𝒙 hist ) cannot be represented exactly but is approximated by a finite empirical measure obtained from an MCMC simulation. Consequently, the joint training distribution 𝜈 = 𝜌 (𝒙 ) ⊗ 𝜋 (𝜽 ∣ 𝒚 hist , 𝒙 hist ) is replaced by its empirical counterpart ̂𝜈 𝑁 (𝒙 , 𝜽 ) = 𝜌 (𝒙 ) ⊗̂ 𝜋 𝑁 (𝜽 ),̂ 𝜋 𝑁 (𝜽 ) = 1
+
+𝑁 
+
+> 𝑁
+
+∑
+
+> 𝑖 =1
+
+𝛿 𝜽 (𝑖 ) , (16) where {𝜽 (𝑖 )}𝑁 𝑖 =1 are the posterior samples generated by the chain. This substitution raises a natural question: how close is the finite-chain training law ̂𝜈 𝑁 to the ideal deployment law 𝜈 dep and how much does this discrepancy affect the bound 𝐽 (𝜈 )? To answer this, we next derive a quantitative extension of the previous results, showing that training on a finite MCMC chain remains asymptotically optimal, that is, with an approximation error that vanishes as the chain converges to the true posterior in Wasserstein distance. This analysis formalizes the intuition that the quality of MINE training depends primarily on how well the MCMC samples represent the underlying posterior distribution. In the finite-chain analysis below, we take as deployment law the ideal (infinite-chain) joint law 
+
+𝜈 ∶= 𝜌 ⊗ 𝜋 ∈ 2( ), i.e. 𝜈 dep ∶= 𝜈, (17) so that 𝐽 𝜈 (𝜈 ) = inf ∈ 𝜈 () (since 𝑊 2(𝜈, 𝜈 ) = 0 ). 
+
+Lemma 2 (Reduction of 𝑊 2 for product measures with a common marginal) . Let 𝜌 ∈ 2() and 𝜋,̂ 𝜋 ∈  2(Θ) . Equip 
+
+ =  × Θ with the product norm ‖(𝒙 , 𝜽 )‖2 
+
+> 
+
+= ‖𝒙 ‖2 
+
+> 
+
++ ‖𝜽 ‖2Θ. Then 
+
+𝑊 2(𝜌 ⊗ 𝜋, 𝜌 ⊗̂ 𝜋 ) = 𝑊 2(𝜋,̂ 𝜋 ). (18) Now we can state our main result: 
+
+Theorem 1 (Finite-chain approximation of the bound objective) . Let 𝜋 ∈ 2(Θ) and define the ideal joint law 
+
+𝜈 ∶= 𝜌 ⊗ 𝜋 ∈ 2( ). Given posterior samples {𝜽 (𝑖 )}𝑁 𝑖 =1 , define the empirical posterior ̂𝜋 𝑁 ∶= 1
+
+𝑁 
+
+> 𝑁
+
+∑
+
+> 𝑖 =1
+
+𝛿 𝜽 (𝑖 ) ,̂ 𝜈 𝑁 ∶= 𝜌 ⊗̂ 𝜋 𝑁 . (19) 
+
+Consider the objective with deployment law set to the ideal law, i.e., 𝐽 𝜈 (⋅) with 𝜈 given by (17) . Then 
+
+0 ≤ 𝐽 𝜈 (̂𝜈 𝑁 ) − 𝐽 𝜈 (𝜈 ) ≤ 2 𝑐 (̂𝜈 𝑁 , 𝜈 ) 𝑊 2(̂𝜋 𝑁 , 𝜋 ). (20) 
+
+Moreover, assume {𝜽 (𝑖 )}𝑖 ≥1 is a (Harris) ergodic Markov chain with invariant distribution 𝜋 such that (i) the ergodic theorem applies to every bounded continuous 𝜑 ∶ Θ → ℝ, and (ii) the ergodic theorem applies to the (unbounded) function 𝜑 (𝜽 ) = ‖𝜽 ‖2Θ, i.e. 
+
+1
+
+𝑁 
+
+> 𝑁
+
+∑
+
+> 𝑖 =1
+
+‖𝜽 (𝑖 )‖2Θ
+
+> 𝑎.𝑠.
+
+←←←←←←←←←←←←←←←←←←←←←←←←→ 
+
+> 𝑁 →∞
+
+∫Θ
+
+‖𝜽 ‖2Θ 𝜋 (𝑑 𝜽 ). (21) 
+
+Then, almost surely, 𝑊 2(̂𝜋 𝑁 , 𝜋 ) → 0 and 𝑐 (̂𝜈 𝑁 , 𝜈 ) → 𝑐 (𝜈, 𝜈 ). Consequently, 𝐽 𝜈 (̂𝜈 𝑁 ) → 𝐽 𝜈 (𝜈 ) almost surely. 
+
+Remark 1. If one keeps a fixed external deployment law 𝜈 dep ≠ 𝜈 , then controlling 𝐽 𝜈 dep (̂𝜈 𝑁 ) − 𝐽 𝜈 dep (𝜈 ) requires, in addition to 𝑊 2(̂𝜈 𝑁 , 𝜈 ), a control of the penalty mismatch 𝑊 2(̂𝜈 𝑁 , 𝜈 dep ) − 𝑊 2(𝜈, 𝜈 dep ) (e.g. via the triangle inequality) and any variability of 𝑐 (⋅, 𝜈 dep ) with respect to its first argument.  
+
+> :Page 9 of 25 MCMC Informed Neural Emulators
+
+## 4. Neural Emulators 
+
+The proposed MCMC Informed Neural Emulator (MINE) framework enables scalable and task-specific uncertainty quantification without embedding stochasticity directly into the network architecture by decomposing the task of Bayesian uncertainty quantification into two modular steps: Step 1 consists of sampling from the posterior distribution of physical parameters using MCMC, and Step 2 , training a deterministic neural network emulator using posterior informed training data as described in Section 3. To explore the posterior predictive distribution given the dataset generated in Step 1, we present two emulators tailored for different use cases: 1. A quantile (interval) emulator: We directly train the neural network 𝝎 ′ ∶  → ℝ𝑚 with learnable parameters 
+
+𝝎 ′ to learn the summary statistics of the posterior predictive distribution, specifically the quantile interval. 2. A forward emulator: We train a surrogate neural network 𝝎 ∶  × Θ → ℝ𝑛 with learnable parameters 𝝎 using posterior samples 𝜽 to emulate the forward operator 𝐹 (𝒙 ∣ 𝜽 ) in the sampling. This enables a fast approximate sampling of the entire posterior predictive distribution. Importantly, the MINE framework does not require a specific architecture here: 𝝎 can be implemented by any suitable neural ODE / neural operator surrogate. In both cases, the neural network is trained in a supervised manner and can be tailored to the specific task. In the following subsections, we elaborate on the particular architectures for 𝝎 and 𝝎 ′ used in this work. 
+
+4.1. Quantile Emulator 
+
+Direct computation of the posterior predictive distribution using Monte Carlo simulations involves repeated evaluations of the forward model, which can be prohibitively expensive when applied to large ensembles or in time-sensitive decision-making contexts - even when using a neural emulator for the forward model. While our forward ODE emulator can be used to accelerate the forward model evaluations within the Monte Carlo sampling, the second, complementary, part of the MINE framework, the quantile emulator, can be applied when sampling full paths obtained from the full posterior predictive distribution is not required; instead, the focus lies on quantiles of this distribution as measures of uncertainty. We utilize the neural network 𝝎 ′ ∶  → ℝ𝑚 with learnable parameters 𝝎 ′ to generate posterior interval estimates without the computational burden of traditional sampling methods for each new data instance. Such an approach is particularly advantageous in applications like financial climate risk management, see, e.g., [9, 43], where timely estimates are crucial. Let us first formalize the problem setup and key concepts: Throughout, we assume a data model in which we have random examples 𝒁 = ( 𝑿 , 𝑌 ) that were created using our forward model 𝐹 (𝒙 ∣ 𝜽 ). It consists of features 𝑿 ∈  and a response 𝑌 ∈  ⊆ ℝ. The features are chosen with respect to the considered model, and the respective response is then created using the forward model and a random sample of the chain from the MCMC calibration, i.e., 𝑌 = 𝐹 (𝒙 = 𝑿 ∣̃ 𝜽 )
+
+and ̃ 𝜽 ∼ 𝑝 (𝜽 ∣ 𝒚 ). We are given a finite training set  = { 𝒁 (1) , 𝒁 (2) , … , 𝒁 (𝑛 )} and will make predictions about a new test example 𝒁 (𝑛 +1) .We predict ̂𝑞 0.05 (𝒙 ) and ̂𝑞 0.95 (𝒙 ) with a ReLU feed-forward net (two hidden layers, 20 units each) using a pinball-loss objective with a non-crossing regularization term 
+
+ = ∑
+
+> 𝑖
+
+[𝐿 0.05 (̂𝑞 0.05 (𝑿 (𝑖 )), 𝑌 (𝑖 )) + 𝐿 0.95 (̂𝑞 0.95 (𝑿 (𝑖 )), 𝑌 (𝑖 ))]
+
++ 𝜆 ∑
+
+> 𝑖
+
+max {0,̂𝑞 0.05 (𝑿 (𝑖 )) − ̂𝑞 0.95 (𝑿 (𝑖 ))}, (22) where 𝐿 𝜏 is the so-called pinball loss: 
+
+𝐿 𝜏 
+
+(̂𝑞 𝜏 (𝒙 ), 𝑦 ) =
+
+⎧⎪⎨⎪⎩
+
+𝜏 (𝑦 −̂𝑞 𝜏 (𝒙 )), if 𝑦 ≥̂𝑞 𝜏 (𝒙 ),
+
+(𝜏 − 1) (𝑦 −̂𝑞 𝜏 (𝒙 )), if 𝑦 <̂𝑞 𝜏 (𝒙 ).
+
+(23) Let 𝜏 1, 𝜏 2, … , 𝜏 𝑚 ∈ (0 , 1) be a set of quantile levels of interest (e.g., 0.05 and 0.95 for a 90% prediction interval). The corresponding quantile neural network 𝝎 ′ (𝒙 ) is parametrized by weights 𝝎 ′, which for given features 𝒙 outputs 𝑚  
+
+> :Page 10 of 25 MCMC Informed Neural Emulators
+
+values (̂𝑞 𝜏 1 (𝒙 ), … ,̂𝑞 𝜏 𝑚 (𝒙 )) , which are estimates of the conditional quantiles: Let 𝜋 (𝑑 𝜽 ) denote the calibrated parameter posterior, e.g. 𝜋 (𝑑 𝜽 ) = 𝑝 (𝜽 ∣ 𝒚 hist , 𝒙 hist ) 𝑑 𝜽 . For a fixed input 𝒙 ∈ , define the posterior predictive conditional CDF 
+
+𝐹 𝑌 ∣𝑿 (𝑦 ∣ 𝒙 ) ∶= ℙ(𝑌 ≤ 𝑦 ∣ 𝑿 = 𝒙 ) = ∫Θ
+
+ℙ(𝑌 ≤ 𝑦 ∣ 𝑿 = 𝒙 , 𝜽 ) 𝜋 (𝑑 𝜽 ). (24) For 𝜏 ∈ (0 , 1) , the conditional 𝜏 -quantile of 𝑌 given 𝑿 = 𝒙 is defined by 
+
+𝑞 𝜏 (𝒙 ) ∶= inf{ 𝑦 ∈ ℝ ∶ 𝐹 𝑌 ∣𝑿 (𝑦 ∣ 𝒙 ) ≥ 𝜏 }. (25) Let us emphasize again that the key idea here is that the training data is generated from the MCMC Informed training distribution obtained in Step 1 of the framework. 
+
+4.2. ODE Forward Emulator: AEODE Neural Network 
+
+Classical neural ODE approaches learn a parameterized vector field and generate trajectories through sequential time integration. In contrast, the proposed AEODE adopts a neural operator perspective and directly maps model parameters and initial conditions to full solution trajectories on a fixed time grid in a single forward evaluation. Inspired by recent advances in deep learning for scientific modeling, we propose a deep neural network capable of learning regression mappings from MCMC-sampled data. Unlike existing neural ODE emulators [5, 7, 28, 35], our method focuses on parameterized ODEs, aiming to learn the correlations between ODE trajectories and their hidden parameters (e.g., rate coefficients in chemical reactions). Instead of relying on explicit ODE solvers as in [5], we design a time-dependent neural network that jointly learns the dependencies between time steps and hidden parameters under fixed initial conditions. Our main novelties are as follows: 1. Neural operator design: rather than modeling time evolution step by step as in Neural ODEs (e.g., Torchdiffeq [5] or ChemiODE [39]), we integrate an attention mechanism [40] to model temporal correlations in the latent do-main. Furthermore, different from other neural operator methods [13, 38] purely utilizing attention mechanisms for operator learning, we propose a learnable time embedding that provides a continuous feature representation that enhances the network’s ability to model ODE dynamics. 2. Physics-informed supervision: we incorporate derivative-based losses on both first- and second-order temporal gradients and total mass conservation to enforce physical consistency during training. The resulting AutoEncoder-based ODE network (AEODE) can flexibly estimate different trajectory paths cor-responding to various ODE parameters 𝜽 . Thanks to its end-to-end differentiable architecture optimized for GPUs, AEODE achieves an approximate 10 × speedup compared to conventional numerical solvers. The additional physical losses ensure physically consistent and accurate ODE trajectory generation. 
+
+Overall structure The overall structure is shown in Figure 4. Let us denote the initial ODE value as 𝒙 0 ∈ ℝ𝑁 , where 
+
+𝑁 is the number of input elements, and the ODE parameters as 𝜽 ∈ ℝ𝑑 , where 𝑑 is the number of model parameters.  
+
+> Figure 4: The structure of the proposed AEODE .
+> :Page 11 of 25 MCMC Informed Neural Emulators
+
+Mathematically, given the time steps 𝑡 𝑖 = 0 , 1, ..., 𝑇 , the proposed AEODE learns a neural ODE function that predicts time-dependent output values 𝒙 𝑡 ∈ ℝ𝑁 based on different ODE parameters 𝜽 as, 
+
+𝒙 (𝑡, 𝜽 ) = 𝜓 
+
+(
+
+𝜑 (𝒙 0, 𝜽 ) + ∫
+
+> 𝑡 𝑡 0
+
+𝑓 (𝑧 (𝑠, 𝜽 ), 𝑠 ; 𝜽 ) 𝑑𝑠 
+
+)
+
+, 𝑡 ∈ [ 𝑡 0, 𝑡 𝑇 ], (26) where 𝜑 (⋅, ⋅) is the encoder producing the latent initial condition, 𝑓 is the latent vector field, and 𝜓 is the decoder mapping the latent trajectory back to the observed state space. The dynamics of the ODE process are characterized as 
+
+𝒙 (𝑡, 𝜽 ). Given initial values 𝒙 0, we have the initial state of the latent space 𝒛 0 = 𝜑 (𝒙 0, 𝜽 ), which serves as the initial condition for the latent ODE process. The encoder and decoder are made of multiple layers of MLP for fully connected computation. In order to improve the long-term predictions. We propose two techniques for the latent ODE operation: 1) time embedding, and 2) attention for more accurate space-time evolution. 
+
+Time embedding We observe that some physical phenomena oscillate over time, like chemical reactions. This behavior can be injected into the neural network as prior knowledge that predetermines the tendency of time evolution. Based on this observation, we propose to utilize frequency time encoding. Mathematically, given the time steps 
+
+𝑡 𝑖 = 0 , 1, ..., 𝑇 , we project them onto a higher dimensional space ℝ2𝐿 as follows, 
+
+𝜆 (𝑡 ) = 
+
+(
+
+sin(2 𝜋𝜔 1𝑡 ), cos(2 𝜋𝜔 1𝑡 ), … , sin(2 𝜋𝜔 𝐿 𝑡 ), cos(2 𝜋𝜔 𝐿 𝑡 )
+
+)
+
+∈ ℝ2𝐿 , (27) where 𝜔 = ( 𝜔 1, … , 𝜔 𝐿 ) ∈ ℝ𝐿 are learnable frequency parameters (initialized, e.g., on a log-spaced grid). We represent the time as a combination of sine and cosine operators so that the network can learn to adjust the reaction frequency. 
+
+Attention for nonlocal feature extraction Attention [40] is commonly used in natural language [25, 32] and image processing [34] because of its high efficiency in learning nonlocal data correlations. Similarly, we could use the same technology for ODE modeling. The motivation comes from the aforementioned time encoding, that we can project the time code to a higher dimension. Meanwhile, the latent values form a time-conditioned latent representation by 
+
+𝒛 0 = 𝜙 (𝒙 0, 𝜽 ) and 𝒛 𝜆 (𝑡 ) = 𝒛 0 + 𝜆 (𝑡 ). In other words, given the value at the initial time 𝑡 0, we construct a time-aware representation by embedding multiple future time steps, e.g., 𝑡 1.𝑡 2, … , using the aforementioned time embedding. Each of these time steps is mapped to a high-dimensional vector using sine and cosine functions to preserve temporal order and periodicity. We then concatenate the initial value with each time embedding to create a set of 2D latent vectors that encode both the ODE element states and temporal context. Therefore, we can implement the time-dependent attention module for nonlocal computation as, 
+
+𝒛 out  
+
+> 𝜆
+
+(𝑡 ) = 𝒛 in  
+
+> 𝜆
+
+(𝑡 ) + 𝜎 
+
+( 𝑄 𝑧 𝐾 ⊤𝑧 
+
+√𝑑 
+
+)
+
+𝑉 𝒛 , 𝑄 𝒛 = 𝒛 in  
+
+> 𝜆
+
+(𝑡 )𝑊 𝑄 , 𝐾 𝒛 = 𝒛 in  
+
+> 𝜆
+
+(𝑡 )𝑊 𝐾 , 𝑉 𝒛 = 𝒛 in  
+
+> 𝜆
+
+(𝑡 )𝑊 𝑉 . (28) The 𝑊 ∗ is the learnable parameters, 𝑑 is the dimension of the feature maps. 𝜎 is the softmax function to normalize the auto-correlation matrix. 
+
+Losses for optimization To train the whole AEODE , not only do we utilize the commonly used Mean Squared Errors (MSE) between prediction and ground truth, but we also propose to utilize the first- and second-order derivatives, and total mass conservation loss. Mathematically, we can define the overall losses as 
+
+𝐿𝑜𝑠𝑠 = 𝛼 1𝐿 𝑟𝑒𝑐𝑜𝑛 + 𝛼 2𝐿 𝑑 1 + 𝛼 3𝐿 𝑑 2 + 𝛼 4𝐿 𝑖𝑑𝑛 + 𝛼 5𝐿 𝑚𝑎𝑠𝑠 (29) In equation (29), 𝛼 1 to 𝛼 5 are the weighting parameters that balance all five loss terms. For 𝐿 𝑟𝑒𝑐𝑜𝑛 is the reconstruction loss that measures the discrepancy between the prediction and ground truth as 𝐿 𝑟𝑒𝑐𝑜𝑛 = ‖𝒙 (𝑡 ) − 𝒙 ′(𝑡 )‖2. The first-order gradient loss enforces the predicted trajectories to closely follow the ground truth over time as 𝐿 𝑑 1 = ‖ 𝑑 𝒙 (𝑡 ) 
+
+> 𝑑𝑡
+
+− 𝑑 𝒙 ′(𝑡 ) 
+
+> 𝑑𝑡
+
+‖2.Similarly, we can define the second-order gradient loss as 𝐿 𝑑 2 = ‖ 𝑑 𝒙 2(𝑡 ) 
+
+> 𝑑𝑡 2
+
+− 𝑑 𝒙 ′2(𝑡 ) 
+
+> 𝑑𝑡 2
+
+‖2. Meanwhile, we can also enforce that the AEODE should preserve the initial condition unchanged during the training process. Hence we can define the identity loss as 𝐿 𝑖𝑑𝑛 = ‖𝒙 0 − 𝜓 (𝜑 (𝒙 0, 𝜽 )‖2. Finally, we define the total mass conservation loss, ensuring that the mass of the predicted trajectory aligns with the mass of the ground truth at each time step. We have 𝐿 𝑚𝑎𝑠𝑠 = ‖(𝒙 (𝑡 )) − (𝒙 ′(𝑡 )) ‖2, where  is the summation of all ODE elements.  
+
+> :Page 12 of 25 MCMC Informed Neural Emulators
+
+Let us interpret the design of the proposed AEODE in detail. Note that the latent integral in Eq. (26) equals the latent state, 
+
+𝒛 (𝑡, 𝜽 ) = 𝜑 (𝒙 0, 𝜽 ) + ∫
+
+> 𝑡 𝑡 0
+
+𝑓 (𝒛 (𝑠, 𝜽 ), 𝑠 ; 𝜽 ) d 𝑠. (30) Although it may not hold exactly here, consider for a moment the latent flow expressed in Duhamel/variation-of-constants form: 
+
+𝒛 (𝑡, 𝜽 ) = Φ 𝜽 (𝑡, 𝑡 0) 𝜑 (𝒙 0, 𝜽 ) + ∫
+
+> 𝑡 𝑡 0
+
+Φ𝜽 (𝑡, 𝑠 ) 𝑢 𝜽 (𝑠 ) d 𝑠, (31) which defines the latent propagator (operator-valued kernel) 𝜽 (𝑡, 𝑠 ) ∶= Φ 𝜽 (𝑡, 𝑠 ). On a discrete time grid the integral term is approximated by the quadrature 
+
+∫
+
+> 𝑡 𝑖
+> 𝑡 0
+
+𝜽 (𝑡 𝑖 , 𝑠 ) 𝑢 𝜽 (𝑠 ) d 𝑠 ≈ ∑
+
+> 𝑗
+
+Δ𝑠 𝑗 𝜽 (𝑡 𝑖 , 𝑠 𝑗 ) 𝑢 𝜽 (𝑠 𝑗 ).
+
+AEODE’s time-aware attention implements this quadrature: by forming queries/keys from the time-conditioned latent [𝜑 (𝒙 0, 𝜽 ); 𝜆 (𝑡 )] and values 𝑉 𝑗 from the local drivers, the learned attention weights 𝑤 𝑖𝑗 act as parameter-conditioned quadrature weights that approximate 𝜽 (𝑡 𝑖 , 𝑠 𝑗 ) (up to a calibrating readout). Consequently the decoder receives the encoder output 𝜑 (𝒙 0, 𝜽 ) plus an attention-produced integral increment ∑𝑗 𝑤 𝑖𝑗 𝑉 𝑗 , yielding a consistent operator-level interpretation of Eq. (26) in terms of 𝜽 .
+
+Remark 2. Equation (31) should be read with care. The representation is the classical variation-of-constants (Duhamel) formula and holds exactly for linear (possibly time-varying) latent dynamics ̇ 𝒛 (𝑡 ) = 𝐴 𝜽 (𝑡 ) 𝒛 (𝑡 ) + 𝒖 𝜽 (𝑡 ),where Φ𝜽 (𝑡, 𝑠 ) is the state-transition operator generated by 𝐴 𝜽 (⋅). In our architecture the latent dynamics are in general nonlinear, ̇ 𝒛 (𝑡 ) = 𝑓 𝜽 (𝒛 (𝑡 ), 𝑡 ), for which no global linear propagator Φ𝜽 (𝑡, 𝑠 ) exists in general. Accordingly, we interpret (31) as an operator-inspired analogy : the attention mechanism produces weights 𝐾 𝜽 (𝑡, 𝑠 ) that act as a data-driven influence kernel describing how information at time 𝑠 contributes to the latent state at time 𝑡 . More precisely, along a given trajectory 𝒛 (⋅) we may linearize the dynamics, 
+
+𝛿̇ 𝒛 (𝑡 ) = 𝐽 𝜽 (𝑡 ) 𝛿 𝒛 (𝑡 ) + 𝛿 𝒖 (𝑡 ), 𝐽 𝜃 (𝑡 ) ∶= ∇ 𝒛 𝑓 𝜽 (𝒛 (𝑡 ), 𝑡 ),
+
+so that the corresponding perturbations satisfy a Duhamel formula with a trajectory-dependent transition operator 
+
+Φ(𝒛 ) 
+
+> 𝜽
+
+(𝑡, 𝑠 ) generated by 𝐽 𝜽 (⋅). In this sense, 𝐾 𝜽 (𝑡, 𝑠 ) can be viewed as a learned approximation to Φ(𝑧 ) 
+
+> 𝜽
+
+(𝑡, 𝑠 ) (or to a truncated Volterra-type expansion) along the data manifold , rather than as an exact propagator for the full nonlinear system. 
+
+## 5. Experiments 
+
+This section presents the experimental setup of the proposed methodology to evaluate the effectiveness of the MINE paradigm. We distinguish two experimental goals: (i) evaluating the end-to-end MINE framework for uncertainty-aware prediction (forward-emulator sampling and quantile/interval prediction), and (ii) motivating our concrete choice of forward-emulator backbone. While the MINE framework is architecture-agnostic and the forward emulator can in principle be any neural ODE / neural operator surrogate, in this paper we instantiate it with AEODE due to its accuracy and efficiency on the studied dynamical systems. Accordingly, some experiments focus specifically on AEODE design choices and comparisons, while the remaining experiments focus on the end-to-end UQ performance enabled by the MINE pipeline. We apply the ODE forward emulator to both the FaIR climate model and the chemical kinetics model, and the quantile emulator to the FaIR climate model only, since the posterior predictive distribution of the simple chemical kinetics is very narrow and does not require a neural network for emulation. 
+
+5.1. Evaluation Metrics 
+
+Quantile Emulator To assess the performance of the quantile emulator, we first compute the pinball loss, which is also utilized during the model training phase. Additionally, we perform tests using empirical quantile data. Specifically, for given inputs 𝒙 , we calculate the conditional quantile values 𝑞 𝜏 𝑗 (𝒙 ) by numerically approximating the posterior predictive distribution, represented by Monte Carlo draws {̂𝑦 (𝑚 )}𝑀 𝑚 =1 from the posterior predictive law (obtained by  
+
+> :Page 13 of 25
+
+MCMC Informed Neural Emulators 
+
+sampling 𝐸 0 ∼ 𝑝 (𝐸 0 ∣ 𝜂 ) and 𝜽 ∼ 𝑝 (𝜽 ∣ 𝒚 hist , 𝒙 hist ) and evaluating the simulator). Next, we evaluate the mean squared error (MSE) between the empirical quantiles and those generated by the emulator. We also compare the average size of the credible intervals for both the empirical data and the predictions made by the neural network. Finally, we determine the mean 90%-coverage, which is the average proportion of test sample elements in {̂𝑦 (𝑚 )}𝑀 𝑚 =1 that fall within the 90% credible interval predicted by the emulator. 
+
+Forward Emulator To evaluate the ODE forward emulator, we compare emulator outputs against the corresponding physical-model outputs using mean squared error (MSE), mean absolute error (MAE), root mean squared error (RMSE), and mean bias error (MBE). Furthermore, we report wall-clock runtime to quantify computational efficiency relative to direct numerical simulation and to assess feasibility for large-scale use. 
+
+5.2. Emulating FaIR with the Quantile Emulator 
+
+With the MINE Posterior Interval Predictor, we estimate the measures of uncertainty in the posterior predictive distribution. Specifically for the FaIR model we want to show how to model additional uncertainties in the input factors 𝒙 . This is motivated by the real-world need to account for both the parameter uncertainty and the uncertainty in future emissions. Direct evaluation of the corresponding posterior predictive distribution requires high-dimensional integration over both the model parameter space and future emission trajectories. Our neural network emulator is well suited for this approach, since it scales with this high-dimensional integration. Parameter uncertainty is reflected in the posterior distribution as described in Equation 1. The uncertainties in the input factors 𝒙 are modeled by treating the base year emissions 𝐸 0 as a random variable, reflecting the fact that estimates of global emissions are inherently uncertain and may even be significantly biased, for example due to unreported methane leakages. Therefore, we introduce a set of probability distributions parameterized by distribution hyperparameters 𝜼 ∈ . The hyperparameter 𝜼 1 serves as a binary flag indicating the choice of distribution: 𝜼 1 = 0 
+
+corresponds to a normal distribution, while 𝜼 1 = 1 specifies a lognormal distribution. The lognormal case is used to model situations in which global emissions are systematically underestimated. The hyperparameter 𝜼 2 defines the location parameter of the distribution, representing a horizontal shift along the x-axis. This is the expected value for global emissions 𝐸 𝑔𝑙𝑜𝑏𝑎𝑙 . The hyperparameter 𝜼 3 specifies the distribution’s scale and allows the user to express uncertainty in the global emission. For the normal distribution, this corresponds to the standard deviation. In the lognormal case, 𝜼 3 controls the spread of the distribution via the standard deviation of the underlying normal distribution. Figure 5a illustrates three example distributions corresponding to different hyperparameter vectors 𝜼 ,while Figure 5b shows the emission pathways for three distinct SSP-RCP scenarios. 10 12 14 16 18 
+
+> E0
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> Probability Density
+> = [0,12,0.2]
+> = [0,15,1]
+> = [1,10,0.3]
+
+(a) Example distributions of 𝐸 0 with normal distribution and small sd. (blue), normal distribution and large sd. (orange), and lognormal distribution and small sd. (red). 2025 2030 2035 2040 2045 2050 
+
+> Year
+> 5
+> 10
+> 15
+> 20
+> 25
+> Global Emission
+> SSP1-RCP1.9
+> SSP4-RCP3.4
+> SSP5-RCP8.5
+
+(b) 90% credible interval and median of the emission path-ways for normally distributed 𝐸 0 with loc. 15 and sd. 1 for several SSP-RCP scenarios. 
+
+Figure 5: Comparison of example 𝐸 0 distributions and resulting emission pathways. 
+
+: Page 14 of 25 MCMC Informed Neural Emulators 
+
+Ultimately, the input to the MINE is the vector of hyperparameters of the distribution of base-year emissions, 𝜼 , and the socio-economic scenario 𝑠 ∈ 𝑆 . Hence, the distribution of temperature predictions that includes both parameter and emission uncertainty is denoted by 
+
+𝑝 (𝑦 ∣ 𝒚 hist , 𝒙 hist ; 𝜼 , 𝑠 ) = ∫ ∫ 𝑝 (𝑦 ∣ 𝒙 = 𝑔 (𝑠, 𝐸 0), 𝜽 ) 𝑝 (𝐸 0 ∣ 𝜼 ) 𝑝 (𝜽 ∣ 𝒚 ℎ𝑖𝑠𝑡 , 𝒙 ℎ𝑖𝑠𝑡 ) 𝑑𝐸 0 𝑑 𝜽 ,
+
+where 𝑔 (𝑠, 𝐸 0) generates an emission vector based on the scenario 𝑠 and the base-year emissions 𝐸 0. Drawing samples from this predictive posterior via nested Monte Carlo would require sampling from 𝑝 (𝐸 0 ∣ 𝜼 ) and 𝑝 (𝜽 ∣ 𝒚 ℎ𝑖𝑠𝑡 , 𝒙 ℎ𝑖𝑠𝑡 ) for a substantial number of samples and running FaIR for each sample draw. 
+
+Dataset We generate data with the inputs 𝑿 ∈ 𝑆 ×  by sampling uniformly from 𝑆 , and from {0 , 1} for the distribution type 𝜼 1 and within plausible bounds for the location and scale parameters of the initial emission distribution, 𝜼 2 and 𝜼 3 respectively. We randomly split the data into non-overlapping training, validation, and testing data in the ratio of 6:2:2. The training and validation data are created using a nested Monte Carlo approach and contain single-time projections based on 𝑠 and the realizations of 𝐸 0 and 𝜽 . That is, we sample 𝐸 0 ∼ 𝑝 (𝐸 0 ∣ 𝜼 )
+
+and 𝜽 ∼ 𝑝 (𝜽 ∣ 𝒙 ℎ𝑖𝑠𝑡 , 𝒚 ℎ𝑖𝑠𝑡 ), compute the resulting emission pathway 𝒙 based on 𝐸 0 and 𝑠 and then call the FaIR model to generate the horizon-T prediction 𝑦 ∼ 𝑝 (𝑦 ∣ 𝒚 hist , 𝒙 hist ; 𝜼 , 𝑠 ), which corresponds to the global mean temperature in the final year. For the empirical test data, we create a large sample ̂ 𝒚 (1) , … ,̂ 𝒚 (𝑀 ) for each input 𝒙 (𝑖 ), 𝑖 = 1 , ..., 𝑁 and then calculate the resulting 5% and 95% quantiles. 
+
+Parameter Setting We again train our network using the Adam optimizer with the learning rate of 1×10 −3 over 1000 epochs. Since this neural network is very shallow, it can be trained in seconds on an ordinary computer. Only generating train and especially test data is time-consuming; the training dataset had a size of 350,000, and the validation and test datasets had a size of 75,000 each. 
+
+5.3. Emulating the Chemical Kinetics Model with the ODE Forward Emulator 
+
+The ODE forward emulator for the chemical kinetics has the inputs of the initial concentration of 𝐴, 𝐵, 𝐶, 𝐷 and 
+
+𝐸 and the output of concentration values for all chemicals at discrete time points 𝑡 𝑖 = 0 , 1, … , 𝑇 .
+
+Datasets We collected data based on the chemical data from the chemical system introduced in Section 2. We randomly split the data into non-overlapped training, validation and testing datasets. To standardize the data for neural network training, we normalize all data by dividing the maximum value, by approximately 6.45. For the chemical reaction parameters, we take the maximum and minimum values to normalize them to [-1, 1]. To further increase the data variety, we apply data augmentation to the training set. Specifically, we randomly roll the time evolution of the observation as ̂𝑦 𝑡 𝑖 = 𝑦 𝑡 +𝜏 𝑖 , 𝑖 = 1 , 2, ..., 100 , 𝑡 = 1 , 2, ..., 11 , where ̂𝑦 𝑡 𝑖 =                      
+
+> {𝑦 𝑡 +𝜏 𝑖 for 𝜏 < 11 − 𝑡 𝑦 𝑡 +𝜏 −11
+> 𝑖 for 𝜏 > 11 − 𝑡 where 𝑖 = 1 ,2,…,100 , 𝑡 = 1 ,2,…,11 (32)
+
+Parameter setting We train AEODE using Adam optimizer with the learning rate of 1 × 10 −3 . The batch size is set to 4096 and AEODE is trained for 50k iterations (about 2 hours) on a PC with one NVIDIA V100 GPU using PyTorch deep learning platform. The weighting factors in the total loss are defined empirically as: 𝛼 1 = 1 , 𝛼 2 = 10 , 𝛼 3 =10 , 𝛼 4 = 1 , 𝛼 5 = 0 .001 .
+
+5.4. Emulating the FaIR Model with the ODE Forward Emulator 
+
+The ODE forward emulator for the FaIR model has the inputs of 𝐸 0 and 𝑠 , which are the inputs of the parametrization 𝑔 (𝐸 0, 𝑠 ) for the input emission 𝐸 𝐺𝐻𝐺 (𝑡 ) as described in Section 2.2.2, and the model parameters 
+
+𝜽 . The output of the forward operator is the pathway of annual global mean temperatures 𝑇 (𝑡 ).
+
+Dataset. We created the training data of size 50,000 by randomly selecting initial emissions 𝐸 0 from a plausible interval, randomly selecting an SSP-RCP scenario 𝑠 , and then selecting a random parameter 𝜽 (𝑖 ) from the MCMC chain. Then, we created the temperature prediction 𝑦 using the FaIR model. Again, we split it with the ratio 6:2:2. 
+
+Parameter Setting We train AEODE using the same parameter setting as done in the chemical kinetics example.  
+
+> :Page 15 of 25
+
+MCMC Informed Neural Emulators 
+
+## 6. Results 
+
+This section provides an explanation of the experiment results. The first part describes the experiments done on the FaIR climate model with the Quantile Emulator, with a focus on validating empirical quantiles. The second part benchmarks the novel AEODE against two state-of-the-art methods and conducts ablation studies on its key modules, both is done on the chemical kinetics example. To show that AEODE is also applicable for more complex physical models, we show the results of applying it to the FaIR climate model. 
+
+6.1. Results for the FaIR Climate Model Quantile Emulator 
+
+In Figure 6, one can see the empirical and the trained credible intervals as well as the empirical mean on the sampled temperature distribution for varying values of the expected global emission 𝐸 global on the x-axis. The two plots on the left side show a positive emission scenario leading to lower temperatures than the right-hand side plots. The two plots on the top show a lower scale and therefore less uncertainty in the emission, leading to smaller credible intervals than the two plots on the bottom. We can see that the empirical results align very well with those produced by the quantile emulator. The evaluation metrics showed that the MSE for the upper bound of the credible interval was 0.0049, and the lower bound was 0.0023. The pinball loss of test data was 0.0238 and 0.0199, respectively. The mean 90% coverage, i.e., the average proportion of elements in the set of Monte Carlo predictive draws {̂𝑦 (𝑚 )}𝑀 𝑚 =1 that lie within the bounds predicted by the quantile emulator, was 90.04%. The average interval size of the empirical test data was 1.2907, and the average interval size of the Neural Network was 1.3024, scoring an absolute difference of 0.0117. Comparing the run time of both approaches, we can see the actual benefits of a surrogate model: the feed-forward network quantile emulator has a run time of 0.0006 seconds; the empirical sampling and evaluation has an effective run time of roughly 20 seconds for a sample size of 5,000. 40 50 60 70              
+
+> Eglobal in 2025 (GtCO2e)
+> 1.5
+> 2.0
+> 2.5
+> 3.0
+> 3.5
+> 4.0
+> Temperature in 2050 (°C)
+> Scenario SSP1 RCP1.9, Normal Dist., Scale 0.1
+> 40 50 60 70
+> Eglobal in 2025 (GtCO2e)
+> 1.5
+> 2.0
+> 2.5
+> 3.0
+> 3.5
+> 4.0
+> Temperature in 2050 (°C)
+> Scenario SSP5 RCP8.5, Normal Dist., Scale 0.1
+> 40 50 60 70
+> Eglobal in 2025 (GtCO2e)
+> 1.5
+> 2.0
+> 2.5
+> 3.0
+> 3.5
+> 4.0
+> Temperature in 2050 (°C)
+> Scenario SSP1 RCP1.9, Normal Dist., Scale 8
+> 40 50 60 70
+> Eglobal in 2025 (GtCO2e)
+> 1.5
+> 2.0
+> 2.5
+> 3.0
+> 3.5
+> 4.0
+> Temperature in 2050 (°C)
+> Scenario SSP5 RCP8.5, Normal Dist., Scale 8
+> Empirical 90% CI
+> Empirical Mean
+> Output by Nested MC
+> ML Output Lower Bound
+
+Figure 6: Visualization of the fit of the empirical and trained 90% credible interval to the temperature projection. 
+
+: Page 16 of 25 MCMC Informed Neural Emulators 
+
+6.2. Results for the Chemical Kinetics Model AEODE Forward Emulator 
+
+6.2.1. Overall comparison with state of the art 
+
+To demonstrate the efficiency of our proposed AEODE , we compare it with two state-of-the-art methods: ChemiODE [39], and Torchdiffeq [5]. The results are depicted in Table 1. We can see that using our approach achieves the lowest scores in all metrics. Torchdiffeq uses the least running time but also achieves the worst MSE value. On the other hand, our approach uses 15% extra computation overhead but can significantly reduce the MSE and MBE scores by 5% and 25%, respectively. 
+
+Modules Evaluation MSE( 10 −5 ) RMSE ( 10 −3 ) MAE ( 10 −3 ) MBE ( 10 −4 ) Running time ( 10 −5 s) Torchdiffeq 3.231 5.426 3.552 -7.539 5.1 ChemiODE 2.582 5.085 3.356 -1.759 8.2 Ours 2.450 4.950 3.064 -1.316 9.5 
+
+Table 1 Testing data comparison among Torchdiffeq, ChemiODE, and ours. We report the results on the testing dataset using different methods. For all metrics, the smaller the values, the better the performance we get. 0 100 200 300 400 500 600       
+
+> Timestep
+> 0.000
+> 0.005
+> 0.010
+> 0.015
+> 0.020
+> mole/liter
+> neuralode A
+> neuralode C
+> Exact solution
+> 0100 200 300 400 500 600
+> Timestep
+> 0.000
+> 0.001
+> 0.002
+> 0.003
+> 0.004
+> 0.005
+> 0.006
+> 0.007
+> mole/liter
+> neuralode B
+> neuralode D
+> neuralode E
+> Exact solution
+
+Figure 7: The proposed AEODE for chemical prediction. We show all 3000 testing data samples using different chemical reaction parameters in gray lines. The five lines with different colors represent the chemical compounds predicted by the proposed network. 
+
+Figure 7 shows the results of using our proposed AEODE for chemical ODE prediction. Taken different chemical reaction parameters 𝜃 1, 𝜃 2, 𝜃 3 with the same initial concentration values, our model is able to estimate the uncertainty of the chemical ODE system for different chemical compounds. For comparison, we show the ground truth chemical values in gray color. We can see that our model can accurately estimate the distribution of chemical changes. For example, at further time steps, the range of concentration distributions becomes wider, and the proposed AEODE can capture the trend with similar distribution changes. To better visualize the model performance, we slice the chemical concentration values at the last time step and visualize the data distributions. In Figure 8, we can see that ours can estimate the lower and upper bound of the concentration values and align well with the ground truth data. Figure 9 shows the distribution differences between ground truth and our model prediction. Similar to Figure 8, we clip the last time step (t=600) across all 3000 testing data samples, and visualize the distribution with the bin size of 256. We can see that the proposed model estimates similar mean and variance as the ground truth. There is a spike for chemical compound C, which our model cannot reproduce. This remains a challenge that would be resolved in the next step. 
+
+: Page 17 of 25 MCMC Informed Neural Emulators 0 100 200 300 400 500 600 
+
+> # sample
+> 0.0000
+> 0.0005
+> 0.0010
+> 0.0015
+> 0.0020
+> 0.0025
+> 0.0030
+> 0.0035
+> 0.0040
+> mole/liter
+> Exact solution
+> neuralode A
+> neuralode B
+> neuralode C
+> neuralode D
+> neuralode E
+
+Figure 8: The distribution comparison between the proposed model and the ground truth data. We show all 3000 testing data samples at the last time step (600) using different chemical reaction parameters in gray lines. The model predictions are shown in different colour, which indicate different chemical compounds. 
+
+6.2.2. Ablation Studies on the Key Modules 
+
+In the Section 4.2, we propose to use time embedding, self-attention, and physical losses to optimize our network. In order to demonstrate their effects on the overall chemical prediction, we conduct the ablation studies and report the results in Table 2. NeuralODE is the baseline model for comparison. We add three novel modules one by one to the network and evaluate their performance on the testing dataset. We can see that Time embedding has a significant impact on the performance, approximately 5 × 10 −6 in MSE. Attention improves the MSE by 1 × 10 −5 
+
+Modules Evaluation NeuralODE Time encoding Attn Physical loss MSE( 10 −5 ) RMSE ( 10 −3 ) MAE ( 10 −3 ) MBE ( 10 −4 )
+
+✓ 3.101 5.569 3.565 -8.190 
+
+✓ ✓ 2.593 5.092 3.209 -0.951 
+
+✓ ✓ ✓ 2.466 4.966 3.076 -1.273 
+
+✓ ✓ ✓ ✓ 2.450 4.950 3.064 -1.316 
+
+Table 2 Ablation studies of using proposed modules in the chemical kinetics example. We report the results on the testing dataset using different key modules and loss terms. 
+
+6.3. Results for the FaIR Climate Model AEODE Forward Emulator 
+
+The proposed AEODE can also be modified for the FaIR climate model. Different from the chemical kinetics model, the only change is to fit the network to output a 1-D time sequence to estimate the temperature values. In Table 3, we repeat the same ablation comparison done in Table 2. We compare the models with and without the proposed key modules and evaluate their performance on the FaIR example. We can see that combining time embedding, attention, and physical losses can improve the MSE loss by 21%. To visualize the ODE trajectories of the temperature changes, we show the results in Figure 10a and 10b. As can be seen from Figure 10a, the model predictions (dotted lines) align well with the ground truth (straight lines), which indicates that the model can approximate the temperature trend with given conditional input information. In Figure 10b, we visualize the overall statistics of all testing samples via mean and variance in every time step. Note that the credible interval is larger than in Figure 3 uncertainty since this is a future prediction which naturally contains more uncertainty. 
+
+: Page 18 of 25 MCMC Informed Neural Emulators 0.70 
+
+0.68 
+
+0.66 
+
+mole/liter 
+
+0
+
+10 
+
+20 
+
+30 
+
+40 
+
+50 
+
+60 
+
+70 
+
+80 
+
+> Frequency
+
+Chemical A 
+
+1.15 
+
+1.10 
+
+1.05 
+
+1.00 
+
+mole/liter 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+120 
+
+140 
+
+Chemical B 
+
+1.04 
+
+1.02 
+
+1.00 
+
+mole/liter 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+120 
+
+140 
+
+160 
+
+Chemical C 
+
+0.72 
+
+0.70 
+
+0.68 
+
+0.66 
+
+mole/liter 
+
+0
+
+10 
+
+20 
+
+30 
+
+40 
+
+50 
+
+Chemical D 
+
+0.66 
+
+0.64 
+
+0.62 
+
+mole/liter 
+
+0
+
+10 
+
+20 
+
+30 
+
+40 
+
+50 
+
+Chemical E 
+
+Figure 9: Visualization of the histogram of chemical concentration at time step 600. We use the histogram to statistically compute the distribution of all 3000 testing data samples at the last time step. The gray curve is the ground truth, and colored lines are model predictions. Modules Evaluation NeuralODE Time encoding Attn Physical loss MSE( 10 −5 ) RMSE ( 10 −3 ) MAE ( 10 −3 ) MBE ( 10 −4 )
+
+✓ 3.200 1.859 1.596 -0.166 
+
+✓ ✓ 3.010 1.768 1.446 -0.016 
+
+✓ ✓ ✓ 3.002 1.751 1.423 -0.015 
+
+✓ ✓ ✓ ✓ 2.949 1.718 1.389 -0.007 
+
+Table 3 Ablation studies of using proposed modules in the FaIR example. We report the results on the testing dataset using different key modules and loss terms. 2025 2030 2035 2040 2045 2050 
+
+> Year
+> 2.0
+> 2.2
+> 2.4
+> 2.6
+> 2.8
+> 3.0
+> 3.2
+> Temperature (°C)
+> SSP1 RCP1.9
+> SSP3 RCP7.0
+> SSP4 RCP6.0
+> SSP5 RCP8.5
+> Ground Truth
+> Prediction
+
+(a) Ground Truth and Prediction of the ODE forward oper-ator for FaIR for different scenarios. 2025 2030 2035 2040 2045 2050 
+
+> Year
+> 1.50
+> 1.75
+> 2.00
+> 2.25
+> 2.50
+> 2.75
+> 3.00
+> 3.25
+> Temperature (°C)
+> Prediction with random
+> 90% Credible Interval
+
+(b) Emulation of 400 FaIR runs by the ODE forward opera-tor with random 𝜽 in each iteration (blue) and 90% credible interval (red) for the SSP3 RCP7.0 Scenario. 
+
+Figure 10: Comparison of forward operator simulations. : Page 19 of 25 MCMC Informed Neural Emulators 
+
+## 7. Conclusion 
+
+We introduced the MCMC Informed Neural Emulator (MINE) paradigm for uncertainty quantification in dynamical systems. The key idea is to decouple Bayesian inference from surrogate modeling: MCMC is used offline to infer a posterior over physical model parameters, and deterministic neural emulators are then trained on posterior-informed input–output pairs. This strategy concentrates training effort on statistically relevant regions of parameter space and avoids expensive simulator evaluations at implausible parameter values. We presented two complementary MINE realizations. First, a quantile (interval) emulator learns posterior predictive quantiles directly, enabling low-latency uncertainty intervals without sampling at inference time. Second, a forward emulator learns the simulator mapping and enables efficient posterior predictive sampling by reusing stored posterior draws of parameters. For the forward emulator, we instantiated MINE using an AutoEncoder-based ODE neural network (AEODE) with time embeddings and attention, and we evaluated performance using both accuracy and calibration-oriented metrics. Empirically, the proposed approach yields accurate and computationally efficient uncertainty-aware predictions on both a chemical kinetics ODE system and the FaIR simple climate model. In particular, the quantile emulator closely matches empirical credible intervals for FaIR temperature projections, while the AEODE forward emulator achieves favorable accuracy-runtime trade-offs compared with existing neural-ODE baselines and benefits from the proposed architectural components in ablation studies. Several limitations and directions for future work remain. MINE assumes that offline MCMC sampling is feasible; extending the framework to settings with extremely expensive simulators may require multi-fidelity strategies and/or surrogate-assisted sampling. Finally, beyond methodological extensions, we envision MINE serving as a practical uncertainty-aware surrogate for scientific simulators in climate science, atmospheric chemistry, and energy systems, enabling faster hypothesis testing, scenario exploration, and data assimilation in computationally intensive modeling pipelines.  
+
+> :Page 20 of 25
+
+MCMC Informed Neural Emulators 
+
+## A. Proofs of the results in Section 3 
+
+Proof of Lemma 1. Let Δ( 𝑢 ) ∶= 𝐹 (𝑢 ) − (𝑢 ) ∈  and ℎ(𝑢 ) ∶= ‖Δ( 𝑢 )‖2 
+
+> 
+
+. For arbitrary 𝑢, 𝑣 ∈  ,
+
+|ℎ(𝑢 ) − ℎ(𝑣 )| = |⟨ Δ( 𝑢 ) + Δ( 𝑣 ), Δ( 𝑢 ) − Δ( 𝑣 )⟩ | ≤ (‖Δ( 𝑢 )‖ + ‖Δ( 𝑣 )‖
+
+) ‖Δ( 𝑢 ) − Δ( 𝑣 )‖ .
+
+By Lipschitz continuity of 𝐹 and  we have 
+
+‖Δ( 𝑢 ) − Δ( 𝑣 )‖ ≤ ‖𝐹 (𝑢 ) − 𝐹 (𝑣 )‖ + ‖(𝑢 ) − (𝑣 )‖ ≤ (𝐿 + 𝑅 ) ‖𝑢 − 𝑣 ‖ = 𝐶 1 ‖𝑢 − 𝑣 ‖ .
+
+Moreover, 
+
+‖Δ( 𝑤 )‖ ≤ ‖𝐹 (𝑤 ) − 𝐹 (0) ‖ + ‖(𝑤 ) − (0) ‖ + ‖𝐹 (0) ‖ + ‖(0) ‖ ≤ 𝐶 1‖𝑤 ‖ + 𝐶 2.
+
+Hence, 
+
+|ℎ(𝑢 ) − ℎ(𝑣 )| ≤ (𝐶 1(‖𝑢 ‖ + ‖𝑣 ‖ ) + 2 𝐶 2
+
+) 𝐶 1 ‖𝑢 − 𝑣 ‖ . (33) Let Γ( 𝜈, 𝜈 ′) denote the set of couplings of 𝜈 and 𝜈 ′. For any 𝛾 ∈ Γ( 𝜈, 𝜈 ′),
+
+|||𝔼 𝜈 ′ ℎ − 𝔼 𝜈 ℎ||| = ||| ∫  ×
+
+(ℎ(𝑣 ) − ℎ(𝑢 )) 𝑑𝛾 (𝑢, 𝑣 )||| ≤ ∫
+
+|||ℎ(𝑣 ) − ℎ(𝑢 )||| 𝑑𝛾 (𝑢, 𝑣 ).
+
+Using (33), Cauchy–Schwarz, and the elementary bound (𝑎 + 𝑏 )2 ≤ 2( 𝑎 2 + 𝑏 2),
+
+∫
+
+|||ℎ(𝑣 ) − ℎ(𝑢 )||| 𝑑𝛾 ≤ 𝐶 21 ∫ (‖𝑢 ‖ + ‖𝑣 ‖ ) ‖𝑢 − 𝑣 ‖ 𝑑𝛾 + 2 𝐶 1𝐶 2 ∫ ‖𝑢 − 𝑣 ‖ 𝑑𝛾 
+
+≤ 𝐶 21
+
+(
+
+∫ (‖𝑢 ‖ + ‖𝑣 ‖ )2𝑑𝛾 
+
+)1∕2 (
+
+∫ ‖𝑢 − 𝑣 ‖2 
+
+> 
+
+𝑑𝛾 
+
+)1∕2 
+
++ 2 𝐶 1𝐶 2
+
+(
+
+∫ ‖𝑢 − 𝑣 ‖2 
+
+> 
+
+𝑑𝛾 
+
+)1∕2 
+
+≤ 𝐶 21
+
+√
+
+2
+
+(
+
+𝔼 𝜈 ‖𝑢 ‖2 
+
+> 
+
++ 𝔼 𝜈 ′ ‖𝑢 ‖2
+
+> 
+
+) (
+
+∫ ‖𝑢 − 𝑣 ‖2 
+
+> 
+
+𝑑𝛾 
+
+)1∕2 
+
++ 2 𝐶 1𝐶 2
+
+(
+
+∫ ‖𝑢 − 𝑣 ‖2 
+
+> 
+
+𝑑𝛾 
+
+)1∕2 
+
+.
+
+Now take the infimum over 𝛾 ∈ Γ( 𝜈, 𝜈 ′). By the Kantorovich formulation of 𝑊 2 (see, e.g., Villani [41]), 
+
+inf 
+
+> 𝛾 ∈Γ( 𝜈,𝜈 ′)
+
+(
+
+∫ ‖𝑢 − 𝑣 ‖2 
+
+> 
+
+𝑑𝛾 
+
+)1∕2 
+
+= 𝑊 2(𝜈, 𝜈 ′).
+
+Therefore, 
+
+|||𝔼 𝜈 ′ ℎ − 𝔼 𝜈 ℎ||| ≤
+
+(
+
+𝐶 21
+
+√
+
+2(𝔼 𝜈 ‖𝑢 ‖2 
+
+> 
+
++ 𝔼 𝜈 ′ ‖𝑢 ‖2
+
+> 
+
+) + 2 𝐶 1𝐶 2
+
+)
+
+𝑊 2(𝜈, 𝜈 ′) = 𝑐 (𝜈, 𝜈 ′) 𝑊 2(𝜈, 𝜈 ′).
+
+Recalling ℎ(𝑢 ) = ‖𝐹 (𝑢 ) − (𝑢 )‖2 
+
+> 
+
+yields the claim: 
+
+𝜈 ′ () − 𝜈 () = 𝔼 𝜈 ′ ℎ − 𝔼 𝜈 ℎ ≤ 𝑐 (𝜈, 𝜈 ′) 𝑊 2(𝜈, 𝜈 ′).
+
+Remark 3. (i) The proof of Lemma 1 is a standard “coupling + Cauchy–Schwarz” argument; see also Santambro-gio [36] for the 𝑊 1–version with Lipschitz test functions and Bolley–Villani [3] for related inequalities with linear growth. (ii) The constants enter only through Lipschitz moduli and the second moments of (𝜈, 𝜈 ′), hence the restriction to 2( ).
+
+: Page 21 of 25 MCMC Informed Neural Emulators 
+
+Proof of Proposition 1. Apply Lemma 1 with (𝜈, 𝜈 ′) = (𝜈, 𝜈 dep ): For any  ∈ , 𝜈 dep () ≤ 𝜈 () + 
+
+𝑐 (𝜈, 𝜈 dep )𝑊 2(𝜈, 𝜈 dep ). Taking inf  on the right and adding the same penalty gives 𝐽 (𝜈 ) ≥ inf  𝜈 dep () = 𝐽 (𝜈 dep ),
+
+with equality at 𝜈 = 𝜈 dep since 𝑊 2(𝜈 dep , 𝜈 dep ) = 0 . For the quantitative upper bound, let † ∈ arg inf  𝜈 dep () and use Lemma 1 in both directions to obtain 
+
+𝐽 (𝜈 ) ≤  𝜈 (†) + 𝑐 (𝜈, 𝜈 dep )𝑊 2(𝜈, 𝜈 dep ) ≤ 𝜈 dep (†) + 2 𝑐 (𝜈, 𝜈 dep )𝑊 2(𝜈, 𝜈 dep )= 𝐽 (𝜈 dep ) + 2 𝑐 (𝜈, 𝜈 dep )𝑊 2(𝜈, 𝜈 dep ).
+
+Proof of Lemma 2. Let 𝛾 Θ ∈ Γ( 𝜋,̂ 𝜋 ) be optimal for 𝑊 2(𝜋,̂ 𝜋 ) and let 𝛾 𝑋 be the diagonal coupling of 𝜌 with itself, i.e., 
+
+𝛾 𝑋 (𝑑 𝒙 , 𝑑 𝒙 ′) = 𝜌 (𝑑 𝒙 ) 𝛿 𝒙 (𝑑 𝒙 ′). Then 𝛾 ∶= 𝛾 𝑋 ⊗ 𝛾 Θ lies in Γ( 𝜌 ⊗ 𝜋, 𝜌 ⊗̂ 𝜋 ) and 
+
+∫ ×
+
+‖(𝒙 , 𝜽 ) − ( 𝒙 ′, 𝜽 ′)‖2 
+
+> 
+
+𝑑𝛾 = ∫Θ×Θ 
+
+‖𝜽 − 𝜽 ′‖2Θ 𝑑𝛾 Θ,
+
+so 𝑊 2(𝜌 ⊗ 𝜋, 𝜌 ⊗̂ 𝜋 ) ≤ 𝑊 2(𝜋,̂ 𝜋 ).Conversely, take any 𝛾 ∈ Γ( 𝜌 ⊗ 𝜋, 𝜌 ⊗̂ 𝜋 ) and let 𝛾 Θ be its (𝜽 , 𝜽 ′)-marginal. Then 𝛾 Θ ∈ Γ( 𝜋,̂ 𝜋 ) and, since the 
+
+𝑥 -term in the product cost is nonnegative, 
+
+∫ ×
+
+‖(𝒙 , 𝜽 ) − ( 𝒙 ′, 𝜽 ′)‖2 
+
+> 
+
+𝑑𝛾 ≥ ∫Θ×Θ 
+
+‖𝜽 − 𝜽 ′‖2Θ 𝑑𝛾 Θ ≥ 𝑊 2(𝜋,̂ 𝜋 ) 2.
+
+Taking the infimum over 𝛾 gives the reverse inequality, hence equality. 
+
+Proof of Theorem 1. Step 1: Finite 𝑁 bound and the 𝑊 2 reduction. Apply Proposition 1 with deployment law 𝜈 dep ∶= 𝜈 
+
+and training law ̂𝜈 𝑁 :
+
+0 ≤ 𝐽 𝜈 (̂𝜈 𝑁 ) − 𝐽 𝜈 (𝜈 ) ≤ 2 𝑐 (̂𝜈 𝑁 , 𝜈 ) 𝑊 2(̂𝜈 𝑁 , 𝜈 ).
+
+Lemma 2 yields 𝑊 2(̂𝜈 𝑁 , 𝜈 ) = 𝑊 2(̂𝜋 𝑁 , 𝜋 ), proving (20). 
+
+Step 2: 𝑊 2(̂𝜋 𝑁 , 𝜋 ) → 0. Since Θ is a separable Hilbert space, it is Polish. Let  ⊂ 𝐶 𝑏 (Θ) be a countable 
+
+convergence-determining class (e.g. a countable dense subset of bounded Lipschitz test functions). By the assumed ergodic theorem, for each 𝑔 ∈ ,
+
+∫ 𝑔 𝑑̂ 𝜋 𝑁 = 1
+
+𝑁 
+
+> 𝑁
+
+∑
+
+> 𝑖 =1
+
+𝑔 (𝜽 (𝑖 )) ⟶ ∫ 𝑔 𝑑𝜋 a.s. By countability, these convergences hold simultaneously a.s. for all 𝑔 ∈ , which implies ̂𝜋 𝑁 ⇒ 𝜋 weakly. By assumption (ii), the empirical second moment converges almost surely: 
+
+∫ ‖𝜽 ‖2Θ 𝑑̂ 𝜋 𝑁 (𝜽 ) = 1
+
+𝑁 
+
+> 𝑁
+
+∑
+
+> 𝑖 =1
+
+‖𝜽 (𝑖 )‖2Θ ⟶ ∫ ‖𝜽 ‖2Θ 𝑑𝜋 (𝜽 ) a.s. On Polish spaces, weak convergence plus convergence of second moments is equivalent to convergence in 𝑊 2 (see, e.g., Villani [41]). 
+
+Step 3: Boundedness and convergence of 𝑐 (̂𝜈 𝑁 , 𝜈 ). By construction, 
+
+𝔼 ̂𝜈 𝑁 ‖𝒖 ‖2 
+
+> 
+
+= 𝔼 𝜌 ‖𝒙 ‖2 
+
+> 
+
++ ∫ ‖𝜽 ‖2Θ 𝑑̂ 𝜋 𝑁 (𝜽 ),
+
+so the second-moment convergence above implies 𝔼 ̂𝜈 𝑁 ‖𝒖 ‖2 
+
+> 
+
+→ 𝔼 𝜈 ‖𝒖 ‖2 
+
+> 
+
+a.s. Therefore 𝑐 (̂𝜈 𝑁 , 𝜈 ) → 𝑐 (𝜈, 𝜈 ) and is eventually bounded almost surely. 
+
+: Page 22 of 25 MCMC Informed Neural Emulators 
+
+## B. MCMC Chains of the FaIR Parameter Calibration 
+
+Figure 11 shows the chains of the MCMC simulations for the FaIR model. It was created for 300,000 samples. The burn in phase is 50,000 samples which are not used in the posterior sampling. 0 100000 200000 300000 
+
+Sample 
+
+25 
+
+30 
+
+35 
+
+40 
+
+45 
+
+> Value
+
+r0
+
+0 100000 200000 300000 
+
+Sample 
+
+0.014 
+
+0.016 
+
+0.018 
+
+0.020 
+
+0.022 
+
+0.024 
+
+> Value
+
+rc
+
+0 100000 200000 300000 
+
+Sample 
+
+3.0 
+
+3.5 
+
+4.0 
+
+4.5 
+
+5.0 
+
+5.5 
+
+> Value
+
+rt
+
+0 100000 200000 300000 
+
+Sample 
+
+1.4 
+
+1.6 
+
+1.8 
+
+2.0 
+
+> Value
+
+TCR 
+
+0 100000 200000 300000 
+
+Sample 
+
+2.5 
+
+3.0 
+
+3.5 
+
+4.0 
+
+4.5 
+
+> Value
+
+ECS 
+
+0 100000 200000 300000 
+
+Sample 
+
+100 
+
+200 
+
+300 
+
+400 
+
+> Value
+
+d1
+
+0 100000 200000 300000 
+
+Sample 
+
+2.5 
+
+3.0 
+
+3.5 
+
+4.0 
+
+4.5 
+
+5.0 
+
+> Value
+
+d2
+
+0 100000 200000 300000 
+
+Sample 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+> Value
+
+F0
+
+0 100000 200000 300000 
+
+Sample 
+
+0.50 
+
+0.75 
+
+1.00 
+
+1.25 
+
+1.50 
+
+1.75 
+
+> Value
+
+F1
+
+0 100000 200000 300000 
+
+Sample 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Value
+
+F2
+
+0 100000 200000 300000 
+
+Sample 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Value
+
+F3
+
+0 100000 200000 300000 
+
+Sample 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+> Value
+
+F4
+
+0 100000 200000 300000 
+
+Sample 
+
+4
+
+2
+
+0
+
+2
+
+4
+
+> Value
+
+F5
+
+0 100000 200000 300000 
+
+Sample 
+
+0
+
+1
+
+2
+
+> Value
+
+F6
+
+0 100000 200000 300000 
+
+Sample 
+
+0
+
+5
+
+10 
+
+15 
+
+20 
+
+> Value
+
+F7
+
+0 100000 200000 300000 
+
+Sample 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Value
+
+F8
+
+0 100000 200000 300000 
+
+Sample 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+> Value
+
+F9
+
+0 100000 200000 300000 
+
+Sample 
+
+1
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+> Value
+
+F10 
+
+0 100000 200000 300000 
+
+Sample 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+1.6 
+
+1.8 
+
+2.0 
+
+> Value
+
+F11 
+
+0 100000 200000 300000 
+
+Sample 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Value
+
+F12 
+
+Figure 11: Chains of the MCMC experiments for the FaIR climate model. : Page 23 of 25 MCMC Informed Neural Emulators 
+
+## Declaration on the Use of Generative AI in Scientific Writing 
+
+The authors used ChatGPT to assist with language editing. All resulting content was critically reviewed, edited, and approved by the authors. The authors remain fully responsible for the accuracy, originality, and overall integrity of the manuscript. 
+
+## References 
+
+[1] C. Betancourt, C. W. Y. Li, F. Kleinert, and M. G. Schultz. Graph machine learning for improved imputation of missing tropospheric ozone data. Environmental Science & Technology , 57(46):18246–18258, 2023. PMID: 37661931. [2] C. Bodnar, Wessel P. Bruinsma, A. Lucic, M. Stanley, A. Allen, J. Brandstetter, P. Garvan, M. Riechert, J. A. Weyn, H. Dong, J. K. Gupta, K. Thambiratnam, A. T. Archibald, C.-C. Wu, E. Heider, M. Welling, R. E. Turner, and P. Perdikaris. A foundation model for the Earth system. 
+
+Nature , 641(8065):1180–1187, May 2025. [3] F. Bolley and C. Villani. Weighted csiszár-kullback-pinsker inequalities and applications to transportation inequalities. In Annales de la Faculté des sciences de Toulouse: Mathématiques , volume 14, pages 331–352, 2005. [4] F. Bourgey, E. Gobet, and Y. Jiao. An efficient SSP-based methodology for assessing climate risks of a large credit portfolio. Available at hal-04665712 , 2024. [5] R. T. Q. Chen, Y. Rubanova, J. Bettencourt, and D. Duvenaud. Neural ordinary differential equations. Advances in Neural Information Processing Systems , 2018. [6] Q. Di, H. Amini, L. Shi, I. Kloog, R. Silvern, J. Kelly, M. B. Sabath, C. Choirat, P. Koutrakis, A. Lyapustin, Y. Wang, L. J. Mickley, and J. Schwartz. Assessing no2 concentration and model uncertainty with high spatiotemporal resolution across the contiguous united states using ensemble model averaging. Environmental Science & Technology , 54(3):1372–1384, 2020. PMID: 31851499. [7] C. Finlay, J. Jacobsen, L. Nurbekyan, and A. Oberman. How to train your neural ode: the world of jacobian and kinetic regularization. 
+
+International Conference on Machine Learning , 2020. [8] Q. Gao, Z. Wang, R. Zhang, and D. Wang. Adaptive movement sampling physics-informed residual network (am-pirn) for solving nonlinear option pricing models, 2025. [9] E. Gobet, Y. Liu, and G. Vermandel. Meta-modelling paths of simple climate models using neural networks and dirichlet polynomials: an application to dice. European Actuarial Journal , pages 1–45, 2025. [10] N. Guerra, N. H. Nelsen, and Y. Yang. Learning where to learn: Training distribution selection for provable ood performance. arXiv preprint arXiv:2505.21626 , 2025. [11] H. Haario, M. Laine, A. Mira, and E. Saksman. DRAM: Efficient adaptive MCMC. Statistics and Computing , 16(4):339–354, 2006. [12] J. Han, A. Jentzen, and W. E. Solving high-dimensional partial differential equations using deep learning. Proc. Natl. Acad. Sci. , 115:8505– 8510, 2018. [13] Z. Hao, Z. Wang, H. Su, C. Ying, Y. Dong, S. Liu, Z. Cheng, J. Song, and J. Zhu. Gnot: a general neural operator transformer for operator learning. In Proceedings of the 40th International Conference on Machine Learning , ICML’23, 2023. [14] D. M. Himmelblau. Process analysis by statistical methods . John Wiley & Sons, Inc., 1970. Exercise 9.9. [15] L. Hou, Q. Dai, C. Song, B. Liu, F. Guo, T. Dai, L. Li, B. Liu, X. Bi, Y. Zhang, and Y. Feng. Revealing drivers of haze pollution by explainable machine learning. Environmental Science & Technology Letters , 9(2):112–119, 2022. [16] A. Q. Ibrahim, S. Götschel, and D. Ruprecht. Parareal with a physics-informed neural network as coarse propagator. In 29th International Conference on Parallel and Distributed Computing , page 649–663, 2023. [17] Y. J. Jang, Q.-Q. Qin, S.-Y. Huang, A. T. J. Peter, X.-M. Ding, and B. Kornmann. Accurate prediction of protein function using statistics-informed graph networks. Nature communications , 15(1):6601, 2024. [18] W. Ji, W. Qiu, Z. Shi, S. Pan, and S. Deng. Stiff-pinn: Physics-informed neural network for stiff chemical kinetics. The Journal of Physical Chemistry A , 125(36), 2021. [19] A. Kashefi and T. Mukerji. Physics-informed pointnet: A deep learning solver for steady-state incompressible flows and thermal fields on multiple sets of irregular geometries. Journal of Computational Physics , 468:111510, 2022. [20] N. J. Leach, S. Jenkins, Z. Nicholls, C. J. Smith, J. Lynch, M. Cain, T. Walsh, B. Wu, J. Tsutsui, and M. R. Allen. Fairv2.0.0: a generalized impulse response model for climate uncertainty and future scenario exploration. Geoscientific Model Development , 14(5):3007–3036, 2021. [21] X. Li, J. Zhang, Q. Zhu, C. Zhao, X. Zhang, X. Duan, and W. Lin. From fourier to neural odes: Flow matching for modeling complex systems. In Proceedings of the 41st International Conference on Machine Learning , volume 235 of Proceedings of Machine Learning Research , pages 29390–29405, 21–27 Jul 2024. [22] A. J. Linot, J. W. Burby, Q. Tang, P. Balaprakash, M. D Graham, and R. Maulik. Stabilized neural ordinary differential equations for long-time forecasting of dynamical systems. Journal of Computational Physics , 474:111838, 2023. [23] ZS. Liu, M. Buttner, V. Aizinger, and A. Rupp. Super-resolution works for coastal simulations, 2024. [24] ZS. Liu, P. Clusius, and M. Boy. Neural network emulator for atmospheric chemical ode. Neural Networks , 184:107106, 2025. [25] ZS. Liu, R. Courant, and V. Kalogeiton. Funnynet-w: Multimodal learning of funny moments in videos in the wild. International Journal of Computer Vision , 2024. [26] ZS. Liu, R. Maier, and A. Rupp. Multiscale corrections by continuous super-resolution. Neural Networks , 197:108516, 2026. [27] D. J. C MacKay. Bayesian neural networks and density networks. Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment , 354(1):73–80, 1995. [28] S. Massaroli, M. Poli, J. Park, A. Yamashita, and H. Asama. Dissecting neural odes. Advances in neural information processing systems ,2020. [29] V. Mullachery, A. Khera, and A. Husain. Bayesian neural networks, 2018. 
+
+: Page 24 of 25 MCMC Informed Neural Emulators 
+
+[30] S. M. Nuugulu, K. C. Patidar, and D. T. Tarla. A physics informed neural network approach for solving time fractional black-scholes partial differential equations. In Optim Eng , 2024. [31] B. C. O’Neill, E. Kriegler, K. Riahi, K. L. Ebi, S. Hallegatte, T. R. Carter, R. Mathur, and D. P. Van Vuuren. A new scenario framework for climate change research: the concept of shared socioeconomic pathways. Climatic change , 122:387–400, 2014. [32] Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever, et al. Language models are unsupervised multitask learners. OpenAI blog , 1(8):9, 2019. [33] M. Raissi, P. Perdikaris, and G. E. Karniadakis. Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. Journal of Computational physics , 378:686–707, 2019. [34] R. Rombach, A. Blattmann, D. Lorenz, P. Esser, and B. Ommer. High-resolution image synthesis with latent diffusion models. In 2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pages 10674–10685, 2022. [35] Y. Rubanova, R. T. Q. Chen, and D. K. Duvenaud. Latent ordinary differential equations for irregularly-sampled time series. Advances in neural information processing systems , 32, 2019. [36] F. Santambrogio. Optimal Transport for Applied Mathematicians: Calculus of Variations, PDEs, and Modeling , volume 87. Birkhäuser/Springer, 2015. [37] C. J. Smith, P. M. Forster, M. Allen, N. Leach, R. J. Millar, G. A. Passerello, and L. A. Regayre. FaIR v1.3: a simple emissions-based impulse response and carbon cycle model. Geoscientific Model Development , 11(6):2273–2297, 2018. [38] J. Su, J. Ma, S. Tong, E. Xu, and M. Chen. Multiscale attention wavelet neural operator for capturing steep trajectories in biochemical systems. 
+
+Proceedings of the AAAI Conference on Artificial Intelligence , 38(13):15100–15107, Mar. 2024. [39] I. Sulzer and T. Buck. Speeding up astrochemical reaction networks with autoencoders and neural odes. In Machine Learning and the Physical Sciences Workshop, NeurIPS 2023 , volume 52, 12 2023. [40] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, Ł. Kaiser, and I. Polosukhin. Attention is all you need. In Advances in Neural Information Processing Systems , volume 30, 2017. [41] Cédric Villani et al. Optimal transport: old and new , volume 338. Springer, 2009. [42] Y. Wang, Y. Yao, J. Guo, and Z. Gao. A practical pinn framework for multi-scale problems with multi-magnitude loss terms. Journal of Computational Physics , 510:113112, 2024. [43] H. Weichel, A. Zinovev, H. Haario, and M. Simon. Uncertainty quantification in portfolio temperature alignment. arXiv preprint arXiv:2412.14182 , 2024. [44] L. Yang, X. Meng, and G. E. Karniadakis. B-pinns: Bayesian physics-informed neural networks for forward and inverse pde problems with noisy data. Journal of Computational Physics , 425:109913, 2021. [45] C. Yildiz, M. Heinonen, and H. Lahdesmaki. Ode2vae: Deep generative second order odes with bayesian neural networks. Advances in neural information processing systems , 2019. [46] Q. Zhu, J. L. Laughner, and R. C. Cohen. Combining machine learning and satellite observations to predict spatial and temporal variation of near surface oh in north american cities. Environmental Science & Technology , 56(11):7362–7371, 2022. PMID: 35302754. [47] Y. Zhu, Y.-H. Tang, and C. Kim. Learning stochastic dynamics with statistics-informed neural network. Journal of Computational Physics ,474:111819, 2023. [48] B. Zou, E. Levine, P. Zaharieva, R. Johari, and E. Fox. Hybrid 2 neural ODE causal modeling and an application to glycemic response. In 
+
+Proceedings of the 41st International Conference on Machine Learning , volume 235 of Proceedings of Machine Learning Research , pages 62934–62963. PMLR, 21–27 Jul 2024. 
+
+: Page 25 of 25

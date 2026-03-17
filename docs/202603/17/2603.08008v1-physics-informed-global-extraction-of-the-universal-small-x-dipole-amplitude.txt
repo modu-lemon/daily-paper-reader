@@ -1,0 +1,1018 @@
+Title: Physics-Informed Global Extraction of the Universal Small-$x$ Dipole Amplitude
+
+URL Source: https://arxiv.org/pdf/2603.08008v1
+
+Published Time: Tue, 10 Mar 2026 02:02:05 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+## Physics-Informed Global Extraction of the Universal Small-x Dipole Amplitude 
+
+Si-Wei Dai, 1, 2, ∗ Fu-Peng Li, 3, 4, † Long-Gang Pang, 1, 2, ‡ Guang-You Qin, 1, 2, § Shu-Yi Wei, 5, ¶ Han-Zhong Zhang, 1, 2, ∗∗ and Wenbin Zhao 1, 2, †† 
+
+> 1
+
+Key Laboratory of Quark and Lepton Physics (MOE) & Institute of Particle Physics, Central China Normal University, Wuhan 430079, China 
+
+> 2
+
+Artificial Intelligence and Computational Physics Research Center, Central China Normal University, Wuhan 430079, China 
+
+> 3
+
+Key Laboratory of Nuclear Physics and Ion-beam Application (MOE) & Institute of Modern Physics, Fudan University, Shanghai 200433, China 
+
+> 4
+
+Shanghai Research Center for Theoretical Nuclear Physics, NSFC and Fudan University, Shanghai 200438, China 
+
+> 5
+
+Institute of Frontier and Interdisciplinary Science, Key Laboratory of Particle Physics and Particle Irradiation (MOE), Shandong University, Qingdao, Shandong 266237, China 
+
+We extract the universal small-x dipole scattering amplitude N (r, x B ) from a global analysis based on a physics-informed neural network (PINN), without imposing a priori MV-type parametrization of the initial condition. The network provides a smooth and differentiable surrogate for N (r, x B ), whose rapidity dependence is constrained by the collinearly improved Balitsky–Kovchegov evolution equation, while its functional form is simultaneously constrained by Deep Inelastic Scattering (DIS) data for the reduced total and charm cross sections, exclusive J/ψ photoproduction measurements, and a positivity requirement for the momentum-space dipole amplitude. The resulting single uni-versal amplitude consistently describes all fitted observables within a unified framework, alleviating the long-standing tension between total and charm channels encountered in conventional small-x fits based on rigid parametric ans¨ atze. Within the fitted kinematic domain, the best extracted PINN solution yields a smooth, non-negative momentum-space dipole over the full transverse-momentum range examined. Our results provide a robust and well-behaved input for Color Glass Condensate phenomenology across a broad class of high-energy processes. 
+
+Introduction. At high energies, Quantum Chromo-dynamics (QCD) enters a regime where nonlinear gluon recombination tames the growth of gluon densities, lead-ing to gluon saturation. This regime is systematically described by the Color Glass Condensate (CGC) effec-tive field theory [1–7]. Within this framework, the small-
+
+x evolution of Wilson-line correlators is governed by the JIMWLK renormalization group equation [8–14]. In the mean-field and large-Nc limit it reduces to the Balitsky– Kovchegov (BK) equation [15, 16], which is a closed evo-lution equation for the dipole amplitude N (r, x B ). This amplitude is the universal input for a wide class of small-
+
+x observables, including inclusive DIS structure func-tions, exclusive diffractive processes and inclusive hadron productions in e–p/A and p–p/A collisions. DIS measurements, in particular of reduced total and heavy-flavor production cross sections at small-x provide the clean lever arm to probe saturation dynamics. DIS off nuclei is especially compelling because saturation effects are parametrically enhanced in heavy nuclei [17]. The fu-ture Electron-Ion Collider (EIC) [18–20] will enable pre-       
+
+> ∗swdai@mails.ccnu.edu.cn
+> †fpli@fudan.edu.cn
+> ‡lgpang@ccnu.edu.cn
+> §guangyou.qin@ccnu.edu.cn
+> ¶shuyi@sdu.edu.cn
+> ∗∗ zhanghz@ccnu.edu.cn
+> †† WenbinZhao@ccnu.edu.cn
+
+cision measurements over a broad kinematic range in the gluon longitudinal momentum fraction xB and photon virtuality Q2. Establishing nonlinear QCD dynamics at collider energies and quantifying its impact on the small-
+
+xB structure of protons and nuclei will therefore require global analyses that simultaneously confront multiple, complementary DIS channels. In particular, combining inclusive and heavy-flavor data is essential because they probe different dipole sizes and hence different regions of the dipole amplitude. Despite substantial progress, several intertwined is-sues remain in small-xB global analyses. First, achiev-ing a simultaneous description of DIS reduced total cross section σr and the charm reduced cross section σc¯cr is challenging [21–25]. Because charm production prefer-entially probes smaller dipoles, σc¯cr imposes particularly stringent constraints on the short-distance behavior of 
+
+N (r, x B ) and on the conventional assumed nonperturba-tive initial condition for the evolution. Second, exclusive vector-meson photoproduction provides an independent universality test of the same dipole amplitude; in prac-tice, exclusive vector meson (e.g. J/ψ ) data can impose partially competing constraints, depending on the mod-eling of impact-parameter dependence and other ingre-dients specific to exclusive channels [24, 26–30]. Third, widely used initial-condition parametrizations can yield a momentum-space dipole, S(kT , x B ) defined in Eq. (2), becomes negative over parts of the kT range, which is in tension with the Fourier-positivity constraints discussed in Refs. [21, 25, 31]. Enforcing Fourier positivity is im-
+
+> arXiv:2603.08008v1 [hep-ph] 9 Mar 2026
+
+2portant for a consistent momentum-space interpretation of dipole amplitude and for its connection to the gluon content of the hadron [23, 32–36]. Recent phenomenological studies that combine im-proved BK evolution with higher-order impact-factor cor-rections have significantly advanced the description of DIS at small x [24, 25, 37, 38]. Nevertheless, tensions with σc¯cr (often with χ2/d.o.f. >
+
+∼ 2.5) and the emergence of oscillations or negative regions in S(kT , x B ) can persist even in Bayesian fits [38, 39]. Taken together, these ob-servations suggest that current analyses may be limited by the functional rigidity of standard analytic ans¨ atze for the non-perturbative initial condition N (r, x 0), mo-tivating a more flexible, yet dynamics-constrained, de-termination of the dipole amplitude [25, 38]. In a re-lated direction, neural-network methods have also been explored for solving BK evolution and for reconstructing the dipole amplitude in the momentum space [40, 41]. In this Letter we introduce a physics-informed neu-ral network (PINN) [42–44] to determine the universal dipole amplitude N (r, x B ) as a differentiable function. Unlike a purely data-driven fit, the PINN enforces the small-x evolution dynamics by including the collinearly improved BK (ciBK) [25, 45–48] evolution residual in the loss function, while experimental data and basic physi-cal constraints anchor the solution. Rather than pre-scribing a parametric initial condition N (r, x 0), we infer it nonparametrically from data under the evolution con-straint. We perform a joint global analysis of DIS observ-ables (including the reduced total, and reduced charm cross section) and exclusive diffractive J/ψ photopro-duction, with a Fourier-positivity regularization imposed on the momentum-space dipole S-matrix. Uncertainties are quantified using deep ensembles [49]. We demon-strate that the extracted dipole amplitude simultane-ously accommodates reduced total, charm quark cross sections, exclusive vector meson constraints and remains consistent with Fourier-positivity in the data-constrained small-x region. 
+
+Physics-informed global analysis. In the small-
+
+x limit, the dipole amplitude evolution is governed by the BK equation. Beyond leading-logarithmic accu-racy, large collinear corrections can destabilize the evolu-tion [50]. This instability is cured by the ciBK equation, which resums the dominant collinear enhancements to all orders [25, 45–48]. In this work we adopt the ciBK pre-scription of Refs. [25, 48, 51], formulated in the rapid-ity of the dense target and including the rapidity-shift (kinematic-constraint) structure of the evolution. Unlike standard global fits that impose a specific analytic ansatz for the non-perturbative initial condition at a starting point x0 and then evolve to smaller x, which can intro-duce parametrization bias, we represent the dipole ampli-tude across the full ( r, x B ) domain with a smooth surro-gate, N (r, Y ) ≡ N θ (r, Y ), Y = ln( x0/x B ). Here x0
+
+is the starting point, θ denotes trainable parameters, and constrain Nθ directly by the ciBK dynamics. Concretely, we penalize the integro-differential residual 
+
+RciBK (r, Y ) = ∂Nθ (r, Y )
+
+∂Y −
+
+Z
+
+d2r1 KciBK (r, r1, r2) F[Nθ ],
+
+(1) with r2 ≡ r − r1, and the residual RciBK (r, Y ) enters the total objective in Eq. (3) as a physics-based penalty that enforces the ciBK evolution for Nθ (r, Y ). Here KciBK is the collinearly improved kernel and F denotes the non-linear interaction functional, refer Refs. [25, 48, 51] for details. In evaluating ciBK residual in Eq. (1), the ra-pidity shift makes the ciBK evolution non-local in Y , so one must specify a boundary condition for N (r, Y < Y 0). Common choices are a frozen boundary, N (r, x > x 0) = 
+
+N (r, x 0), or a vanishing one, N (r, x > x 0) = 0. The physical behavior should lie between these limits. We start the evolution at x0 = 0 .03, which reduces sensitiv-ity to the boundary prescription and yields a smoother extrapolation towards x <
+
+∼ 10 −2. The smooth neural surrogate also enables a direct evaluation of ∂Y N via au-tomatic differentiation and stable Fourier transforms to momentum space, avoiding interpolation artifacts from a discrete ( r, Y ) grid. The ciBK equation alone does not uniquely fix Nθ ;we therefore determine it through a global fit to the DIS reduced total ( σr ), charm quark ( σc¯cr ) cross section, and total exclusive J/ Ψ photoproduction. Even though our theoretical evolution initialized at higher momentum fractions, our actual fit to experimental data is strictly confined to the xB < 0.004 region. While xB ∼ 0.01 is widely regarded as the onset of gluon saturation, we restrict to xB < 0.004 to avoid the tail of the tran-sitional region where DGLAP-dominated collinear and non-linear ciBK dynamics overlap [52, 53]. This conser-vative cut also mitigates the numerical impact of miss-ing higher-order corrections in the DIS impact factors and reduces potential contamination from valence-quark contributions. We employ an impact-parameter indepen-dent dipole amplitude and focus on total cross sections. For J/ψ we include the standard real-part and skewness corrections [1, 54–58], use the Boosted Gaussian wave function [57], and allow an overall normalization KVM factor 
+
+[30, 59]. We take meff  
+
+> u,d,s
+
+= 0 .14 GeV, mc = 1 .4 GeV, and Λ QCD = 0 .2 GeV in the running coupling of the ciBK evolution. Throughout, we employ leading-order impact factors, leaving a full NLO treatment for future work. The details of our calculations are presented in the Supplemental Material. We further impose essential physical constraints through penalty terms. In the large-dipole limit ( r →
+
+rmax ), we implement saturation unitarity requirement by enforcing the black-disk limit N (rmax , Y ) → 1 [70, 71]. In the small-dipole limit ( r → rmin ), color transparency requires N (r, Y ) ∝ r2γ [72] with γ the anomalous dimen-sion. Rather than fixing γ, we constrain the local loga-rithmic slope in the small dipole region r < 10 −3 GeV −1
+
+via 0 < ∂ ln N (r, Y )/∂ ln r2 ≤ 1 at Y ≥ ln (0 .03 /0.01) ≃
+
+1.1. Finally, to enforce Fourier-positivity, we penalize 310 −4 10 −3 
+
+xB
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+1.6                
+
+> σr(xB, Q 2)
+> χ2/d. o. f. = 1.150
+> √s= 318 GeV
+> Q2= 2.7 GeV 2
+> Q2= 4.5 GeV 2
+> Q2= 6.5 GeV 2
+> Q2= 12 GeV 2
+> Q2= 18 GeV 2
+> Q2= 35 GeV 2
+> PINN
+> 1σUncertainty
+
+10 −4 10 −3 
+
+xB
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4                
+
+> σc̄cr (xB, Q 2)
+> √s= 318 GeV
+> χ2/d. o. f. = 1.546
+> PINN
+> 1σUncertainty
+> Q2= 2.5 GeV 2
+> Q2= 5 GeV 2
+> Q2= 7 GeV 2
+> Q2= 12 GeV 2
+> Q2= 18 GeV 2
+> Q2= 32 GeV 2
+
+FIG. 1 . The reduced total and charm cross sections, σr and σc¯cr , are shown vs. xB in selected Q2 bins at √s = 318 GeV, compared with HERA data [60–62]. Solid curves are the best-fit PINN prediction (minimum global χ2/d.o.f.); bands show 1 σ
+
+uncertainties. The quoted χ2/d.o.f. uses the solid curve; for σr it includes all available energies. 10 2 10 3
+
+W [GeV] 
+
+10 2
+
+> σ(γp  → J/ψ p ) [nb]
+
+χ2/d. o. f. = 0.474 
+
+PINN 
+
+1σ Uncertainty 
+
+ALICE 
+
+H1 
+
+ZEUS 
+
+LHCb 
+
+FIG. 2 . Total cross section for exclusive J/ψ photoproduc-tion as a function of center-of-mass energy W , compare to ALICE [63, 64], H1 [65, 66], ZEUS [67] and LHCb [68, 69] data. Solid curve is the PINN prediction with the smallest global χ2/d.o.f.; shaded band is 1 σ uncertainties. The quoted 
+
+χ2/d.o.f. value is evaluated using the solid curve. 
+
+negative values of the momentum-space dipole S-matrix, 
+
+S(kT , Y ) = 
+
+Z
+
+d2reikT ·r 1 − N (r, Y ). (2) The total objective in our PINN now reads 
+
+L(θ, p) = w1LciBK + w2Ldata + w3Lphy , (3) where wi are weights controlling the relative importance of each term. The LciBK = ∥R ciBK ∥2 is the ciBK residual defined in Eq. (1), Ldata quantifies agreement with the experimental data, and Lphy encodes additional physical constraints. Optimization is performed with the AdamW algorithm [73] together with a cosine-annealing learning-rate schedule [74], ensuring stable and high-precision con-vergence. We simultaneously fit the network parameters 
+
+θ and three physical parameters p = {Rp, K V M 
+
+> factor
+
+, α f r },where Rp is the effective transverse proton size, KV M 
+
+> factor
+
+10 −7 
+
+10 −5 
+
+10 −3 
+
+10 −1 
+
+10 1    
+
+> N(r, xB)
+> xB= 10 −2 (PINN)
+> xB= 10 −3 (PINN)
+> xB= 10 −5 (PINN)
+> ciBK numerical solution
+> ciBK numerical solution
+> MV-type fit ( γ= 1.110 )
+
+10 −3 10 −2 10 −1 10 0 10 1
+
+r [GeV −1 ]
+
+0.5 
+
+1.0  
+
+> Ratio
+> MV-type fit / PINN ( xB= 10 −2 )
+
+FIG. 3. Top: Solid curves show the dipole amplitude 
+
+N (r, x B ) predicted by the PINN for xB ∈ { 10 −2, 10 −3, 10 −5}.Markers denote numerical ciBK evolution results obtained with the same initial condition as used in the PINN. The dashed curve corresponds to the best-fit MV-type parametrization to NPINN (r, x B = 0 .01). 10 −2 10 −1 10 0 10 1 10 2
+
+kT [GeV] 
+
+10 −8 
+
+10 −6 
+
+10 −4 
+
+10 −2 
+
+10 0
+
+10 2
+
+> S(kT, xB)
+
+xB = 10 −2 
+
+xB = 10 −3 
+
+xB = 10 −5 
+
+FIG. 4 . Fourier transform of the dipole amplitude at xB ∈{10 −2, 10 −3, 10 −5}.4accounts for uncertainties in the non-perturbative J/ Ψwave function, and αf r is the infrared-frozen value of the running coupling in the ciBK evolution. In this framework, the effective anomalous dimension is deter-mined locally from gradients of Nθ (r, Y ), rather than treated as a fixed constant. To stabilize optimization in the presence of disparate gradient scales, the weights wi
+
+are adaptively adjusted during training by balancing the back-propagated gradient magnitudes of the correspond-ing loss components [75, 76]. Uncertainties are quantified with a hybrid strategy combining the Monte Carlo replica method and a deep ensemble approach [49]. To propa-gate experimental errors, we generate statistically inde-pendent pseudodata replicas by sampling each data point from a Gaussian distribution centered on the measured central number with a width given by its uncertainty, and train an independent network for each replica. Each network outputs both the continuous amplitude N (r, Y )and a data-dependent predictive variance needed to con-struct theory predictions. We therefore take Ldata to be a negative log-likelihood, which naturally incorporates heteroscedastic (aleatoric) uncertainties. This yields a robust uncertainty band for the extracted universal am-plitude N (r, Y ). Detailed expressions for Ldata and Lphy ,together with a full description of the PINN framework, are provided in the Supplemental Material. 
+
+Results and Discussion. The global fit includes the HERA reduced cross section σr at all available energies √s = 224 .9, 251 .5, 300 .3, and 318 GeV [60, 61], the re-duced charm cross section σc¯cr at √s = 318 GeV [62], and exclusive diffractive J/ψ photoproduction [63–69]. Unless stated otherwise, we restrict to the measurements with xB ≤ 0.004 and 2 < Q 2 < 45 GeV 2.Figure 1 shows representative results at √s = 318 GeV for σr and σc¯cr . The predictions obtained from the best PINN-extracted amplitude describe the reduced total cross-section data with χ2/N dof = 1 .150, while main-taining a good description of the charm reduced cross section with χ2/N dof = 1 .546. The same joint optimiza-tion simultaneously determines the phenomenological pa-rameters (deep-ensemble 1 σ) as Rp = 0 .809 ± 0.010 fm, 
+
+αf r = 0 .702 ± 0.070, and KV M  
+
+> factor
+
+= 0 .902 ± 0.008. Rec-onciling DIS reduced total and charm observables within small-x evolution frameworks is known to be challenging. Recent analyses [37, 38] emphasize that charm produc-tion probes short dipole distances and therefore provides particularly stringent constraints on the short-distance behavior and on the profile entering the evolution. Our simultaneous fit yields a universal dipole amplitude to-gether with physically reasonable parameter values. Fur-ther detailed fit results for σr at various center-of-mass energies, as well as the evaluation of the longitudinal structure function FL serving as a crucial cross-check, are provided in the the Supplemental Material. The extracted amplitude also describes diffractive J/ψ 
+
+production within the same global framework. Figure 2 shows the total cross section for γp → J/ψ p as a function of the photon–proton energy W , compared with experi-mental data [63–69]. The PINN prediction provides an excellent description, with χ2/N dof = 0 .474. The overall normalization is fixed to KV M  
+
+> factor
+
+= 0 .902 to account for uncertainties in the vector-meson wave function, and no additional process-dependent initial conditions are intro-duced. This offers a nontrivial universality check of the inferred N (r, x B ) across inclusive DIS (including charm) and exclusive vector-meson photoproduction. Figure 3 shows the extracted dipole amplitude 
+
+N (r, x B ) at three representative xB values. As a con-sistency check, we solve the ciBK equation numerically using N (r, x B = x0) = NPINN (r, x B = x0) with x0 =0.03 as the initial condition to consistently accommo-date the non-local rapidity shift in the evolution ker-nel, and compare the evolved solutions with PINN out-put. We observe excellent agreements throughout the kinematic regions. Once trained, the surrogate evalu-ates N (r, x B ) at any desired xB in a single forward pass, avoiding repeated and computationally expensive grid-based ciBK evolutions in global analyses. The inferred pre-asymptotic shape, together with the momentum-space positivity regularization, is further illustrated by comparing NPINN (r, x B = 0 .01), a standard reference scale in saturation phenomenology, with an MV-type parametrization [77, 78], 
+
+NMV-type (r) = 1 − exp 
+
+
+
+− (r2Q2
+
+> s0
+
+)γ
+
+4 ln 
+
+ 1
+
+rΛ + ec · e
+
+ 
+
+.
+
+(4) Fitting Eq. (4) to the PINN profile at 
+
+xB = 0.01 yields (γ, Q2
+
+> s0
+
+, Λ, ec) =(1 .110 , 0.074 GeV 2, 0.089 GeV , 0.300). The ratio of the fitted MV-type form to the PINN result is shown in the bottom panel of Figure 3. It exhibits systematic deviations at small r and requires an unrealistically small fitted value Λ = 0 .089 GeV, indicating that the extracted initial dipole amplitude cannot be faithfully captured by this MV-type functional form. By moving beyond rigid parametrizations, the non-parametric PINN extraction provides the flexibility needed to capture the dipole-amplitude structure at both short and long trans-verse distances, which is essential for a simultaneous description of light- and heavy-quark observables and the momentum-space positivity requirement. Finally, we examine the two-dimensional Fourier transform of the dipole S-matrix defined in Eq. (2). Momentum-space positivity is essential: within the CGC framework, the momentum-space dipole is directly con-nected to the gluon content of the target and enters a va-riety of particle-production cross sections in e–p/A and 
+
+p–p/A collisions. The sign changes in the momentum-space dipole have been reported for several widely used initial conditions, even when the DIS reduced cross sec-tion is well described [22, 23, 25, 36, 38]. Although BK evolution generally mitigates these issues, they can per-sist in phenomenologically relevant kinematics. Figure 4 shows S(kT , x B ) at three representative Bjorken-xB val-ues. In our PINN global fit we impose a positivity reg-5ularization by penalizing regions where S(kT , x B ) < 0. In the region ( xB ≤ 0.01), the extracted PINN solution yields a smooth kT dependence and remains positive over the range shown, kT ∈ [0 , 100] GeV. This demonstrates that momentum-space positivity can be achieved simul-taneously with a good description of inclusive DIS re-duced cross section (including total and charm quark) and diffractive vector-meson production, provided suffi-cient functional flexibility and an explicit positivity regu-larization are included. For comparison, Ref. [38] reports oscillatory behavior in S(kT , x B ) even at xB = 10 −3 and 10 −6 using a Bayesian-fit approach. 
+
+Conclusion. We have performed a global and dynamics-constrained determination of the universal small-x dipole amplitude N (r, x B ) using a physics-informed neural network. In our approach, the ampli-tude is represented by a smooth surrogate Nθ (r, x B )and is constrained directly at the functional level by the ciBK evolution equation together with precision DIS and diffractive data. The initial profile is inferred non-parametrically from data while remaining consistent with ciBK dynamics. Within the fitted kinematic re-gion, the resulting universal amplitude simultaneously describes the reduced total cross section, the reduced charm cross section, and exclusive J/ψ photoproduc-tion. Another central outcome of this analysis is a well-behaved momentum-space representation. By in-corporating physical regularizer of the Fourier-positivity penalty on the momentum-space S-matrix, we obtain a PINN solution whose S(kT , x B ) remains non-negative for 
+
+xB ≤ 0.01 over the transverse-momentum range shown. This addresses a long-standing practical issue in dipole-model initial conditions and supports a consistent use of the extracted amplitude in downstream CGC calcula-tions that require a stable and positive momentum-space dipole input. The present study employs an impact-parameter in-dependent dipole amplitude and leading-order impact factors, and we restrict the fit to xB ≤ 0.004 exper-imental data to suppress potential DGLAP-dominated contributions and reduce sensitivity to pre-asymptotic effects associated with the rapidity-shift non-locality. Natural next steps are to extend this framework to impact-parameter dependent amplitudes and to incorpo-rate NLO impact factors together with NLO/collinearly resummed evolution, enabling more stringent universal-ity tests and direct confrontation with forthcoming EIC precision data. More broadly, our framework moves beyond a purely “data-driven” fit toward “physics-driven” inference. PINN acts as a differentiable surrogate that simulta-neously enforces the evolution equation, accommodates precise measurements, and incorporates first-principles constraints such as unitarity and color transparency. By combining these complementary sources of information, the network is guided not only by statistical agreement with data but also by the underlying QCD dynamics, helping ensure that the extracted amplitude remains physically consistent across the full kinematic domain. This strategy is inherently generalizable and offers a ro-bust template for embedding fundamental laws into data-driven inference in scientific settings where dynamical equations and first-principles constraints coexist with ex-perimental measurements. We have made available the tabulated PINN solution for N (r, x B ) over the fitted domain, together with its momentum-space Fourier transform, in Ref. [79]. 
+
+> ACKNOWLEDGMENTS
+
+Acknowledgments W.B. Z thanks Heikki M¨ antysaari for helpful discussions. This work was supported in part by the NSFC under grant No. 12225503, No. 12535010, No. 12435009, No. 12405156. This work was supported also in part by the Cross Research Project of Fundamen-tal Research Funds for Central Universities of Central China Normal University in 2025: “Advanced Detection and Artificial Intelligence at the Frontiers of Physics” (No.30101250317).                                                             
+
+> [1] Y. V. Kovchegov and E. Levin, Quantum Chromodynam-ics at High Energy , vol. 33 (Oxford University Press, 2013), ISBN 978-1-009-29144-6, 978-1-009-29141-5, 978-1-009-29142-2, 978-0-521-11257-4, 978-1-139-55768-9. [2] L. McLerran, Nucl. Phys. A 702 , 49 (2002). [3] E. Iancu and R. Venugopalan, The Color glass conden-sate and high-energy scattering in QCD (2003), pp. 249– 3363, hep-ph/0303204. [4] H. Weigert, Prog. Part. Nucl. Phys. 55 , 461 (2005), hep-ph/0501087. [5] F. Gelis, E. Iancu, J. Jalilian-Marian, and R. Venu-gopalan, Ann. Rev. Nucl. Part. Sci. 60 ,463 (2010), 1002.0333. [6] J. L. Albacete and C. Marquet, Prog. Part. Nucl. Phys.
+> 76 , 1 (2014), 1401.4866. [7] A. Morreale and F. Salazar, Universe 7,312 (2021), 2108.08254. [8] J. Jalilian-Marian, A. Kovner, L. D. McLerran, and H. Weigert, Phys. Rev. D55 ,5414 (1997), hep-ph/9606337. [9] J. Jalilian-Marian, A. Kovner, A. Leonidov, and H. Weigert, Nucl. Phys. B504 ,415 (1997), hep-ph/9701284. [10] J. Jalilian-Marian, A. Kovner, A. Leonidov, and H. Weigert, Phys. Rev. D59 ,014014 (1998), hep-ph/9706377. [11] E. Iancu and L. D. McLerran, Phys. Lett. B 510 , 145 (2001), hep-ph/0103032. [12] E. Ferreiro, E. Iancu, A. Leonidov, and L. McLerran, Nucl. Phys. A 703 , 489 (2002), hep-ph/0109115. [13] E. Iancu, A. Leonidov, and L. D. McLerran, Phys. Lett. B510 , 133 (2001), hep-ph/0102009.
+
+6
+
+[14] E. Iancu, A. Leonidov, and L. D. McLerran, Nucl. Phys. A 692 , 583 (2001), hep-ph/0011241. [15] I. Balitsky, Nucl. Phys. B 463 , 99 (1996), hep-ph/9509348. [16] Y. V. Kovchegov, Phys. Rev. D 60 , 034008 (1999), hep-ph/9901281. [17] H. Kowalski, T. Lappi, and R. Venugopalan, Phys. Rev. Lett. 100 , 022303 (2008), 0705.3047. [18] R. Abdul Khalek et al., Nucl. Phys. A 1026 , 122447 (2022), 2103.05419. [19] E. C. Aschenauer, S. Fazio, J. H. Lee, H. Mantysaari, B. S. Page, B. Schenke, T. Ullrich, R. Venugopalan, and P. Zurita, Rept. Prog. Phys. 82 , 024301 (2019), 1708.01527. [20] A. Accardi et al., Eur. Phys. J. A 52 , 268 (2016), 1212.1701. [21] J. L. Albacete, N. Armesto, J. G. Milhano, and C. A. Salgado, Phys. Rev. D 80 , 034031 (2009), 0902.1112. [22] J. L. Albacete, N. Armesto, J. G. Milhano, P. Quiroga-Arias, and C. A. Salgado, Eur. Phys. J. C 71 , 1705 (2011), 1012.4408. [23] T. Lappi and H. M¨ antysaari, Phys. Rev. D 88 , 114020 (2013), 1309.6963. [24] H. M¨ antysaari and B. Schenke, Phys. Rev. D 98 , 034013 (2018), 1806.06783. [25] B. Duclou´ e, E. Iancu, G. Soyez, and D. N. Triantafyl-lopoulos, Phys. Lett. B 803 , 135305 (2020), 1912.09196. [26] H. M¨ antysaari, B. Schenke, C. Shen, and W. Zhao, Phys. Lett. B 833 , 137348 (2022), 2202.01998. [27] H. M¨ antysaari and J. Penttala, JHEP 08 , 247 (2022), 2204.14031. [28] H. M¨ antysaari, J. Penttala, F. Salazar, and B. Schenke, Phys. Rev. D 111 , 054033 (2025), 2411.13533. [29] M. Hentschinski and R. R. Ram´ ırez, Phys. Rev. D 113 ,014043 (2026), 2508.11545. [30] H. M¨ antysaari, H. Roch, F. Salazar, B. Schenke, C. Shen, and W. Zhao, Phys. Rev. D 113 , 014038 (2026), 2507.14087. [31] B. G. Giraud and R. Peschanski, Phys. Lett. B 760 , 26 (2016), 1604.01932. [32] F. Gelis and R. Venugopalan, Phys. Rev. D 69 , 014019 (2004), hep-ph/0310090. [33] J. P. Blaizot, F. Gelis, and R. Venugopalan, Nucl. Phys. A 743 , 13 (2004), hep-ph/0402256. [34] J. P. Blaizot, F. Gelis, and R. Venugopalan, Nucl. Phys. A 743 , 57 (2004), hep-ph/0402257. [35] A. Dumitru, A. Hayashigaki, and J. Jalilian-Marian, Nucl. Phys. A 765 , 464 (2006), hep-ph/0506308. [36] P. Caucal, Z.-B. Kang, P. Korcyl, F. Salazar, B. Schenke, T. Stebel, R. Venugopalan, and W. Zhao (2025), 2512.21466. [37] H. H¨ anninen, H. M¨ antysaari, R. Paatelainen, and J. Penttala, Phys. Rev. Lett. 130 , 192301 (2023), 2211.03504. [38] C. Casuga, H. H¨ anninen, and H. M¨ antysaari, Phys. Rev. D 112 , 034003 (2025), 2506.00487. [39] C. Casuga, M. Karhunen, and H. M¨ antysaari, Phys. Rev. D 109 , 054018 (2024), 2311.10491. [40] M. Gao, Z.-B. Kang, J. Penttala, and D. Y. Shao (2025), 2510.26779. [41] W. Kou and X. Chen (2026), 2601.16391. [42] M. Raissi, P. Perdikaris, and G. E. Karniadakis, J. Com-put. Phys. 378 , 686 (2019), 1711.10561. [43] L. von Rueden, S. Mayer, K. Beckh, B. Georgiev, S. Gies-selbach, R. Heese, B. Kirsch, J. Pfrommer, A. Pick, R. Ramamurthy, et al., IEEE Transactions on Knowl-edge and Data Engineering 35 , 614 (2023). [44] S. Cuomo, V. S. D. Cola, F. Giampaolo, G. Rozza, M. Raissi, and F. Piccialli, CoRR abs/2201.05624 
+
+(2022), 2201.05624. [45] G. Beuf, Phys. Rev. D 89 , 074039 (2014), 1401.0313. [46] E. Iancu, J. D. Madrigal, A. H. Mueller, G. Soyez, and D. N. Triantafyllopoulos, Phys. Lett. B 744 , 293 (2015), 1502.05642. [47] E. Iancu, J. D. Madrigal, A. H. Mueller, G. Soyez, and D. N. Triantafyllopoulos, Phys. Lett. B 750 , 643 (2015), 1507.03651. [48] B. Duclou´ e, E. Iancu, A. H. Mueller, G. Soyez, and D. N. Triantafyllopoulos, JHEP 04 , 081 (2019), 1902.06637. [49] B. Lakshminarayanan, A. Pritzel, and C. Blundell, Sim-ple and scalable predictive uncertainty estimation using deep ensembles (2017), 1612.01474. [50] E. Iancu, J. D. Madrigal, A. H. Mueller, G. Soyez, and D. N. Triantafyllopoulos, Nucl. Phys. A 956 , 557 (2016), 1601.06525. [51] E. Iancu, A. H. Mueller, D. N. Triantafyllopoulos, and S. Y. Wei, JHEP 07 , 196 (2021), 2012.08562. [52] J. L. Albacete, J. G. Milhano, P. Quiroga-Arias, and J. Rojo, Eur. Phys. J. C 72 , 2131 (2012), 1203.1043. [53] P. Agostini et al. (LHeC, FCC-he Study Group), J. Phys. G 48 , 110501 (2021), 2007.14491. [54] K. J. Golec-Biernat and M. Wusthoff, Phys. Rev. D 59 ,014017 (1998), hep-ph/9807513. [55] H. Kowalski and D. Teaney, Phys. Rev. D 68 , 114005 (2003), hep-ph/0304189. [56] J. R. Forshaw, R. Sandapen, and G. Shaw, Phys. Rev. D 
+
+69 , 094013 (2004), hep-ph/0312172. [57] H. Kowalski, L. Motyka, and G. Watt, Phys. Rev. D 74 ,074016 (2006), hep-ph/0606272. [58] A. G. Shuvaev, K. J. Golec-Biernat, A. D. Martin, and M. G. Ryskin, Phys. Rev. D 60 , 014015 (1999), hep-ph/9902410. [59] T. Lappi and H. Mantysaari, Phys. Rev. C 87 , 032201 (2013), 1301.4095. [60] H. Abramowicz et al. (H1, ZEUS), Eur. Phys. J. C 75 ,580 (2015), 1506.06042. [61] F. D. Aaron et al. (H1, ZEUS), JHEP 01 , 109 (2010), 0911.0884. [62] H. Abramowicz et al. (H1, ZEUS), Eur. Phys. J. C 78 ,473 (2018), 1804.01019. [63] B. B. Abelev et al. (ALICE), Phys. Rev. Lett. 113 ,232504 (2014), 1406.7819. [64] S. Acharya et al. (ALICE), Eur. Phys. J. C 79 , 402 (2019), 1809.03235. [65] A. Aktas et al. (H1), Eur. Phys. J. C 46 , 585 (2006), hep-ex/0510016. [66] C. Alexa et al. (H1), Eur. Phys. J. C 73 , 2466 (2013), 1304.5162. [67] S. Chekanov et al. (ZEUS), Eur. Phys. J. C 24 , 345 (2002), hep-ex/0201043. [68] R. Aaij et al. (LHCb), JHEP 10 , 167 (2018), 1806.04079. [69] R. Aaij et al. (LHCb), SciPost Phys. 18 , 071 (2025), 2409.03496. [70] J. L. Albacete, N. Armesto, J. G. Milhano, C. A. Salgado, and U. A. Wiedemann, Phys. Rev. D 71 , 014003 (2005), hep-ph/0408216. [71] C. Marquet, R. B. Peschanski, and G. Soyez, Phys. Lett. B 628 , 239 (2005), hep-ph/0509074. 7
+
+[72] S. Munier and R. B. Peschanski, Phys. Rev. Lett. 91 ,232001 (2003), hep-ph/0309177. [73] I. Loshchilov and F. Hutter, in International Conference on Learning Representations (2019). [74] I. Loshchilov and F. Hutter, CoRR abs/1608.03983 
+
+(2016), 1608.03983. [75] Y. Wang, Y. Yao, J. Guo, and Z. Gao, Journal of Com-putational Physics 510 , 113112 (2024), ISSN 0021-9991. [76] S. Wang, X. Yu, and P. Perdikaris, Journal of Computa-tional Physics 449 , 110768 (2022), ISSN 0021-9991. [77] L. D. McLerran and R. Venugopalan, Phys. Rev. D 49 ,2233 (1994), hep-ph/9309289. [78] L. D. McLerran and R. Venugopalan, Phys. Rev. D 49 ,3352 (1994), hep-ph/9311205. [79] S. Dai, F. Li, L.-G. Pang, G. Qin, S.-y. Wei, H. Zhang, and W. Zhao, Physics-informed global extraction of the universal small-x dipole amplitude (2026), URL https: //doi.org/10.5281/zenodo.18826120 .[80] K. He, X. Zhang, S. Ren, and J. Sun, CoRR 
+
+abs/1512.03385 (2015), 1512.03385. [81] V. Andreev et al. (H1), Eur. Phys. J. C 74 , 2814 (2014), 1312.4821. 8 
+
+> Appendix A: SUPPLEMENTAL MATERIAL 1. A. Physics-Informed Neural Network Framework and Loss Function
+
+This Supplementary Material section provides the de-tails about˚ a˚ a the PINN framework used to extract the universal dipole scattering amplitude, including the ex-plicit form of the loss function. Figure S1 illustrates the PINN architecture, which takes the dipole size r and the rapidity Y = ln( x0/x B ) as inputs. The network is based on a Residual Neural Net-work (ResNet) [80], which mitigates vanishing-gradient issues in deep multilayer perceptrons. Our baseline con-figuration comprises seven residual blocks with 32 neu-rons each, using the softplus activation ln(1 + ex) for the hidden nonlinearities. A final sigmoid activation, 
+
+σ(x) = 1 /(1+ e−x), constrains the output to (0 , 1), ensur-ing that the dipole amplitude N (r, Y ) remains physical. The optimization objective, i.e., the loss function, is formulated as: 
+
+L(θ, p) = w1LciBK + w2Ldata + w3Lphy , (S1) where θ denotes the trainable neural network weights and biases, and p represents optimizable physical parameters. The weights wi dynamically balance the gradients among different loss components. The term LciBK = ∥R ciBK ∥2 is the ciBK residual, eval-uated on collocation points generated by two-dimensional Latin hypercube sampling over the ( r, Y ) domain. These points are resampled at the start of each training epoch. Compared with a dense, fixed uniform grid, this dy-namic resampling reduces the per-epoch computational cost while ensuring thorough coverage of the continuous kinematic space over the course of training. The data loss Ldata measures agreement with experi-mental data. Consistent with the deep-ensemble setup, we use a negative log-likelihood, 
+
+Ldata = X
+
+> O
+> NO
+
+X
+
+> i=1
+
+λO
+
+"
+
+(Oth  
+
+> i
+
+− O exp  
+
+> i
+
+)2
+
+2 (σNN  
+
+> i
+
+)2 + ( σexp  
+
+> i
+
+)2
+
++ 12 ln  (σNN  
+
+> i
+
+)2 + ( σexp  
+
+> i
+
+)2#
+
+, (S2) where the outer sum runs over observable classes O ∈ {σr , σ c¯cr , σ VM }, and λO are dataset-specific weights. These weights are introduced to balance the relative con-tributions of different observables, preventing the over-all data loss from being strictly dominated by datasets with a significantly larger number of data points (e.g., the inclusive σr ). For the i-th point, Oexp  
+
+> i
+
+and σexp  
+
+> i
+
+are the measured central value and total experimental uncer-tainty. The corresponding prediction Oth  
+
+> i
+
+is computed from the network output, namely the universal dipole amplitude N (r, Y ). The term σNN  
+
+> i
+
+is the data-dependent predictive uncertainty produced by the network’s vari-ance branch during training. The physical loss Lphy imposes key theoretical con-straints, including the large-r limit, momentum-space positivity, and the small-r color-transparency behavior. Its explicit form is 
+
+Lphy = λIR ∥N (rmax , Y ) − 1∥2
+
+> rmax =50 GeV −1
+
++ λpos ∥ min(0 , S (kT , Y )) ∥2
+
++ λUV max 
+
+
+
+0, ∂ ln N (r, Y )
+
+∂ ln r2 − 1
+
+ 2
+
++ min 
+
+
+
+0, ∂ ln N (r, Y )
+
+∂ ln r2
+
+ 2 ! 
+
+> r< 10 −3GeV −1
+
+,
+
+(S3) where the penalty terms enforce the following physical behaviors: 
+
+• Asymptotic large-r constraint (Black-disk limit): Because rmax = 50 GeV −1 (about 10 fm) is far larger than the proton radius, the dipole am-plitude should saturate to the black-disk limit. We therefore penalize deviations from N (rmax , Y ) = 1. 
+
+• Asymptotic small-r constraint (Color trans-parency): In the deep perturbative regime (r < 10 −3 GeV −1), color transparency implies 
+
+N (r, Y ) ∼ r2γ , where γ is an effective anomalous dimension. The third term constrains the local log-arithmic slope γ ≡ ∂ ln N (r, Y )/∂ ln r2 to the phys-ically allowed range [0 , 1], preserving the small-r
+
+asymptotics while retaining the functional flexibil-ity required by QCD evolution. 
+
+• Fourier-positivity constraint: The second term penalizes negative values of the momentum-space 
+
+S-matrix S(kT , Y ), enforcing positivity of the Fourier-transformed distribution during training. Here, λIR , λpos , and λUV are penalty coefficients that dictate the stringency of the respective physical con-straints. These weights are adaptively adjusted during training by balancing the back-propagated gradient mag-nitudes of the corresponding loss components, initialized as w1, w2, w3 = (50000 , 100 , 1), λσr , λσc¯cr , λσVM =(1 , 1.2, 1) and λIR , λ pos , λ UV = (1 , 10000 , 2000). The loss is minimized using the AdamW optimizer [73] with a cosine-annealing learning-rate schedule [74], en-suring stable and high-precision convergence. Training was run for 3000 epochs on a GPU, with the learning rate initialized at 10 −3. 
+
+> 2. B. Theoretical Formalism for the Observables and Supplementary Results
+
+This section first summarizes the theoretical formal-ism used to compute the observables, and then presents comprehensive results for the reduced cross section σr9
+
+FIG. S1 . Schematic of the PINN framework. The network maps the kinematic inputs ( r, Y ) to the dipole amplitude N (r, Y ). Training is guided by the total loss L(θ, p) = w1LciBK + w2Ldata + w3Lphy . See the text for details of the three loss components. 
+
+over all available HERA kinematic range. Additionally, we evaluate the longitudinal structure function FL as a cross-check, complementing the representative compar-isons shown in the main text. 
+
+a. B1. Reduced cross sections and longitudinal structure function: σr , FL and σc¯cr
+
+The DIS cross section is commonly written in terms of the reduced cross section, 
+
+σr (y, x B , Q 2) = F2(xB , Q 2)
+
+− y2
+
+1 + (1 − y)2 FL(xB , Q 2), (S4) where y = Q2/(sx B ) is the inelasticity, xB the Bjorken variable, Q2 the photon virtuality, √s the lepton–proton center-of-mass energy. The structure functions F2 and FL are related to the transverse (T) and longitudinal (L) virtual-photon pro-ton cross sections via 
+
+F2 = Q2
+
+4π2αem 
+
+
+
+σγ∗pT + σγ∗pL
+
+
+
+, (S5) 
+
+FL = Q2
+
+4π2αem 
+
+σγ∗pL . (S6) Here αem is the electromagnetic coupling. In the leading-order eikonal approximation within the color dipole picture [1], the γ∗p interaction proceeds in two steps. First, the virtual photon fluctuates into a quark–antiquark pair, γ∗ → q ¯q, described by the light-cone wave function Ψ γ∗→q ¯q . The resulting color dipole then scatters off the proton. The corresponding γ∗p cross sections for transverse and longitudinal photon polariza-tions are 
+
+σγ∗pT,L = 2 X
+
+> f
+
+Z
+
+d2bd2r dz 
+
+4π |Ψγ∗→q ¯qT,L 
+
+ r, Q 2, z  |2
+
+×N (r, b, x B ), (S7) Here r is the transverse size of the q ¯q dipole, z is the frac-tion of the photon longitudinal momentum carried by the quark, b is the impact parameter, and N (r, b, x B ) de-notes the dipole–proton scattering amplitude. The sum runs over the light quark flavors and the charm quark. In this work, we neglect the impact-parameter depen-dence of the dipole–proton scattering amplitude. Accord-ingly, we replace the impact-parameter integral by a con-stant effective proton area, R d2b −→ σ0/2 , where σ0/2is the proton transverse area. The squared photon light-cone wave functions, summed over quark helicities and, for the transverse case, averaged over the two transverse photon polarizations, are [1] 
+
+|ΨL(r, Q 2, z )|2 = 8Nc
+
+π αem e2 
+
+> q
+
+Q2z2(1 − z)2K20 (εr ), (S8) 
+
+|ΨT (r, Q 2, z )|2 = 2Nc
+
+π αem e2
+
+> q
+
+n
+
+[z2 + (1 − z)2]ε2K21 (εr )+ m2 
+
+> f
+
+K20 (εr )
+
+o
+
+, (S9) 10 where r = |r|, ε2 = z(1 − z)Q2 + m2 
+
+> f
+
+, ef is the fractional charge of quark flavor f , and K0 and K1 are modified Bessel functions of the second kind of order zero and one, respectively. For the light and charm quarks we use the effective masses mlight = 0 .14 GeV and mc = 1 .4 GeV, respectively. In practice, when computing σγ∗pT,L , we apply the standard kinematical shift and introduce the modified Bjorken variable ˜x = xB 1 + 4m2
+
+> f
+
+Q2
+
+!
+
+. (S10) for each quark flavor. 
+
+b. B2. Diffractive Vector-Meson Production 
+
+In exclusive vector-meson production at small Bjorken-
+
+x, the relevant longitudinal momentum fraction is set by the hard scale Q2 + M 2 
+
+> V
+
+and the photon–proton center-of-mass energy W ,
+
+x ≡ Q2 + M 2
+
+> V
+
+W 2 + Q2 . (S11) The diffractive scattering amplitude for γ∗p → V p 
+
+reads [57] 
+
+Aγ∗p→V p T,L (x, Q 2, ∆) = i
+
+Z
+
+d2r
+
+Z 10
+
+dz 
+
+4π
+
+Z
+
+d2b (Ψ ∗ 
+
+> V
+
+Ψ) T,L 
+
+× e−i[b−(1 −z)r]·∆ dσ q ¯q
+
+d2b , (S12) where ∆ is the momentum transfer, related to the Man-delstam variable t by t = −∆2, and dσ q ¯q /d 2b is the dipole–proton cross section differential in the impact pa-rameter b. Assuming impact-parameter independence, the b-integrated dipole cross section becomes 
+
+σq ¯q (x, r ) ≡
+
+Z
+
+d2b dσ q ¯q
+
+d2b = σ0 N (x, r ) . (S13) The transverse and longitudinal photon and vector-meson overlap functions are given by [57] (Ψ ∗ 
+
+> V
+
+Ψ) T =ˆ ef e Nc
+
+πz (1 − z)
+
+n
+
+m2 
+
+> f
+
+K0(εr )ϕT (r, z )
+
+− [z2 + (1 − z)2]εK 1(εr )∂r ϕT (r, z )
+
+o
+
+, (S14) (Ψ ∗ 
+
+> V
+
+Ψ) L =ˆ ef e Nc
+
+π 2Qz (1 − z)K0(εr )
+
+h
+
+MV ϕL(r, z )+ δ m2 
+
+> f
+
+− ∇ 2
+
+> r
+
+MV z(1 − z) ϕL(r, z )
+
+i
+
+, (S15) where ˆ ef is the fractional electric charge of the charm quark, e = √4πα em , and MV = 3 .097 GeV is the J/ψ 
+
+mass. The scalar functions ϕT,L (r, z ) encode the meson wave function, in this work we use the boosted-Gaussian parametrization for J/ψ [57]. The t-differential cross section for exclusive vector-meson production is given by [57] 
+
+dσ γ∗p→V p T,L 
+
+dt = R2
+
+> g
+
+16 π Aγ∗p→V p T,L  
+
+> 2
+
+ 1 + β2 , (S16) where β ≡ Re A/Im A accounts for the real part of the scattering amplitude contribution. It can be calculated from the effective small-x exponent of the amplitude, 
+
+β = tan 
+
+ πλ 
+
+2
+
+
+
+, λ =
+
+∂ ln 
+
+
+
+Aγ∗p→V p T,L 
+
+
+
+∂ ln(1 /x ) . (S17) The skewness (off-forward) correction is encoded in Rg ,which in the Shuvaev prescription reads [58] 
+
+Rg = 2 2λ+3 
+
+√π
+
+Γ λ + 52
+
+
+
+Γ( λ + 4) . (S18) Integrating Eq. (S16) over t yields the total cross sec-tion, 
+
+σγ∗p→V p T,L =
+
+Z
+
+dt dσ γ∗p→V p T,L 
+
+dt , (S19) 
+
+σγ∗p→V p  
+
+> total
+
+= σγ∗p→V p T + σγ∗p→V p L . (S20) In the present study we focus on J/ψ photoproduction with Q2 = 0, for which only the transverse contribution is relevant. 
+
+c. B3. Reduced cross sections and longitudinal structure function at all energies 
+
+This section presents supplementary comparisons for the inclusive reduced cross section σr at all available HERA center-of-mass energies, and for the longitu-dinal structure function FL as a cross-check. Fig-ure S2 compares the PINN predictions with the com-bined HERA measurements of the inclusive reduced to-tal cross section σr at the center-of-mass energies √s =224 .9, 251 .5, 300 .3, and 318 GeV. The good agreement over the measured kinematic range provides a global vali-dation of the extracted dipole amplitude in inclusive DIS. Figure S3 compares the PINN predictions with the FL
+
+measurements. The significance of this cross-check lies in isolating the longitudinal photon contribution through Eq. (S6). Since σr depends on both F2 and FL (see Eq. (S4)), these constraints are not fully independent, and the FL comparison provides a nontrivial consistency check of the extracted universal amplitude. The resulting uncertainty band for FL is comparatively narrow in our fit, consistent with the indirect constraint provided by σr .The agreement with the data supports the robustness of the extracted N (r, Y ) across observables that emphasize different photon polarizations. 11 0.50 
+
+0.75 
+
+1.00 
+
+1.25 
+
+1.50 
+
+> σr(xB, Q 2)
+
+χ2/d. o. f. = 1.150 
+
+Q 2 = 2 GeV 2
+
+Q 2 = 5 GeV 2
+
+Q 2 = 12 GeV 2
+
+Q 2 = 25 GeV 2
+
+Q 2 = 2 GeV 2
+
+Q 2 = 5 GeV 2
+
+Q 2 = 12 GeV 2
+
+Q 2 = 25 GeV 2
+
+√ s = 224.9 GeV 
+
+Q 2 = 2.5 GeV 2
+
+Q 2 = 6.5 GeV 2
+
+Q 2 = 15 GeV 2
+
+Q 2 = 35 GeV 2
+
+Q 2 = 2.5 GeV 2
+
+Q 2 = 6.5 GeV 2
+
+Q 2 = 15 GeV 2
+
+Q 2 = 35 GeV 2
+
+Q 2 = 3.5 GeV 2
+
+Q 2 = 8.5 GeV 2
+
+Q 2 = 20 GeV 2
+
+Q 2 = 45 GeV 2
+
+Q 2 = 3.5 GeV 2
+
+Q 2 = 8.5 GeV 2
+
+Q 2 = 20 GeV 2
+
+Q 2 = 45 GeV 2
+
+0.5 
+
+1.0 
+
+1.5 
+
+> σr(xB, Q 2)
+
+Q 2 = 2 GeV 2
+
+Q 2 = 5 GeV 2
+
+Q 2 = 12 GeV 2
+
+Q 2 = 25 GeV 2
+
+Q 2 = 2 GeV 2
+
+Q 2 = 5 GeV 2
+
+Q 2 = 12 GeV 2
+
+Q 2 = 25 GeV 2
+
+√ s = 251.5 GeV 
+
+Q 2 = 2.5 GeV 2
+
+Q 2 = 6.5 GeV 2
+
+Q 2 = 15 GeV 2
+
+Q 2 = 35 GeV 2
+
+Q 2 = 2.5 GeV 2
+
+Q 2 = 6.5 GeV 2
+
+Q 2 = 15 GeV 2
+
+Q 2 = 35 GeV 2
+
+Q 2 = 3.5 GeV 2
+
+Q 2 = 8.5 GeV 2
+
+Q 2 = 20 GeV 2
+
+Q 2 = 45 GeV 2
+
+Q 2 = 3.5 GeV 2
+
+Q 2 = 8.5 GeV 2
+
+Q 2 = 20 GeV 2
+
+Q 2 = 45 GeV 2
+
+1.0 
+
+1.5 
+
+> σr(xB, Q 2)
+
+Q 2 = 2 GeV 2
+
+Q 2 = 4.5 GeV 2
+
+Q 2 = 10 GeV 2
+
+Q 2 = 18 GeV 2
+
+Q 2 = 35 GeV 2
+
+Q 2 = 2 GeV 2
+
+Q 2 = 4.5 GeV 2
+
+Q 2 = 10 GeV 2
+
+Q 2 = 18 GeV 2
+
+Q 2 = 35 GeV 2
+
+√ s = 300.3 GeV 
+
+Q 2 = 2.7 GeV 2
+
+Q 2 = 6.5 GeV 2
+
+Q 2 = 12 GeV 2
+
+Q 2 = 22 GeV 2
+
+Q 2 = 45 GeV 2
+
+Q 2 = 2.7 GeV 2
+
+Q 2 = 6.5 GeV 2
+
+Q 2 = 12 GeV 2
+
+Q 2 = 22 GeV 2
+
+Q 2 = 45 GeV 2
+
+Q 2 = 3.5 GeV 2
+
+Q 2 = 8.5 GeV 2
+
+Q 2 = 15 GeV 2
+
+Q 2 = 27 GeV 2
+
+PINN 
+
+1σ Uncertainty 
+
+10 −4 10 −3 
+
+## xB
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+> σr(xB, Q 2)
+
+Q 2 = 2 GeV 2
+
+Q 2 = 4.5 GeV 2
+
+Q 2 = 10 GeV 2
+
+Q 2 = 18 GeV 2
+
+Q 2 = 35 GeV 2
+
+Q 2 = 2 GeV 2
+
+Q 2 = 4.5 GeV 2
+
+Q 2 = 10 GeV 2
+
+Q 2 = 18 GeV 2
+
+Q 2 = 35 GeV 2
+
+10 −4 10 −3 
+
+## xB
+
+√ s = 318 GeV 
+
+Q 2 = 2.7 GeV 2
+
+Q 2 = 6.5 GeV 2
+
+Q 2 = 12 GeV 2
+
+Q 2 = 22 GeV 2
+
+Q 2 = 45 GeV 2
+
+Q 2 = 2.7 GeV 2
+
+Q 2 = 6.5 GeV 2
+
+Q 2 = 12 GeV 2
+
+Q 2 = 22 GeV 2
+
+Q 2 = 45 GeV 2
+
+10 −4 10 −3 
+
+## xB
+
+Q 2 = 3.5 GeV 2
+
+Q 2 = 8.5 GeV 2
+
+Q 2 = 15 GeV 2
+
+Q 2 = 27 GeV 2
+
+Q 2 = 3.5 GeV 2
+
+Q 2 = 8.5 GeV 2
+
+Q 2 = 15 GeV 2
+
+Q 2 = 27 GeV 2
+
+FIG. S2 . The reduced total cross section σr (xB , Q 2) compared with combined HERA e+p data [60, 61] at all available center-of-mass energies, √s = 224 .9, 251 .5, 300 .3, 318 GeV . The quoted χ2/d.o.f. uses the solid curve, and it includes all available energies. 12 0.0 
+
+0.5 
+
+1.0 
+
+> FL(xB, Q 2)
+
+χ2/d. o. f. = 0.733 
+
+Q 2 = 2 GeV 2
+
+Q 2 = 12 GeV 2
+
+Q 2 = 2 GeV 2
+
+Q 2 = 12 GeV 2
+
+Q 2 = 2.5 GeV 2
+
+Q 2 = 15 GeV 2 
+
+> PINN
+> 1σUncertainty
+
+Q 2 = 3.5 GeV 2
+
+Q 2 = 20 GeV 2
+
+Q 2 = 3.5 GeV 2
+
+Q 2 = 20 GeV 2
+
+10 −4 10 −3 
+
+## xB
+
+0.0 
+
+0.5 
+
+1.0 
+
+> FL(xB, Q 2)
+
+Q 2 = 5 GeV 2
+
+Q 2 = 25 GeV 2
+
+Q 2 = 5 GeV 2
+
+Q 2 = 25 GeV 2
+
+10 −4 10 −3 
+
+## xB
+
+Q 2 = 6.5 GeV 2
+
+Q 2 = 35 GeV 2
+
+Q 2 = 6.5 GeV 2
+
+Q 2 = 35 GeV 2
+
+10 −4 10 −3 
+
+## xB
+
+Q 2 = 8.5 GeV 2
+
+Q 2 = 45 GeV 2
+
+Q 2 = 8.5 GeV 2
+
+Q 2 = 45 GeV 2
+
+FIG. S3 . The longitudinal structure function FL(xB , Q 2) compared with HERA e+p data [81] at different Q2 at all available center-of-mass energies.

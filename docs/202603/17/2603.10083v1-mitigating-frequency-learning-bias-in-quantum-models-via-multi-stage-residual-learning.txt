@@ -1,0 +1,911 @@
+Title: Mitigating Frequency Learning Bias in Quantum Models via Multi-Stage Residual Learning
+
+URL Source: https://arxiv.org/pdf/2603.10083v1
+
+Published Time: Thu, 12 Mar 2026 00:03:42 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# Mitigating Frequency Learning Bias in Quantum Models via Multi-Stage Residual Learning 
+
+Ammar Daskin Department of Computer Engineering Istanbul Medeniyet University, Istanbul, Turkiye, 34000 email: adaskin25@gmail.com 
+
+# Abstract 
+
+Quantum machine learning models based on parameter-ized circuits can be viewed as Fourier series approxi-mators. However, they often struggle to learn func-tions with multiple frequency components, particularly high-frequency or non-dominant ones - a phenomenon we term the quantum Fourier parameterization bias .Inspired by recent advances in classical Fourier neu-ral operators (FNOs), we adapt the multi-stage resid-ual learning idea to the quantum domain, iteratively training additional quantum modules on the residuals of previous stages. We evaluate our method on a syn-thetic benchmark composed of spatially localized fre-quency components with diverse envelope shapes (Gaus-sian, Lorentzian, triangular). Systematic experiments show that the number of qubits, the encoding scheme, and residual learning are all crucial for resolving multi-ple frequencies; residual learning alone can improve test MSE significantly over a single-stage baseline trained for the same total number of epochs. Our work provides a practical framework for enhancing the spectral expressiv-ity of quantum models and offers new insights into their frequency-learning behavior. 
+
+# 1 Introduction 
+
+1.1 Motivation 
+
+Varying Temporal and Spatial Frequency Con-tents in Data Analysis. Many scientific and engi-neering tasks rely on understanding how data vary in time or space. This variation is captured by its frequency content: low frequencies represent broad, slowly chang-ing trends, while high frequencies encode rapid fluctu-ations or fine details. In time-series analysis, for ex-ample, low-frequency components reflect long-term pat-terns, and high-frequency components capture noise or short-term events (see e.g. the book [1]). In images, low spatial frequencies correspond to coarse structures, and high spatial frequencies to edges and textures ( e.g. see the recent review [2] or the book on computer vision [3]). Real-world signals, however, rarely have a fixed fre-quency composition. Their dominant modes of vari-ation often shift across the domain—a hallmark of non-stationary systems [4]. Standard tools like the Fourier transform, which provide a global frequency av-erage, fail to capture such localized changes: a transient high-frequency burst may be misinterpreted as a persis-tent feature, or a subtle frequency shift may be missed entirely [5]. This difficulty in learning from multi-scale, non-stationary features arises across many fields: geophysics must extract transient signals from long-term trends [6], neuroscience must separate neural oscillations from background noise [7], and audio processing must localize sound events in dynamic environments [8]. Gravitational wave analysis and wave propagation mod-eling face similar challenges [9]. A common thread is the need to learn from data whose informative structure is distributed across multiple, often overlapping, frequency bands—a problem that also appears in solving partial differential equations (PDEs) with spatially varying coefficients [10]. 
+
+Classical Fourier Neural Operators. Classical Fourier neural operators (FNOs) [11, 12] have proven effective at learning such operators by parameterizing convolutional kernels directly in Fourier space. How-ever, they suffer from a Fourier parameterization bias: they learn dominant frequencies well but struggle with non-dominant ones, especially when large Fourier ker-nels are used [10]. This bias limits their ability to capture multi-scale features. 
+
+Parameterized Quantum Circuits as Fourier Ap-proximators. Schuld et al. [13] showed that quantum machine learning models-especially those based on pa-rameterized circuits-can be expressed as a Fourier-type sum, making them natural approximators for functions with rich frequency content. The accessible frequencies are determined by the eigenvalues of the data-encoding 1
+
+> arXiv:2603.10083v1 [quant-ph] 10 Mar 2026
+
+Hamiltonians. Data re-uploading [14] can enrich this spectrum, and certain encodings have been shown to mit-igate barren plateaus [15]. Despite these advances, a systematic understand-ing of how quantum models learn multi-frequency functions-and how to overcome their inherent spectral biases—remains elusive. 
+
+1.2 Contributions 
+
+In this paper, we i) identify and characterize a quantum Fourier parameterization bias in quantum circuit mod-els through spectral analysis of prediction residuals; ii) adapt the multi-stage residual learning idea from clas-sical FNOs [11] (in particular SpecB-FNO [10]) to the quantum domain, training additional quantum modules sequentially on the residuals of previous stages—an ap-proach analogous to classical boosting; and iii) intro-duce a synthetic benchmark of spatially localized fre-quency components with diverse envelope shapes (Gaus-sian, Lorentzian, triangular) to systematically probe fre-quency learning. Using this benchmark, we study the ef-fects of qubit count (expressivity), residual stage depth, and compare with a single-stage baseline under equal to-tal training epochs. We also analyze frequency-resolved learning curves, residual spectrum evolution, and gra-dient variance scaling (barren plateau diagnostic). Our results show that residual learning can dramatically re-duce test MSE and may also mitigate barren plateaus in early iterations. 
+
+1.3 Outline 
+
+The remainder of this paper is organized as follows. Sec-tion 2 situates our work within the broader literature, reviewing residual learning, boosting, and existing quan-tum residual network architectures. Section 3 intro-duces our synthetic frequency-localized dataset, details the quantum circuit architecture and encoding scheme, and presents the multi-stage residual learning algorithm along with the frequency-domain tools used for analy-sis. In Section 4, we report experimental results, in-cluding systematic studies on qubit count, comparisons with single-stage baselines, frequency-resolved learning curves, residual spectrum evolution, and barren plateau diagnostics. Section 5 interprets the findings, discusses their implications, and acknowledges limitations of the current study. Finally, Section 6 summarizes our contri-butions and outlines directions for future work. 
+
+# 2 Related Work 
+
+2.1 Residual Learning and Boosting 
+
+Residual learning, popularized by ResNets [16], and boosting algorithms such as AdaBoost and gradient boosting are classical techniques that combine multiple weak learners to form a strong learner. The core princi-ple is to focus subsequent models on the errors (residuals) of previous ones, thereby iteratively improving perfor-mance. Recently, Qin et al. [10] introduced SpecB-FNO, which applies this idea to Fourier neural operators by training additional modules on prediction residuals, ef-fectively addressing the Fourier parameterization bias in classical models. In this work, we adapt this concept to the quantum domain, creating a multi-stage residual quantum learner that iteratively trains quantum circuits on the residuals of earlier stages. This adaptation retains the spirit of boosting while leveraging the unique Fourier-series structure of parameterized quantum circuits. 
+
+2.2 Comparison with Quantum Residual Networks 
+
+The concept of incorporating residual connections into quantum neural networks (QNNs) has recently gained significant attention as a strategy to improve trainabil-ity, mitigate barren plateaus, and enhance expressivity. Several distinct approaches have been proposed, each with different architectural motivations and mechanisms. In this subsection, we compare the multi-stage residual quantum learner used in this paper with existing quan-tum residual network designs, highlighting the unique aspects of our stage-wise residual learning for frequency capture. 
+
+Quantum Residual Networks with Auxiliary Qubits. A fundamental approach to implementing quantum residual networks was proposed by Wen et al. [17], who introduced a quantum circuit-based algorithm where residual connection channels are constructed by introducing auxiliary qubits to both data-encoding and trainable blocks. In this design, the residual connection is realized in the subspace of an ancillary qubit, with measurement outcomes determining whether the residual path is activated. This architecture has been theoreti-cally shown to enhance the spectral richness of quantum models: for an l-layer data-encoding, the number of fre-quency generation forms can be extended from one (the difference of the sum of generator eigenvalues) to O(l2), while also improving the flexibility of Fourier coefficients due to additional optimization degrees of freedom in gen-eralized residual operators . However, this expressivity gain comes at the cost of requiring additional qubits and post-selection, which may be prohibitive in the NISQ era. 
+
+ResQNets for Mitigating Barren Plateaus. 
+
+Kashif and Al-Kuwari introduced ResQNets [18] as a so-lution to address the barren plateau problem in quan-tum neural networks. Their approach involves splitting the conventional QNN architecture into multiple quan-tum nodes, each containing its own parameterized quan-tum circuit, and introducing residual connections be-2tween these nodes. Through multiple training exper-iments and analysis of cost function landscapes, they demonstrated that the incorporation of residual connec-tions results in improved training performance and effec-tively mitigates barren plateaus. This approach differs from our work in that ResQNets focus specifically on the trainability problem, whereas we address the Fourier pa-rameterization bias and spectral learning. Additionally, ResQNets use residual connections within a single for-ward pass across multiple nodes, while we employ stage-wise training where each module is trained sequentially on the residuals of previous stages. Heredge et al. [19] also discuss similar nonunitary approaches using linear combination of unitaries (LCU) to implement residual connections. Note that while residual connections can prevent barren plateaus, their approach carries a trade-off in success probability. 
+
+Hybrid Quantum-ResNet Architectures. Several hybrid quantum-classical models have been proposed that combine classical ResNet components with quan-tum circuits. Noh et al. [20] proposed HQResNet, a hybrid quantum residual network for time-series classifi-cation that introduces a classical layer before a quantum convolutional neural network (QCNN), using the QCNN as a residual block. These structures enable shortcut connections and are particularly effective for classifica-tion tasks without requiring a data re-uploading scheme. Their results show that HQResNet achieves high perfor-mance with a relatively small number of trainable pa-rameters. Similarly, Chen et al. [21] introduced hybrid quantum-inspired residual neural networks (ResQNet1 and ResQNet2) using symmetrical circuit models within residual frameworks to prevent gradient explosion and improve robustness to adversarial attacks. Their ex-periments demonstrate that these hybrid models out-perform pure classical models in resistance to adversar-ial parameter attacks with various asymmetrical noise. However, these models are either classical simulations of quantum-inspired operations or hybrids where the resid-ual mechanism resides primarily in the classical domain, whereas our approach implements residual learning en-tirely within the quantum domain. 
+
+2.2.1 Positioning of Our Work 
+
+Our framework similar to classically proposed SpecB-FNO [10] occupies a distinct niche in this landscape. Unlike QResNets, we do not require auxiliary qubits to implement residual connections; instead, we achieve fre-quency enhancement through sequential training of in-dependent quantum modules. Unlike ResQuNNs, which address gradient collapse in multi-layer quanvolutional networks, our method tackles the fundamental spec-tral bias of quantum models—the tendency to priori-tize dominant frequencies while neglecting non-dominant ones. Furthermore, while hybrid quantum-ResNet archi-tectures leverage classical residual blocks, our approach implements residual learning entirely within the quan-tum domain, with each module operating as a quantum circuit that learns to correct the errors of its predeces-sors. A key differentiator is our focus on frequency-domain analysis. Existing quantum residual networks have demonstrated improved expressivity through increased frequency components [17], however, none of these works has systematically analyzed how residual learn-ing progressively captures different frequency compo-nents across stages. Our work provides the first empir-ical demonstration that stage-wise residual training can flatten the residual spectrum, enabling quantum models to learn high-frequency and non-dominant components that are missed by single-stage training. This spectral perspective, inspired by classical Fourier neural opera-tors [11, 10], offers both a diagnostic tool and a practical solution for enhancing the frequency learning capabilities of quantum models. 
+
+# 3 Method 
+
+3.1 Localized Frequency Data 
+
+To systematically study frequency learning, we generate a synthetic 1D regression dataset composed of multiple spatially localized frequency components. Each compo-nent is defined by a central frequency ωk, a spatial centre 
+
+ck, a width wk, an amplitude ak, and an optional enve-lope function ek(x). The target function is 
+
+y(x) = X
+
+> k
+
+ak ek(x; ck, w k) sin(2 πω kx) + η, 
+
+where η is Gaussian noise. We use five components with the frequencies {0.5, 3, 7, 12 , 20 } Hz, each with a differ-ent envelope shape: a Gaussian for the 0.5-Hz compo-nent, a Lorentzian for 3-Hz, a triangular for 7-Hz, and narrow Gaussians for the highest two frequencies (12-Hz and 20-Hz). The total dataset consists of Ntotal = 5000 points uniformly sampled from x ∈ [0 , 2], with no added noise ( η = 0) to isolate the learning behavior. The data are split into training (70%), validation (15%), and test (15%) sets. Figure 1 shows the generated data colored by the dominant frequency region, which is defined as the component whose envelope gives the largest weight at each x.
+
+3.2 Quantum Circuit Architecture 
+
+The quantum model we use in this paper consists of a data-encoding block, L variational layers, and a final lin-ear readout. The circuit is implemented in PennyLane with the ‘default.qubit‘ simulator as depicted in Figure 2 for 2 qubits with single variational layer. All trainable weights are scaled via tanh to lie in [ −π, π ] before use. 30.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 
+
+> x
+> 0.4
+> 0.2
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> y
+> Generated data (colored by dominant region)
+> 0.5 Hz
+> 3.0 Hz
+> 7.0 Hz
+> 12.0 Hz
+> 20.0 Hz
+> Generated data (sorted)
+
+Figure 1: Generated synthetic data (sorted) and test points colored by the dominant frequency region (blue: 0.5-Hz, green: 3-Hz, red: 7-Hz, cyan: 12-Hz, magenta: 20-Hz). 
+
+3.2.1 Data encoding Quantum Machine Learning and Frequency Anal-ysis. Parameterized quantum circuits (PQCs) that en-code classical data through unitary evolutions of the form eixH produce outputs that are Fourier series in x
+
+[13]. The set of accessible frequencies is given by the differences of eigenvalues of H. Data re-uploading [14] – repeatedly applying encoding gates interleaved with trainable parameters – can dramatically increase the fre-quency spectrum. 
+
+Barren Plateaus in Quantum Circuits. Barren plateaus [22], the exponential vanishing of gradients with increasing qubit count or circuit depth, pose a major obstacle for training large quantum models. Certain data-encoding strategies, especially those that break uni-tary t-design behavior, can mitigate plateaus [15]. In this work, motivated by [15], we use a combination of 
+
+RY , RZ , and RX rotations with non-linear functions of 
+
+x (πx , πx 3, π√1 − x2) to enrich the spectrum and im-prove learnability. 
+
+Encoding Features on Qubits and Gates. To in-crease the richness of the Fourier spectrum, we encode the input x using three Pauli rotations on each qubit. When the number of qubits exceeds the input dimension, we use a cyclic assignment that repeats features: for q = 0 , . . . , n qubits :feat = q mod input dim ,RY (πx feat ),RZ (πx 3feat ),RX
+
+
+
+π
+
+q
+
+|1 − x2feat |
+
+
+
+.
+
+This encoding injects the same feature multiple times (data re-uploading) and uses non-linear functions of x to broaden the frequency spectrum. 
+
+3.2.2 Variational layers 
+
+Each layer consists of single-qubit rotations (RY , R Z , R X ) on every qubit, followed by an all-to-all en-tangling block of controlled rotations ( CR Y , CR Z , CR X )with trainable parameters. Using the rotations on all three axes fully exploits the encoding done in three axes. 
+
+3.2.3 Output 
+
+After L layers, we measure the Pauli-Z expectation on each qubit and pass the resulting nqubits values through a classical single linear layer to produce the final output. 
+
+3.3 Multi-Stage Residual Quantum Learner 
+
+Algorithm 1 inspired by SpecB-FNO [10] presents the multi-stage residual learning procedure used in this pa-per. The algorithm trains a sequence of quantum mod-ules. The first module M1 is trained on the origi-nal input–output pairs ( x, y ). For subsequent stages 
+
+s = 2 , . . . , S , we compute the residual 
+
+r(s) = y −
+
+> s−1
+
+X
+
+> t=1
+
+Mt
+
+  x, M t−1(· · · ) , (1) where Mt−1(· · · ) denotes the output of the previous mod-ule concatenated with the original input. Each new mod-ule is trained to predict its own residual r(s). At infer-ence, predictions from all modules are summed. Algo-rithm 1 provides the full details. 
+
+Algorithm 1 Multi-Stage Residual Quantum Learning 
+
+Require: Training data {(xi, y i)}Ni=1 , number of stages 
+
+S, hyperparameters for each module  
+
+> 1:
+
+F0(x) ← 0 
+
+> 2:
+
+for s = 1 to S do  
+
+> 3:
+
+Compute residuals r(s) 
+
+> i
+
+= yi − Fs−1(xi) 
+
+> 4:
+
+if s = 1 then  
+
+> 5:
+
+Input features: z(1)  
+
+> i
+
+= xi 
+
+> 6:
+
+else  
+
+> 7:
+
+Input features: z(s) 
+
+> i
+
+= [ xi, M s−1(z(s−1)  
+
+> i
+
+)]  
+
+> 8:
+
+end if  
+
+> 9:
+
+Train quantum model Ms on {(z(s) 
+
+> i
+
+, r (s) 
+
+> i
+
+)} 
+
+> 10:
+
+Update Fs(x) = Fs−1(x) + Ms([ x, M s−1(· · · )])  
+
+> 11:
+
+end for  
+
+> 12:
+
+return {M1, . . . , M S }
+
+3.4 Frequency-Domain Analysis 
+
+To understand which frequency components are learned at each stage, we compute the discrete Fourier transform of the model’s predictions on a dense uniform grid. Let 
+
+xgrid be a fine grid covering the input domain, and ygrid 
+
+the clean target values. For stage s, we obtain predictions 40          
+
+> 1
+> Data encoding .....................................................................................Variational layer..................................................................................... Measurement
+> RY
+> RY
+> RZ
+> RZ
+> RX
+> RX
+> RY
+> RY
+> RZ
+> RZ
+> RX
+> RX
+> RY RZ RX
+> RY RZ RX
+> RY RZ RX
+> RY RZ RX
+
+Figure 2: The quantum circuit depicted for 2 qubits with single variational layer. ˆy(s)grid . The amplitude of a target frequency ω is extracted from the Fourier spectrum as F{ ˆy(s)}(ω) . Comparing these amplitudes with the true amplitudes shows how each frequency is captured progressively. Following the approach in [10], we also analyze the spectrum of the residual ygrid − ˆy(s)grid after each stage. A flattening of the residual spectrum indicates that the model is shifting its focus from dominant to non-dominant frequencies, thereby learning a more bal-anced representation of the target function. 
+
+# 4 Experiments 
+
+4.1 Dataset and Training Details 
+
+The dataset consists of Ntrain = 3500, Nval = 750, and 
+
+Ntest = 750 points uniformly sampled from x ∈ [0 , 2], with noise level σ = 0 .0 (unless stated otherwise). Each quantum model uses nqubits qubits (varied from 2 to 10), 
+
+L = 2 layers, and is trained for E = 25 epochs per stage with Adam (learning rate 0 .005). For baseline compar-isons, a single-stage model is trained for 4 × 25 = 100 epochs to match the total computational budget of a 4-stage residual learner. The parameters are summarized in Table 1. Table 1: Hyperparameter settings. Parameter Value Training samples 3500 Validation samples 750 Test samples 750 Batch size 64 Learning rate 0.005 Epochs per stage 25 Number of stages 4Qubit range 2–10 Layers per module 2Optimiser Adam Noise level 0.0 
+
+4.2 Results and Visualization 
+
+4.2.1 Effect of Qubit Count on Expressivity 
+
+We trained four-stage residual learners with nqubits =2, . . . , 10 and recorded the test MSE after each stage. Figure 3 (left) shows the MSE versus qubit count for all four stages. As expected, increasing the number of qubits reduces the error, though the gains diminish after about eight qubits. The right panel displays the relative improvement from stage 1 for each qubit count; improve-ments are most pronounced for smaller qubit budgets, in-dicating that residual learning is particularly beneficial when the base model has limited expressivity. This observation mirrors the findings of Qin et al. [10] for classical FNOs: a larger Fourier kernel (analogous to more qubits) only helps if the model can effectively use all frequency parameters. Residual learning helps uti-lize that capacity, but if the base capacity is too low, later stages cannot further improve performance. In particular, while the first stage captures the dominant low-frequency components, the second stage learns most of the remaining structure. Later stages struggle because the residual becomes dominated by noise or very subtle patterns that the model, with its fixed capacity, cannot easily capture. In other words, during training, the quantum model—like the FNO—can rapidly learn the coarse, dominant frequency structure of the target function in the first stage. However, optimization may slow or stall when learning the finer details represented by higher or non-dominant frequencies. 
+
+4.2.2 Comparison with Baseline 
+
+We compared the final stage (stage 4) of the residual learner with a single-stage model trained for the same total number of epochs (100). Figure 4 (left) shows the final test MSE for both models across all qubit counts; the residual learner consistently outperforms the base-line. The right panel displays the relative improvement, which is particularly pronounced for low qubit counts and remains substantial even for 10 qubits. 
+
+4.2.3 Frequency-Resolved Learning Curves 
+
+For each target frequency, we extracted its amplitude from the predictions after every stage. Figure 5 shows the 52 3 4 5 6 7 8 9 10       
+
+> Number of Qubits
+> 0.01
+> 0.02
+> 0.03
+> 0.04
+> 0.05
+> Test MSE
+> Test MSE per Stage vs. Qubit Count
+> Stage 1
+> Stage 2
+> Stage 3
+> Stage 4
+> 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+> Stage
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> Relative Improvement from Stage 1
+> Improvement per Stage
+> 2 qubits
+> 3 qubits
+> 4 qubits
+> 5 qubits
+> 6 qubits
+> 7 qubits
+> 8 qubits
+> 9 qubits
+> 10 qubits
+
+Figure 3: Left: Test MSE per stage versus number of qubits. Right: Relative improvement, defined as (MSE stage-1 −
+
+MSE stage-s)/MSE stage-1 .2 3 4 5 6 7 8 9 10     
+
+> Number of Qubits
+> 0.01
+> 0.02
+> 0.03
+> 0.04
+> 0.05
+> Test MSE
+> Final Test MSE: Baseline vs Residual
+> Baseline (1 stage, 100 epochs)
+> Residual (4 stages, 25 each)
+> 246810
+> Number of Qubits
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+> 0.20
+> 0.25
+> 0.30
+> 0.35
+> 0.40
+> Relative Improvement
+> Improvement of Residual over Baseline
+
+Figure 4: Left: Final test MSE of the baseline model (1 stage, 100 epochs) versus the residual model (4 stages, 25 epochs each). Right: Relative improvement of the residual model over the baseline. results for a model with six qubits trained for 25 epochs per stage. Low frequencies (e.g., 0.5 Hz) are captured almost perfectly by stage 1. Higher frequencies (e.g., 12 Hz and 20 Hz) require additional stages to approach the true amplitude. This confirms that the residual modules focus on the harder-to-learn frequency components. Figure 6 plots the amplitude spectrum of the predic-tion residuals after each stage. The spectrum progres-sively approaches the true spectrum as the stages ad-vance, indicating that later stages continue to refine the learned representation. 
+
+4.2.4 Barren Plateau Diagnostics 
+
+We measured the variance of gradients over random ini-tializations for qubit counts 2 , . . . , 10 and layers 1 , . . . , 4. Figure 7 shows that the decay in variance is less severe when increasing the number of qubits than when increas-ing the number of layers. For example, going from 9 to 10 qubits results in little to no change in gradient vari-ance. This behavior aligns with the findings of [15] for structured encodings. 
+
+4.3 Ablation Studies 
+
+We also tested the effect of encoding complexity (only 
+
+RY vs. all three rotations) and found that the richer encoding significantly improves final MSE, especially for high-frequency components (results not shown for brevity). Additionally, we verified that the performance gains of residual learning are not merely due to increased parameter count; increasing the hidden dimension of a single-stage model to match the total parameters of the 4-stage ensemble yielded much smaller improvements. 
+
+# 5 Discussion 
+
+The experiments presented in this paper demonstrate that quantum models exhibit a clear spectral bias: low, dominant frequencies are learned quickly, while higher frequencies require more capacity and additional stages. This is summarized in Figures 8 and 9, which show the test predictions, frequency component amplitudes, train-ing loss, and validation loss curves for each stage us-ing three and eight qubits, respectively. As can be ob-served from these figures, the proposed multi-stage resid-ual learning effectively shifts focus to the residuals, al-lowing later modules to capture previously neglected fre-quencies. This behavior mirrors that observed in classi-cal FNOs [10] and suggests that boosting-like strategies are broadly applicable to models with a Fourier-based inductive bias. The choice of encoding is critical. The combination of 
+
+RY , RZ , and RX rotations with non-linear functions of x
+
+provides a richer frequency spectrum and, importantly, 61 2 3 4            
+
+> Stage
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> Amplitude
+> Frequency 0.5 Hz
+> True
+> Learned
+> 1234
+> Stage
+> 0
+> 20
+> 40
+> 60
+> Amplitude
+> Frequency 3.0 Hz
+> True
+> Learned
+> 1234
+> Stage
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> 30
+> Amplitude
+> Frequency 7.0 Hz
+> True
+> Learned
+> 1234
+> Stage
+> 0.0
+> 2.5
+> 5.0
+> 7.5
+> 10.0
+> 12.5
+> 15.0
+> Amplitude
+> Frequency 12.0 Hz
+> True
+> Learned
+> 1234
+> Stage
+> 0
+> 1
+> 2
+> 3
+> 4
+> Amplitude
+> Frequency 20.0 Hz
+> True
+> Learned
+
+Figure 5: Amplitudes of each target frequency in the true function and after stages 1–4, obtained with six qubits and 25 epochs per stage. The bars approach the true values as training progresses (similar behavior is observed for other qubit counts). 0 50 100 150 200 250     
+
+> Frequency (Hz)
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> 10 2
+> Amplitude (log scale)
+> Residual Spectrum After Each Stage (qubits=6)
+> Stage 1
+> Stage 2
+> Stage 3
+> Stage 4
+> True signal
+
+Figure 6: Fourier amplitude of the residual after each stage (six qubits). The spectrum converges toward the true spectrum as stages progress. 2 3 4 5 6 7 8 9 10     
+
+> Number of Qubits
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> Gradient Variance (log scale)
+
+Gradient Variance Scaling Barren Plateau Diagnostic 
+
+> Polynomial (1/n)
+> Exponential (exp(-0.5 n))
+> Layers = 1
+> Layers = 2
+> Layers = 3
+> Layers = 4
+
+Figure 7: Gradient variance (log scale) vs. number of qubits for different layer counts. Dashed lines show poly-nomial (1 /n ) and exponential ( e−0.5n) references. The decay in variance is less pronounced when increasing the number of qubits (e.g., from 9 to 10 qubits) than when increasing the number of layers. helps avoid barren plateaus. The gradient variance scal-ing we observe (polynomial rather than exponential) in-dicates that our encoding preserves trainability even with up to ten qubits and four layers. Limitations of our study include the use of a synthetic one-dimensional dataset; extending to higher dimensions and real-world tasks (e.g., time series or PDE data) is an important next step. Furthermore, we have not yet explored adaptive selection of the number of stages or the possibility of freezing earlier modules to reduce training cost. 
+
+# 6 Conclusion and Future Work 
+
+n this paper, we introduced a multi-stage residual quan-tum learner to study and mitigate the frequency learn-ing bias inherent in parameterized quantum circuits. Through systematic experiments on a multi-frequency dataset, we demonstrated that residual learning signif-icantly improves test MSE compared to a single-stage baseline trained for the same total number of epochs. We also analyzed gradient variance and found that our encoding helps avoid barren plateaus, thereby preserving trainability. Future work will extend this approach to problems with higher-dimensional inputs, investigate adaptive se-lection of the number of stages, and apply the method to real-world scientific data such as seismic signals or fi-nancial time series. Alternative quantum encodings (e.g., amplitude encoding, IQP circuits) can also be explored to study frequency spectra both theoretically and empir-ically, and to compare different architectural choices. 
+
+# Acknowledgments 
+
+The author acknowledges the use of DeepSeek AI for proofreading and language refinement during the prepa-ration of this manuscript. 70.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.50 
+
+0.25 
+
+0.00 
+
+0.25 
+
+0.50 
+
+0.75 
+
+> y
+
+Generated data and test data 
+
+> Generated data (sorted)
+> Test data
+
+0.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.50 
+
+0.25 
+
+0.00 
+
+0.25 
+
+0.50 
+
+0.75 
+
+> y
+
+Stage 1 prediction (MSE = 0.028116) 
+
+> Generated
+> Prediction (stage 1)
+
+0.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.50 
+
+0.25 
+
+0.00 
+
+0.25 
+
+0.50 
+
+0.75 
+
+> y
+
+Stage 2 prediction (MSE = 0.017816) 
+
+> Generated
+> Prediction (stage 2)
+
+0.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.50 
+
+0.25 
+
+0.00 
+
+0.25 
+
+0.50 
+
+0.75 
+
+> y
+
+Stage 3 prediction (MSE = 0.015562) 
+
+> Generated
+> Prediction (stage 3)
+
+0.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.50 
+
+0.25 
+
+0.00 
+
+0.25 
+
+0.50 
+
+0.75 
+
+> y
+
+Stage 4 prediction (MSE = 0.015190) 
+
+> Generated
+> Prediction (stage 4)
+
+0.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.4 
+
+0.2 
+
+0.0 
+
+0.2 
+
+0.4 
+
+> residual
+
+Residuals for each stage 
+
+> Residual stage 1
+> Residual stage 2
+> Residual stage 3
+> Residual stage 4
+
+0.5 Hz 3.0 Hz 7.0 Hz 12.0 Hz 20.0 Hz 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+120 
+
+> Amplitude
+
+Frequency component amplitudes 
+
+> True (clean)
+> Stage 1
+> Stage 2
+> Stage 3
+> Stage 4
+
+0 5 10 15 20 25 
+
+Epoch 
+
+0.02 
+
+0.03 
+
+0.04 
+
+0.05 
+
+0.06 
+
+0.07 
+
+> Loss (MSE)
+
+Training Loss per Stage 
+
+> Stage 1
+> Stage 2
+> Stage 3
+> Stage 4
+
+0 5 10 15 20 25 
+
+Epoch 
+
+0.02 
+
+0.03 
+
+0.04 
+
+0.05 
+
+> Loss (MSE)
+
+Validation Loss per Stage 
+
+> Stage 1
+> Stage 2
+> Stage 3
+> Stage 4
+
+Figure 8: Residual learning results for three qubits: test predictions, frequency component amplitudes, training loss, and validation loss curves for each stage. 80.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.50 
+
+0.25 
+
+0.00 
+
+0.25 
+
+0.50 
+
+0.75 
+
+> y
+
+Generated data and test data 
+
+Generated data (sorted) 
+
+Test data 
+
+0.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.50 
+
+0.25 
+
+0.00 
+
+0.25 
+
+0.50 
+
+0.75 
+
+> y
+
+Stage 1 prediction (MSE = 0.013100) 
+
+Generated 
+
+Prediction (stage 1) 
+
+0.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.50 
+
+0.25 
+
+0.00 
+
+0.25 
+
+0.50 
+
+0.75 
+
+> y
+
+Stage 2 prediction (MSE = 0.010130) 
+
+Generated 
+
+Prediction (stage 2) 
+
+0.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.50 
+
+0.25 
+
+0.00 
+
+0.25 
+
+0.50 
+
+0.75 
+
+> y
+
+Stage 3 prediction (MSE = 0.009346) 
+
+Generated 
+
+Prediction (stage 3) 
+
+0.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.50 
+
+0.25 
+
+0.00 
+
+0.25 
+
+0.50 
+
+0.75 
+
+> y
+
+Stage 4 prediction (MSE = 0.009224) 
+
+Generated 
+
+Prediction (stage 4) 
+
+0.0 0.5 1.0 1.5 2.0 
+
+x
+
+0.4 
+
+0.2 
+
+0.0 
+
+0.2 
+
+> residual
+
+Residuals for each stage 
+
+Residual stage 1 
+
+Residual stage 2 
+
+Residual stage 3 
+
+Residual stage 4 
+
+0.5 Hz 3.0 Hz 7.0 Hz 12.0 Hz 20.0 Hz 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+120 
+
+> Amplitude
+
+Frequency component amplitudes 
+
+True (clean) 
+
+Stage 1 
+
+Stage 2 
+
+Stage 3 
+
+Stage 4 
+
+0 5 10 15 20 25 
+
+Epoch 
+
+0.01 
+
+0.02 
+
+0.03 
+
+0.04 
+
+0.05 
+
+0.06 
+
+> Loss (MSE)
+
+Training Loss per Stage 
+
+Stage 1 
+
+Stage 2 
+
+Stage 3 
+
+Stage 4 
+
+0 5 10 15 20 25 
+
+Epoch 
+
+0.010 
+
+0.015 
+
+0.020 
+
+0.025 
+
+0.030 
+
+> Loss (MSE)
+
+Validation Loss per Stage 
+
+Stage 1 
+
+Stage 2 
+
+Stage 3 
+
+Stage 4 Figure 9: Residual learning results for eight qubits: test predictions, frequency component amplitudes, training loss, and validation loss curves for each stage. 9Data Availability 
+
+The code and synthetic data generation scripts used in this study are publicly available on GitHub at https:// github.com/adaskin/quantum-residual-learning .All experimental results can be reproduced using the provided code. The synthetic datasets described in Section 3.1 can be generated directly from the scripts. 
+
+# References 
+
+[1] R. B. Pachori, Time-frequency analysis techniques and their applications . CRC Press, 2023. [2] Q. Zhang, P. Yang, H. Wen, X. Li, H. Wang, F. Sun, Z. Song, Z. Lai, R. Ma, R. Han, et al. , “Beyond the time domain: Recent advances on frequency transforms in time series analysis,” arXiv e-prints ,pp. arXiv–2504, 2025. [3] C. H. Chen, Handbook of pattern recognition and computer vision . World scientific, 2015. [4] M. De Domenico, “More is different in real-world multilayer networks,” Nature Physics , vol. 19, no. 9, pp. 1247–1262, 2023. [5] A. Dixit and S. Jain, “Contemporary approaches to analyze non-stationary time-series: Some solu-tions and challenges,” Recent Advances in Com-puter Science and Communications (Formerly: Re-cent Patents on Computer Science) , vol. 16, no. 2, pp. 61–80, 2023. [6] M. Kano, K. Yano, Y. Tanaka, T. Takabatake, and Y. Ohta, “Spatio-temporal characteristics in the geonet f5 solution in the frequency domain esti-mated based on the robust spectral analysis,” Earth, Planets and Space , vol. 77, no. 1, p. 103, 2025. [7] M. Gerster, G. Waterstraat, V. Litvak, K. Lehnertz, A. Schnitzler, E. Florin, G. Curio, and V. Nikulin, “Separating neural oscillations from aperiodic 1/f activity: challenges and recommendations,” Neu-roinformatics , vol. 20, no. 4, pp. 991–1012, 2022. [8] B. Chen, M. Wang, and Y. Gu, “Joint spatio-temporal-frequency representation learning for im-proved sound event localization and detection,” Sen-sors , vol. 24, no. 18, p. 6090, 2024. [9] S. Alkhadhr and M. Almekkawy, “Multifrequency encoding in pinns for precision wave equation mod-eling in inhomogeneous media,” in 2024 IEEE Ultra-sonics, Ferroelectrics, and Frequency Control Joint Symposium (UFFC-JS) , pp. 1–4, IEEE, 2024. [10] S. Qin, F. Lyu, W. Peng, D. Geng, J. Wang, X. Tang, S. Leroyer, N. Gao, X. Liu, and L. L. Wang, “Toward a better understanding of fourier neural operators from a spectral perspective,” arXiv preprint arXiv:2404.07200 , 2024. [11] Z. Li, N. Kovachki, K. Azizzadenesheli, B. Liu, K. Bhattacharya, A. Stuart, and A. Anand-kumar, “Fourier neural operator for paramet-ric partial differential equations,” arXiv preprint arXiv:2010.08895 , 2020. [12] V. Duruisseaux, J. Kossaifi, and A. Anandkumar, “Fourier neural operators explained: A practi-cal perspective,” arXiv preprint arXiv:2512.01421 ,2025. [13] M. Schuld, R. Sweke, and J. J. Meyer, “Effect of data encoding on the expressive power of varia-tional quantum-machine-learning models,” Physical Review A , vol. 103, no. 3, p. 032430, 2021. [14] A. P´ erez-Salinas, A. Cervera-Lierta, E. Gil-Fuster, and J. I. Latorre, “Data re-uploading for a universal quantum classifier,” Quantum , vol. 4, p. 226, 2020. [15] M. Cerezo, M. Larocca, D. Garc´ ıa-Mart´ ın, N. L. Diaz, P. Braccia, E. Fontana, M. S. Rudolph, P. Bermejo, A. Ijaz, S. Thanasilp, et al. , “Does prov-able absence of barren plateaus imply classical sim-ulability?,” Nature Communications , vol. 16, no. 1, p. 7907, 2025. [16] K. He, X. Zhang, S. Ren, and J. Sun, “Deep residual learning for image recognition,” in Proceedings of the IEEE conference on computer vision and pattern recognition , pp. 770–778, 2016. [17] J. Wen, Z. Huang, D. Cai, and L. Qian, “En-hancing the expressivity of quantum neural net-works with residual connections,” Communications Physics , vol. 7, no. 1, p. 220, 2024. [18] M. Kashif and S. Al-Kuwari, “Resqnets: a residual approach for mitigating barren plateaus in quan-tum neural networks,” EPJ Quantum Technology ,vol. 11, no. 1, pp. 1–28, 2024. [19] J. Heredge, M. West, L. Hollenberg, and M. Sevior, “Nonunitary quantum machine learning,” Physical Review Applied , vol. 23, no. 4, p. 044046, 2025. [20] D.-I. Noh, S.-G. Jeong, and W.-J. Hwang, “Hy-brid quantum resnet for time series classification,” 
+
+IEEE Transactions on Emerging Topics in Comput-ing , vol. 13, no. 3, pp. 1083–1098, 2025. [21] A. Chen, H.-L. Yin, Z.-B. Chen, and S. Wu, “Hybrid quantum-inspired resnet and densenet for pattern recognition,” Neurocomputing , vol. 668, p. 132357, 2026. 10 [22] J. R. McClean, S. Boixo, V. N. Smelyanskiy, R. Bab-bush, and H. Neven, “Barren plateaus in quantum neural network training landscapes,” Nature com-munications , vol. 9, no. 1, p. 4812, 2018. 11

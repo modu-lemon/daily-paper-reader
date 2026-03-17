@@ -1,0 +1,3683 @@
+Title: Upper Generalization Bounds for Neural Oscillators
+
+URL Source: https://arxiv.org/pdf/2603.09742v1
+
+Published Time: Wed, 11 Mar 2026 01:22:11 GMT
+
+Number of Pages: 25
+
+Markdown Content:
+# Upper Generalization Bounds for Neural Oscillators 
+
+Zifeng Huang a, ∗, Konstantin M. Zuev b, Yong Xia c, Michael Beer a,d,e   
+
+> aInstitute for Risk and Reliability, Leibniz University Hannover, Callinstraße 34, Hannover, 30167, Germany
+> bDepartment of Computing and Mathematical Sciences, California Institute of Technology, Pasadena, California, United States
+> cJoint Research Centre for Marine Infrastructure, Department of Civil and Environmental Engineering, The Hong Kong Polytechnic University, Kowloon, Hong Kong, China
+> dDepartment of Civil and Environmental Engineering, University of Liverpool, Liverpool, L69 3GH, United Kingdom
+> eInternational Joint Research Center for Resilient Infrastructure &International Joint Research Center for Engineering Reliability and Stochastic Mechanics, Tongji University, Shanghai, 200092, China
+
+Abstract 
+
+Neural oscillators that originate from the second-order ordinary di ff erential equations (ODEs) have shown competi-tive performance in learning mappings between dynamic loads and responses of complex nonlinear structural systems. Despite this empirical success, theoretically quantifying the generalization capacities of their neural network archi-tectures remains undeveloped. In this study, the neural oscillator consisting of a second-order ODE followed by a multilayer perceptron (MLP) is considered. Its upper probably approximately correct (PAC) generalization bound for approximating causal and uniformly continuous operators between continuous temporal function spaces and that for approximating the uniformly asymptotically incrementally stable second-order dynamical systems are derived by leveraging the Rademacher complexity framework. The theoretical results show that the estimation errors grow poly-nomially with respect to both the MLP size and the time length, thereby avoiding the curse of parametric complexity. Furthermore, the derived error bounds demonstrate that constraining the Lipschitz constants of the MLPs via loss function regularization can improve the generalization ability of the neural oscillator. A numerical study considering a Bouc-Wen nonlinear system under stochastic seismic excitation validates the theoretically predicted power laws of the estimation errors with respect to the sample size and time length, and confirms the e ff ectiveness of constraining MLPs’ matrix and vector norms in enhancing the performance of the neural oscillator under limited training data. 
+
+Keywords: Neural oscillator, PAC generalization bound, Causal continuous operator, Rademacher complexity, Lipschitz regularization 
+
+1. Introduction 
+
+Accurately modeling mappings among long sequences or continuous temporal functions is a significant challenge in machine learning, yet it is critical for a wide range of applications in science and engineering. To address this challenge, numerous neural network architectures have been proposed for sequential and functional learning tasks, which includes recurrent neural networks (RNNs) (Rumelhart et al., 1986) and their enhanced variants (Hochreiter and Schmidhuber, 1997; Cho et al., 2014), attention-based architectures (Vaswani et al., 2017), state-space (SS) models (Gu et al., 2020, 2021, 2022), and neural oscillators (Rusch and Mishra, 2020, 2021; Lanthaler et al., 2023; Rusch and Rus, 2024; Huang and Xia, 2025). Originating from ordinary di ff erential equations (ODEs), SS models and neural oscillators combine the fast inference capability of RNNs with the competitive long-range sequence learning performance of attention-based architectures (Gu and Dao, 2023; Rusch and Rus, 2024). Neural oscillators have been theoretically demonstrated to alleviate vanishing and exploding gradient problems (Rusch and Mishra, 2020, 2021) and to ensure stable dynamics in learning long-range dependencies (Rusch and Rus, 2024). Furthermore, numerical        
+
+> ∗Corresponding author.
+> Email addresses: zifeng.huang@irz.uni-hannover.de (Zifeng Huang), kostia@caltech.edu (Konstantin M. Zuev),
+> ceyxia@polyu.edu.hk (Yong Xia), beer@irz.uni-hannover.de (Michael Beer)
+> arXiv:2603.09742v1 [cs.LG] 10 Mar 2026
+
+studies have demonstrated that neural oscillators are capable of accurately learning and modeling the relationships between random dynamic loads and the corresponding responses of complex nonlinear structural systems (Huang and Xia, 2025). In addition to the empirical success of SS models and neural oscillators in practical applications, advancing their theoretical understanding, especially in quantifying the approximation and generalization bounds of their network architectures, is also a significant issue. Several studies have theoretically investigated the approximation and general-ization bounds of SS models. Li et al. (2022) proved an approximation bound for linear RNNs in universally approx-imating linear, causal, continuous, regular, and time-homogeneous operators between continuous temporal function spaces. Orvieto et al. (2024) derived an approximation bound for the SS models consisting of a time-discrete linear RNN followed by an multilayer perceptron (MLP) in modeling the mappings between finite-length sequences. Liu and Li (2024) derived a probably approximately correct (PAC) upper generalization bound for a linear SS model using the Rademacher complexity. In this bound, the Rademacher complexity constant incorporates the model parameters and the expectation and variance of sub-Gaussian input function processes. Under the constraint that the spectral ab-scissa of the state matrix is smaller than zero, Honarpisheh et al. (2025) established a length-independent norm-based generalization bound for the selective SS model. Both studies only considered the mappings from input sequences or continuous temporal functions to vector outputs at a final time instant. By leveraging a layer-by-layer Rademacher contraction approach, Rácz et al. (2024) derived a PAC upper generalization bound for a deep SS model consisting of a time-discrete linear RNN followed by an MLP. This bound is still limited to the mappings from input sequences to scalar outputs, and the estimation error (di ff erence between the generalization error and the approximation error) in this generalization bound grows exponentially with the depth of the employed MLP. In addition to these results, the approximation and generalization properties of the traditional RNNs for approximating continuous mappings be-tween continuous temporal function spaces (Hanson and Raginsky, 2020; Hanson et al., 2021; Fermanian et al., 2021; Hanson and Raginsky, 2024) and those for approximating fading memory causal operators of time-discrete sequences (Grigoryeva and Ortega, 2018a,b; Gonon et al., 2020, 2023; Yasumoto and Tanaka, 2025) have been studied. In contrast to SS models, theoretical analyses of the approximation and generalization properties of neural oscillators remain limited. For a neural oscillator architecture consisting of a second-order ODE followed by an MLP, Huang et al. (2025) established its upper approximation bounds for approximating causal continuous operators between con-tinuous temporal function spaces and for approximating stable second-order dynamical systems. The generalization bounds of neural oscillators, however, remain unexplored. In this study, the neural oscillator consisting of a second-order ODE followed by an MLP is considered. Its upper PAC generalization bound for approximating causal and uniformly continuous operators between continuous temporal function spaces and that for approximating uniformly asymptotically incrementally stable second-order dynamical systems are established. In Section 2, the neural oscillator architecture is introduced, some necessary assumptions are outlined, and the established theoretical approximation bounds of the neural oscillator in Huang et al. (2025) are briefly reviewed. The newly derived theoretical generalization bounds of the neural oscillator are also informally provided in Section 2 to facilitate understanding. In Section 3, the formal statements of two theorems that establish the generalization bounds for the neural oscillator, accompanied by the supporting lemmas essential for their proofs, are provided. These generalization bounds reveal that constraining the Lipschitz constants of the employed MLPs in the loss function can improve the generalization capability of the neural oscillator. In Section 4, a numerical study based on a Bouc-Wen nonlinear system under stochastic seismic excitation validates the power laws of the established estimation errors with respect to the sample size and time length, and confirms that constraining the MLPs’ matrix and vector norms can improve performance of the neural oscillator under limited training data. 
+
+Notations: For an n-dimensional vector a = [a1, a2, ..., an]⊤, its Lr-norm is |a|r = [Pni=1 |ai|r]1/r for 1 ≤ r < ∞
+
+and |a|r = max 1≤i≤n |ai| for r = + ∞. |a| is short for |a|1. For a matrix M = [mi j ]p×q, its Lr,s-norm is |M|r,s =
+
+h|m1|r, |m2|r, . . . , |mq|r
+
+i⊤
+
+> s
+
+, where 1 ≤ r, s ≤ +∞ and m j is the jth column vector of M. The Lr-norm of M is 
+
+|M|r = sup |a|r =1 |Ma |r/|a|r. Z and R respectively represent the integer and real number spaces. ⌊·⌋ and ⌈·⌉ respectively represent the floor and ceiling functions. Re( ·) and Im( ·) respectively represent the real and imaginary parts of a complex number. Rp×q represents the p × q-dimensional real matrix space. f ′(t) = d f (t)/dt and f ′′ (t) = d2 f (t)/dt2.
+
+C0([0 , T ]; Rp) represents a p-dimensional real-valued continuous function space defined over [0 , T ] with respect to 
+
+L∞-norm ∥·∥ L∞ . For u(t) = [u1(t), u2(t), ..., up(t)] ⊤ ∈ C0([0 , T ]; Rp), its L∞-norm is ∥u(t)∥L∞ = sup t∈[0 ,T ] |u(t)|, L∞[0 , t0]-norm ∥·∥ L∞[0 ,t0] is ∥u(t)∥L∞[0 ,t0] = sup t∈[0 ,t0] |u(t)|, and L2-norm ∥·∥ L2 is ∥u(t)∥L2 =
+
+qR T 
+
+> 0
+
+|u(t)|22dt. Big O notation: 2f (n) = O g(n) if there exist positive constants c and n0 such that f (n) ≤ c · g(n) for all n ≥ n0.
+
+2. Neural Oscillator 
+
+A neural oscillator architecture mapping u(t) = [u1(t), u2(t), ..., up(t)] ⊤ ∈ C0([0 , T ]; Rp) to y(t) =
+
+[y1(t), y2(t), ..., yq(t)] ⊤ ∈ C0([0 , T ]; Rq) is (Huang et al., 2025) 
+
+
+
+x′′ (t) = Γ[x(t), x′(t), u(t)] 
+
+y(t) = Π[x(t), u(0) , t] (1) with x(0) = x′(0) = 0, where x(t) = [x1(t), x2(t), ..., xr(t)] ⊤ is an intermediate r-dimensional real-valued state function, 
+
+Γ(·) and Π(·) are two MLPs 
+
+Γ x(t), x′(t), u(t) = W2σΓ
+
+
+
+W1
+
+hx⊤(t), x′⊤ (t), u⊤(t)i⊤
+
++ b1
+
+
+
++ b2, (2) 
+
+Π [x(t), u(0) , t] = ˜WhΠ σΠ
+
+
+
+. . . σ Π
+
+ ˜W1
+
+hx⊤(t), u⊤(0) , ti⊤
+
++ ˜b1
+
+ 
+
++ ˜bhΠ , (3) 
+
+Wi, i = 1 and 2, ˜W j, j = 1, 2,..., hΠ , are real-valued tunable weight matrices, bi and ˜ b j are real-valued tunable bias vectors, hΠ is the depth of Π(·), and σΓ (·) and σΠ (·) are respectively the activation functions of Γ(·) and Π(·). Unless otherwise specified, these two activation functions are set to the Rectified Linear Unit (ReLU) (Nair and Hinton, 2010), defined as σΓ (x) = σΠ (x) = σReLU (x) = max(0 , x), in this study. The input layer widths of Γ(·) and Π(·) are denoted as wΓ,in and wΠ,in , respectively. The output layer widths of Γ(·) and Π(·) are denoted as wΓ,out and wΠ,out ,respectively. The largest hidden layer widths of Γ(·) and Π(·) are denoted as wΓ and wΠ , respectively. The neural oscillator in Eq. (1) can be written as y(t) = Π ◦ ΦΓ [u(τ)]( t) = Π {ΦΓ [u(τ)]( t), u(0) , t}, where ◦ is the composition operator and x(t) = Φ Γ [u(τ)] ( t) represents the mapping governed by the second-order ODE in Eq. (1). Two theoretical approximation bounds of the neural oscillator in Eq. (1), corresponding respectively to the ap-proximation of causal and uniformly continuous operators and that of uniformly asymptotically incrementally stable second-order dynamical systems, have been established in Huang et al. (2025). These two approximation bounds, to-gether with some necessary assumptions and the definition of uniformly asymptotically incrementally stable systems, are summarized below. 
+
+Assumption 1: C0([0 , T ]; Rp) with T ≥ 1 is a Banach space equipped with the L∞-norm. Its metric is defined as 
+
+∥u1(t) − u2(t)∥L∞ for u1(t) and u2(t) ∈ C0([0 , T ]; Rp). 
+
+Assumption 2: K is a compact subset of C0([0 , T ]; Rp) and it is closed. From the Arzelà-Ascoli theorem (Beattie and Butzmann, 2013), all functions belonging to K are uniformly bounded and there exists a constant BK such that 
+
+∥ui(t)∥L∞ ≤ BK for all u(t) ∈ K and 1 ≤ i ≤ p, where ui(t) is the ith element of u(t). It is assumed BK ≥ 1. In addition, all functions belonging to K are equicontinuous and there exists a continuous modulus of continuity 
+
+ϕK (t) = [ϕK,1(t), ϕ K,2(t), ..., ϕ K,p(t)] ⊤ such that for arbitrary 0 ≤ t1 ≤ t2 ≤ T and all u(t) ∈ K, it is satisfied that 
+
+|ui(t1) − ui(t2)| ≤ ϕK,i(t2 − t1), thereby |u(t1) − u(t2)| ≤ | ϕK (t2 − t1)|, where ϕK,i(t) : [0 , +∞) → [0 , +∞) is monotonic with ϕK,i(t) → 0 as t → 0. 
+
+Assumption 3: Φ = [Φ1, Φ2...., Φq] : C0([0 , T ]; Rp) → C0([0 , t]; Rq) is a causal and uniformly continuous operator. For ∀t ∈ [0 , T ], Φ[u(τ)]( t) only depends on u(τ) over τ ∈ [0 , t]. For ∀ε > 0, there exists a distance dε > 0, such that ∥u1(t) − u2(t)∥L∞ < dε ⇒ ∥ Φ[u1(τ)]( t) − Φ[u2(τ)]( t)∥L∞ < ε for ∀u1(t), u2(t) ∈ C0([0 , t]; Rp). 
+
+Assumption 4: Since Φ : C0([0 , T ]; Rp) → C0([0 , t]; Rq) is a causal and uniformly continuous operator and 
+
+K ⊆ C0([0 , t]; Rp) is compact, the image set Φ(K) ⊆ C0([0 , T ]; Rq) of K by Φ is also compact. There exists a constant BΦ(K) such that all functions belonging to Φ(K) are bounded by BΦ(K), that is ∥v j(t)∥L∞ ≤ BΦ(K) for all 
+
+v(t) = [v1(t), v2(t), ..., vq(t)] ⊤ ∈ Φ(K) and 1 ≤ j ≤ q.
+
+Assumption 5: For each element Φ j of the causal and uniformly continuous operator Φ = [Φ1, Φ2...., Φq], 1 ≤
+
+j ≤ q, it is assumed that the first-order derivatives of all temporal functions in the image set Φ j {C0([0 , T ]; Rp)} by Φ j
+
+are bounded by a finite constant DΦ j .
+
+Assumption 6: Since Φ : C0([0 , T ]; Rp) → C0([0 , t]; Rq) is a causal and uniformly continuous operator, its jth 
+
+element Φ j has a monotonic continuous modulus of continuity ϕΦ j (·) : [0 , +∞) → [0 , +∞) with ϕΦ j (r) → 0 as 3r → 0, such that Φ j[u1(τ)]( t) − Φ j[u2(τ)]( t) L∞ ≤ ϕΦ j [∥u1(t) − u2(t)∥L∞ ] for ∀u1(t), u2(t) ∈ C0([0 , T ]; Rp). ϕΦ(·)
+
+= Pqj=1 ϕΦ j (·) : [0 , +∞) → [0 , +∞) with ϕΦ(r) → 0 as r → 0, is a monotonic modulus of continuity of Φ, such that ∥Φ[u1(τ)]( t) − Φ[u2(τ)]( t)∥L∞ ≤ Pqj=1 Φ j[u1(τ)]( t) − Φ j[u2(τ)]( t) L∞ ≤ ϕΦ
+
+∥u1(t) − u2(t)∥L∞
+
+ for ∀u1(t), u2(t)
+
+∈ C0([0 , T ]; Rp). 
+
+Definition 1 (Hanson and Raginsky, 2020): Given a second-order ODE ˆ x′′ (t) = g [ˆ x(t), ˆx′(t), u(t)] with its state function z(t) = ˆx⊤(t), ˆx′⊤ (t)⊤, where ˆ x(t) = [ ˆ x1(t), ˆx2(t), . . . , ˆxr(t)] ⊤, it is uniformly asymptotically incrementally stable for the inputs in a subset K ⊂ C0([0 , T ]; Rp) on a domain Ωz ⊂ R2r if there exists a set of non-negative stability functions βk(h, t) over h ≥ 0 and t ≥ 0, k = 1, 2, ..., 2r, where βk(0 , t) = 0, lim  
+
+> t→+∞
+
+βk(h, t) = 0, βk(h, t) is continuous and strictly increasing with respect to h and is continuous and strictly decreasing with respect to t, such that |zk(t, zτ) − zk(t, ˆzτ)| ≤ βk (|zτ − ˆzτ|2, t − τ) holds for all u(t) ∈ K, all zτ and ˆ zτ ∈ Ωz, all t ∈ [0 , T ], and all 0 ≤ τ ≤ t,where zk (t, zτ) is the kth element of z (t, zτ) and z (t, zτ) represents the solution z(t) at t driven by u(t) with an initial condition zτ at an initial time instant τ, 0 ≤ τ ≤ t. The corresponding stability bound Bβ is calculated as 
+
+Bβ =
+
+Z +∞
+
+> 0
+
+∂∂h
+
+> 2r
+
+X
+
+> k=1
+
+βk(h, τ )
+
+> h=0+
+
+dτ. (4) 
+
+Lemma 1 (Theorem 1 of Huang et al. 2025): Given a compact subset K ⊂ C0([0 , T ]; Rp) and a causal and uniformly continuous operator Φ : C0([0 , T ]; Rp) → C0([0 , T ]; Rq) satisfying Assumptions 1 to 6 with ϕK (t) =
+
+LK [t, t, . . . , t]⊤ and L K > 0, for every integer M Γ larger than an independent deterministic threshold and every positive integer H Π , there exist two MLPs Γ(·) and Π(·) employing σReLU (·), such that for ∀u(t) ∈ K, the corresponding solution y(t) = [y1(t), y2(t), ..., yq(t)] ⊤ from Eq. (1) subject to u(t) with the initial conditions x(0) = x′(0) = 0 satisfies 
+
+|Φ [u(τ)] ( t) − y(t)| ≤ εy (5) 
+
+for all t ∈ [0 , T ], where 
+
+εy = ϕΦ
+
+O
+
+ pL K TM1/3
+
+> Γ
+
+ + O
+
+
+
+qp 3 M3
+
+> Γ
+
+H1/[p(MΓ +1) +1]
+
+> Π
+
+ (6) 
+
+and ϕΦ(·) is the modulus of continuity of Φ in Assumption 6. Γ(·) has one hidden layer and the widths of its input, hidden, and output layers are w Γ,in = p (2 MΓ + 1) , w Γ = 2pM Γ , and w Γ,out = pM Γ , respectively. For Π(·), the widths of its input, hidden, and output layers are w Π,in = p (MΓ + 1) + 1, w Π = q (pM Γ + 1) + 4, and w Π,out = q, respectively, and its depth is h Π = HΠ + 1.
+
+Lemma 2 (Theorem 2 of Huang et al. 2025): Let K be a compact subset of C 0([0 , T ]; Rp), a second-order dynamical system 
+
+ˆx′′ (t) = g ˆx(t), ˆx′(t), u(t)
+
+ˆy(t) = h [ˆ x(t)] , (7) 
+
+with ˆx(0) = ˆx′(0) = 0, is uniformly asymptotically incrementally stable for all u(t) ∈ K on a domain [−Bx, Bx]r ×
+
+[−Bx′ , Bx′ ]r × [−BK , BK ]p ⊂ R2r+p, where ˆx(t) = [ ˆ x1(t), ˆx2(t), ..., ˆxr(t)] ⊤, ˆy(t) = hˆy1(t), ˆy2(t), ..., ˆyq(t)i⊤
+
+, B x = αBβg + Bˆx,Bx′ = αBβg + Bˆx′ , α is a positive coe ffi cient, B ˆx and B ˆx′ are the bounds of ˆx(t) and ˆx′(t), respectively, B K is the bound of all u(t) ∈ K in Assumption 2, and B βg is the stability bound of the system calculated by Eq. (4) . The functions g(·) = g1(·), g2(·), ... gr(·)⊤ and h (·) = hh1(·), h2(·), ... hq(·)i⊤
+
+are Lipschitz continuous over R2r+p and Rr, respectively, with arbitrary finite-order derivatives. Then, for arbitrary positive errors ε1 ≤ α/ r and ε2, there exist two one-hidden-layer MLPs Γ(·) and Π(·) employing σReLU (·), such that for ∀u(t) ∈ K, the corresponding solutions y(t) to Eq. (1) and 
+
+ˆy(t) to Eq. (7) satisfy 
+
+|y(t) − ˆy(t)| ≤ Lh Bβg
+
+√rε1 + qε2 (8) 
+
+for all t ∈ [0 , T ], where L h is the Lipschitz constant of h (·). For Γ(·), the widths of its input, hidden, and output layers are w Γ,in = 2r + p, w Γ = 8r⌈CΓ ε−21 ⌉, and w Γ,out = r, respectively. For Π(·), the widths of its input, hidden, and output layers are w Π,in = r + p + 1, w Π = 8q⌈CΠ ε−22 ⌉, and w Π,out = q, respectively. C Γ is a constant only depending on g (·),
+
+σReLU (·), r, p, B x, B x′ , and B K . C Π is a constant only depending on h (·), σReLU (·), r, and B K .
+
+4Remark 1: Lemma 1 proves that the neural oscillator in Eq. (1) can function as a universal approximator of causal and uniformly continuous operators by first encoding an input function u(t) into the intermediate function x(t) through the second-order ODE in Eq. (1), and then mapping x(t), together with the initial value u(0) of u(t) and time t, to the output function y(t). This capability is similar to the universal approximation property of neural operators (Kovachki et al., 2023). Moreover, for the second-order dynamical systems in science and engineering (Strogatz, 2024), Lemma 2 demonstrates that the neural oscillator can directly approximate these systems using its ODE in Eq. (1) with an effi cient neural network size. In the following content of this section, the established theoretical generalization bounds of the neural oscillator in Eq. (1) are presented in an informal manner. The formal statements of the derived theoretical results are presented in Theorems 1 and 2 in Section 3, together with the supporting lemmas required for their proofs. 
+
+Informal Statement of Theorem 1: Under Assumptions 1-11 and the conditions in Lemma 1, for the target causal and uniformly continuous operator Φ, with the specified sizes of Γ(·) and Π(·) in Lemma 1, the generalization error 
+
+ℓ  ˆΠ ◦ Φ ˆΓ
+
+ in Eq. (13) of a neural oscillator ˆΠ ◦ Φ ˆΓ , that is learned by Eq. (12) with N independent and identically distributed (i.i.d.) sample pairs UN (t) and VN (t) from the probability measure μ(·) in Assumption 7, is bounded by 
+
+ℓ  ˆΠ ◦ Φ ˆΓ
+
+ ≤ T ε2 
+
+> y
+
++ C1
+
+√N
+
+"
+
+C2 +
+
+q
+
+0.5log  2δ−1#
+
+(9) 
+
+with probability at least 1 − δ for ∀δ ∈ (0 , 1) , where εy is in Eq. (6) in Lemma 1, C 1 and C 2 are two constants scaling polynomially with the sizes and parameter values of Γ(·) and Π(·), and the time length T . 
+
+Informal Statement of Theorem 2: Under Assumptions 1-11 and the conditions in Lemma 2, for the target second-order di ff erential system governed by Eq. (7) , with the specified sizes of Γ(·) and Π(·) in Lemma 2, the gener-alization error ℓ  ˆΠ ◦ Φ ˆΓ
+
+ of ˆΠ ◦ Φ ˆΓ , that is learned by Eq. (12) with N i.i.d. sample pairs UN (t) and VN (t) from the probability measure μ(·) in Assumption 7, is bounded by 
+
+ℓ  ˆΠ ◦ Φ ˆΓ
+
+ ≤ 16 T
+
+
+
+L2 
+
+> h
+
+B2 
+
+> βg
+
+r2CΓ
+
+wΓ − 8r + q3CΠ
+
+wΠ − 8q
+
+ + C1
+
+√N
+
+"
+
+C2 +
+
+q
+
+0.5log  2δ−1#
+
+(10) 
+
+with probability at least 1 − δ for ∀δ ∈ (0 , 1) , where w Γ > 8α−2r3CΓ + 8r, w Π > 8q, C Γ and C Π are the constants specified in Lemma 2, and C 1 and C 2 are two constants scaling polynomially with the sizes and parameter values of 
+
+Γ(·) and Π(·), and the time length T . 
+
+3. Upper Generalization Bounds of the Neural Oscillator 
+
+In this section, corresponding to the results in Lemmas 1 and 2, the PAC upper generalization bounds for the neural oscillator trained with i.i.d. samples are derived using the method based on the Rademacher complexity and the covering number of a candidate neural oscillator class. This method has been applied to derive the upper general-ization bounds of MLPs (Bartlett et al., 2017), RNNs (Chen et al., 2020), neural ODEs (Bleistein and Guilloux, 2023; Marion, 2023), and implicit networks (Fung and Berkels, 2024). First, some additional assumptions and necessary definitions on the loss function, covering number, and Rademacher complexity are provided. Then, Lemmas 3 and 4 demonstrate that the Rademacher complexity of the loss function can be bounded by the expected supremum of a sub-Gaussian process. Lemmas 5-10 bound the expected supremum of the sub-Gaussian process using the covering number of a neural oscillator class. Finally, the upper generalization bounds for the neural oscillator in approximating causal and uniformly continuous operators between continuous temporal function spaces and in approximating the uniformly asymptotically incrementally stable second-order dynamical systems are established in Theorems 1 and 2, respectively. The proofs for Theorems 1 and 2 and all lemmas in this section are provided in Appendix A. Further-more, based on the established generalization bounds, an additional regularization term constraining the Lipschitz constants of Γ(·) and Π(·) is added into the loss function to enhance the generalization ability of the neural oscillator. 
+
+Assumption 7: μ(·) is a probability measure supported on the compact set K ⊂ C0([0 , t]; Rp). 
+
+Assumption 8: Suppose that the sizes of Γ(·) in Eq. (2) and Π(·) in Eq. (3) are specified according to Lemma 1 or Lemma 2, the input layer widths of Γ(·) and Π(·) are wΓ,in = 2r + p and wΠ,in = r + p + 1, respectively. The output 5layer widths of Γ(·) and Π(·) are wΓ,out = r and wΠ,out = q, respectively. The largest hidden layer widths of Γ(·) and 
+
+Π(·) are wΓ and wΠ , respectively, and the depth hΠ of Π(·) satisfies hΠ ≥ 2. 
+
+Assumption 9: FΓ represents a class of MLPs Γ(·) whose sizes are specified in Assumption 8. The weight matrices Wi and vectors bi, i = 1 and 2, of Γ(·) ∈ F Γ are bounded by |Wi|∞,∞ ≤ BW and |bi|∞ ≤ Bb. FΠ represents a class of MLPs Π(·) whose sizes are specified in Assumption 8. The weight matrices ˜ W j and vectors ˜ b j, j = 1, 2, ..., hΠ ,of Π(·) ∈ F Π are bounded by ˜W j ∞,∞ ≤ B ˜W and ˜b j ∞ ≤ B˜b. The outputs of all Π(·) ∈ F Π are bounded by 
+
+Π j(x) L∞ ≤ BΠ , j = 1, 2, ..., wΠ,out , where Π j(x) is the jth output of Π(x). The bounds BW and Bb depend on the size of Γ(·) and the bounds B ˜W, B˜b, and BΠ depend on the size of Π(·), ensuring that the results of Lemma 1 or Lemma 2 can be achieved. 
+
+Assumption 10: FΦΓ represents a second-order ODE class whose elements ΦΓ are governed by the first ODE in Eq. (1) with Γ(·) ∈ F Γ . FΠ◦ΦΓ represents a neural oscillator class whose elements Π ◦ ΦΓ are governed by Eq. (1) with Γ(·) ∈ F Γ and Π(·) ∈ F Π .Consider the causal continuous operator Φ : K ⊂ C0([0 , T ]; Rp) → C0([0 , T ]; Rq) in Assumption 3, given N i.i.d. samples UN (t) = [u1(t), u2(t), ..., uN (t)] from the probability measure μ(·) in Assumption 7, and the corresponding N
+
+output function samples VN (t) = [v1(t), v2(t), ..., vN (t)] with vi(t) = Φ [ui(τ)] ( t), for a neural oscillator Π ◦ΦΓ ∈ F Π◦ΦΓ
+
+in Assumption 10, its empirical loss ˆ ℓUN ,VN (Π ◦ ΦΓ ) is defined as ˆℓUN ,VN (Π ◦ ΦΓ ) = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+∥vi(t) − Π ◦ ΦΓ [ui(τ)] ( t)∥2 
+
+> L2
+
+. (11) An estimated neural oscillator ˆ Π ◦ Φ ˆΓ is learned by the following optimization problem ˆΠ ◦ Φ ˆΓ ∈ arg min  
+
+> Π◦ΦΓ∈F Π◦ΦΓ
+
+ˆℓUN ,VN (Π ◦ ΦΓ ) . (12) An generalization error ℓ  ˆΠ ◦ Φ ˆΓ
+
+ of ˆ Π ◦ Φ ˆΓ is calculated as 
+
+ℓ  ˆΠ ◦ Φ ˆΓ
+
+ = Eu∽μϑ ˆΠ◦Φ ˆΓ [u(τ)] =
+
+Z
+
+> K
+
+ϑ ˆΠ◦Φ ˆΓ [u(τ)] d μ [u(τ)] , (13) where 
+
+ϑ ˆΠ◦Φ ˆΓ [u(τ)] = Φ [u(τ)] ( t) − ˆΠ ◦ Φ ˆΓ [u(τ)] ( t) 2 
+
+> L2
+
+. (14) 
+
+Assumption 11: Since the outputs of all neural oscillators in FΠ◦ΦΓ are bounded by BΠ from Assumptions 9 and 10, and v(t) = Φ [u(τ)] ( t) with u(t) ∈ K is bounded by BΦ(K) in Assumption 4, the empirical loss ˆ ℓUN ,VN and generalization error ℓ are bounded by ˆ ℓUN ,VN , ℓ ≤ T qB 2loss , where Bloss = BΠ + BΦ(K).
+
+Definition 2 (Cover): Let M be a space with a pseudo-metric dM, for any real ε > 0, a subset S ⊂ M is an 
+
+ε-cover of M with respect to dM if for ∀ f ∈ M , there exists ˜ f ∈ S , such that dM
+
+ f, ˜f  < ε .
+
+Definition 3 (Covering number, Definition 2.2.3 of van der Vaart and Wellner 2013): Let M be a space with a pseudo-metric dM, for any real ε > 0, the covering number of M is defined as N (M, dM, ε ) =
+
+min (# S : S is an ε-cover of M), where # S is the cardinality of S.
+
+Definition 4 (Empirical Rademacher Complexity, Definition 3.1 of Mohri et al. 2018): Given N i.i.d. samples 
+
+UN (t) = [u1(t), u2(t), ..., uN (t)] from μ(·) in Assumption 7, the empirical Rademacher complexity ℜGϑ of the functional class for ϑΠ◦ΦΓ [u(τ)] in Eq. (14) with Π ◦ ΦΓ ∈ F Π◦ΦΓ is defined as 
+
+ℜGϑ = Eσ sup  
+
+> Π◦ΦΓ∈F Π◦ΦΓ
+
+1
+
+N
+
+> N
+
+X
+
+> i=1
+
+σiϑΠ◦ΦΓ [ui(τ)] , (15) where σ = [σ1, σ 2, ..., σ N ] is a Rademacher vector of i.i.d. Rademacher variables σi taking values of 1 or –1 with equal probability and i = 1, 2, ..., N.
+
+Lemma 3: Given N i.i.d. samples UN (t) = [u1(t), u2(t), ..., uN (t)] from μ(·) in Assumption 7, the empirical Rademacher complexity ℜGϑ in Eq. (15) is bounded by 
+
+ℜGϑ ≤ 2 p2T w Π,out Bloss 
+
+N E ˜σ sup  
+
+> Π◦ΦΓ∈F Π◦ΦΓ
+
+κ (Π ◦ ΦΓ , ˜σ) , (16) 6where 
+
+κ (Π ◦ ΦΓ , ˜σ) =
+
+> N
+
+X
+
+> i=1
+> wΠ,out
+
+X
+
+> j=1
+> +∞
+
+X
+
+> k=1
+
+˜σi jk α jk 
+
+nΠ ◦ ΦΓ [ui(τ)] j
+
+o, (17) 
+
+Bloss is in Assumption 11, α jk 
+
+nΠ ◦ ΦΓ [ui(τ)] j
+
+o is the coe ffi cient of Π ◦ ΦΓ [ui(τ)] j (t) under a countable set of standard orthogonal basis functions e k(t) over [0 , T ], i = 1, 2, ..., N, j = 1, 2, ..., wΠ,out , k = 1, 2, ... , and ˜σ is a third-order tensor with elements ˜σi jk being i.i.d. Rademacher variables over discrete indices i, j, and k. 
+
+Lemma 4: Under the conditions in Lemma 3, κ (Π ◦ ΦΓ , ˜σ) in Eq. (17) is a zero-mean sub-Gaussian process with respect to Π ◦ ΦΓ over FΠ◦ΦΓ satisfying 
+
+E ˜σ exp w κ  Π1 ◦ ΦΓ1 , ˜σ − κ  Π2 ◦ ΦΓ2 , ˜σ ≤ exp n0.5w2d2
+
+> κ
+
+ Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2
+
+o (18) 
+
+for ∀w ∈ R and ∀Π1 ◦ ΦΓ1 , ∀Π2 ◦ ΦΓ2 ∈ F Π◦ΦΓ , where the pseudo-metric d κ
+
+ Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2
+
+ is dκ
+
+ Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2
+
+ =
+
+vut NX
+
+> i=1
+
+Π1 ◦ ΦΓ1 [ui(τ)] ( t) − Π2 ◦ ΦΓ2 [ui(τ)] ( t) 2 
+
+> L2
+
+. (19) 
+
+The diameter ∆κ
+
+ FΠ◦ΦΓ
+
+ of κ (Π ◦ ΦΓ , ˜σ) over FΠ◦ΦΓ is bounded by 
+
+∆κ
+
+ FΠ◦ΦΓ
+
+ = sup   
+
+> Π1◦ΦΓ1,Π2◦ΦΓ2∈F Π◦ΦΓ
+
+dκ
+
+ Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2
+
+ ≤ 2 pNT w Π,out BΠ , (20) 
+
+where B Π is in Assumption 9. 
+
+Given a neural oscillator ˆ Π ◦ Φ ˆΓ learned from N i.i.d. sample pairs UN (t) and VN (t) using Eq. (12), from Theorem 11.3 of Mohri et al. (2018), for ∀δ ∈ (0 , 1), the generalization error ℓ  ˆΠ ◦ Φ ˆΓ
+
+ of ˆ Π ◦ Φ ˆΓ , which is calculated using Eq. (13), is bounded by 
+
+ℓ  ˆΠ ◦ Φ ˆΓ
+
+ ≤ ˆℓUN ,VN
+
+ ˆΠ ◦ Φ ˆΓ
+
+| {z }
+
+> approximation error
+
++ 2ℜGϑ + 3T w Π,out B2loss 
+
+r log  2δ−1
+
+2N| {z }
+
+> estimation error
+
+(21) with probability at least 1 − δ. In Eq. (21), the empirical loss ˆ ℓUN ,VN
+
+ ˆΠ ◦ Φ ˆΓ
+
+ can be bounded using the approximation error bounds in Lemma 1 or Lemma 2. The empirical Rademacher complexity ℜGϑ can be bounded by the expected supremum of the sub-Gaussian process κ (Π ◦ ΦΓ , ˜σ), as demonstrated in Lemma 3. Based on the Dudley entropy integral bound (Theorem 8.23 of Foucart and Rauhut, 2013), the expected supremum of κ (Π ◦ ΦΓ , ˜σ) over FΠ◦ΦΓ can be bounded by the covering number N  FΠ◦ΦΓ , dκ, ε  of FΠ◦ΦΓ
+
+E ˜σ sup  
+
+> Π◦ΦΓ∈F Π◦ΦΓ
+
+κ (Π ◦ ΦΓ , ˜σ) ≤ 4 √2
+
+Z √NT w Π,out BΠ
+
+> 0
+
+q
+
+ln N  FΠ◦ΦΓ , dκ, ε dε. (22) For the sake of completeness, the proof of Eq. (22) is provided in Appendix B. In what follows, the bound of the covering number N  FΠ◦ΦΓ , dκ, ε  is derived. Subsequently, the bound of the expected supremum of κ (Π ◦ ΦΓ , ˜σ) is obtained using the bound of N  FΠ◦ΦΓ , dκ, ε . Finally, by substituting the bound of the expected supremum of κ (Π ◦ ΦΓ , ˜σ) into Eq. (16) in Lemma 3, the bound of the generalization error 
+
+ℓ  ˆΠ ◦ Φ ˆΓ
+
+ can be derived using Eq. (21). 
+
+Lemma 5: Under Assumptions 8 and 9, all Γ(·) ∈ F Γ and Π(·) ∈ F Π are Lipschitz continuous. L FΓ = wΓ,out wΓ B2
+
+> W
+
+is an L 1-norm Lipschitz constant of all Γ(·) ∈ F Γ . LFΠ = wΠ,out whΠ −1 
+
+> Π
+
+BhΠ 
+
+> ˜W
+
+is an L 1-norm Lipschitz constant of all 
+
+Π(·) ∈ F Π .
+
+Lemma 6: Under Assunptions 2, 8, 9, and 10, for all ΦΓ ∈ F ΦΓ and all u(t) ∈ K, x(t) = Φ Γ [u(τ)] ( t) with the initial conditions x(0) = x′(0) = 0 satisfies 
+
+max  
+
+> t∈[0 ,T]
+
+h|x(t)| + x′(t) i ≤ T pB K LFΓ + wΓ,out Bb (wΓ BW + 1)  eT (LFΓ +1), (23) 7where L FΓ is an arbitrary L 1-norm Lipschitz constant for all Γ(·) ∈ F Γ .
+
+Lemma 7: Under Assunptions 1, 2, 8, 9, and 10, given MLPs Γ1(·) and Γ2(·) ∈ F Γ , the di ff erences between their weight matrices and vectors are bounded by ς, that is W2,i − W1,i ∞,∞ ≤ ς and b2,i − b1,i ∞ ≤ ς, where W j,i and b j,i
+
+are respectively the weight matrix and vector of Γ j(·), and i,j = 1 and 2, then, for all u(t) ∈ K, the di ff erence between 
+
+x1(t) = Φ Γ1 [u(τ)] ( t) and x2(t) = Φ Γ2 [u(τ)] ( t), with the initial conditions x1(0) = x′
+
+> 1
+
+(0) = x2(0) = x′
+
+> 2
+
+(0) = 0, is bounded by 
+
+max   
+
+> t∈[0 ,T]
+
+|x2(t) − x1(t)| ≤ 2ςwΓ,out wΓ pT 2e2T (LFΓ +1) max ( BW, Bb) BK
+
+ LFΓ + 1 + wΓ,out Bb (wΓ BW + 1) + 1 + 1 , (24) 
+
+where L FΓ is an arbitrary L 1-norm Lipschitz constant for all Γ(·) ∈ F Γ .
+
+Lemma 8: Under Assumptions 8 and 9, given MLPs Π1(·) and Π2(·) ∈ F Π , the di ff erences between their weight matrices and vectors are bounded by ς, that is ˜W2,i − ˜W1,i ∞,∞ ≤ ς and ˜b2,i − ˜b1,i ∞ ≤ ς, where ˜W j,i and ˜b j,i are respectively the weight matrix and vector of Π j(·), i = 1, 2, ..., hΠ and j = 1 and 2, then |Π1(x) − Π2(x)| is bounded by 
+
+|Π1(x) − Π2(x)| ≤ ς max  wΓ,out , wΓ
+
+ h2
+
+> Π
+
+LhΠ −1  
+
+> FΠ,layer
+
++ 1   |x| + wΠ B˜b + 1 , (25) 
+
+where L FΠ ,layer is an arbitrary L 1-norm Lipschitz constant that simultaneously bounds the mappings between all adja-cent layers of all Π(·) ∈ F Π .
+
+Lemma 9: Under Assumptions 1, 2, 8, 9, and 10, given MLPs Γ1(·) and Γ2(·) ∈ F Γ and MLPs Π1(·) and Π2(·)
+
+∈ F Π , the di ff erences between the weight matrices and vectors of Γ1(·) and Γ2(·) and those of Π1(·) and Π2(·) are bounded by ς, as specified in Lemmas 7 and 8, then, for all u(t) ∈ K, the di ff erence between Π1 ◦ ΦΓ1 [u(τ)] ( t) and 
+
+Π2 ◦ ΦΓ2 [u(τ)] ( t), with the initial conditions x1(0) = x′
+
+> 1
+
+(0) = x2(0) = x′
+
+> 2
+
+(0) = 0, is bounded by 
+
+max   
+
+> t∈[0 ,T]
+
+Π1 ◦ ΦΓ1 [u(τ)] ( t) − Π2 ◦ ΦΓ2 [u(τ)] ( t)
+
+≤ 3ς LhΠ  
+
+> FΠ,layer
+
++ 1 wΠ w2
+
+> Γ,out
+
+w2 
+
+> Γ
+
+h2 
+
+> Π
+
+pT 2e2T (LFΓ +1)  LFΓ + 1 BK B  B ˜W, B˜b, BW, Bb
+
+ , (26) 
+
+where L FΓ is an arbitrary L 1-norm Lipschitz constant for all Γ(·) ∈ F Γ , L FΠ ,layer is an arbitrary inter-layer L 1-norm Lipschitz constant for all Π(·) ∈ F Π , and B  B ˜W, B˜b, BW, Bb
+
+ = [max ( BW, Bb) + 1] [ Bb (BW + 1) + 2] + B˜b + 2. (27) 
+
+Lemma 10: Under Assumptions 1, 2, 8, 9, and 10, the expected supremum of κ (Π ◦ ΦΓ , ˜σ) in Eq. (22) can be bounded by 
+
+E ˜σ sup  
+
+> Π◦ΦΓ∈F Π◦ΦΓ
+
+κ (Π ◦ ΦΓ , ˜σ) ≤ 32 √2BΠ w1.5max hΠ
+
+pNT ln  3 + 6Bmax ∆Π◦ΦΓ
+
+, (28) 
+
+where 
+
+∆Π◦ΦΓ = 30 w5.5max h2
+
+> Π
+
+LhΠ  
+
+> FΠ,layer
+
++ 1   LFΓ + 1 T 2e2T (LFΓ +1)B−1 
+
+> Π
+
+BK
+
+B3max + 1 , (29) 
+
+wmax = max  wΠ,in , wΠ , wΠ,out , wΓ,in , wΓ , wΓ,out 
+
+, B max = max  BW, Bb, B ˜W, B˜b
+
+, L FΓ is an arbitrary L 1-norm Lipschitz constant for all Γ(·) ∈ F Γ , and L FΠ ,layer is an arbitrary inter-layer L 1-norm Lipschitz constant for all Π(·) ∈ F Π .
+
+Theorem 1: Under Assumptions 1-11 and the conditions in Lemma 1, for the target causal and uniformly contin-uous operator Φ, with the specified sizes of Γ(·) and Π(·) in Lemma 1, the generalization error ℓ  ˆΠ ◦ Φ ˆΓ
+
+ of a neural oscillator ˆΠ ◦ Φ ˆΓ , that is learned by Eq. (12) with N i.i.d. sample pairs UN (t) and VN (t) from μ(·), is bounded by 
+
+ℓ  ˆΠ ◦ Φ ˆΓ
+
+ ≤ T ε2 
+
+> y
+
++ 3 T qB 2loss 
+
+√N
+
+"
+
+86 w1.5max hΠ
+
+q
+
+ln  3 + 6Bmax ∆Π◦ΦΓ
+
+ +
+
+q
+
+0.5log  2δ−1#
+
+(30) 
+
+with probability at least 1 − δ for ∀δ ∈ (0 , 1) , where εy is in Eq. (6) in Lemma 1, ∆Π◦ΦΓ is in Eq. (29) with L FΓ =
+
+w2max B2max , L hΠ  
+
+> FΠ,layer
+
+= whΠ 
+
+> max
+
+BhΠ
+
+> max
+
+, and w Π,out = q. 
+
+Theorem 2: Under Assumptions 1-11 and the conditions in Lemma 2, for the target second-order di ff erential system governed by Eq. (7) , with the specified sizes of Γ(·) and Π(·) in Lemma 2, the generalization error ℓ  ˆΠ ◦ Φ ˆΓ
+
+
+
+of ˆΠ ◦ Φ ˆΓ , that is learned by Eq. (12) with N i.i.d. sample pairs UN (t) and VN (t) from μ(·), is bounded by 
+
+ℓ  ˆΠ ◦ Φ ˆΓ
+
+ ≤ 16 T
+
+
+
+L2 
+
+> h
+
+B2 
+
+> βg
+
+r2CΓ
+
+wΓ − 8r + q3CΠ
+
+wΠ − 8q
+
+ + 3 T qB 2loss 
+
+√N
+
+"
+
+172 w1.5max 
+
+q
+
+ln  3 + 6Bmax ∆Π◦ΦΓ
+
+ +
+
+q
+
+0.5log  2δ−1#
+
+(31) 8with probability at least 1 − δ for ∀δ ∈ (0 , 1) , where w Γ > 8α−2r3CΓ + 8r, w Π > 8q, ∆Π◦ΦΓ is in Eq. (29) with h Π = 2,wΓ,out = r, L FΓ = w2max B2max , L hΠ  
+
+> FΠ,layer
+
+= w2max B2max , and w Π,out = q, and the constants C Γ and C Π are specified in Lemma 2. 
+
+Remark 2: An upper generalization bound for a deep SS model has been derived by leveraging the Rademacher complexity combined with a layer-by-layer Rademacher contraction approach (Rácz et al., 2024). The considered deep SS model produces a scalar output through pooling and its derived estimation error grows exponentially with the depth of a utilized MLP. In this study, the outputs of the neural oscillator are continuous temporal functions. The exponential terms in ∆Π◦ΦΓ of Eq. (29), which contain the MLP sizes, parameter bound Bmax , and time length T ,are encapsulated within the logarithmic functions in Eqs. (30) and (31). Consequently, the estimation errors of the generalization bounds established in Theorems 1 and 2 grow polynomially with the sizes and parameter values of the employed MLPs Γ(·) and Π(·), as well as the time length T . In the numerical study conducted by Huang et al. (2025), the numerical generalization errors can clearly illustrate the decaying approximation error curves of the neural oscillator with the increasing MLP sizes. These results indicate that increasing the MLP sizes has only a marginal influence on the generalization errors, which is consistent with the theoretical results in Theorems 1 and 2 of this study. 
+
+Remark 3: Lanthaler (2024) has proved that decreasing the required number of parameters in neural operators using super-expressive neural networks, which aims to mitigate the curse of parametric complexity, may come at the expense of requiring larger model parameter values. The generalization bounds in Theorems 1 and 2 increase with the growing bound Bmax of the MLP parameters. Therefore, whether employing super-expressive neural networks can finally decrease the generalization error of the neural oscillator remains an open question. Theorem 10. 4 in Foucart and Rauhut (2013) proves that the Gelfand widths of the normed spaces containing a target operator can be employed to establish lower generalization bounds for all models that approximate this target operator. This method has been employed to prove that polynomial-based neural operators attain the optimal rate of sample complexity for the approximation of Lipschitz operators (Adcock et al., 2025). Utilizing this method to derive lower generalization bounds for the neural oscillator represents an interesting direction for future research. The estimation errors in Theorems 1 and 2 can be expressed in the form of 
+
+N−0.5O
+
+h LFΓ + ln  LFΓ
+
+ + hΠ ln LFΠ ,layer 
+
+i 0.5
+
+, which can be interpreted from a sample-dependent perspective (Wei and Ma, 2019). During a practical training process, each tunable parameter in the matrices and vectors of Γ(·)and Π(·) varies within a bounded range and attains a largest absolute value. Thus, for each pair of Γ(·) and Π(·)learned from ˆ ℓUN ,VN (Π ◦ ΦΓ ) in Eq. (12), the MLP spaces FΓ and FΠ in Assumption 9 can be narrowed to the ones determined by the largest absolute values of all tunable MLP parameters during the training process, under which all above theoretical results remain valid. In this setting, LFΓ and LFΠ ,layer are the L1-norm Lipschitz constants of these two narrowed MLP spaces and they can be much smaller than wΓ,out wΓ B2 
+
+> W
+
+and max  wΠ,out , wΠ
+
+B ˜W, respectilvey. Therefore, constraining the Lipschitz constants of Γ(·) and Π(·) rather than the maximum parameter bound Bmax 
+
+provides an e ff ective approach to reducing the generalization error of a neural oscillator learned from samples. Motivated by this observation, a loss function containing explicit constraints on the Lipschitz constants of Γ(·) and 
+
+Π(·) is introduced ˜ℓUN ,VN (Π ◦ ΦΓ ) = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+∥vi(t) − Π ◦ ΦΓ [ui(τ)] ( t)∥2 
+
+> L2
+
++ λL
+
+√N
+
+LΓ + hΠ LΠ,layer 
+
+ , (32) where λL a manually determined parameter, LΓ is the L1-norm Lipschitz constant of Γ(·), and LΠ,layer is the inter-layer 
+
+L1-norm Lipschitz constant of Π(·). Existing methods for constraining Lischitz constants of MLPs, including weight matrix norm regularization methods (Yoshida and Miyato, 2017), weight matrix normalization methods (Gouk et al., 2021; Liu et al., 2022), and Jacobian regularization methods (Ho ff man et al., 2019; Wei and Ma, 2019), can be directly employed to constrain LΓ and LΠ,layer . Since the ReLU MLPs Γ(·) and Π(·) are piecewise a ffi ne functions (Hanin, 2019), decreasing the number of a ffi ne segments can reduce the Lipschitz constants of Γ(·) and Π(·) learned from samples. In this study, LΓ and hΠ LΠ,layer are respectively replaced by P2
+
+> i=1
+
+|Wi|1,1 + |bi|1
+
+ and PhΠ
+
+> j=1
+
+ ˜W j 1,1 + ˜b j 1
+
+
+
+to enhance the sparsity of Γ(·) and Π(·), thereby reducing their Lipschitz constants. 94. Numerical Study 
+
+In this section, a Bouc-Wen nonlinear system subjected to stochastic seismic excitation, which exhibits plastic deformation responses (Huang et al., 2025), is employed to validate the power laws of the estimation errors in the generalization bounds with respect to the sample size N and time length T , and to demonstrate the e ff ectiveness of ˜ℓUN ,VN in Eq. (32) for improving the generalization capability of the neural oscillator under limited training samples. The di ff erential equation of the five-degree of freedom Bouc-Wen system is 
+
+
+
+M ¨X(t) + C ˙X(t) + λKX (t) + (1 − λ) ˜ KZ (t) = −MUe(t)˙Zi(t) = ˙˜Xi(t) − β ˙˜Xi(t) |Zi(t)|s−1Zi(t) − γ ˙˜Xi(t)|Zi(t)|s, i = 1, 2, . . . , 5 , (33) where X = [X1(t), X2(t), . . . , X5(t)] ⊤, ˜X(t) = [X1(t), X2(t) − X1(t), X3(t) − X2(t), . . . , X5(t) − X4(t)] ⊤, Z =
+
+[Z1(t), Z2(t), . . . , Z5(t)] ⊤, X(0) = X′(0) = Z(0) = 0,
+
+M =
+
+
+
+m 0 0 0 00 m 0 0 00 0 m 0 00 0 0 m 00 0 0 0 m
+
+
+
+, K =
+
+
+
+2k −k 0 0 0
+
+−k 2k −k 0 00 −k 2k −k 00 0 −k 2k −k
+
+0 0 0 −k k
+
+
+
+, ˜K =
+
+
+
+k −k 0 0 00 k −k 0 00 0 k −k 00 0 0 k −k
+
+0 0 0 0 k
+
+
+
+, (34) 
+
+m = 1382 .4 kilogram, k = 1.7 × 10 6 Newton /meter, C is determined using M and K such that the damping ratios of all response modes are 0.05, λ = 0.01, β = 2, γ = 2, and s = 3, and Ue(t) is a stochastic Gaussian harmonizable earthquake ground motion acceleration whose Wigner-Ville spectrum is 
+
+We(t, f ) = 2500 t2 f 2 exp h−0.3(1 + f 2)ti . (35) The ODE system in Eq. (33) is solved numerically using a fourth-order Runge-Kutta method (Gri ffi ths and Higham, 2010) with a time discretization of ∆t = 0.01 seconds. For the numerical implementation of training, the neural oscillator is discretized using a second-order Runge–Kutta scheme. The approach for training the neural oscillator with input-output pair samples is briefly described in Appendix C. All code for this numerical study is available at: 
+
+https://github.com/ZifengH22/Upper-Generalization-Bounds-for-Neural-Oscillators .In this numerical study, the mapping from Ue(t) to the response X5(t) and that from Ue(t) to the extreme value process EX5 (t) = max τ∈[0 ,t] |X5(τ)| of X5(t) are learned using the neural oscillator with simulated sample pairs. For learning the mapping from Ue(t) to X5(t), 5 × 10 4 independent discrete-time samples Ue,l(ti) of Ue(t) over a time interval [0 , 10] are simulated, where i = 0, 1, 2, . . . , 999 and l = 1, 2, . . . , 5 × 10 4. Their induced 5 × 10 4 samples 
+
+X5,l(ti) of X5(t) are computed by numerically solving the ODE in Eq. (33). Γ(·) and Π(·) in Eq. (1) are one-hidden layer MLPs. Their activation functions are σReLU (·). The widths of input, hidden, and output layers of Γ(·) are 21, 40, and 10, respectively. The widths of input, hidden, and output layers of Π(·) are 15, 20, and 10, respectively. Six sets of randomly selected training and validation samples are employed to train the neural oscillator with the loss function ˆ ℓλL
+
+in Eq. (C.3), both with ( λL = 0.003) and without ( λL = 0) the parameter-norm constraint. The six datasets respectively contain (i) 100 training and 20 validation samples, (ii) 200 training and 50 validation samples, (iii) 400 training and 100 validation samples, (iv) 800 training and 200 validation samples, (v) 1600 training and 400 validation samples, and (vi) 3200 training and 800 validation samples. All training phases consist of 1000 epochs, each containing 32 batches with a batch size of 100. For each training phase of the six datasets, the initial learning rate is set to 0.01, with a decay period of 100 epochs and a decay factor of 0.965. A gradient-norm clipping strategy (Pascanu et al., 2013) with a threshold of 1 is applied to all MLPs to prevent gradient explosion. Γ(·) and Π(·) are initialized using identical random seeds to ensure consistent initialization across experiments. The neural oscillator network achieving the smallest training loss is selected as the final model. For each of all trained neural oscillators using one of the six datasets, its 5 × 10 4 prediction samples ˜ X5,l(ti) driven by the input samples Ue,l(ti) are simulated. The relative generalization error ˜ εX,2 is computed as ˜εX,2 =
+
+> 50000
+
+P
+
+> l=1999
+
+P
+
+> i=0
+
+hX5,l(ti) − ˜X5,l(ti)i250000 P
+
+> l=1999
+
+P
+
+> i=0
+
+X25,l(ti)
+
+. (36) 10 100 200 400 800 1600 3200 10 -2             
+
+> 10 -1
+> 10 0Figure 1: ˜ εX,2versus N.510 15 20 25 30 00.5 11.5 22.5 33.5 10 -3 Figure 2: ˜ εE,2versus T.
+
+The decays of ˜ εX,2 with respect to the increasing sample number N are shown in Figure 1. It can be observed that, for small sample sizes ( N ∈ [100 , 400]), the decay rate of −2.2 obtained from the numerical results is steeper than the theoretical value of −0.5 in Theorems 1 and 2. As the sample number increases ( N ∈ [400 , 3200]), the decay rate of the numerical errors coincides with the theoretical value of −0.5. Since the established theoretical results provide upper generalization bounds, the numerical results in Figure 1 confirm the validity of the decay rate of −0.5. For small sample sizes ( N ∈ [100 , 200]), the numerical generalization errors are significantly reduced by constraining the 
+
+L1-norms of the matrices and vectors of Γ(·) and Π(·) during training. This validates the e ff ectiveness of ˜ ℓUN ,VN in Eq. (32) for decreasing the generalization error of the neural oscillator when training data are limited. For learning the mapping from Ue(t) to EX5 (t), 5 × 10 4 independent discrete-time samples Ue,l(ti) of Ue(t) over a time interval [0 , 30], where i = 0, 1, 2, . . . , 2999 and l = 1, 2, . . . , 5 × 10 4, are simulated. Their induced 5 × 10 4 samples 
+
+EX5,l(ti) of EX5 (t) are computed by EX5,l(ti) = max τ∈[0 ,ti] X5,l(τ) , where X5,l(ti) is the sample of X5(t) computed by numerically solving the ODE in Eq. (33). Γ(·) in Eq. (1) is a one-hidden layer MLP. The widths of input, hidden, and output layers of Γ(·) is 11, 20, and 10, respectively. For Π(·), its input, hidden, and output layer widths are 12, 15, and 1, respectively, and its hidden layer number is 2. The activation functions of Γ(·) and Π(·) adopt the Parametric Rectified Linear Unit (PReLU) σPReLU (x) = max(0 , x) + α min(0 , x) to facilitate the training process, where α is a parameter learned during training (He et al., 2015). Since σPReLU (·) is also a piecewise linear activation function with bounded first-order derivatives, the estimation errors in Theorems 1 and 2 remain valid up to a constant factor. Six sets of randomly selected training and validation samples are employed to train the neural oscillator with the loss function ˆℓλL in Eq. (C.3) without the parameter-norm constraint ( λL = 0). Each of the six datasets contains 1600 training and 400 validation samples. The time lengths of the six datasets are 5 seconds, 10 seconds, 15 seconds, 20 seconds, 25 seconds, and 30 seconds, respectively. All training phases consist of 3000 epochs, each containing 16 batches with a batch size of 100. For each training phase of the six datasets, the learning rate first linearly increases from 0.0005 to 0.02 within the first 40 epoches, and subsequently decreases exponentially with a decay period of 100 epochs and a decay factor of 0.95. A gradient-norm clipping strategy (Pascanu et al., 2013) with a threshold of 1 is applied to all MLPs to prevent gradient explosion. Γ(·) and Π(·) are initialized using identical random seeds to ensure consistent initialization across experiments. The neural oscillator network achieving the smallest training loss is selected as the final model. For each of all trained neural oscillators using one of the six datasets, its 5 × 10 4 prediction samples ˜ EX5,l(ti) driven by the input samples Ue,l(ti) are simulated. The relative generalization error ˜ εE,2 is computed as ˜εE,2 =
+
+> 50000
+
+P 
+
+> l=1100 T−1
+
+P
+
+> i=0
+
+hEX5,l(ti) − ˜EX5,l(ti)i250000 P
+
+> l=12999
+
+P
+
+> i=0
+
+E2
+
+> X5,l
+
+(ti)
+
+. (37) As illustrated in Figure 2, the variation of ˜ εE,2 with respect to the increasing time length T can be approximated by 11 0 5 10 15 20 25 30 35 00.05 0.1 0.15 0.2 Figure 3: PDF of EX5 (30). 0 5 10 15 20 25 30 35 0.000 0.014 0.500 0.986 1.000 Figure 4: CDF of EX5 (30). 
+
+a power-law function with an exponent of 1 .5, which is consistent with the leading term in the theoretical estimation errors O hT 1.5 + T √ln ( T ) + T i derived from Eqs. (29)-(31). These results confirm that the increase in the estimation error of the neural oscillator with respect to the time length T is moderate. The ODE of the extreme value process EX5 (t) can be expressed as 
+
+E′ 
+
+> X5
+
+(t) =
+
+
+
+X′
+
+> 5
+
+(t) , |X5(t)| ≥ EX5 (t)0, otherwise . (38) By incorporating Eq. (38) into Eq. (33), it can be shown that the mapping from Ue(t) to EX5 (t) is continuous but not smooth due to the piecewise nature of the derivative term in Eq. (38). This nonsmoothness renders the learning of this mapping more di ffi cult than that of the smooth one from Ue(t) to X5(t). Figures 3 and 4 respectively compare the probability density functions (PDFs) and cumulative distribution functions (CDFs) of EX5 (t) at T = 30 estimated from the 5 × 10 4 samples EX5,l(ti) and ˜ EX5,l(ti). The results indicate that the neural oscillator trained with 1600 samples can accurately predict the probability distribution of EX5 (30), demonstrating its ability to e ff ectively approximate the nonsmooth mapping from Ue(t) to EX5 (t). 
+
+5. Conclusions 
+
+In this study, two upper PAC generalization bounds of the neural oscillator consisting of a second-order ODE followed by an MLP are derived for approximating the causal and uniformly continuous operators between con-tinuous temporal function spaces and for approximating the uniformly asymptotically incrementally stable second-order dynamical systems. The theoretical results demonstrate that the estimation errors in the generalization bounds grow polynomially with increasing MLP sizes and time length, thereby avoiding the curse of parametric complexity. Moreover, the derived generalization bounds reveal that the generalization capability of the neural oscillator can be enhanced by constraining the Lipschitz constants of the employed MLPs through appropriate regularization in the loss function. A numerical study based on a Bouc-Wen nonlinear system subjected to stochastic seismic excitation validates the power laws of the estimation errors with respect to the sample size and time length, and confirms the eff ectiveness of constraining the MLPs’ matrix and vector norms in improving the generalization performance of the neural oscillator under limited training data. 
+
+CRediT authorship contribution statement Zifeng Huang: Conceptualization, Methodology, Software, Writing-reviewing & editing, Project administration. 
+
+Konstantin M. Zuev: Methodology, Writing-reviewing & editing. Yong Xia: Writing-reviewing & editing, Super-vision. Michael Beer: Supervision, Project administration. 12 Declaration of competing interest 
+
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper. 
+
+Data and Code Availability 
+
+All code used in this study is available at: https://github.com/ZifengH22/ Upper-Generalization-Bounds-for-Neural-Oscillators . All data presented in this study were gener-ated using this code. 
+
+Acknowledgments 
+
+This work is supported by the German Research Foundation (Project No. 554325683 and HU 3418 /2-1). The opinions and conclusions presented in this paper are entirely those of the authors. 
+
+Appendix A. Proofs for Lemmas and Theorems in Section 3 
+
+Appendix A.1. Proof of Lemma 3 
+
+Proof: The empirical Rademacher complexity ℜGϑ in Eq. (15) can be calculated as 
+
+ℜGϑ = Eσ sup  
+
+> Π◦ΦΓ∈F Π◦ΦΓ
+
+1
+
+N
+
+> N
+
+X
+
+> i=1
+
+σiwΠ,out X
+
+> j=1
+
+Z T
+
+> 0
+
+nvi j (t) − Π ◦ ΦΓ [ui(τ)] j(t)o2
+
+dt, (A.1) where vi j (t) = Φ [ui(τ)] j (t) and Π ◦ ΦΓ [ui(τ)] j (t) are the jth elements of the q-dimensional vector functions 
+
+Φ [ui(τ)] ( t) and Π ◦ ΦΓ [ui(τ)] ( t), respectively, and q = wΠ,out . Since Π ◦ ΦΓ [ui(τ)] j (t) and vi j (t) are bounded and continuous functions over [0 , T ], they can be respectively expressed as 
+
+Π ◦ ΦΓ [ui(τ)] j(t) =
+
+> +∞
+
+X
+
+> k=1
+
+α jk 
+
+nΠ ◦ ΦΓ [ui(τ)] j
+
+o ek(t) (A.2) and 
+
+vi j (t) =
+
+> +∞
+
+X
+
+> k=1
+
+β jk (vi j )ek(t), (A.3) where ek(t), k = 1, 2, ... , denote a countable set of standard orthogonal basis functions over [0 , T ], α jk 
+
+nΠ ◦ ΦΓ [ui(τ)] j
+
+o
+
+and β jk (vi j ) are the coe ffi cients of Π ◦ ΦΓ [ui(τ)] j (t) and vi j (t), respectively. Substituting Eqs. (A.2) and (A.3) in Eq. (A.1) and utilizing the Parseval’s identity, ℜGϑ can be expressed as 
+
+ℜGϑ = Eσ sup  
+
+> Π◦ΦΓ∈F Π◦ΦΓ
+> 1
+> NN
+
+P
+
+> i=1
+
+σiwΠ,out P
+
+> j=1
+
+R T
+
+> 0
+
+"+∞P
+
+> k=1
+
+β jk (vi j ) − α jk 
+
+nΠ ◦ ΦΓ [ui(τ)] j
+
+o ek(t)
+
+#2
+
+dt
+
+= Eσ sup  
+
+> Π◦ΦΓ∈F Π◦ΦΓ
+> 1
+> NN
+
+P
+
+> i=1
+
+σiz {Π ◦ ΦΓ [ui(τ)] },
+
+(A.4) where 
+
+z {Π ◦ ΦΓ [ui(τ)] } =
+
+> wΠ,out
+
+X
+
+> j=1
+> +∞
+
+X
+
+> k=1
+
+β jk (vi j ) − α jk 
+
+nΠ ◦ ΦΓ [ui(τ)] j
+
+o 2
+
+. (A.5) 13 Consider two neural oscillators Π1 ◦ ΦΓ1 and Π2 ◦ ΦΓ2 ∈ F Π◦ΦΓ , the di ff erence between z nΠ1 ◦ ΦΓ1 [ui(τ)] j (t)o and 
+
+z nΠ2 ◦ ΦΓ2 [ui(τ)] j (t)o can be bounded by 
+
+z nΠ1 ◦ ΦΓ1 [ui(τ)] j
+
+o − z nΠ2 ◦ ΦΓ2 [ui(τ)] j
+
+o
+
+= wΠ,out P
+
+j=1
+
++∞P
+
+k=1
+
+β jk (vi j ) − α jk 
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j
+
+o 2
+
+− wΠ,out P
+
+j=1
+
++∞P
+
+k=1
+
+β jk (vi j ) − α jk 
+
+nΠ2 ◦ ΦΓ2 [ui(τ)] j
+
+o 2
+
+= wΠ,out P
+
+j=1
+
++∞P
+
+k=1
+
+α2
+
+jk 
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j
+
+o − α2
+
+jk 
+
+nΠ2 ◦ ΦΓ2 [ui(τ)] j
+
+o 
+
+−2 wΠ,out P
+
+j=1
+
++∞P
+
+k=1
+
+β jk (vi j ) α jk 
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j
+
+o − α jk 
+
+nΠ2 ◦ ΦΓ2 [ui(τ)] j
+
+o 
+
+= wΠ,out P
+
+j=1
+
++∞P
+
+k=1
+
+α jk 
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j
+
+o − α jk 
+
+nΠ2 ◦ ΦΓ2 [ui(τ)] j
+
+o 
+
+× α jk 
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j
+
+o + α jk 
+
+nΠ2 ◦ ΦΓ2 [ui(τ)] j
+
+o − 2β jk (vi j )
+
+(a)
+
+≤
+
+swΠ,out P
+
+j=1
+
++∞P
+
+k=1
+
+α jk 
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j
+
+o − α jk 
+
+nΠ2 ◦ ΦΓ2 [ui(τ)] j
+
+o 2
+
+×
+
+swΠ,out P
+
+j=1
+
++∞P
+
+k=1
+
+α jk 
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j
+
+o + α jk 
+
+nΠ2 ◦ ΦΓ2 [ui(τ)] j
+
+o − 2β jk (vi j )2
+
+=
+
+swΠ,out P
+
+j=1
+
++∞P
+
+k=1
+
+α jk 
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j
+
+o − α jk 
+
+nΠ2 ◦ ΦΓ2 [ui(τ)] j
+
+o 2
+
+×
+
+swΠ,out P
+
+j=1
+
+R T
+
+0
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j(t) + Π2 ◦ ΦΓ2 [ui(τ)] j(t) − 2vi j (t)o2
+
+dt
+
+(b)
+
+≤ 2 pT w Π,out Bloss 
+
+swΠ,out P
+
+j=1
+
++∞P
+
+k=1
+
+α jk 
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j
+
+o − α jk 
+
+nΠ2 ◦ ΦΓ2 [ui(τ)] j
+
+o 2
+
+,
+
+(A.6) where Step ( a) follows from the Cauchy-Schwarz inequality and Step ( b) relies on the Assumption 11 that 
+
+Π1 ◦ ΦΓ1 [ui(τ)] j + Π2 ◦ ΦΓ2 [ui(τ)] j − 2vi j (t) is bounded by 2 Bloss . Eq. (A.6) indicates that 2 pT w Π,out Bloss is a Lip-schitz constant of z nΠ ◦ ΦΓ [ui(τ)] j
+
+o with respect to α jk 
+
+nΠ ◦ ΦΓ [ui(τ)] j
+
+o. Then, from Corollary 4 of Maurer (2016) and Eq. (A.4), ℜGϑ can be bounded by 
+
+ℜGϑ ≤ E ˜σ sup 
+
+Π◦ΦΓ ∈F Π◦ΦΓ
+
+2 √2T w Π,out Bloss 
+
+NNP
+
+i=1
+
+wΠ,out P
+
+j=1
+
++∞P
+
+k=1
+
+˜σi jk α jk 
+
+nΠ ◦ ΦΓ [ui(τ)] j
+
+o. (A.7) This completes the proof. ■
+
+Appendix A.2. Proof of Lemma 4 
+
+Proof: Consider a random variable sequence XK , K = 1, 2, ... 
+
+XK =
+
+NX
+
+i=1
+
+wΠ,out X
+
+j=1
+
+KX
+
+k=1
+
+˜σi jk αi jk , (A.8) where αi jk = α jk 
+
+nΠ ◦ ΦΓ [ui(τ)] j
+
+o for ∀Π ◦ ΦΓ ∈ F Π◦ΦΓ , this sequence satisfies lim 
+
+K1,K2→+∞ E ˜σ
+
+ XK2 − XK1
+
+2 = lim 
+
+K1,K2→+∞ E ˜σ
+
+NP
+
+i=1
+
+wΠ,out P
+
+j=1
+
+K2P
+
+k=1
+
+˜σi jk αi jk − NP
+
+i=1
+
+wΠ,out P
+
+j=1
+
+K1P
+
+k=1
+
+˜σi jk αi jk 
+
+!2(a)
+
+= lim 
+
+Kmin ,Kmax →+∞
+
+NP
+
+i=1
+
+wΠ,out P
+
+j=1
+
+Kmax P
+
+k=Kmin +1
+
+α2
+
+i jk 
+
+(b)
+
+= 0,
+
+(A.9) 14 where in Step ( a) Kmin = min ( K1, K2) and Kmax = max ( K1, K2), and Step ( b) is valid since the sequence αi jk is square-summable. Eq. (A.9) indicates that the sequence XK converges in mean-square. The expectation of κ (Π ◦ ΦΓ , ˜σ) is 
+
+E ˜σκ (Π ◦ ΦΓ , ˜σ) = E ˜σ
+
+> N
+
+P
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> +∞
+
+P
+
+> k=1
+
+˜σi jk αi jk 
+
+> (a)
+
+= NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> +∞
+
+P
+
+> k=1
+
+E ˜σ ˜σi jk αi jk = 0, (A.10) where the mean-square convergence property of XK allows the expectation and limit to be interchanged in Step (a) (Huang and Xia, 2022). For arbitrary Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2 ∈ F Π◦ΦΓ , Π1 ◦ ΦΓ1 [ui(τ)] j (t) − Π2 ◦ ΦΓ2 [ui(τ)] j (t) are bounded and continuous functions over [0 , T ] for all i = 1, 2, ..., N and j = 1, 2, ..., wΠ,out . Thus, ∆αi jk = αi jk ,1 −αi jk ,2 is also a square-summable sequence, where αi jk ,1 = α jk 
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j
+
+o and αi jk ,2 = α jk 
+
+nΠ2 ◦ ΦΓ2 [ui(τ)] j
+
+o. XK,∆ = PNi=1
+
+PwΠ,out 
+
+> j=1
+
+PKk=1 ˜σi jk ∆αi jk 
+
+is a sequence converging in mean-square and satisfies 
+
+E ˜σ
+
+
+
+lim  
+
+> K→+∞
+
+XK,∆
+
+2
+
+= lim  
+
+> K→+∞
+
+E ˜σ X2
+
+> K,∆
+
+. (A.11) The pseudo-metric dκ
+
+ Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2
+
+ for arbitrary Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2 ∈ F Π◦ΦΓ is calculated as 
+
+dκ
+
+ Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2
+
+
+
+=
+
+q
+
+E ˜σ
+
+κ  Π1 ◦ ΦΓ1 , ˜σ − κ  Π2 ◦ ΦΓ2 , ˜σ 2 =
+
+s
+
+E ˜σ
+
+" NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> +∞
+
+P
+
+> k=1
+
+˜σi jk ∆αi jk 
+
+#2(a)
+
+=
+
+s NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> +∞
+
+P
+
+> k=1
+
+E ˜σ ˜σ2
+
+> i jk
+
+∆α2 
+
+> i jk
+
+=
+
+s NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> +∞
+
+P
+
+> k=1
+
+∆α2
+
+> i jk
+
+=
+
+s NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+
+R T
+
+> 0
+
+nΠ1 ◦ ΦΓ1 [ui(τ)] j(t) − Π2 ◦ ΦΓ2 [ui(τ)] j(t)o2
+
+dt
+
+=
+
+s NP
+
+> i=1
+
+Π1 ◦ ΦΓ1 [ui(τ)] ( t) − Π2 ◦ ΦΓ2 [ui(τ)] ( t) 2 
+
+> L2
+
+,
+
+(A.12) where Step ( a) holds from Eq. (A.11). Given ∀w ∈ R, it can be obtained 
+
+E ˜σ exp w κ  Π1 ◦ ΦΓ1 , ˜σ − κ  Π2 ◦ ΦΓ2 , ˜σ 
+
+= E ˜σ exp w NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> +∞
+
+P
+
+> k=1
+
+˜σi jk ∆αi jk 
+
+! (a)
+
+= NQ
+
+> i=1
+> wΠ,out
+
+Q
+
+> j=1
+> +∞
+
+Q
+
+> k=1
+
+E ˜σi jk exp  ˜σi jk w∆αi jk 
+
+
+
+> (b)
+
+≤ NQ
+
+> i=1
+> wΠ,out
+
+Q
+
+> j=1
+> +∞
+
+Q
+
+> k=1
+
+exp 0.5w2∆α2
+
+> i jk
+
+ = exp 0.5w2 NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> +∞
+
+P
+
+> k=1
+
+∆α2
+
+> i jk
+
+!
+
+> (c)
+
+= exp h0.5w2d2
+
+> κ
+
+ Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2
+
+i ,
+
+(A.13) where Step ( b) is valid because of Lemma A.6 in Shalev-Shwartz and Ben-David (2014) that for ∀a ∈ R, it is satisfied 
+
+E ˜σi jk exp( ˜ σi jk a) = 0.5 exp( a) + exp( −a) ≤ exp(0 .5a2), Step ( c) is from Eq. (A.12), and Step ( a) is demonstrated as follows. A random variable sequence YK , K = 1, 2, ..., is defined as 
+
+YK = exp 
+
+w
+
+> N
+
+X
+
+> i=1
+> wΠ,out
+
+X
+
+> j=1
+> K
+
+X
+
+> k=1
+
+˜σi jk ∆αi jk 
+
+ . (A.14) 15 This sequence satisfies lim  
+
+> K1,K2→+∞
+
+E ˜σYK1 YK2
+
+= lim  
+
+> K1,K2→+∞
+
+E ˜σ exp w NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> K1
+
+P
+
+> k=1
+
+˜σi jk ∆αi jk 
+
+!
+
+exp w NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> K2
+
+P
+
+> k=1
+
+˜σi jk ∆αi jk 
+
+!
+
+> (a)
+
+= lim  
+
+> Kmin ,Kmax →+∞
+
+E ˜σ exp 
+
+"
+
+w 2 NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> Kmin
+
+P
+
+> k=1
+
+˜σi jk ∆αi jk + NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> Kmax
+
+P
+
+> k=Kmin +1
+
+˜σi jk ∆αi jk 
+
+!# 
+
+= lim  
+
+> Kmin ,Kmax →+∞
+
+E ˜σ exp 2w NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> Kmin
+
+P
+
+> k=1
+
+˜σi jk ∆αi jk 
+
+!
+
+E ˜σ exp w NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> Kmax
+
+P
+
+> k=Kmin +1
+
+˜σi jk ∆αi jk 
+
+!
+
+= lim  
+
+> Kmin ,Kmax →+∞
+
+AKmin BKmax  
+
+> Kmin
+
+,
+
+(A.15) where 
+
+AKmin = NQ
+
+> i=1
+> wΠ,out
+
+Q
+
+> j=1
+> Kmin
+
+Q
+
+> k=1
+
+0.5 hexp 2w∆αi jk 
+
+ + exp −2w∆αi jk 
+
+i ≤ exp 2w2 NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> Kmin
+
+P
+
+> k=1
+
+∆α2
+
+> i jk
+
+!
+
+, (A.16) 1 ≤ BKmax  
+
+> Kmin
+
+= NQ
+
+> i=1
+> wΠ,out
+
+Q
+
+> j=1
+> Kmax
+
+Q
+
+> k=Kmin +1
+
+0.5 hexp w∆αi jk 
+
+ + exp −w∆αi jk 
+
+i ≤ exp 0.5w2 NP
+
+> i=1
+> wΠ,out
+
+P
+
+> j=1
+> Kmax
+
+P
+
+> k=Kmin +1
+
+∆α2
+
+> i jk
+
+!
+
+, (A.17) and in Step ( a) of Eq. (A.15) Kmin = min ( K1, K2) and Kmax = max ( K1, K2). Since the sequence ∆αi jk is square-summable and 0 .5 exp ( a) + exp ( −a) ≥ 1 for all a ∈ R, AKmin is a monotonically increasing and bounded sequence with respect to Kmin , and its limit exists. BKmax  
+
+> Kmin
+
+is also a bounded sequence with respect to Kmin and Kmax , and its limit is 1 because of 1 = lim  
+
+> Kmin ,Kmax →+∞
+
+exp 0.5w2 PNi=1
+
+PwΠ,out 
+
+> j=1
+
+PKmax  
+
+> k=Kmin +1
+
+∆α2
+
+> i jk
+
+ ≥ lim  
+
+> Kmin ,Kmax →+∞
+
+BKmax  
+
+> Kmin
+
+≥ 1. Since the values of AKmin and BKmax  
+
+> Kmin
+
+are bounded, the limit in Eq. (A.15) exists and equals that of AKmin , and it is independent of the manner in which Kmin and Kmax approach infinity. It is also independent of the manner in which K1 and K2 approach infinity. Thus, it can be obtained lim  
+
+> K1,K2→+∞
+
+E ˜σ
+
+ YK2 − YK1
+
+2 = lim  
+
+> K1,K2→+∞
+
+E ˜σ
+
+Y2 
+
+> K1
+
++ Y2 
+
+> K2
+
+−YK1 YK2 − YK2 YK1
+
+ = 0. This result indicates that the random variable sequence YK converges in mean-square, thereby allowing the expectation and limit to be interchanged in Step (a) of Eq. (A.13) (Huang and Xia, 2022). Eqs. (A.10) and (A.13) prove that κ (Π ◦ ΦΓ , ˜σ) is a zero-mean sub-Gaussian process with respect to Π ◦ ΦΓ over 
+
+FΠ◦ΦΓ . The diameter of κ (Π ◦ ΦΓ , ˜σ) over FΠ◦ΦΓ is bounded by 
+
+∆κ
+
+ FΠ◦ΦΓ
+
+ = sup   
+
+> Π1◦ΦΓ1,Π2◦ΦΓ2∈F Π◦ΦΓ
+
+dκ
+
+ Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2
+
+ (a)
+
+≤ 2 pNT w Π,out BΠ , (A.18) where Step ( a) holds from Eq. (A.12). ■
+
+Appendix A.3. Proof of Lemma 5 
+
+Proof: For ∀Γ(·) ∈ F Γ , the di ff erence between Γ(x1) and Γ(x2) is bounded by 
+
+|Γ(x1) − Γ(x2)| = |W2 [σReLU (W1x1 + b1) − σReLU (W1x2 + b1)] |≤ W⊤  
+
+> 2∞,1
+
+|[σReLU (W1x1 + b1) − σReLU (W1x2 + b1)] |≤ wΓ,out |W2|∞,∞ |[W1 (x1 − x2)] |≤ wΓ,out |W2|∞,∞|W1|∞,∞wΓ |x1 − x2| ≤ wΓ,out wΓ B2 
+
+> W
+
+|x1 − x2| .
+
+(A.19) Thus, LFΓ = wΓ,out wΓ B2 
+
+> W
+
+is an L1-norm Lipschitz constant of all Γ(·) ∈ F Γ . For ∀Π(·) ∈ F Π , the di ff erence between 
+
+Π(x1) and Π(x2) is bounded by 
+
+|Π(x1) − Π(x2)| ≤ ˜W⊤  
+
+> hΠ∞,1
+
+σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1x1 + ˜b1
+
+i − σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1x2 + ˜b1
+
+i 
+
+≤ wΠ,out B ˜W σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1x1 + ˜b1
+
+i − σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1x2 + ˜b1
+
+i 
+
+≤ wΠ,out whΠ−1 
+
+> Π
+
+BhΠ 
+
+> ˜W
+
+|x1 − x2| .
+
+(A.20) Thus, LFΠ = wΠ,out whΠ −1 
+
+> Π
+
+BhΠ 
+
+> ˜W
+
+is an L1-norm Lipschitz constant of all Π(·) ∈ F Π . ■
+
+16 Appendix A.4. Proof of Lemma 6 
+
+Proof: Since the weight matrices and vectors of all Γ(·) ∈ F Γ in Assumption 9 are bounded and σReLU (·) is Lipschitz continuous, the first ODE in Eq. (1) with the initial conditions x(0) = x′(0) = 0 has unique solutions 
+
+x(t) = Φ Γ [u(τ)] ( t) for all u(t) ∈ K. x(t) and its derivative x′(t) satisfy 
+
+|x(t)| + |x′(t)| = R t 
+
+> 0
+
+x′(τ)d τ + R t 
+
+> 0
+
+Γ [x(τ), x′(τ), u(τ)] d τ ≤ R t 
+
+> 0
+
+|x′(τ)| dτ + R t 
+
+> 0
+
+|Γ [x(τ), x′(τ), u(τ)] | dτ
+
+> (a)
+
+≤ R t 
+
+> 0
+
+|x′(τ)| dτ + LFΓ
+
+R t 
+
+> 0
+
+[|x(τ)| + |x′(τ)| + |u(τ)|] d τ + R t 
+
+> 0
+
+|Γ (0)| dτ
+
+≤  LFΓ + 1 R t 
+
+> 0
+
+[|x(τ)| + |x′(τ)|] d τ + pT B K LFΓ + T [|W2σReLU (b1)| + |b2|]
+
+≤  LFΓ + 1 R t 
+
+> 0
+
+[|x(τ)| + |x′(τ)|] d τ + T pB K LFΓ + wΓ,out Bb (wΓ BW + 1) 
+
+> (b)
+
+≤ T pB K LFΓ + wΓ,out Bb (wΓ BW + 1)  eT (LFΓ +1),
+
+(A.21) where in Step ( a) LFΓ is an arbitrary L1-norm Lipschitz constant for all Γ(·) ∈ F Γ and Step ( b) is from the Grönwall’s inequality (Ames and Pachpatte, 1997). ■
+
+Appendix A.5. Proof of Lemma 7 
+
+Proof: As explained in the proof of Lemma 6, x1(t) = Φ Γ1 [u(τ)] ( t) and x2(t) = Φ Γ2 [u(τ)] ( t) are unique solutions of the first ODE in Eq. (1) for all u(t) ∈ K. From Appendix D and Lemma 6 in Huang et al. (2025), |x2(t) − x1(t)| can be bounded by 
+
+|x2(t) − x1(t)| ≤ eT (LFΓ +1)T max   
+
+> τ∈[0 ,T]
+
+Γ2
+
+x2(τ), x′
+
+> 2
+
+(τ), u(τ) − Γ1
+
+x2(τ), x′
+
+> 2
+
+(τ), u(τ) , (A.22) where LFΓ is an arbitrary L1-norm Lipschitz constant that simultaneously bounds all Γ(·) ∈ FΓ .
+
+Γ2
+
+hx2(τ), x′
+
+> 2
+
+(τ), u(τ)i − Γ1
+
+hx2(τ), x′
+
+> 2
+
+(τ), u(τ)i in Eq. (A.22) can be bounded by 
+
+Γ2
+
+hx2(τ), x′
+
+> 2
+
+(τ), u(τ)i − Γ1
+
+hx2(τ), x′
+
+> 2
+
+(τ), u(τ)i
+
+≤ W2,2σReLU 
+
+
+
+W2,1
+
+hx⊤ 
+
+> 2
+
+(t), x′⊤  
+
+> 2
+
+(t), u⊤(t)i⊤
+
++ b2,1
+
+
+
++ b2,2
+
+−W1,2σReLU 
+
+
+
+W1,1
+
+hx⊤ 
+
+> 2
+
+(t), x′⊤  
+
+> 2
+
+(t), u⊤(t)i⊤
+
++ b1,1
+
+
+
+− b1,2
+
+≤ W2,2σReLU 
+
+
+
+W2,1
+
+hx⊤ 
+
+> 2
+
+(t), x′⊤  
+
+> 2
+
+(t), u⊤(t)i⊤
+
++ b2,1
+
+
+
+− W1,2σReLU 
+
+
+
+W2,1
+
+hx⊤ 
+
+> 2
+
+(t), x′⊤  
+
+> 2
+
+(t), u⊤(t)i⊤
+
++ b2,1
+
+
+
++W1,2σReLU 
+
+
+
+W2,1
+
+hx⊤ 
+
+> 2
+
+(t), x′⊤  
+
+> 2
+
+(t), u⊤(t)i⊤
+
++ b2,1
+
+
+
+−W1,2σReLU 
+
+
+
+W1,1
+
+hx⊤ 
+
+> 2
+
+(t), x′⊤  
+
+> 2
+
+(t), u⊤(t)i⊤
+
++ b1,1
+
+
+
++ b2,2 − b1,2
+
+≤ wΓ,out W2,2 − W1,2 ∞,∞ σReLU 
+
+
+
+W2,1
+
+hx⊤ 
+
+> 2
+
+(t), x′⊤  
+
+> 2
+
+(t), u⊤(t)i⊤
+
++ b2,1
+
+
+
++wΓ,out W1,2 ∞,∞
+
+
+
+W2,1
+
+hx⊤ 
+
+> 2
+
+(t), x′⊤  
+
+> 2
+
+(t), u⊤(t)i⊤
+
++ b2,1
+
+
+
+−
+
+
+
+W1,1
+
+hx⊤ 
+
+> 2
+
+(t), x′⊤  
+
+> 2
+
+(t), u⊤(t)i⊤
+
++ b1,1
+
+
+
++wΓ,out b2,2 − b1,2 ∞
+
+≤ ςwΓ,out W2,1
+
+hx⊤ 
+
+> 2
+
+(t), x′⊤  
+
+> 2
+
+(t), u⊤(t)i⊤
+
++ b2,1 + ςwΓ,out 
+
++wΓ,out BW
+
+  W2,1 − W1,1
+
+ h x⊤ 
+
+> 2
+
+(t), x′⊤  
+
+> 2
+
+(t), u⊤(t)i⊤
+
++ b2,1 − b1,1
+
+
+
+> (a)
+
+≤ ςwΓ,out 
+
+wΓ BW
+
+nT pB K LFΓ + wΓ,out Bb (wΓ BW + 1)  eT (LFΓ +1) + pB K
+
+o + wΓ Bb
+
+
+
++wΓ,out BW
+
+wΓ ς nT pB K LFΓ + wΓ,out Bb (wΓ BW + 1)  eT (LFΓ +1) + pB K
+
+o + wΓ ς + ςwΓ,out (b)
+
+≤ ςwΓ,out wΓ
+
+BW
+
+nT pB K
+
+ LFΓ + 1 + wΓ,out Bb (wΓ BW + 1)  eT (LFΓ +1)o + Bb
+
+
+
++wΓ,out BWwΓ ς n T pB K
+
+ LFΓ + 1 + wΓ,out Bb (wΓ BW + 1)  eT (LFΓ +1)o + 1 + ςwΓ,out 
+
+≤ 2ςwΓ,out wΓ max ( BW, Bb) nT pB K
+
+ LFΓ + 1 + wΓ,out Bb (wΓ BW + 1)  eT (LFΓ +1) + 1o + ςwΓ,out (c)
+
+≤ 2ςwΓ,out wΓ pT e T (LFΓ +1) max ( BW, Bb) BK
+
+ LFΓ + 1 + wΓ,out Bb (wΓ BW + 1) + 1 + 1 ,
+
+(A.23) where Step ( a) utilizes Eq. (23) in Lemma 6 and Steps ( b) and ( c) hold from T ≥ 1 in Assumption 1. Substituting Eq. (A.23) into Eq. (A.22), Eq. (24) is proven. ■
+
+17 Appendix A.6. Proof of Lemma 8 
+
+Proof: |Π1(x) − Π2(x)| is bounded by 
+
+|Π1(x) − Π2(x)| ≤ ˜W1,hΠ σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i 
+
+− ˜W2,hΠ σReLU 
+
+h. . . σ ReLU 
+
+ ˜W2,1x + ˜b2,1
+
+i + ˜b1,hΠ − ˜b2,hΠ
+
+≤ ˜W1,hΠ σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i − ˜W2,hΠ σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i 
+
++ ˜W2,hΠ σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i 
+
+− ˜W2,hΠ σReLU 
+
+h. . . σ ReLU 
+
+ ˜W2,1x + ˜b2,1
+
+i + wΠ,out ς
+
+≤ ˜W⊤
+
+1,hΠ − ˜W⊤
+
+2,hΠ ∞,1 σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i + wΠ,out ς
+
++LFΠ ,layer σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i −σReLU 
+
+h. . . σ ReLU 
+
+ ˜W2,1x + ˜b2,1
+
+i ,
+
+(A.24) where LFΠ ,layer = max j∈[1 ,2,..., hΠ ] LFΠ , j and LFΠ , j is an arbitrary L1-norm Lipschitz constant that bounds the mappings between the ( j − 1) th and jth layers of all Π(·) ∈ F Π , for j = 1, 2, . . . , hΠ . σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i in Eq. (A.24) is bounded by 
+
+σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i ≤ LFΠ ,layer σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i + wΠ B˜b
+
+≤ L2
+
+FΠ ,layer σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i + wΠ B˜b
+
+1 + LFΠ ,layer 
+
+
+
+≤ LhΠ −1
+
+FΠ ,layer |x| + wΠ B˜b
+
+hΠ −2P
+
+i=0
+
+Li
+
+FΠ ,layer .
+
+(A.25) Substituting Eq. (A.25) into Eq. (A.24), |Π1(x) − Π2(x)| is bounded by 
+
+|Π1(x) − Π2(x)|≤ wΠ,out ς LhΠ −1
+
+FΠ ,layer |x| + wΠ B˜b
+
+hΠ −2P
+
+i=0
+
+Li
+
+FΠ ,layer + 1
+
+!
+
++LFΠ ,layer ˜W1,hΠ −1σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i + ˜b1,hΠ −1− ˜W2,hΠ −1σReLU 
+
+h. . . σ ReLU 
+
+ ˜W2,1x + ˜b2,1
+
+i − ˜b2,hΠ −1 .
+
+(A.26) Similarly, the last term of Eq. (A.26) is bounded by 
+
+˜W1,hΠ −1σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i + ˜b1,hΠ −1 − ˜W2,hΠ −1σReLU 
+
+h. . . σ ReLU 
+
+ ˜W2,1x + ˜b2,1
+
+i − ˜b2,hΠ −1
+
+≤ wΠ ς LhΠ −2
+
+FΠ ,layer |x| + wΠ B˜b
+
+hΠ −3P
+
+i=0
+
+Li
+
+FΠ ,layer + 1
+
+!
+
++LFΠ ,layer ˜W1,hΠ −2σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i + ˜b1,hΠ −2 − ˜W2,hΠ −2σReLU 
+
+h. . . σ ReLU 
+
+ ˜W2,1x + ˜b2,1
+
+i − ˜b2,hΠ −2 .
+
+(A.27) By solving the iteration in Eq. (A.27), the last term of Eq. (A.26) is bounded by 
+
+˜W1,hΠ −1σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i + ˜b1,hΠ −1 − ˜W2,hΠ −1σReLU 
+
+h. . . σ ReLU 
+
+ ˜W2,1x + ˜b2,1
+
+i − ˜b2,hΠ −1
+
+≤ wΠ ς LhΠ −2
+
+FΠ ,layer |x| + wΠ B˜b
+
+hΠ −3P
+
+i=0
+
+Li
+
+FΠ ,layer + 1
+
+!
+
++ wΠ ςLFΠ ,layer LhΠ −3
+
+FΠ ,layer |x| + wΠ B˜b
+
+hΠ −4P
+
+i=0
+
+Li
+
+FΠ ,layer + 1
+
+!
+
++L2
+
+FΠ ,layer ˜W1,hΠ −3σReLU 
+
+h. . . σ ReLU 
+
+ ˜W1,1x + ˜b1,1
+
+i + ˜b1,hΠ −3 − ˜W2,hΠ −3σReLU 
+
+h. . . σ ReLU 
+
+ ˜W2,1x + ˜b2,1
+
+i − ˜b2,hΠ −3
+
+≤ wΠ ς hΠ −3P
+
+j=0
+
+L j
+
+FΠ ,layer LhΠ −2− j
+
+FΠ ,layer |x| + wΠ B˜b
+
+hΠ −3− jP
+
+i=0
+
+Li
+
+FΠ ,layer + 1
+
+!
+
++ LhΠ −2
+
+FΠ ,layer 
+
+ ˜W1,1x + ˜b1,1
+
+ −  ˜W2,1x + ˜b2,1
+
+
+
+≤ wΠ ς hΠ −3P
+
+j=0
+
+L j
+
+FΠ ,layer LhΠ −2− j
+
+FΠ ,layer |x| + wΠ B˜b
+
+1−LhΠ −2− j 
+
+> FΠ,layer
+
+1−LFΠ ,layer + 1
+
+!
+
++ LhΠ −2
+
+FΠ ,layer wΠ ς (|x| + 1) 
+
+= wΠ ς hΠ −2P
+
+i=0
+
+Li
+
+FΠ ,layer LhΠ −2−i
+
+FΠ ,layer |x| + wΠ B˜b
+
+1−LhΠ −2−i 
+
+> FΠ,layer
+
+1−LFΠ ,layer + 1
+
+!
+
+.
+
+(A.28) 18 Substituting Eq. (A.28) into Eq. (A.26), |Π1(x) − Π2(x)| is bounded by 
+
+|Π1(x) − Π2(x)| ≤ wΠ,out ς LhΠ −1  
+
+> FΠ,layer
+
+|x| + wΠ B˜b 
+
+> hΠ−2
+
+P
+
+> i=0
+
+Li  
+
+> FΠ,layer
+
++ 1
+
+!
+
++LFΠ ,layer wΠ ς hΠ −2P
+
+> i=0
+
+Li  
+
+> FΠ,layer
+
+LhΠ −2−i  
+
+> FΠ,layer
+
+|x| + wΠ B˜b    
+
+> 1−LhΠ−2−i
+> FΠ,layer
+> 1−LFΠ,layer
+
++ 1
+
+!
+
+= wΠ,out ς LhΠ −1  
+
+> FΠ,layer
+
+|x| + wΠ B˜b 
+
+> hΠ−2
+
+P
+
+> i=0
+
+Li  
+
+> FΠ,layer
+
++ 1
+
+!
+
++wΠ ς hΠ −1P
+
+> i=1
+
+Li  
+
+> FΠ,layer
+
+LhΠ −1−i  
+
+> FΠ,layer
+
+|x| + wΠ B˜b    
+
+> 1−LhΠ−1−i
+> FΠ,layer
+> 1−LFΠ,layer
+
++ 1
+
+!
+
+≤ max  wΓ,out , wΓ
+
+ ς hΠ −1P
+
+> i=0
+
+Li  
+
+> FΠ,layer
+
+LhΠ −1−i  
+
+> FΠ,layer
+
+|x| + wΠ B˜b    
+
+> 1−LhΠ−1−i
+> FΠ,layer
+> 1−LFΠ,layer
+
++ 1
+
+!
+
+= max  wΓ,out , wΓ
+
+ ς hΠ LhΠ −1  
+
+> FΠ,layer
+
+|x| + hΠ −1P
+
+> i=0
+
+Li  
+
+> FΠ,layer
+
++ wΠ B˜b 
+
+> hΠ−2
+
+P 
+
+> i=0
+> hΠ−2
+
+P
+
+> j=i
+
+L j 
+
+> FΠ,layer
+
+!
+
+≤ ς max  wΓ,out , wΓ
+
+ h2
+
+> Π
+
+LhΠ −1  
+
+> FΠ,layer
+
++ 1   |x| + wΠ B˜b + 1 .
+
+(A.29) This completes the proof. ■
+
+Appendix A.7. Proof of Lemma 9 
+
+Proof: Π1 ◦ ΦΓ1 [u(τ)] ( t) − Π2 ◦ ΦΓ2 [u(τ)] ( t) is bounded by 
+
+Π1 ◦ ΦΓ1 [u(τ)] ( t) − Π2 ◦ ΦΓ2 [u(τ)] ( t)
+
+≤ Π1 ◦ ΦΓ1 [u(τ)] ( t) − Π1 ◦ ΦΓ2 [u(τ)] ( t) + Π1 ◦ ΦΓ2 [u(τ)] ( t) − Π2 ◦ ΦΓ2 [u(τ)] ( t) . (A.30) From Lemma 7, Π1 ◦ ΦΓ1 [u(τ)] ( t) − Π1 ◦ ΦΓ2 [u(τ)] ( t) in Eq. (A.30) is bounded by 
+
+Π1 ◦ ΦΓ1 [u(τ)] ( t) − Π1 ◦ ΦΓ2 [u(τ)] ( t)
+
+≤ 2LFΠ ςwΓ,out wΓ pT 2e2T (LFΓ +1) max ( BW, Bb) BK
+
+ LFΓ + 1 + wΓ,out Bb (wΓ BW + 1) + 1 + 1 , (A.31) where LFΠ is an arbitrary L1-norm Lipschitz constant for all Π(·) ∈ F Π . From Eq. (1), Lemma 6, and Lemma 8, 
+
+Π1 ◦ ΦΓ2 [u(τ)] ( t) − Π2 ◦ ΦΓ2 [u(τ)] ( t) in Eq. (A.30) with x(t) = Φ Γ2 [u(τ)] ( t) is bounded by 
+
+Π1 ◦ ΦΓ2 [u(τ)] ( t) − Π2 ◦ ΦΓ2 [u(τ)] ( t)
+
+≤ ς max  wΓ,out , wΓ
+
+ h2
+
+> Π
+
+LhΠ −1  
+
+> FΠ,layer
+
++ 1   |x(t)| + |u0| + t + wΠ B˜b + 1
+
+≤ ς max  wΓ,out , wΓ
+
+ h2
+
+> Π
+
+LhΠ −1  
+
+> FΠ,layer
+
++ 1 n T pB K LFΓ + wΓ,out Bb (wΓ BW + 1)  eT (LFΓ +1) + pB K + T + wΠ B˜b + 1o
+
+≤ ς max  wΓ,out , wΓ
+
+ h2
+
+> Π
+
+LhΠ −1  
+
+> FΠ,layer
+
++ 1 T pB K
+
+ LFΓ + 1 + wΓ,out Bb (wΓ BW + 1) + wΠ B˜b + 2 eT (LFΓ +1)
+
+≤ ς max  wΓ,out , wΓ
+
+ h2
+
+> Π
+
+LhΠ −1  
+
+> FΠ,layer
+
++ 1 pT e T (LFΓ +1) BK
+
+ LFΓ + 1 + wΓ,out Bb (wΓ BW + 1) + wΠ B˜b + 2 .
+
+(A.32) Substituting Eqs. (A.31) and (A.32) into Eq. (A.30), Π1 ◦ ΦΓ1 [u(τ)] ( t) − Π2 ◦ ΦΓ2 [u(τ)] ( t) can be bounded by 
+
+Π1 ◦ ΦΓ1 [u(τ)] ( t) − Π2 ◦ ΦΓ2 [u(τ)] ( t)
+
+≤ 2LFΠ ςwΓ,out wΓ pT 2e2T (LFΓ +1) max ( BW, Bb) BK
+
+ LFΓ + 1 + wΓ,out Bb (wΓ BW + 1) + 1 + 1
+
++ς max  wΓ,out , wΓ
+
+ h2
+
+> Π
+
+LhΠ −1  
+
+> FΠ,layer
+
++ 1 pT e T (LFΓ +1) BK
+
+ LFΓ + 1 + wΓ,out Bb (wΓ BW + 1) + wΠ B˜b + 2
+
+≤ 3ς LhΠ  
+
+> FΠ,layer
+
++ 1 wΠ w2
+
+> Γ,out
+
+w2 
+
+> Γ
+
+h2 
+
+> Π
+
+pT 2e2T (LFΓ +1)  LFΓ + 1 BK
+
+[max ( BW, Bb) + 1] [ Bb (BW + 1) + 2] + B˜b + 2 .
+
+(A.33) This completes the proof. ■
+
+Appendix A.8. Proof of Lemma 10 
+
+Proof: Under Assumptions 1, 2, 8, 9, and 10, given MLPs Γ1(·) and Γ2(·) ∈ F Γ and MPLs Π1(·) and Π2(·) ∈ F Π ,the di ff erences between the weight matrices and vectors of Γ1(·) and Γ2(·) and those of Π1(·) and Π2(·) are bounded 19 by ς, then, from Eq. (19) in Lemma 4 and Eq. (26) in Lemma 9, the pseudo-metric dκ
+
+ Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2
+
+ between 
+
+Π1 ◦ ΦΓ1 and Π2 ◦ ΦΓ2 ∈ F Π◦ΦΓ , is bounded by 
+
+dκ
+
+ Π1 ◦ ΦΓ1 , Π2 ◦ ΦΓ2
+
+ =
+
+s NP
+
+> i=1
+
+Π1 ◦ ΦΓ1 [ui(τ)] ( t) − Π2 ◦ ΦΓ2 [ui(τ)] ( t) 2
+
+> L2
+
+≤ √T N max   
+
+> t∈[0 ,T]
+
+Π1 ◦ ΦΓ1 [u(τ)] ( t) − Π2 ◦ ΦΓ2 [u(τ)] ( t) ≤ ς pNT w Π,out BΠ ∆Π◦ΦΓ ,
+
+(A.34) where ∆Π◦ΦΓ is in Eq. (29). For all neural oscillators Π ◦ ΦΓ ∈ F Π◦ΦΓ in Assumption 10, the number NW of the total tunable parameters in the weight matrices of an arbitrary Γ(·) ∈ F Γ is NW = wΓ
+
+ 3wΓ,out + p, the number Nb of the total tunable parameters in the weight vectors of Γ(·) ∈ F Γ is Nb = wΓ,out + wΓ , the number N ˜W of the total tunable parameters in the weight matrices of an arbitrary Π(·) ∈ F Π is N ˜W = w2 
+
+> Π
+
+(hΠ − 2) + wΠ
+
+ wΓ,out + p + wΠ,out + 1, and the number N˜b of the total tunable parameters in the weight vectors of Π(·) ∈ F Π is N˜b = wΠ,out + (hΠ − 1) wΠ . By discretizing the range of values for each weight parameter using a uniform grid with a grid size of ς, the number of the obtained neural oscillators is 
+
+2BW
+
+ς
+
+!NW 2Bb
+
+ς
+
+!Nb 2B ˜W
+
+ς
+
+!N ˜W 2Bb
+
+ς
+
+!N˜b
+
+. (A.35) Based on Eq. (A.34), these neural oscillators cover the neural oscillator class FΠ◦ΦΓ by a distance ε =
+
+ς pNT w Π,out BΠ ∆Π◦ΦΓ . Thus, the covering number N  FΠ◦ΦΓ , dκ, ε  can bounded by 
+
+N  FH◦ΦG , dκ, ε  ≤ BW
+
+√NT w Π,out BΠ ∆Π◦ΦΓ
+
+> 0.5ε
+
+!NW Bb
+
+√NT w Π,out BΠ ∆Π◦ΦΓ
+
+> 0.5ε
+
+!Nb B ˜W
+
+√NT w Π,out BΠ ∆Π◦ΦΓ
+
+> 0.5ε
+
+!N ˜W B˜b
+
+√NT w Π,out BΠ ∆Π◦ΦΓ
+
+> 0.5ε
+
+!N˜b
+
+.
+
+(A.36) Given an inequality 
+
+Z b
+
+> 0
+
+r
+
+ln 
+
+ a
+
+ε
+
+
+
+dε ≤
+
+Z b
+
+> 0
+
+r
+
+ln 
+
+
+
+1 + a
+
+ε
+
+
+
+dε = a
+
+Z b/a
+
+> 0
+
+s
+
+ln 1 + 1
+
+ε
+
+!
+
+dε (a)
+
+≤ b
+
+r
+
+ln 
+
+
+
+3
+
+
+
+1 + ab
+
+ 
+
+, (A.37) where Step ( a) is from Lemma C. 9 of Foucart and Rauhut (2013). The integral in Eq. (22) is bounded by 
+
+R √NT w Π,out BΠ
+
+> 0
+
+pln N  FH◦ΦG , dκ, ε dε
+
+≤ R √NT w Π,out BΠ
+
+> 0
+
+s
+
+NW ln BW
+
+√NT w Π,out BΠ ∆Π◦ΦΓ
+
+> 0.5ε
+
+!
+
+dε + R √NT w Π,out BΠ
+
+> 0
+
+s
+
+Nb ln Bb
+
+√NT w Π,out BΠ ∆Π◦ΦΓ
+
+> 0.5ε
+
+!
+
+dε
+
++ R √NT w Π,out BΠ
+
+> 0
+
+s
+
+N ˜W ln B ˜W
+
+√NT w Π,out BΠ ∆Π◦ΦΓ
+
+> 0.5ε
+
+!
+
+dε + R √NT w Π,out BΠ
+
+> 0
+
+s
+
+N˜b ln B˜b
+
+√NT w Π,out BΠ ∆Π◦ΦΓ
+
+> 0.5ε
+
+!
+
+dε
+
+≤ pNT w Π,out BΠ
+
+pwΓ
+
+ 3wΓ,out + p ln  3 + 6BW∆Π◦ΦΓ
+
+
+
++ pNT w Π,out BΠ
+
+p  wΓ,out + wΓ
+
+ ln  3 + 6Bb∆Π◦ΦΓ
+
+
+
++ pNT w Π,out BΠ
+
+qh w2 
+
+> Π
+
+(hΠ − 2) + wΠ
+
+ wΓ,out + p + wΠ,out + 1i ln  3 + 6B ˜W∆Π◦ΦΓ
+
+
+
++ pNT w Π,out BΠ
+
+p wΠ,out + (hΠ − 1) wΠ
+
+ ln  3 + 6B˜b∆Π◦ΦΓ
+
+.
+
+(A.38) Substituting Eq. (A.38) into Eq. (22), Eq. (28) is proven. ■
+
+Appendix A.9. Proof of Theorem 1 
+
+Proof: Under Assumptions 1-11, together with the conditions and results in Lemma 1, for the target causal and uniformly continuous operator Φ, with the specified sizes of Γ(·) and Π(·) from Lemma 1, the generalization error 
+
+ℓ  ˆΠ ◦ Φ ˆΓ
+
+ of a neural oscillator ˆ Π ◦ Φ ˆΓ , learned by Eq. (12) with N i.i.d. sample pairs UN (t) and VN (t) from μ(·), is bounded by Eq. (21) with probability at least 1 − δ for ∀δ ∈ (0 , 1). The empirical loss ˆ ℓUN ,VN
+
+ ˆΠ ◦ Φ ˆΓ
+
+ in Eq. (21) can be bounded by T ε2 
+
+> y
+
+with εy in Eq. (6) of Lemma 1. The empirical Rademacher complexity ℜGϑ in Eq. (21) can be bounded by the expected supremum κ (Π ◦ ΦΓ , ˜σ), as demonstrated in Lemma 3. By bounding the expected supremum of κ (Π ◦ ΦΓ , ˜σ) using Eq. (28) in Lemma 10, together with wΠ,out = q, LFΓ = w2max B2max , and LhΠ  
+
+> FΠ,layer
+
+= whΠ 
+
+> max
+
+BhΠ
+
+> max
+
+from Lemma 5, Eq. (30) is proven. ■
+
+20 Appendix A.10. Proof of Theorem 2 
+
+Proof: Under Assumptions 1-11 and the conditions in Lemma 2, for the target second-order di ff erential system governed by Eq. (7), with the specified sizes of Γ(·) and Π(·) from Lemma 2, by replacing the εy in Eq. (30) with the bound Lh Bβg
+
+√rε1 + qε2 in Eq. (8) of Lemma 2, the generalization error ℓ  ˆΠ ◦ Φ ˆΓ
+
+ of ˆ Π ◦ Φ ˆΓ learned by Eq. (12) with 
+
+N i.i.d. sample pairs UN (t) and VN (t) from μ(·) can be bounded by 
+
+ℓ  ˆΠ ◦ Φ ˆΓ
+
+ ≤ T Lh Bβg
+
+√rε1 + qε2
+
+2
+
++ 3 T qB 2loss 
+
+> √N
+
+h172 w1.5max 
+
+pln  3 + 6Bmax ∆Π◦ΦΓ
+
+ + p0.5log  2δ−1i 
+
+≤ 2T L2 
+
+> h
+
+B2 
+
+> βg
+
+rε21 + q2ε22
+
+ + 3 T qB 2loss 
+
+> √N
+
+h172 w1.5max 
+
+pln  3 + 6Bmax ∆Π◦ΦΓ
+
+ + p0.5log  2δ−1i (A.39) with probability at least 1 − δ for ∀δ ∈ (0 , 1), ∀0 < ε 1 < α/ r, and ∀ε2 > 0, where ∆Π◦ΦΓ is in Eq. (29) with hΠ = 2, 
+
+LFΓ = w2max B2max , and LhΠ  
+
+> FΠ,layer
+
+= w2max B2max . From wΓ = 8r⌈CΓ ε−21 ⌉, wΠ = 8q⌈CΠ ε−22 ⌉, wΓ,out = r, and wΠ,out = q in Lemma 2, ε21 and ε22 can be replaced using wΓ , and wΠ , respectively, thus obtaining Eq. (31). ■
+
+Appendix B. Proof of Eq. (22) Given an arbitrary integer M, let Bm, m = 1, 2, . . . , M, be the subsets of FΠ◦ΦΓ , that each Bm corresponds to a minimal 2 pNT w Π,out BΠ 2−m-cover of FΠ◦ΦΓ , with the covering number N FΠ◦ΦΓ , dκ, 2 pNT w Π,out BΠ 2−m, where 2 pNT w Π,out BΠ is the bound of the diameter of FΠ◦ΦΓ , as shown in Eq. (20). Then, given ∀Π ◦ ΦΓ ∈ F Π◦ΦΓ , it can be expressed as 
+
+κ (Π ◦ ΦΓ , ˜σ) = κ (Π ◦ ΦΓ , ˜σ) − κ  ΠM ◦ ΦΓM , ˜σ +
+
+> M
+
+X
+
+> m=1
+
+κ  Πm ◦ ΦΓm , ˜σ − κ  Πm−1 ◦ ΦΓm−1 , ˜σ, (B.1) where Πm−1 ◦ΦΓm−1 ∈ B m−1 is closet to Πm ◦ΦΓm , m = 2, 3, . . . , M, ΠM ◦ΦΓM ∈ B M is closet to Π ◦ΦΓ , κ  Π0 ◦ ΦΓ0 , ˜σ =
+
+0, and Π0 ◦ ΦΓ0 represents case where the parameter of the MLPs Γ(·) and Π(·) are all zeros. κ (Π ◦ ΦΓ , ˜σ) can be bounded by 
+
+κ (Π ◦ ΦΓ , ˜σ) ≤ sup  
+
+> dκ
+
+(Π1◦ΦΓ1 ,Π2◦ΦΓ2 )≤2 √NT w Π,out BΠ 2−M  
+
+> Π1◦ΦΓ1,Π2◦ΦΓ2∈F Π◦ΦΓ
+
+κ  Π1 ◦ ΦΓ1 , ˜σ − κ  Π2 ◦ ΦΓ2 , ˜σ
+
++ MP
+
+> m=1
+
+sup  
+
+> Πm◦ΦΓm∈B m
+
+κ  Πm ◦ ΦΓm , ˜σ − κ Πm−1 ◦ ΦΓm−1
+
+ Πm ◦ ΦΓm
+
+ , ˜σ (B.2) and its expected supremum is bounded by 
+
+E ˜σκ (Π ◦ ΦΓ , ˜σ) ≤ E ˜σ sup  
+
+> dκ
+
+(Π1◦ΦΓ1 ,Π2◦ΦΓ2 )≤2 √NT w Π,out BΠ 2−M  
+
+> Π1◦ΦΓ1,Π2◦ΦΓ2∈F Π◦ΦΓ
+
+κ  Π1 ◦ ΦΓ1 , ˜σ − κ  Π2 ◦ ΦΓ2 , ˜σ
+
++ MP
+
+> m=1
+
+E ˜σ sup  
+
+> Πm◦ΦΓm∈B m
+
+κ  Πm ◦ ΦΓm , ˜σ − κ Πm−1 ◦ ΦΓm−1
+
+ Πm ◦ ΦΓm
+
+ , ˜σ .
+
+(B.3) Since the cardinalities of the subsets Bm are finite, and the expected supremum of a sub-Gaussian process’ increment over a finite index set can be bounded by the index’s finite cardinality, as shown in the lemma on Page 2 of Bartlett (2013), the last term in Eq. (B.3) can be bounded by 
+
+> M
+
+P
+
+> m=1
+
+E ˜σ sup  
+
+> Πm◦ΦΓm∈B m
+
+κ  Πm ◦ ΦΓm , ˜σ − κ Πm−1 ◦ ΦΓm−1
+
+ Πm ◦ ΦΓm
+
+ , ˜σ
+
+≤ MP
+
+> m=1
+
+2 pNT w Π,out BΠ 2−(m−1) 
+
+q
+
+2 ln N FΠ◦ΦΓ , dκ, 2 pNT w Π,out BΠ 2−m
+
+= 4 MP
+
+> m=1
+
+2 pNT w Π,out BΠ 2−(m+1) 
+
+q
+
+2 ln N FΠ◦ΦΓ , dκ, 2 pNT w Π,out BΠ 2−m
+
+≤ 4 MP
+
+> m=1
+
+R 2 √NT w Π,out BΠ 2−m 
+
+> 2
+
+√NT w Π,out BΠ 2−(m+1) 
+
+p2 ln N  FΠ◦ΦΓ , dκ, ε dε
+
+= 4 √2 R √NT w Π,out BΠ
+
+√NT w Π,out BΠ2−M
+
+pln N  FΠ◦ΦΓ , dκ, ε dε. 
+
+(B.4) 21 Substituting Eq. (B.4) into Eq. (B.3), it can be obtained 
+
+E ˜σκ (Π ◦ ΦΓ , ˜σ) ≤ E ˜σ sup  
+
+> dκ
+
+(Π1◦ΦΓ1 ,Π2◦ΦΓ2 )≤2 √NT w Π,out BΠ 2−M  
+
+> Π1◦ΦΓ1,Π2◦ΦΓ2∈F Π◦ΦΓ
+
+κ  Π1 ◦ ΦΓ1 , ˜σ − κ  Π2 ◦ ΦΓ2 , ˜σ
+
++4 √2 R √NT w Π,out BΠ
+
+√NT w Π,out BΠ2−M
+
+pln N  FΠ◦ΦΓ , dκ, ε dε. 
+
+(B.5) Since M are arbitrary and the outputs of ∀Π ◦ ΦΓ ∈ F Π◦ΦΓ are all continuous functions, under M approaching the positive infinity, the first term on the right side of Eq. (B.5) converges to zero, yielding 
+
+E ˜σ sup  
+
+> Π◦ΦΓ∈F Π◦ΦΓ
+
+κ (Π ◦ ΦΓ , ˜σ) ≤ 4 √2
+
+Z √NT w Π,out BΠ
+
+> 0
+
+q
+
+ln N  FΠ◦ΦΓ , dκ, ε dε. (B.6) This completes the proof. ■
+
+Appendix C. Approach for Training the Neural Oscillator 
+
+By introducing the state space vector z(t) = hz⊤ 
+
+> 1
+
+(t), z⊤ 
+
+> 2
+
+(t)i⊤
+
+= x⊤(t), x′⊤ (t)⊤, Eq. (1) over the time interval [0 , T ]can be rewritten in the state function form 
+
+
+
+z′
+
+> 1
+
+(t) = z2(t)
+
+z′
+
+> 2
+
+(t) = Γ [z1(t), z2(t), u(t)] 
+
+y(t) = Π [z1(t), u(0) , t]
+
+. (C.1) Utilizing a second-order Runge-Kutta scheme (Gri ffi ths and Higham, 2010), a time-discretization form of Eq. (C.1) is 
+
+
+
+y(ti+1) = Π [z1(ti+1), u(0) , ti+1]
+
+z(ti+1) = 0.5∆ti (k2 + k1)
+
+k2 =
+
+( z2(ti) + ∆ tik12 
+
+Γ [z1(ti) + ∆ tik11 , z2(ti) + ∆ tik12 , u(ti+1)] 
+
+)
+
+k1 =
+
+"k11 
+
+k12 
+
+#
+
+=
+
+( z2(ti)
+
+Γ [z1(ti), z2(ti), u(ti)] 
+
+)
+
+, (C.2) where z(0) = 0, y(0) = Π [z1(0) , u(0) , t], ∆ti = ti+1 −ti, 0 = t0 < t1 < t2 < · · · < tI = T . Given available output function samples ˆ yl(ti) = hˆyl,1(ti), ˆyl,2(ti), . . . , ˆyl,q(ti)i⊤
+
+caused by the input samples ul(ti), l = 1, 2, . . . , L, the loss function ˆ ℓλL is used to learn the parameters of the MLPs Γ(·) and Π(·) in Eq. (C.1), ˆℓλL = 1
+
+LIq 
+
+> L
+
+X
+
+> l=1
+> I−1
+
+X
+
+> i=0
+> q
+
+X
+
+> j=1
+
+yl, j(ti) − ˆyl, j(ti) 2 + λL
+
+√N
+
+
+
+> 2
+
+X
+
+> i=1
+
+|Wi|1,1 + |bi|1
+
+ +
+
+> hΠ
+
+X
+
+> j=1
+
+ ˜W j 1,1 + ˜b j 1
+
+ , (C.3) where yl(ti) = hyl,1(ti), yl,2(ti), . . . , yl,q(ti)i⊤
+
+represents the output computed from the neural oscillator driven by ul(ti)using Eq. (C.2). In this numerical study, the Adam method (Kingma and Ba, 2014) implemented using the PyTorch (Paszke et al., 2019) is utilized to train the neural oscillator using the Runge-Kutta scheme in Eq. (C.2) and the loss function ˆ ℓλL in Eq. (C.3). 
+
+References 
+
+Adcock, B., Griebel, M., Maier, G., 2025. The sample complexity of learning lipschitz operators with respect to gaussian measures. URL: https://arxiv.org/abs/2410.23440 , arXiv:2410.23440 .Ames, W.F., Pachpatte, B., 1997. Inequalities for di ff erential and integral equations. volume 197. Elsevier. 22 Bartlett, P., 2013. Theoretical statistics: Lecture 14. https://www.stat.berkeley.edu/~bartlett/courses/ 2013spring-stat210b/notes/14notes.pdf .Bartlett, P.L., Foster, D.J., Telgarsky, M.J., 2017. Spectrally-normalized margin bounds for neural networks. Advances in neural information processing systems 30. Beattie, R., Butzmann, H.P., 2013. Convergence structures and applications to functional analysis. Springer Science & Business Media. Bleistein, L., Guilloux, A., 2023. On the generalization and approximation capacities of neural controlled di ff erential equations. arXiv preprint arXiv:2305.16791 . Chen, M., Li, X., Zhao, T., 2020. On generalization bounds of a family of recurrent neural networks, in: International Conference on Artificial Intelligence and Statistics, PMLR. pp. 1233–1243. Cho, K., Van Merriënboer, B., Gulcehre, C., Bahdanau, D., Bougares, F., Schwenk, H., Bengio, Y., 2014. Learning phrase representations using rnn encoder-decoder for statistical machine translation. arXiv preprint arXiv:1406.1078 . Fermanian, A., Marion, P., Vert, J.P., Biau, G., 2021. Framing rnn as a kernel method: A neural ode approach. Advances in Neural Information Processing Systems 34, 3121–3134. Foucart, S., Rauhut, H., 2013. A Mathematical Introduction to Compressive Sensing. Applied and Numerical Har-monic Analysis, Springer New York. URL: https://books.google.com.hk/books?id=zb28BAAAQBAJ .Fung, S.W., Berkels, B., 2024. A generalization bound for a family of implicit networks. arXiv preprint arXiv:2410.07427 . Gonon, L., Grigoryeva, L., Ortega, J.P., 2020. Risk bounds for reservoir computing. Journal of Machine Learning Research 21, 1–61. Gonon, L., Grigoryeva, L., Ortega, J.P., 2023. Approximation bounds for random neural networks and reservoir systems. The Annals of Applied Probability 33, 28–69. Gouk, H., Frank, E., Pfahringer, B., Cree, M.J., 2021. Regularisation of neural networks by enforcing lipschitz continuity. Machine Learning 110, 393–416. Gri ffi ths, D.F., Higham, D.J., 2010. Numerical methods for ordinary di ff erential equations: initial value problems. volume 5. Springer. Grigoryeva, L., Ortega, J.P., 2018a. Echo state networks are universal. Neural Networks 108, 495–508. Grigoryeva, L., Ortega, J.P., 2018b. Universal discrete-time reservoir computers with stochastic inputs and linear readouts using non-homogeneous state-a ffi ne systems. Journal of Machine Learning Research 19, 1–40. Gu, A., Dao, T., 2023. Mamba: Linear-time sequence modeling with selective state spaces. arXiv preprint arXiv:2312.00752 . Gu, A., Dao, T., Ermon, S., Rudra, A., Ré, C., 2020. Hippo: Recurrent memory with optimal polynomial projections. Advances in neural information processing systems 33, 1474–1487. Gu, A., Goel, K., Gupta, A., Ré, C., 2022. On the parameterization and initialization of diagonal state space models. Advances in Neural Information Processing Systems 35, 35971–35983. Gu, A., Goel, K., Ré, C., 2021. Effi ciently modeling long sequences with structured state spaces. arXiv preprint arXiv:2111.00396 . Hanin, B., 2019. Universal function approximation by deep neural nets with bounded width and relu activations. Mathematics 7, 992. 23 Hanson, J., Raginsky, M., 2020. Universal simulation of stable dynamical systems by recurrent neural nets, in: Learning for Dynamics and Control, PMLR. pp. 384–392. Hanson, J., Raginsky, M., 2024. Rademacher complexity of neural odes via chen-fliess series, in: 6th Annual Learning for Dynamics & Control Conference, PMLR. pp. 758–769. Hanson, J., Raginsky, M., Sontag, E., 2021. Learning recurrent neural net models of nonlinear systems, in: Learning for Dynamics and Control, PMLR. pp. 425–435. He, K., Zhang, X., Ren, S., Sun, J., 2015. Delving deep into rectifiers: Surpassing human-level performance on imagenet classification, in: Proceedings of the IEEE international conference on computer vision, pp. 1026–1034. Hochreiter, S., Schmidhuber, J., 1997. Long short-term memory. Neural computation 9, 1735–1780. Ho ff man, J., Roberts, D.A., Yaida, S., 2019. Robust learning with jacobian regularization. arXiv preprint arXiv:1908.02729 . Honarpisheh, A., Bozdag, M., Camps, O., Sznaier, M., 2025. Generalization error analysis for selective state-space models through the lens of attention. The Thirty-ninth Annual Conference on Neural Information Processing Systems URL: https://openreview.net/forum?id=YVZbaVikBp .Huang, Z., Xia, Y., 2022. Probability distribution estimation for harmonisable loads and responses of linear elastic structures. Probabilistic Engineering Mechanics 68, 103258. Huang, Z., Xia, Y., 2025. Universal runge–kutta neural oscillator for stochastic response analysis of nonlinear dynamic systems under random loads. Journal of Engineering Mechanics 151, 04025033. Huang, Z., Zuev, K.M., Xia, Y., Beer, M., 2025. Upper approximation bounds for neural oscillators. arXiv preprint arXiv:2512.01015 . Kingma, D.P., Ba, J., 2014. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980 . Kovachki, N., Li, Z., Liu, B., Azizzadenesheli, K., Bhattacharya, K., Stuart, A., Anandkumar, A., 2023. Neural operator: Learning maps between function spaces with applications to pdes. Journal of Machine Learning Research 24, 1–97. Lanthaler, S., 2024. Operator learning of lipschitz operators: An information-theoretic perspective. arXiv preprint arXiv:2406.18794 . Lanthaler, S., Rusch, T.K., Mishra, S., 2023. Neural oscillators are universal. Advances in Neural Information Processing Systems 36, 46786–46806. Li, Z., Han, J., E, W., Li, Q., 2022. Approximation and optimization theory for linear continuous-time recurrent neural networks. Journal of Machine Learning Research 23, 1–85. URL: http://jmlr.org/papers/v23/21-0368. html .Liu, F., Li, Q., 2024. From generalization analysis to optimization designs for state space models, in: International Conference on Machine Learning, PMLR. pp. 31383–31405. Liu, H.T.D., Williams, F., Jacobson, A., Fidler, S., Litany, O., 2022. Learning smooth neural functions via lipschitz regularization, in: ACM SIGGRAPH 2022 Conference Proceedings, pp. 1–13. Marion, P., 2023. Generalization bounds for neural ordinary di ff erential equations and deep residual networks. Ad-vances in Neural Information Processing Systems 36, 48918–48938. Maurer, A., 2016. A vector-contraction inequality for rademacher complexities, in: Algorithmic Learning Theory: 27th International Conference, ALT 2016, Bari, Italy, October 19-21, 2016, Proceedings 27, Springer. pp. 3–17. 24 Mohri, M., Rostamizadeh, A., Talwalkar, A., 2018. Foundations of Machine Learning, second edition. Adaptive Computation and Machine Learning series, MIT Press. URL: https://books.google.com.hk/books?id= V2B9DwAAQBAJ .Nair, V., Hinton, G.E., 2010. Rectified linear units improve restricted boltzmann machines, in: Proceedings of the 27th international conference on machine learning (ICML-10), pp. 807–814. Orvieto, A., De, S., Gulcehre, C., Pascanu, R., Smith, S.L., 2024. Universality of linear recurrences followed by non-linear projections: Finite-width guarantees and benefits of complex eigenvalues, in: International Conference on Machine Learning, PMLR. pp. 38837–38863. Pascanu, R., Mikolov, T., Bengio, Y., 2013. On the di ffi culty of training recurrent neural networks, in: International conference on machine learning, Pmlr. pp. 1310–1318. Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen, T., Lin, Z., Gimelshein, N., Antiga, L., et al., 2019. Pytorch: An imperative style, high-performance deep learning library. Advances in neural information processing systems 32. Rácz, D., Petreczky, M., Daróczy, B., 2024. Length independent generalization bounds for deep ssm architectures, in: Next Generation of Sequence Modeling Architectures Workshop at ICML 2024. Rumelhart, D.E., Hinton, G.E., Williams, R.J., 1986. Learning representations by back-propagating errors. nature 323, 533–536. Rusch, T.K., Mishra, S., 2020. Coupled oscillatory recurrent neural network (cornn): An accurate and (gradient) stable architecture for learning long time dependencies. arXiv preprint arXiv:2010.00951 . Rusch, T.K., Mishra, S., 2021. Unicornn: A recurrent model for learning very long time dependencies, in: Interna-tional Conference on Machine Learning, PMLR. pp. 9168–9178. Rusch, T.K., Rus, D., 2024. Oscillatory state-space models. arXiv preprint arXiv:2410.03943 . Shalev-Shwartz, S., Ben-David, S., 2014. Understanding machine learning: From theory to algorithms. Cambridge university press. Strogatz, S.H., 2024. Nonlinear dynamics and chaos: with applications to physics, biology, chemistry, and engineer-ing. Chapman and Hall /CRC. van der Vaart, A.W., Wellner, J.A., 2013. Weak Convergence and Empirical Processes: With Applications to Statis-tics. Springer Series in Statistics, Springer New York. URL: https://books.google.com.hk/books?id= zdDkBwAAQBAJ .Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser, Ł., Polosukhin, I., 2017. Attention is all you need. Advances in neural information processing systems 30. Wei, C., Ma, T., 2019. Data-dependent sample complexity of deep neural networks via lipschitz augmentation. Advances in neural information processing systems 32. Yasumoto, H., Tanaka, T., 2025. Universality of reservoir systems with recurrent neural networks. Neural Networks 188, 107413. Yoshida, Y., Miyato, T., 2017. Spectral norm regularization for improving the generalizability of deep learning. arXiv preprint arXiv:1705.10941 . 25
