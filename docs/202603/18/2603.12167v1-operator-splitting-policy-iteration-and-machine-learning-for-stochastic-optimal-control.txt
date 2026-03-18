@@ -1,0 +1,4525 @@
+Title: Operator Splitting, Policy Iteration, and Machine Learning for Stochastic Optimal Control
+
+URL Source: https://arxiv.org/pdf/2603.12167v1
+
+Published Time: Fri, 13 Mar 2026 01:13:47 GMT
+
+Number of Pages: 38
+
+Markdown Content:
+OPERATOR SPLITTING, POLICY ITERATION, AND MACHINE LEARNING FOR STOCHASTIC OPTIMAL CONTROL 
+
+ALAIN BENSOUSSAN ∗, THIEN P.B. NGUYEN ∗∗ , MINH-BINH TRAN ∗∗∗ , SON N.T. TU †
+
+ABSTRACT . We propose a splitting approach to solve the second-order Hamilton–Jacobi equation, reducing it to a heat step and a purely first-order step. The latter is implemented using a gradient value policy iteration algorithm, enabling efficient characteristic-based machine learning methods. We establish convergence rates for the splitting method. In particular, the L∞ error is bounded below by O(h) and above by O(h1/7 ) for Lipschitz initial data; this improves to O(h1/5 ) for semiconcave data and to O(h1/3 ) for C2 data. We also prove an upper L1 error estimate of order O(h1/2 ) in the periodic setting, where h is the splitting step. For the first-order step, we provide a weighted L2 error analysis that shows exponential convergence. Each iteration solves linear characteristic equations and learns the value function by minimizing a weighted value gradient loss. The approach yields stable and accurate numerical results. 
+
+1. I NTRODUCTION 
+
+Let ε ∈ [0, 1 ). We assume that H : Rd × Rd → R is a convex and coercive Hamiltonian, and that 
+
+u0 ∈ W1, ∞(Rd). Let u : Rd × [0, T] → R be the solution of 
+
+(ut + H(x, Du ) = ε∆u in Rd × (0, T),
+
+u(x, 0 ) = u0(x) on Rd. (1.1) The above Hamilton–Jacobi–Bellman (HJB) equation plays a central role in stochastic (ε > 0) and deterministic (ε = 0) optimal control [ 35 , 15 , 33 , 11 ]. Although the theoretical foundations of HJB equations are well established, their numerical solution remains highly challenging, both in the deterministic case ( ε = 0) and the stochastic case ( ε > 0). Closed-form solutions exist only in exceptional cases (e.g., linear-quadratic regulator problems, which reduce to Riccati equations [11 ]). In general, the PDE dimension matches the state dimension d, so traditional grid-based discretization methods suffer severely from the curse of dimensionality. This limitation has driven the development of modern techniques that integrate ideas from optimal control, reinforcement learning, and deep learning [59, 16, 56]. Classical numerical strategies include successive approximation schemes [ 9 , 8, 10 ], which it-eratively linearize the nonlinear HJB into a sequence of generalized HJ equations, each paired with pointwise minimization of the Hamiltonian. This procedure closely parallels policy iteration in reinforcement learning [ 59 , 16 ]. For low-dimensional problems (small d), spectral Galerkin methods remain viable [ 8 ]. In moderate dimensions, polynomial expansions or low-rank tensor 
+
+Date : March 13, 2026. 2020 Mathematics Subject Classification. 35D40, 70H20, 49L25, 65M15, 49H25, 35L60 . 
+
+Key words and phrases. viscosity solution, Hamilton-Jacobi equations, optimal control, operator splitting, error estimate, vanishing viscosity. A.B. is funded in part by NSF Grant DMS-2204795. M.-B. T is funded in part by a NSF CAREER DMS-2303146, and NSF Grants DMS-2204795, DMS-2305523, DMS-2306379. 
+
+> 1
+> arXiv:2603.12167v1 [math.OC] 12 Mar 2026
+
+representations can be effective [ 38 , 41 , 53 ]. For very high dimensions, deep neural networks have become the dominant approach. When the Hamiltonian minimization step admits an explicit (or efficiently computable) solu-tion, traditional grid-based schemes, including level-set methods [ 52 ], fast marching [ 64 ], fast sweeping [ 63 ], and semi-Lagrangian schemes [ 31 ], provide accurate solutions, yet they still face exponential growth in computational cost and memory with respect to d.To address truly high-dimensional regimes, many state-of-the-art neural PDE solvers leverage Lagrangian (or characteristics-based) reformulations of the HJB equation. Under suitable convexity or semiconcavity assumptions, generalized Lax–Hopf formulas recast value function computation as a convex optimization problem over terminal co-states along characteristic curves [ 27 , 21 , 47 , 22 ,23 ]. An alternative route relies on Pontryagin’s maximum principle, which leads to a two-point boundary value problem in the combined state–costate space [ 42 ]. Solutions to this system can then be interpolated using sparse grids [ 43 ] or trained neural networks in a supervised manner [39, 50, 51]; see also recent high-dimensional PDE surveys and related works [29, 46]. We propose an algorithm to solve (1.1) based on an operator splitting scheme. In this context, operator splitting means separating the nonlinear effect in (1.1) . Operator splitting methods for nonlinear partial differential equations has been studied in the literature. In [ 57 ], such methods were analyzed for purely first-order equations, with convergence rates provided, see also [ 40 , 45 ]. An abstract convergence theory for general schemes was developed in [ 7 ]. Later, [ 6 ] studied a splitting method for nonlinear degenerate elliptic and parabolic equations arising in option pricing models. See also the related method of dimensional splitting in [58, 49]. 1.1. Approach and contributions. In this approach, we split the evolution into a pure heat step and a purely first-order Hamilton–Jacobi step. The heat step is computationally straightforward to implement, while the first-order step is solved using a value–gradient (also known as PI-
+
+λ) policy iteration method, first introduced in [ 13 ] and later studied for the time-independent first-order case in [ 12 ]. This first-order step has the advantage of being easily implemented in parallel and exhibits exponential convergence of the policy iteration in a weighted L2 norm. Moreover, it can be implemented using a machine learning algorithm with fast convergence [ 12 , 13 ]. Each iteration solves linear equations along characteristics from sampled initial states. Training minimizes a convex combination of mean-squared errors for the value function and its gradient. The value function is approximated using nonparametric models (e.g., radial basis functions or neural networks), with gradients obtained via automatic differentiation. Our numerical experiments confirm the accuracy and stability of the proposed scheme. We also provide a rigorous error analysis of the algorithm. (ii) First, we provide a fairly complete error analysis of the splitting scheme. The error with respect to the splitting time step improves as the regularity of the initial data u0 increases; see Subsection 1.2 below for the main results. In a sense, the splitting scheme (1.4) can be viewed as a Trotter–Kato product, which is known to converge qualitatively in related settings. To the best of our knowledge, quantitative error estimates for such schemes remain largely unexplored. Theorem 1.1 provides, to the best of our knowledge, the first result of this type. (ii) Second, we show that the Hamilton–Jacobi step exhibits exponential convergence in a weighted L2 norm. This analysis extends the results for the first-order time-independent 
+
+> 2
+
+problem established in [ 12 ]. Since we consider a time-dependent problem, we have the flexibility to modify the weighted error in a natural way. This contrasts with the analysis in [12], where the result holds only for sufficiently large values of the discount factor. One advantage of this splitting scheme is that the first-order step is purely deterministic, which makes both backward and forward time computations straightforward, as well as the characteristic method implemented via machine learning (see Section 4). 1.1.1. The Splitting Scheme. For clarity, we introduce the solution operators as follows. 
+
+• Let u(·, t) = SH 
+
+> t
+
+u0 denote the solution of the heat equation 
+
+(ut − ε∆u = 0, (x, t) ∈ Rd × (0, T),
+
+u(x, 0 ) = u0(x), x ∈ Rd. (1.2) An explicit formula for S H is provided by the heat kernel: for t > 0 and u0 ∈ L2(Rd), set 
+
+SH 
+
+> t
+
+u0(x) = 
+
+> Z
+> Rd
+
+Φε(x − y, t)u0(y) dy , Φε(x, t) = ( 4πε t)−d/2 e− |x|24εt .
+
+• Consider the first-order Hamilton–Jacobi equation 
+
+(ut + H(x, Du ) = 0 in Rd × (0, T),
+
+u(x, 0 ) = u0(x) on Rd. (1.3) Under standard assumptions, (1.3) admits a unique viscosity solution u(·, t), and we define 
+
+u(·, t) = SHJ  
+
+> t
+
+u0 for t ≥ 0 (see [4, 25, 32, 62]). Given n ∈ N, we set h = T/n and ti = ih for i = 0, . . . , n. Our result takes the form 
+
+u(x, ih ) ≈
+
+
+
+S Hh ◦ S HJ 
+
+> h
+
+i
+
+u0(x), (x, t) ∈ Rd × (0, T), (1.4) where u is the true solution to (1.1). The splitting approximation v is defined iteratively by 
+
+( v(x, ti) = SH 
+
+> h
+
+◦ S HJ  
+
+> h
+
+v(·, ti−1)( x) = SH 
+
+> h
+
+ζ(i)(·, h)( x), x ∈ Rd,
+
+v(x, t0) = u0(x). (1.5) where (∂tζ(i)(x, t) + H x, Dζ(i)(x, t) = 0 in Rd × (0, h),
+
+ζ(i)(x, 0 ) = v(x, ti−1) on Rd.To analyze the error, the key idea is to introduce an appropriate comparison function, following an approach previously used in [40, 45]. 
+
+Lower bound. For the lower bound of u − v, we take the comparison function directly from (1.5) ;on each interval [ti−1, ti],
+
+v(·, ti + t) = SH 
+
+> t
+
+ζ(i)(·, t)
+
+The lower bound for u − v reduces to a commutator estimate between SH 
+
+> t
+
+and H. By exploiting the convexity of H, we obtain a linear convergence rate of order O(h). The argument starts from Lipschitz data and relies on the stability of the Lipschitz norm along the iteration, which follows from properties of first-order Hamilton–Jacobi equations and the nonexpansiveness of the heat operator. 
+
+Upper bound. For the upper bound of u − v, the commutator produces terms involving Dζ(i)(x −
+
+y, t) − Dζ(i)(x, t), requiring higher regularity of Dζ(i).
+
+> 3
+
+(i) One can rely on BV estimates when ζ(i) is semiconcave. However, starting from semiconcave data only yields Dζ(i) ∈ BV loc (Rd), so this approach provides merely an L1-weighted estimate and also requires semiconcave data to obtain uniform bounds near t = 0. (ii) To obtain the L∞ estimate, we introduce a new a comparison function that is more regular than the splitting approximation (1.4) , possessing C2 regularity. This is achieved by using the vanishing viscosity approximation of the first-order equation with parameter δ. Precisely, we define 
+
+vδ(·, ti + t) = SH 
+
+> t
+
+ζ(i) 
+
+> δ
+
+(·, t)
+
+where vδ(·, 0 ) = u0, and iteratively, 
+
+
+
+∂tζ(i) 
+
+> δ
+
+(x, t) + H x, Dζ(i) 
+
+> δ
+
+(x, t) = δ∆ζ(i) 
+
+> δ
+
+(x, t) in Rd × (0, h),
+
+ζ(i) 
+
+> δ
+
+(x, 0 ) = vδ(x, ti−1) on Rd.We then proceed to estimate 
+
+u − v = ( u − vδ) + ( vδ − v).Thus, the C2-regularity of ζ(i) 
+
+> δ
+
+allows us to establish the commutator estimate, thereby obtaining the upper bound for u − vδ. The remaining error vδ − v reduces to the classical vanishing viscosity error, for which semiconcavity yields the optimal upper rate O(δ); see below. The main difficulty is to control the error at each step so that the local error is better than linear. This requires stability of the Lipschitz and semiconcavity bounds, which are preserved under the heat operator. The most delicate part is obtaining a uniform lower bound for D2ζ(i), since the heat operator accumulates errors at each iteration, worse than the Hamilton–Jacobi step alone. This estimate relies crucially on the exact linear lower bound of the commutator in the lower bound; any weaker rate would not suffice for our approach. Since the vanishing viscosity error arises in our proof, we briefly review the literature on this well-studied problem. We list below a non-exhaustive selection of related works. The rate O(δ1/2 )
+
+has been established in many works [ 5, 26 , 34 , 48 , 55 , 62 ], and was also obtained in [ 30 , 61 ] via the nonlinear adjoint method. A rate O(δ log (δ)) in one dimension was proved in [ 55 ], and similar results have been obtained in higher dimensions for uniformly convex Hamiltonians in [20 , 24 , 65 ]. Moreover, an averaged L1 rate of order O(ε) was proved in [ 62 ], and linear Lp rates in the semiconcave setting were obtained in [ 18 ]. It is also well known that the upper bound for 
+
+wδ − w improves to O(δ) under suitable semiconcavity assumptions [ 5 , 48 , 17 ] (see [ 37 , 28 ] for the case of state constraints). We remark that, for our purposes, the optimal upper bound vδ − v = O(δ)
+
+obtained using semiconcavity estimates is all we need. 1.1.2. Policy Iteration Algorithm for first-order Hamilton–Jacobi equation. For the first-order problem (1.3) , we assume that the Hamiltonian H arises from an optimal control problem (see (1.8) ), so that the value function admits a convenient variational formulation. 
+
+• For t ∈ [0, T], we denote by At = {a(·) : [0, t] → Rp | a(·) is measurable } the set of admissible controls. Elements of At are referred to as controls. When talking about feedback control, we mean a(t) = a(γ(t)) where a : Rd → Rp and γ : [0, t] → Rd is a state-trajectory. We refer to a : Rd → Rp as a policy. 
+
+> 4
+
+• The dynamics f : Rd × Rp → Rd is assumed to be globally Lipschitz continuous. The running cost is ℓ : Rd × Rp → R, and the initial cost is u0 : Rd → R.For a(·) ∈ A t and (x, t) ∈ Rd × [0, T], we denote by η(·) ∈ AC ([ 0, t]; Rd) the solution to 
+
+( ˙η(s) = − f (η(s), a(s)) , s ∈ (0, t),
+
+η(t) = x. (1.6) Then, we denote by u : Rd × [0, T] the value function of the minimization problem 
+
+u(x, t) = inf 
+
+> a(·)∈A t
+
+Z t
+
+> 0
+
+ℓ(η(s), a(s)) ds + u0(η(0)) : η(t) = x, η solving (1.6) 
+
+
+
+. (1.7) It is well known, see [ 62 , 5 , 19 ], that u satisfies the Dynamic Programming Principle and is a viscosity solution of (1.3), where the associated Hamiltonian H : Rd × Rd → R is defined by 
+
+H(x, p) = sup 
+
+> a∈Rp
+
+
+
+p ·   − f (x, a) − ℓ(x, a)
+
+
+
+, (x, p) ∈ Rd × Rd. (1.8) Policy iteration is an effective algorithm for solving first-order Hamilton–Jacobi equations. We refer to the recent developments in [ 1, 60 , 36 ] and the references therein. To solve for u(x, t), we seek the optimal policy using the following algorithm. Let λ(x, t) = Du (x, t). Then λ satisfies 
+
+(λt(x, t) = DT λ(x, t) · f (x, ˆ a(x, t)) + DT f (x, ˆ a(x, t)) · λ(x, t) + ∇x ℓ(x, ˆ a(x)) ,
+
+λ(x, 0 ) = ∇u0(x). (1.9) As noted in [ 14 , 13 ], the Algorithm 1 decouples the components of λ(k+1)(x), allowing them to be solved in parallel. Each of the d equations has the same form, so the method of characteristics applies (see Section 4). 
+
+Algorithm 1 PI-λ for first-order time-dependent problem Step 1. Given a(k)(x, t), we solve for λ(k+1)(x, t):
+
+(∂tλ(k+1)(x, t) = Dλ(k+1) · f (x, a(k)) + Dx f (x, a(k)) · λ(k) + ∇x ℓ(x, a(k)),
+
+λ(k+1)(x, 0 ) = ∇u0(x). (1.10) Step 2. a(k+1) is obtained from the optimization problem 
+
+a(k+1)(x, t) = arg max 
+
+> a
+
+
+
+λ(k+1)(x, t) · (− f (x, t)) − ℓ(x, a)
+
+
+
+. (1.11) 1.2. Main results. The first result concerns the error estimate for the splitting scheme (1.1) in terms of the step size h = T/n as n → ∞, with n the number of splitting steps. 
+
+Theorem 1.1. Assume (H1)–(H2). Let u0 ∈ W1, ∞(Rd). Let u and v denote the true solution of (1.1) and the splitting scheme (1.5) , respectively, with initial data u 0.
+
+(i) For all x ∈ Rd and i = 1, . . . , n, 
+
+−CT εh ≤ u(x, ti) − v(x, ti)
+
+where C is a constant depending only on H and Lip (u0).
+
+> 5
+
+(ii ) For all x ∈ Rd and i = 1, . . . , n, u(x, ti) − v(x, ti) ≤
+
+
+
+C(Tεh)1/7 u0 is Lipschitz C(Tεh)1/5 u0 is Lipschitz and semiconcave C(Tεh)1/3 u0 ∈ C2(Rd)
+
+where C depends only on H , Lip (u0), and, in the last two cases, also on SC (u0) (the semiconcavity constant) or ∥D2u0∥L∞ (Rd ), respectively. 
+
+Proposition 1.2. Assume (H1)-(H2) and further that x 7 → H(x, p) is Zd-periodic. Let u0 ∈ W1, ∞(Rd)
+
+be semiconcave. Let u and v denote the true solution of (1.1) and the splitting scheme (1.5) , respectively, with initial data u 0. For 0, 1, . . . , n we have 
+
+∥u(·, ti) − v(·, ti)∥L1(Td ) ≤ C(eCT − 1)√εh. (1.12) 
+
+Here C is a constant depends only on H , the dimension d , Lip (u0) and the semiconcavity constant SC (u0).
+
+Remark 1.3. We note that a similar result in L1 
+
+> ω
+
+(Rd), where ω is either a smooth cutoff function or a weight decaying sufficiently fast at infinity, can also be obtained along the lines of (1.12) , with the same local rate 
+
+O(√εh). The proof would rely on the ingredients used in the commutator estimate of Proposition 2.4-(iii) below. We omit the details here, as we plan to investigate a more general framework of weighted estimates in forthcoming work. 
+
+The second main result concerns the first-order step and the convergence of Algorithm 1. Since it is treated using the value–gradient method [ 13 ], we derive an error estimate in a weighted space–time L2 norm. This analysis is substantially more involved than that in [ 12 ], where the time-independent case was considered. 
+
+Theorem 1.4. Assume (A0)–(A2). Let α ∈ (0, 1 ) and γ > 0. For k = 1, 2, . . . , define the L2-weighted error ek = 
+
+> ZT
+> 0
+
+e−γt
+
+> Z
+> Rd
+
+|(λ(k) − λ(k−1))( x, t)|2
+
+(1 + |x|2)2α dxdt . (1.13) 
+
+There exists T 0 > 0 and γ0 > 0, depending on (A0)–(A2), such that for T ≤ T0 and γ ≥ T0,ek = O(2−k) as k → ∞.
+
+More precisely, e k ≤ 2−(k−1)e1 for all k ∈ N.
+
+1.3. Assumptions. We state assumptions (H0)–(H2) used to prove the error estimate for the splitting scheme. 
+
+(H0) The initial datum satisfies u0 ∈ W1, ∞(Rd).
+
+(H1) H ∈ C2(Rd × Rd) be such that H, Dp H ∈ BUC (Rd × BR(0)) for each R > 0, lim 
+
+> |ξ|→ ∞
+
+inf 
+
+> x∈Rd
+
+ 12 H(x, ξ)2 + Dx H(x, ξ) · ξ
+
+
+
+= + ∞,and for every R, there exists CR > 0 such that for x, y, p, q ∈ Rd with |p|, |q| ≤ R, we have 
+
+(|H(x, p) − H(y, p)| ≤ CR|x − y|,
+
+|H(x, p) − H(x, q)| ≤ CR|p − q|. (1.14) 
+
+> 6
+
+(H2) H ∈ C2(Rd × Rd) such that for all (x, ξ) ∈ Rd × Rd then 
+
+
+
+H(x, ξ) is uniformly convex in ξ : θ Id ⪯ D2 
+
+> pp
+
+H(x, ξ)
+
+Linear Growth First Derivative: |Dx H(x, ξ)| ≤ ΛH (1 + |ξ|)
+
+Bounded Second Derivatives: |D2 
+
+> xx
+
+H(x, ξ)|, |D2 
+
+> xp
+
+H(x, ξ)| ≤ ΛH .For the first-order step in the later section, where we use the value-gradient policy iteration method of [ 12 , 13 ], we assume additional structure on the Hamiltonian arising from optimal control for the L2 
+
+> ω
+
+error analysis and the implementation of the machine learning method. Owing to this structure, unbounded initial data are allowed, while stronger conditions are imposed on the dynamics and cost. 
+
+(A0) |∇ u0(x)| ≤ Λ0(1 + |x|) for all x ∈ Rd.
+
+(A1) The dynamic f (x, a) : Rd × Rp → R is given by 
+
+f (x, a) = f0(x) + cTf · a, f0 : Rd → Rd, c f ∈ Mp×d, |c f | ≤ Cf (1.15) 
+
+| f (x, a)| ≤ Cf (1 + |x| + |a|), |Dx f (x, a)| ≤ Cf . (1.16) The running cost ℓ(x, a) : Rd × Rp → R satisfies 
+
+D2
+
+> aa
+
+ℓ(x, a) ⪰ ℓ0 Id for all (x, a) ∈ Rd × Rp, |Daℓ(x, a)| ≥ ℓ0(|a| − 1) (1.17) 
+
+|ℓ(x, a)| ≤ Cℓ(1 + |x|2 + |a|2), |Dx ℓ(x, a)| ≤ Cℓ(1 + |x| + |a|). (1.18) 
+
+(A2) The dynamic f (x, a) : Rd × Rp → R satisfies further that 
+
+> d
+
+# ∑
+
+> i=1
+
+Dx
+
+ ∂xi f (x, a) ≤ Cf
+
+1 + |x| . (1.19) The running cost ℓ(x, a) : Rd × Rp → R satisfies further that 
+
+|ℓ(x1, a1) − ℓ(x2, a2)| ≤ Cℓ(1 + max (|x1|, |x2|) + max (|a1|, |a2|))  |x1 − x2| + |a1 − a2|
+
+|D2
+
+> xa
+
+ℓ(x, a)|, |D2 
+
+> ax
+
+ℓ(x, a)|, |D2 
+
+> xx
+
+ℓ(x, a)| ≤ Cℓ.1.4. Notations. A function u : Rd → R is said to be semiconcave with constant Λ if D2u(x) ⪯ Λ Id
+
+for all x ∈ Rd in the distribution sense; equivalently, u(x) − Λ 
+
+> 2
+
+|x|2 is concave. We denote SC (u) := inf Λ ∈ R : u(x) − 12 Λ|x|2 is concave . (1.20) We denote by 
+
+> Z
+> Rd
+
+|x|Φε(x, t)dx = Cd
+
+√εt where Cd = 2
+
+πd/2 
+
+> Z
+> Rd
+
+|x|e−| x|2
+
+dx .1.5. Organization of the paper. In Section 2, we first collect some basic estimates for the heat equation and the Hamilton–Jacobi equation, mainly for second-order equations, as well as the key commutator estimate. In particular, we track the Lipschitz constant, the semiconcavity constant, and a lower bound on the Hessian of the solution throughout the iteration obtained by concatenating the Hamilton–Jacobi and heat steps. We then present the error analysis of the splitting scheme, including Theorem 1.1 and Proposition 1.2. In Section 3, we establish the estimates for the first-order algorithm 1 and provide a proof of Theorem 1.4. Section 4 is devoted to describing the machine 
+
+> 7
+
+learning method used to compute the solution component of Algorithm 1, and we present several numerical tests demonstrating the effectiveness of our approach. 2. E RROR ANALYSIS OF THE SPLITTING SCHEME 
+
+2.1. Basic properties and commutator estimates. In this subsection, we collect several useful results on the Heat and Lax–Oleinik operators, along with estimates needed for the subsequent analysis. First, we collect basic estimates for the heat operator SH, which follow immediately from the heat kernel representation. 
+
+Lemma 2.1. The heat operator SH 
+
+> t
+
+: L∞(Rd) → L∞(Rd) is monotone, i.e., f , g ∈ L∞(Rd), f ≤ g in Rd =⇒ SH 
+
+> t
+
+f ≤ S H 
+
+> t
+
+g. (2.1) 
+
+Let v (x, t) = SH 
+
+> t
+
+v0(x) for (x, t) ∈ Rd × (0, ∞). We have 
+
+∥v(·, t)∥L∞ (Rd ) ≤ ∥ v0∥L∞ (Rd ) v0 ∈ L∞(Rd) (2.2) 
+
+∥v(·, t) − v0(·)∥L∞ (Rd ) ≤ Cd∥Dv 0∥L∞ (Rd )(εt)1/2 v0 ∈ Lip (Rd) (2.3) 
+
+∥v(·, t) − v0(·)∥L∞ (Rd ) ≤ ∥ ∆v0∥L∞ (Rd )εt v0 ∈ C2(Rd) (2.4) 
+
+∥∆v(·, t)∥L∞ (Rd ) ≤ Cd∥Dv 0∥L∞ (Rd )(εt)−1/2 v0 ∈ Lip (Rd). (2.5) 
+
+Furthermore, for every f ∈ W1, ∞(Rd) and every t ≥ 0, the spatial derivative commutes with the semigroup: D(SH 
+
+> t
+
+f )( x) = SH 
+
+> t
+
+(D f )( x) for every x ∈ Rd. (2.6) Next, we state some basic results for SHJ . We omit the proof and refer to [62] for details. 
+
+Proposition 2.2. Assume (H1).(i) (Comparison Principle) If u is a continuous viscosity subsolution, and v is a continuous viscosity supersolution to (1.3) then u ≤ v. (ii) For each u0 ∈ W1, ∞(Rd) there exists a unique viscosity solution to (1.3) with u(·, t) ∈ W1, ∞(Rd)
+
+for every t ∈ [0, T]. Moreover, 
+
+|u(x, t) − u0(x)| ≤ t
+
+
+
+sup {| H(x, Du 0(x)) | : x ∈ Rd}
+
+
+
+,
+
+∥Du (·, t)∥L∞ (Rd ) ≤ C where C = C(H, Lip (u0)) .
+
+Remark 2.3. The first-order problem (1.3) is well posed under weaker assumptions on H (see [ 62 ]). We impose the stronger condition (H1) for technical convenience in the analysis of the second-order case. We note that an explicit expression for the Lipschitz bound of Lip (u(·, t)) is available when ξ 7 → H(x, ξ) is coercive with a clear structure (see [3] ). 
+
+Next, we state the following commutator estimates between the heat operator SH 
+
+> t
+
+and the Hamiltonian H.
+
+Proposition 2.4 (Commutator Estimates) . Assume (H1)–(H2). Let t > 0 and ζ ∈ W1, ∞(Rd).(i) There exists Λ1(ζ) depending only on H and Lip (ζ) such that 
+
+SH 
+
+> t
+
+(x, Dζ(x)) − H x, SH 
+
+> t
+
+Dζ(x) ≥ − Λ1(ζ)εt, for a.e. x ∈ Rd. (2.7) 
+
+> 8
+
+(ii) If we have further that 
+
+sup 
+
+> |v|≤ 1
+
+|⟨ D2ζ(x)v, v⟩| ≤ ∥ D2ζ∥∞ for all x ∈ Rd,
+
+then 
+
+SH 
+
+> t
+
+(x, Dζ(x)) − H(x, SH 
+
+> t
+
+Dζ(x)) ≤ Λ2(ζ) · (dεt) (2.8) 
+
+where 
+
+Λ2(ζ) = ΛH + 2√2ΛH ∥D2ζ∥∞ + 2Λ3(ζ)∥D2ζ∥2
+
+> ∞
+
+Λ3(ζ) = sup {| D2 
+
+> pp
+
+H(x, ξ)| : x ∈ Rd, |ξ| ≤ Lip (ζ)}.
+
+(iii) If ζ is semiconcave, then D ζ ∈ BV loc (Rd). For any R > 0, defining 
+
+ωR(x) = ( πR2)−d/2 e−| x|2/R2
+
+,
+
+we have Z
+
+> Rd
+
+
+
+SH 
+
+> t
+
+(x, Dζ(x)) − H(x, SH 
+
+> t
+
+Dζ(x)) 
+
+
+
+ωR(x)dx ≤ Λ5(ζ, R)√εtwhere 
+
+Λ5(ζ, R) = 
+
+
+
+ΛH (2d + C2
+
+> d
+
+) + 2Lip (ζ)Λ3(ζ)
+
+
+
+∥ωR Dζ∥BV (Rd ) + dΛH . (2.9) 
+
+(iv) If ζ is semiconcave and x 7 → H(x, p) is Zn-periodic then D ζ ∈ BV (Rd), hence 
+
+Z
+
+> Td
+
+
+
+SH 
+
+> t
+
+(x, Dζ(x)) − H(x, SH 
+
+> t
+
+Dζ(x)) 
+
+
+
+dx ≤ Λ5(ζ)√εtwhere 
+
+Λ5(ζ) = 
+
+
+
+ΛH (2d + C2
+
+> d
+
+) + 2Lip (ζ)Λ3(ζ)
+
+
+
+∥Dζ∥BV (Rd ) + dΛH.
+
+Proof. 
+
+Part (i). It is standard that under (H1)–(H2) then the Lagrangian of H, given by the Legendre transform L(x, v) = sup p∈Rd (p · v − H(x, p)) for (x, v) ∈ Rd × Rd, satisfies that L ∈ C2(Rd × Rd).Let us define 
+
+CR = sup {| D2 
+
+> xx
+
+L(x, v)| : (x, v) ∈ Rd × BR}.There exists Γζ > 0 such that the Hamiltonian satisfies (see [62, p. 67]) 
+
+H(x, p) = sup 
+
+> |v|≤ Γζ
+
+ p · v − L(x, v), |p| ≤ Lip (ζ). (2.10) By Lemma 2.1-(2.4) we have sup 
+
+> |v|≤ Γζ
+
+∥S H 
+
+> t
+
+L(·, v) − L(·, v)∥L∞ (Rd ) ≤ εt sup 
+
+> |v|≤ Γζ
+
+∥∆xx L(x, v)∥L∞ (Rd ) ≤ Λ1(ζ)εt
+
+where 
+
+Λ1(ζ) = sup 
+
+n
+
+|∆xx L(x, v)| : x ∈ Rd, |v| ≤ Γζ
+
+o
+
+.For any v ∈ Rd with |v| ≤ Γζ , we have 
+
+SH
+
+> t
+
+
+
+v · Dζ(x) − L(x, v)
+
+
+
+−
+
+
+
+v · S H 
+
+> t
+
+Dζ(x) − L(x, v)
+
+
+
+= −
+
+
+
+SH 
+
+> t
+
+L(x, v) − L(x, v)
+
+
+
+≥ − Λ1(ζ)εt
+
+> 9
+
+thanks to Lemma 2.1-(2.6). Therefore 
+
+SH
+
+> t
+
+
+
+v · Dζ(x) − L(x, v)
+
+
+
+≥
+
+
+
+v · S H 
+
+> t
+
+Dζ(x) − L(x, v)
+
+
+
+− Λ1(ζ)εt, |v| ≤ Γζ .By Lemma 2.1- (2.1) , SH 
+
+> t
+
+is monotone. Hence, since H(x, Dζ(x)) ≥ v · Dζ(x) − L(x, v) for any 
+
+|v| ≤ Γζ , we deduce that 
+
+SH 
+
+> t
+
+H(x, Dζ(x)) ≥ S H
+
+> t
+
+
+
+v · Dζ(x) − L(x, v)
+
+
+
+≥
+
+
+
+v · S H 
+
+> t
+
+Dζ(x) − L(x, v)
+
+
+
+− Λ1(ζ)εt.Taking the supremum over |v| ≤ Γζ and using (2.10), we obtain 
+
+SH 
+
+> t
+
+H(x, Dζ(x)) ≥ sup 
+
+> |v|≤ Γζ
+
+
+
+v · S H 
+
+> t
+
+Dζ(x) − L(x, v)
+
+
+
+= H
+
+
+
+x, SH 
+
+> t
+
+Dζ(x)
+
+
+
+− Λ1(ζ)εt.
+
+Part (ii). We have 
+
+SH 
+
+> t
+
+(x, Dζ(x)) − H(x, SH 
+
+> t
+
+Dζ(x)) =
+
+Z
+
+> Rd
+
+
+
+H(x − y, Dζ(x − y)) − H(x, SH 
+
+> t
+
+Dζ(x)) 
+
+
+
+Φε(y, t)dy = A + B,where 
+
+A =
+
+Z
+
+> Rd
+
+
+
+H(x − y, Dζ(x − y)) − H(x − y, SH 
+
+> t
+
+Dζ(x)) 
+
+
+
+Φε(y, t)dy B =
+
+Z
+
+> Rd
+
+
+
+H(x − y, SH 
+
+> t
+
+Dζ(x))) − H(x, SH 
+
+> t
+
+Dζ(x)) 
+
+
+
+Φε(y, t)dy .
+
+Step 1. Estimate for A. By Taylor expanding H(·, p) at px, we obtain 
+
+H(z, p) − H(z, px ) = Dp H(z, px) · (p − px) + 
+
+Z 10
+
+(p − px ) · D2 
+
+> pp
+
+H(z, px ) · (p − px )( 1 − s) ds .Taking z = x − y, p = Dζ(x − y) and px = SH 
+
+> t
+
+Dζ(x), we obtain 
+
+A =
+
+Z
+
+> Rd
+
+
+
+H(z, p) − H(z, px)
+
+
+
+Φε(y, t) dy = A1 + A2
+
+where 
+
+A1 =
+
+Z
+
+> Rd
+
+Dp H x − y, SH 
+
+> t
+
+Dζ(x))  ·
+
+
+
+Dζ(x − y) − S H 
+
+> t
+
+Dζ(x)
+
+
+
+Φε(y, t)dy (2.11) 
+
+A2 =
+
+Z
+
+> Rd
+
+Z 10
+
+(p − px ) · D2 
+
+> pp
+
+H(z, px ) · (p − px )( 1 − s) ds 
+
+
+
+Φε(y, t)dy . (2.12) For A1, using 
+
+Z
+
+> Rd
+
+Dp H(x, SH 
+
+> t
+
+Dζ(x))) · (Dζ(x − y) − S H 
+
+> t
+
+Dζ(x)) Φε(y, t)dy = 0we obtain 
+
+A1 =
+
+Z
+
+> Rd
+
+
+
+Dp H(x − y, SH 
+
+> t
+
+Dζ(x))) − Dp H(x, SH 
+
+> t
+
+Dζ(x))) 
+
+
+
+· (Dζ(x − y) − S H 
+
+> t
+
+Dζ(x)) Φε(y, t)dy 
+
+=
+
+Z
+
+> Rd
+
+Z 10
+
+Dxp H(x − sy , SH 
+
+> t
+
+Dζ(x))) ds 
+
+
+
+· (−y) ·
+
+
+
+Dζ(x − y) − S H 
+
+> t
+
+Dζ(x)
+
+
+
+Φε(y, t)dy 
+
+> 10
+
+thanks to the Fundamental Theorem of Calculus. Therefore, by (H2) we have 
+
+|A1| ≤ ΛH
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+|y|
+
+Z
+
+> Rd
+
+|Dζ(x − y) − Dζ(x − z)| Φε(z, t)Φε(y, t)dzdy 
+
+≤ ΛH ∥D2ζ∥∞
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+|y|| y − z|Φε(z, t)Φε(y, t)dzdy 
+
+≤ ΛH ∥D2ζ∥∞
+
+Z
+
+> Rd
+
+|y|2Φε(y, t)dy 
+
+1/2 Z
+
+> Rd
+
+Z
+
+> Rd
+
+|y − z|2Φε(z, t)Φε(y, t)dzdy 
+
+1/2 
+
+= ΛH ∥D2ζ∥∞ · (2dεt)1/2 · (4dεt)1/2 = ΛH ∥D2ζ∥∞(2√2d) · εt.For A2, using Λ3(ζ) = sup {| D2 
+
+> pp
+
+H(x, ξ)| : x ∈ Rd, |ξ| ≤ Lip (ζ)} we obtain 
+
+Z 10
+
+(p − px ) · D2 
+
+> pp
+
+H(z, px ) · (p − px )( 1 − s) ds ≤ Λ3(ζ)
+
+2 |p − px |2.Therefore 
+
+A2 ≤ Λ3(ζ)
+
+2
+
+Z
+
+> Rd
+
+Dζ(x − y) − S Ht Dζ(x) 2
+
+Φε(y, t)dy 
+
+= Λ3(ζ)
+
+2
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+
+
+Dζ(x − y) − Dζ(x − z)
+
+
+
+Φε(z, t)dz 
+
+> 2
+
+Φε(y, t)dy 
+
+≤ Λ3(ζ)
+
+2
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+|Dζ(x − y) − Dζ(x − z)|2Φε(z, t)Φε(y, t)dzdy 
+
+≤ Λ3(ζ)
+
+2
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+∥D2ζ∥2
+
+> ∞
+
+|y − z|2Φε(z, t)Φε(y, t)dzdy = Λ3(ζ)∥D2ζ∥2
+
+> ∞
+
+(2d) · εt
+
+thanks to Jensen’s inequality. Thus 
+
+A = A1 + A2 ≤ ΛH ∥D2ζ∥∞(2√2d) · εt + Λ3(ζ)∥D2ζ∥2
+
+> ∞
+
+(2d) · εt.
+
+Step 2. Estimate for B. By Taylor expanding H(·, p) at x, we obtain 
+
+H(x − y, px ) − H(x, px) = Dx H(x, px ) · (−y) + 
+
+Z 10
+
+
+
+y · D2 
+
+> xx
+
+H(x − sy , px ) · y
+
+
+
+(1 − s) ds .From (H2) and the symmetry of the heat kernel, we have 
+
+Z 10
+
+
+
+y · D2 
+
+> xx
+
+H(x − sy , px ) · y
+
+
+
+(1 − s) ds ≤ ΛH
+
+2 |y|2 and 
+
+Z
+
+> Rd
+
+Dx H(x, px ) · (−y)Φε(y, t)dy = 0. Therefore 
+
+B =
+
+Z
+
+> Rd
+
+
+
+H(x − y, px) − H(x, px )
+
+
+
+Φε(y, t)dy 
+
+=
+
+Z
+
+> Rd
+
+Dx H(x, px ) · (−y)Φε(y, t)dy +
+
+Z
+
+> Rd
+
+Z 10
+
+
+
+y · D2 
+
+> xx
+
+H(x − sy , px ) · y
+
+
+
+(1 − s) ds 
+
+
+
+Φε(y, t)dy 
+
+≤ ΛH
+
+2
+
+Z
+
+> Rd
+
+|y|2Φε(y, t)dy = dΛH εt. (2.13) 
+
+Part (iii). If ζ is semiconcave, then its gradient Dζ belongs to BV loc (Rd), i.e., Dζ is of locally bounded variation [ 19 ]. The distributional derivative of Dζ exists and is a Radon measure with 
+
+> 11
+
+total variation measures denoted by μ|D2ζ|. For each R > 0 and ωR(x) = ( πR2)−d/2 e−| x|2/R2
+
+, the function Dζ(x)ωR(x) ∈ BV (Rd) with 
+
+∥ωR Dζ∥M ≤
+
+Z
+
+> Rd
+
+ωR(x)dμ|D2ζ|(x) + 
+
+Z
+
+> Rd
+
+|Dζ(x)|| DωR(x)|dx 
+
+≤
+
+Z
+
+> Rd
+
+ωR(x)dμ|D2ζ|(x) + 2Lip (ζ)
+
+R2 (πR2)−d/2 
+
+Z
+
+> Rd
+
+|x|e− |x|2 
+
+> R2
+
+dx .We have 
+
+Z
+
+> Rd
+
+|Dζ(x − h) − Dζ(x)|ωR(x)dx 
+
+=
+
+Z
+
+> Rd
+
+Dζ(x − h)ωR(x − h) − Dζ(x)ωR(x) dx +
+
+Z
+
+> Rd
+
+|Dζ(x − h)|. ωR(x − h) − ωR(x) dx 
+
+≤ Λ4(ζ, R)|h| where Λ4(ζ, R) = 2∥ωR Dζ∥M.Using the expression for A1 in (2.11), we have 
+
+Z
+
+> Rd
+
+|A1(x, t)|ωR(x)dx 
+
+≤ ΛH
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+|y|
+
+Z
+
+> Rd
+
+
+
+|Dζ(x − y) − Dζ(x)| + |Dζ(x) − Dζ(x − z)|
+
+
+
+ωR(x)dx Φε(z, t)Φε(y, t)dzdy 
+
+≤ ΛH · Λ4(ζ, R)
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+|y| · (|y| + |z|)Φε(z, t)Φε(y, t)dzdy 
+
+= ΛH · Λ4(ζ, R)
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+|y|2Φε(z, t)Φε(y, t)dzdy +
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+|y|.|z|Φε(z, t)Φε(y, t)dzdy 
+
+
+
+= ΛH · Λ4(ζ, R) · (2d + C2
+
+> d
+
+) · εt.Using the expression for A2 in (2.12), we have 
+
+Z
+
+> Rd
+
+|A2(x, t)|ωR(x)dx 
+
+≤ Λ3(ζ)
+
+2
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+|Dζ(x − y) − Dζ(x − z)|2ωR(x)dx 
+
+
+
+Φε(z, t)Φε(y, t)dzdy 
+
+≤ Λ3(ζ)
+
+2 · 2Lip (ζ) · Λ4(ζ, R)
+
+Z
+
+> Rd
+
+Z
+
+> Rd
+
+(|y| + |z|)Φε(y, t)Φε(z, t)dydz 
+
+≤ Λ3(ζ)
+
+2 · 2Lip (ζ) · Λ4(ζ, R) · 2Cd
+
+√εt = 2Lip (ζ)Λ3(ζ)Λ4(ζ, R) · Cd
+
+√εt.From (2.13) we have Z
+
+> Rd
+
+B(x, t)ωR(x)dx ≤ dΛH εt.Thus, we obtain the conclusion that Λ5(ζ, R) is given by (2.9). 
+
+Part (iv). This follows from (iii). □
+
+2.2. Estimates for the viscous Hamilton–Jacobi equation. Lemma 2.5. Assume (H2) and w 0 ∈ C2(Rd). Let w : Rd × [0, h] → R be the solution of 
+
+(∂tw + H(x, Dw ) − δ∆w = 0 in Rd × (0, h),
+
+w(·, 0 ) = w0 on Rd. (2.14) 
+
+We denote by w (x, t) = SHJ δ 
+
+> t
+
+w0(x) the solution operator to the viscous Hamilton–Jacobi equation (2.14) .
+
+> 12
+
+(i) We have L− 
+
+> 0
+
+(w0) ≤ wt(x, t) ≤ L+ 
+
+> 0
+
+(w0) (2.15) 
+
+where (L− 
+
+> 0
+
+(w0) := inf x∈Rd
+
+δ∆w0(x) − H(x, Dw 0(x)) ,
+
+L+ 
+
+> 0
+
+(w0) := sup x∈Rd
+
+δ∆w0(x) − H(x, Dw 0(x)) .
+
+(ii ) Assume |Dx H(x, ξ)| ≤ ΛH (1 + |ξ|) for all (x, ξ) ∈ Rd × Rd. Then 
+
+∥Dw (·, t)∥2   
+
+> L∞(Rd)
+
+≤ e3ΛH t∥Dw 0∥2   
+
+> L∞(Rd)
+
++ e3ΛH t − 13 , t ∈ [0, h]. (2.16) 
+
+(iii ) If w 0 is semiconcave, D 2w0(x) ⪯ SC (w0) Id as in (1.20) for x ∈ Rd, then for all t ∈ [0, h],D2w(x, t) ⪯ C2(w0) Id where C2(w0) := max 
+
+(
+
+SC (w0),
+
+s
+
+ΛH
+
+ 2
+
+θ + 4
+
+θ2
+
+)
+
+. (2.17) 
+
+(iv ) Let 
+
+C0(w0) = 
+
+
+
+e3ΛH T ∥Dw 0∥2   
+
+> L∞(Rd)
+
++ 13
+
+
+
+e3ΛH T − 1
+
+1/2 
+
+(2.18) 
+
+C1(w0) = max {| H(x, ξ)| : |ξ| ≤ C0(w0)} . (2.19) 
+
+Then D2w(x, t) ⪰ C3(w0)
+
+δ − (d − 1)C2(w0) (2.20) 
+
+where 
+
+C3(w0) = inf 
+
+> x∈Rd
+
+ δ∆w0(x) − H(x, Dw 0(x))  − C1(w0). (2.21) 
+
+If we choose 
+
+δ ≤ 2C1(w0)(d − 1)C2(w0) + ∥∆w0∥L∞ (Rd )
+
+=⇒ D2w(x, t) ⪰ − 4C1(w0)
+
+δ .
+
+Proof. By the existence results in [ 2 ], [ 48 , Appendix], and [ 62 , Sec. 1.7], there exists a unique solution 
+
+w to (2.14) that is sufficiently smooth, and Dw and |D2w| are bounded (possibly depending on 
+
+δ). To treat the unbounded domain, we apply the maximum principle to ϕ(x, t) − κ(1 + |x|2)1/2 ,where ϕ denotes the quantity to be estimated. The maximum is attained, and we then let κ → 0(see [62, Remark 1.27]). 
+
+(i) Estimate of the Time-derivative. We observe that w0(x) ± L± 
+
+> 0
+
+are, respectively, a supersolution and a subsolution of (2.14). As a consequence, we have the following. 
+
+L− 
+
+> 0
+
+(w0)t ≤ w(x, t) − w0(x) ≤ L+ 
+
+> 0
+
+(w0)t =⇒ L− 
+
+> 0
+
+(w0) ≤ wt(x, 0 ) ≤ L+ 
+
+> 0
+
+(w0).Differentiating the equation with respect to time, with φ(x, t) = wt(x, t) for t > 0, we deduce that 
+
+φt + Dp H(x, Dw ) · Dφ − δ∆φ = 0. By the maximum principle, we have 
+
+L− 
+
+> 0
+
+(w0) ≤ inf 
+
+> x∈Rd
+
+φ(x, 0 ) ≤ φ(x, t) ≤ sup 
+
+> x∈Rd
+
+φ(x, 0 ) ≤ L+ 
+
+> 0
+
+(w0).
+
+(ii). Gradient Estimate. Let φ(x, t) = 12 |Dw (x, t)|2 for (x, t) ∈ Rd × [0, h]. Differentiating the equation with respect to xi, then multiply both sides by wxi , and sum over i = 1, 2, . . . , d we obtain 
+
+φt + Dx H(x, Dw ) · Dw + Dp H(x, Dw ) · Dφ − δ∆φ + δ|D2w|2 = 0. 
+
+> 13
+
+By (H2) we have 
+
+|Dx H(x, D f ) · Dw | ≤ ΛH (1 + |Dw |)|Dw | ≤ ΛH
+
+2
+
+ 1 + 3|Dw |2 = ΛH
+
+2 + 3ΛH φ(x, t).We deduce that 
+
+φt − 3ΛH φ + Dp H(x, Dw ) · Dφ − δ∆φ ≤ ΛH
+
+2 .Let 
+
+ψ(x, t) = e−3ΛH t
+
+
+
+φ(x, t) − e3ΛH t − 16
+
+
+
+, (x, t) ∈ Rd × [0, h].Then 
+
+ψt + Dp H(x, Dw ) · Dψ − δ∆ψ ≤ 0 in (0, h).By the maximum principle, sup x∈Rd ψ(x, t) ≤ sup x∈Rd ψ(x, 0 ). This implies that 
+
+e−3ΛH t
+
+ 12 |Dw (x, t)|2 − e3ΛH t − 16
+
+
+
+≤ 12 |Dw 0(x)|2.Therefore 
+
+∥Dw (x, t)∥2  
+
+> L∞(Rd)
+
+2 ≤ e3ΛH t ∥Dw 0∥2  
+
+> L∞(Rd)
+
+2 + e3ΛH t − 16 .Hence (2.16) follows. 
+
+(iii). Upper bound of the Hessian. Let ξ ∈ Rd with |ξ| = 1. We write 
+
+wξ (x, t) = Dw (x, t) · ξ and ϕ(x, t) = wξξ (x, t) = ξ · D2w(x, t) · ξ
+
+for (x, t) ∈ Rd × (0, T). We first observe that the semiconcavity of w0 means 
+
+D2w0(·) ⪯ SC (w0) Id =⇒ ϕ(x, 0 ) ≤ ξ · D2w0(x) · ξ ≤ SC (w0) for all ξ ∈ Rd, |ξ| = 1for all x ∈ Rd. Differentiating the equation with respect to ξ, we obtain 
+
+∂twξ − δ∆wξ + Dξ H(x, Dw ) + Dp H(x, Dw ) · Dw ξ = 0. Differentiating again with respect to ξ, we obtain 
+
+∂twξξ − δ∆wξξ +  Dξξ H(x, Dw ) + Dpξ H(x, Dw ) · Dw ξ
+
+
+
++  Dp H(x, Dw ) · Dw ξξ + Dpξ H(x, Dw ) · Dw ξ + Dw ξ · Dpp H(x, Dw ) · Dw ξ
+
+ = 0. By (H2) we have 
+
+θ|Dw ξ |2 ≤ Dw xi · D2 
+
+> pp
+
+H(x, Dw ) · Dw xi
+
+|D2 
+
+> pξ
+
+H(x, Dw ) · Dw ξ | ≤ θ
+
+4 |Dw ξ |2 + 1
+
+θ |D2 
+
+> pξ
+
+H(x, Dw )|2 ≤ θ
+
+4 |Dw ξ |2 + ΛH
+
+θ
+
+|D2 
+
+> ξξ
+
+H(x, Dw )| ≤ ΛH .Therefore 
+
+ ϕt + Dp H(x, Dw ) · Dϕ − δ∆ϕ + 2Dpξ H(x, Dw ) · Dw ξ + Dξξ H(x, Dw ) + θ|Dw ξ |2 ≤ 0, and thus 
+
+ ϕt + Dp H(x, Dw ) · Dϕ − δ∆ϕ + θ|Dw ξ |2 ≤ θ
+
+2 |Dw ξ |2 + ΛH
+
+
+
+1 + 2
+
+θ
+
+
+
+.
+
+> 14
+
+Recalling that wξ = Dw · ξ, we have 
+
+|Dw ξ |2 = |D2wξ |2 = ( D2wξ)T (D2wξ) = ξT · (D2wξ )2 · ξ ≥ (ξT · D2wξ · ξ)2 = ϕ2.Therefore 
+
+ ϕt + Dp H(x, Dw ) · Dϕ − δ∆ϕ + θ
+
+2 ϕ2 ≤ ΛH
+
+
+
+1 + 2
+
+θ
+
+
+
+, (x, t) ∈ Rd × (0, h).By the maximum principle, we conclude that sup 
+
+> x∈Rd
+
+ϕ(x, t) ≤ max 
+
+(
+
+sup 
+
+> x∈Rd
+
+ϕ(x, 0 ), CH
+
+)
+
+= max {SC (w0), CH }, where CH =
+
+s
+
+ΛH
+
+ 2
+
+θ + 4
+
+θ2
+
+
+
+.
+
+(iv). Lower bound of the Hessian. We have ∥Dw (·, t)∥L∞ (Rd ) ≤ C0(w0) for all t ∈ [0, h], thus sup 
+
+> x∈Rd
+
+H(x, Dw (x, t)) ≤ C1( f0) for all t ∈ [0, h].For all t ∈ [0, h], we have 
+
+δ∆w(x, t) = wt(x, t) + H x, Dw (x, t)
+
+≥ inf 
+
+> x∈Rd
+
+
+
+δ∆w(x, 0 ) − H(x, Dw (x, 0 )) 
+
+
+
+− C1(w0) = C3(w0).Fix (x, t) ∈ Rd × (0, T). Since D2w(x, t) is symmetric, its eigenvalues are real and can be ordered as λ1(x, t) ≤ · · · ≤ λd(x, t). From (2.17) we have λi ≤ C2(w0) for all i = 1, . . . , d. Therefore 
+
+∆w(x, t) ≤ λi(x, t) + ( d − 1)C2(w0) for all i = 1, . . . , d.As a consequence, 
+
+λi(x, t) ≥ C3(w0)
+
+δ − (d − 1)C2(w0) for all i = 1, . . . , d
+
+and thus the conclusion follows. □
+
+Next, we show that throughout the splitting scheme, at each step, the updated initial data satisfies the same first- and second-order derivative estimates as in the single-step analysis. 
+
+Proposition 2.6. Assume (H2), w 0 ∈ C2(Rd), and for i = 1, 2, . . . , n, we define 
+
+( w(x, ti) = SH 
+
+> h
+
+◦ S HJ δ 
+
+> h
+
+w(·, ti−1)( x) = SH 
+
+> h
+
+ζ(i)(·, h)( x)
+
+w(x, t0) = w0(x)
+
+where 
+
+∂tζ(i)(x, t) + H
+
+
+
+x, Dζ(i)(x, t)
+
+
+
+= δ∆ζ(i)(x, t) in Rd × (0, h),
+
+ζ(i)(x, 0 ) = w(x, ti−1) on Rd.
+
+(i) We have 
+
+∥Dw (x, ti)∥2   
+
+> L∞(Rd)
+
+≤ ∥ Dζ(i)(x, h)∥2   
+
+> L∞(Rd)
+
+≤ C0(w0)2 (2.22) 
+
+where C0(w0) is given by (2.18) .
+
+(ii ) For every i = 1, 2, . . . , n we have 
+
+SC (w(·, ti)) ≤ SC (ζ(i)(·, h)) ≤ max {SC (w0), CH } = C2(w0). (2.23) 
+
+> 15
+
+(iii ) For every i = 1, 2, . . . , n we have D2w(x, ti) ⪰ D2ζ(i)(x, h) ⪰ C3(w0) − C1(C0(w0)) Tεδ − (d − 1)C2(w0),
+
+where C1(C0(w0)) is a constant depending only on H and C0(w0), defined in (2.7) , and C1(w0), C3(w0)
+
+are defined in Lemma 2.5. By choosing δ small enough, we have D2w(x, ti) ⪰ D2ζ(i)(x, h) ⪰ − 4C0(w0) + 4C1(C0(w0)) Tεδ = − C4(w0)
+
+δ .
+
+More importantly, the estimates (2.22) and (2.23) remain valid in the limit case δ = 0.Proof. 
+
+(i). From (2.16) we have 
+
+∥Dw (x, ti)∥2   
+
+> L∞(Rd)
+
+= ∥S H 
+
+> h
+
+Dζ(i)(·, h)∥2   
+
+> L∞(Rd)
+
+≤ ∥ Dζ(i)(·, h)∥2  
+
+> L∞(Rd)
+
+≤ e3ΛH h∥Dw (·, ti−1)∥2   
+
+> L∞(Rd)
+
++ e3ΛH h − 13
+
+≤ e3ΛH h
+
+
+
+e3ΛH h∥Dw (·, ti−2)∥2   
+
+> L∞(Rd)
+
++ e3ΛH h − 13
+
+
+
++ e3ΛH h − 13
+
+= e3Λh ·(2h)∥Dw (·, ti−2)∥2   
+
+> L∞(Rd)
+
++ e3ΛH h − 13
+
+
+
+e3ΛH h + 1
+
+
+
+.By induction, we obtain 
+
+∥Dw (x, ti)∥2   
+
+> L∞(Rd)
+
+≤ ∥ Dζ(i)(·, h)∥2  
+
+> L∞(Rd)
+
+≤ . . . ≤ e3ΛH ·(ih )∥Dw (·, t0)∥2   
+
+> L∞(Rd)
+
++ e3ΛH h − 13
+
+
+
+e3ΛH ·(i−1)h + . . . + 1
+
+
+
+= e3ΛH ·(ih )∥Dw (·, t0)∥2   
+
+> L∞(Rd)
+
++ e3ΛH h − 13
+
+e3ΛH ·(ih ) − 1
+
+e3ΛH h − 1 .Therefore 
+
+∥Dw (x, ti)∥2   
+
+> L∞(Rd)
+
+≤ e3ΛH ·(ih )∥Dw 0∥2   
+
+> L∞(Rd)
+
++ 13
+
+
+
+e3ΛH ·(ih ) − 1
+
+
+
+, i = 1, 2, . . . , n.Since nh = T, we obtain the conclusion (2.22). 
+
+(ii). Since SH 
+
+> h
+
+is monotone, we have SC (w(·, ti)) ≤ SC (ζ(i)(·, h)) . By (2.17) we have SC (ζ(i)(·, h)) ⪯ max 
+
+n
+
+SC (ζ(i)(·, 0 )) , CH
+
+o
+
+= max {SC (w(·, ti−1)) , CH } .In other words, we obtain SC (w(·, ti)) ≤ max {SC (w(·, ti−1)) , CH } ≤ . . . ≤ max {SC (w(·, t0)) , CH } = C2(u0).
+
+(iii). By (2.15), for t ∈ (0, h] we have 
+
+∂tζ(i)(x, t) ≥ inf 
+
+> x∈Rd
+
+n
+
+δ∆ζ(i)(x, 0 ) − H(x, Dζ(i)(x, 0 )) 
+
+o
+
+. (2.24) To estimate w(·, ti), we need to estimate δ∆w(x, ti) − H(x, Dw (x, ti)) . By (2.6) we have 
+
+δ∆w(x, ti) − H(x, Dw (x, ti)) = δ∆
+
+
+
+SH 
+
+> h
+
+ζ(i)(x, h)
+
+
+
+− H
+
+
+
+x, SH 
+
+> h
+
+Dζ(i)(x, h)
+
+
+
+= I1 + I2,
+
+> 16
+
+where 
+
+I1 = δ∆
+
+
+
+SH 
+
+> h
+
+ζ(i)(x, h)
+
+
+
+− S H 
+
+> h
+
+H(x, Dζ(i)(x, h)) 
+
+I2 = SH 
+
+> h
+
+H(x, Dζ(i)(x, h)) − H
+
+
+
+x, SH 
+
+> h
+
+Dζ(i)(x, h)
+
+
+
+.By (2.22), we have 
+
+∥Dζ(i)(·, t)∥L∞ (Rd ) ≤ C0(w0) for all t ∈ [0, h]
+
+|H
+
+
+
+x, Dζ(i)(x − y, h)
+
+
+
+| ≤ max {| H(x, ξ)| : |ξ| ≤ C0(w0)} = C1(w0).Using the equation for ζ(i) and (2.24) we have 
+
+I1 = δ∆
+
+
+
+SH 
+
+> h
+
+ζ(i)(x, h)
+
+
+
+− S H 
+
+> h
+
+H(x, Dζ(i)(x, h)) =
+
+Z
+
+> Rd
+
+
+
+δ∆ζ(i)(x − y, h) − H(x − y, Dζ(i)(x − y, h)) 
+
+
+
+Φε(y, t) dy 
+
+=
+
+Z
+
+> Rd
+
+∂tζδ(x − y, h)Φε(y, h) dy 
+
+≥ inf 
+
+> x∈Rd
+
+n
+
+δ∆ζ(i)(x, 0 ) − H(x, Dζ(i)(x, 0 )) 
+
+o
+
+= inf 
+
+> x∈Rd
+
+{δ∆w(x, ti−1) − H(x, Dw (x, ti−1)) } .For I2, using (2.7) in Proposition 2.4-(i) we obtain 
+
+I2 ≥ − C1(C0(w0)) εh.Therefore 
+
+δ∆w(x, ti) − H(x, Dw (x, ti)) ≥ inf 
+
+> x∈Rd
+
+{δ∆w(x, ti−1) − H(x, Dw (x, ti−1)) } − C1(C0(w0)) εh
+
+≥ inf 
+
+> x∈Rd
+
+{δ∆w(x, t0) − H(x, Dw (x, t0)) } − C1(C0(w0))  iεh
+
+≥ inf 
+
+> x∈Rd
+
+{δ∆w0(x) − H(x, Dw 0(x)) } − C1(C0(w0)) Tε.By (2.20) of Lemma 2.5 we obtain for all i = 1, 2, . . . n that 
+
+D2w(x, ti) ⪰ D2ζ(i)(x, h) ⪰ C3(w0) − C1(C0(w0)) Tεδ − (d − 1)C2(w0)
+
+where C3(w0) is defined in (2.21). □
+
+Corollary 2.7. Assume (H1)–(H2), u 0 ∈ C2(Rd) and v 0 ∈ W1, ∞(Rd). Let ζδ solve 
+
+(∂tζδ + H(x, Dζδ) − δ∆ζδ = 0 in Rd × (0, h),
+
+ζδ(x, 0 ) = v0(x) on Rd, (2.25) 
+
+and let ζ solve (∂tζ + H(x, Dζ) = 0 in Rd × (0, h),
+
+ζ(x, 0 ) = u0(x) on Rd. (2.26) 
+
+We have 
+
+sup 
+
+> x∈Rd
+
+ ζδ(x, t) − ζ(x, t) ≤ ∥ (v0 − u0)+∥L∞ (Rd ) + dC2(u0)h, t ∈ [0, h].
+
+> 17
+
+Proof. By Lemma 2.5, we have ∆ζδ(x, t) ≤ dC2(u0). Let 
+
+φ(x, t) = ζδ(x, t) − dC2(u0)h − ∥ (u0 − v0)+∥L∞ (Rd ), (x, t) ∈ Rd × [0, h].We compute 
+
+φt + H(x, Dφ) = ζδ 
+
+> t
+
++ H(x, Dζδ) − dC2(u0)δ = δ∆ζδ − dC2(u0)δ ≤ 0, and φ(x, 0 ) = v0(x) − ∥ (v0 − u0)+∥L∞ (Rd ) ≤ u0(x). By the comparison principle for (2.26) we obtain φ(x, t) ≤ ζ(x, t) for all (x, t) ∈ Rd × [0, h]. The conclusion thus follows. □
+
+2.3. Error Analysis of the splitting scheme on L∞(Rd). We present the error analysis for the splitting scheme (1.4) . Let T = nh and ti = ih for i = 0, 1, . . . , n. For convenience, we recall the definitions of the true solution u, the splitting approximation v introduced in the introduction, and the new object, the regularized splitting function vδ, as follows. 
+
+• (The true solution) Let u0 ∈ W1, ∞(Rd). Let u be the exact solution to (1.1). 
+
+• (The splitting function) Let v0 ∈ W1, ∞(Rd) and for i = 1, 2, . . . , n, we define 
+
+( v(x, ti) = SH 
+
+> h
+
+◦ S HJ  
+
+> h
+
+v(·, ti−1)( x) = SH 
+
+> h
+
+ζ(i)(·, h)( x), x ∈ Rd,
+
+v(x, t0) = v0(x). (2.27) where 
+
+∂tζ(i)(x, t) + H
+
+
+
+x, Dζ(i)(x, t)
+
+
+
+= 0 in Rd × (0, h),
+
+ζ(i)(x, 0 ) = v(x, ti−1) on Rd.
+
+• (The regularized splitting function) Let w0 ∈ C2(Rd), and for i = 1, 2, . . . , n, we define 
+
+(
+
+vδ(x, ti) = SH 
+
+> h
+
+◦ S HJ δ 
+
+> h
+
+vδ(·, ti−1)( x) = SH 
+
+> h
+
+ζ(i) 
+
+> δ
+
+(·, h)( x), x ∈ Rd,
+
+vδ(x, t0) = w0(x) (2.28) where 
+
+∂tζ(i) 
+
+> δ
+
+(x, t) + H
+
+
+
+x, Dζ(i) 
+
+> δ
+
+(x, t)
+
+
+
+= δ∆ζ(i) 
+
+> δ
+
+(x, t) in Rd × (0, h),
+
+ζ(i) 
+
+> δ
+
+(x, 0 ) = vδ(x, ti−1) on Rd.(2.29) 
+
+Proposition 2.8. Assume (H1)–(H2). Then, for all i = 1, 2, . . . , n , the true solution u of (1.1) and the splitting solution v of (2.27) satisfy the following. 
+
+(i) (Lower bound of u − v) There exists a constant Λ1 = Λ1(H, Lip (v0)) such that 
+
+∥(v − u)+(·, ti)∥L∞ (Rd ) ≤ ∥ (v0 − u0)+∥L∞ (Rd ) + Λ1
+
+2 Tεh. (2.30) 
+
+(ii ) (Upper bound of u − v) For any w0 ∈ C2(Rd), there exist constants Λ2, Λ3, Λ4, depending only on H, Lip (w0), and ∥D2w0∥L∞ , such that for all small δ > 0,
+
+∥(u(·, ti) − v(·, ti)) +∥L∞ (Rd ) ≤ ∥ (u0 − w0)+∥L∞ (Rd ) + ∥(w0 − v0)+∥L∞ (Rd )
+
++ Λ2Cd T√εh + dΛ3Λ24T
+
+2
+
+εh
+
+δ2 + d max {SC (w0), CH }Tδ. (2.31) 
+
+> 18
+
+Proof. 
+
+Part (i). By the Lipschitz estimate (2.22) in Proposition 2.6 with δ = 0, we have, for i = 1, . . . , n, that 
+
+∥Dv (·, ti)∥L∞ (Rd ) ≤ ∥ Dζ(i)(·, h)∥L∞ (Rd ) ≤ C0(v0). (2.32) where C0(w0) is given by (2.18) . By the commutator estimate (2.7) in Proposition 2.4 together with the Lipschitz estimate (2.32), there exists a constant 
+
+Λ1 = Λ1(H, C0(v0)) = Λ1(H, Lip (v0)) (2.33) such that 
+
+SH 
+
+> t
+
+H(x, Dζ(i)(x, t)) − H x, DSH 
+
+> t
+
+ζ(i)(x, t) ≥ − Λ1 εt. (2.34) We introduce the comparison function (see, e.g., [40]) 
+
+q(i)(x, t) = SH 
+
+> t
+
+◦ S HJ  
+
+> t
+
+v(·, ti−1)( x) = SH 
+
+> t
+
+ζ(i)(x, t), (x, t) ∈ Rd × [0, h].It is clear that q(i)(·, 0 ) = v(·, ti−1) and q(i)(·, h) = v(x, ti), thus 
+
+u(x, ti) − v(x, ti) = u(x, ti) − q(i)(x, h).By Lemma 2.9, for (x, t) ∈ Rd × [0, h] we have 
+
+∂tq(i)(x, t) = ∂t
+
+
+
+SH 
+
+> t
+
+ζ(i)(x, t)
+
+
+
+= SH 
+
+> t
+
+∂tζ(i)(x, t) + ε∆q(i)(x, t) = −S H 
+
+> t
+
+H(x, Dζ(i)(x, t)) + ε∆q(i)(x, t)
+
+thanks to ∂tζ(i)(x, t) = −H(x, Dζ(i)(x, t)) for a.e. (x, t) ∈ Td × [0, h]. Therefore 
+
+∂tq(i)(x, t) + H(x, Dq (i)(x, t)) − ε∆q(i)(x, t) (2.35) 
+
+= H(x, DSHε 
+
+> t
+
+ζ(i)(x, t)) − S Hε 
+
+> t
+
+H(x, Dζ(i)(x, t)) ≤ Λ1εt. (2.36) thanks to (2.34). By the comparison principle, we deduce that 
+
+q(i)(x, h) − u(x, ti) ≤ ∥ (q(i)(x, 0 ) − u(x, ti−1)) +∥L∞ (Rd ) + Λ1
+
+2 εh2, x ∈ Rd.In other words, we have 
+
+∥(v − u)+(·, ti)∥L∞ (Rd ) ≤ ∥ (v − u)+(·, ti−1)∥L∞ (Rd ) + Λ1
+
+2 εh2
+
+and thus the conclusion (2.30) follows. 
+
+Part (ii). To estimate the upper bound, namely u − v, we split the difference into two parts: 
+
+u − v = ( u − vδ) + ( vδ − v).The key idea is to use the regularized splitting function vδ defined in (2.28). 
+
+Step 1. Estimates for v δ − v. We recall from (2.23) in Proposition 2.6 that for all i = 1, 2, . . . , n
+
+SC (vδ(·, ti)) ≤ max {SC (w0), CH }, C2 
+
+> H
+
+= ΛH (2θ−1 + 4θ−2).
+
+> 19
+
+At step i, we apply Corollary 2.7 to obtain 
+
+vδ(x, ti) − v(x, ti) = SH
+
+> h
+
+
+
+ζ(i) 
+
+> δ
+
+(x, ti) − ζ(i)(x, ti)
+
+
+
+≤ ζ(i) 
+
+> δ
+
+(x, ti) − ζ(i)(x, ti)
+
+≤ ∥  ζ(i) 
+
+> δ
+
+(x, 0 ) − ζ(i)(x, 0 )+∥L∞ (Rd ) + d max {SC (vδ(·, ti−1)) , CH }δh
+
+= ∥ vδ(x, ti−1) − v(x, ti−1)+∥L∞ (Rd ) + d max {SC (vδ(·, ti−1)) , CH }δh
+
+≤ ∥  vδ(x, t0) − v(x, t0)+∥L∞ (Rd ) + d max {SC (w0), CH }δih 
+
+≤ ∥ (w0 − v0)+∥L∞ (Rd ) + d max {SC (w0), CH }Tδ. (2.37) 
+
+Step 2. Estimates for u − vδ. Let 
+
+q(i) 
+
+> δ
+
+(x, t) := SH 
+
+> t
+
+◦ S HJ δ 
+
+> t
+
+vδ(·, ti−1)( x) = SH 
+
+> t
+
+ζ(i) 
+
+> δ
+
+(x, t), (x, t) ∈ Td × [0, h]
+
+where ζδ : Rd × [0, h] → R is the solution to (2.29). We observe that 
+
+q(i) 
+
+> δ
+
+(·, 0 ) = vδ(·, ti−1), q(i) 
+
+> δ
+
+(·, h) = vδ(·, ti). (2.38) By Proposition 2.6 we have 
+
+∥Dζ(i) 
+
+> δ
+
+(·, t)∥L∞ (Rd ) ≤ C0(w0) and − C4(w0)
+
+δ ⪯ D2ζ(i) 
+
+> δ
+
+(·, t) ⪯ C2(w0).By (2.8) of Proposition 2.4, we obtain 
+
+∂tq(i) 
+
+> δ
+
+(x, t) + H(x, Dq (i) 
+
+> δ
+
+(x, t)) − ε∆q(i) 
+
+> δ
+
+(x, t) = H(x, DSH 
+
+> t
+
+ζ(i) 
+
+> δ
+
+(x, t)) − S H 
+
+> t
+
+H(x, Dζ(i) 
+
+> δ
+
+(x, t)) 
+
+≥ − Λ2Cd
+
+√εt − dΛ3
+
+ C4(w0)
+
+δ
+
+2
+
+εt,where Λ2 = Λ2(H, Lip (w0)) , Λ3 = Λ3(H, Lip (w0)) , and Λ4 = Λ4(H, Lip (w0), D2w0) are constants such that 
+
+
+
+|H(x, p) − H(y, p)| ≤ Λ2|x − y| x, y ∈ Rd, |p| ≤ C0(w0)
+
+Λ3 = sup 
+
+n
+
+|D2 
+
+> pp
+
+H(x, ξ)| : x ∈ Rd, |ξ| ≤ C0(w0)
+
+o
+
+Λ4 = C4(w0) : D2vδ(x, ti) ⪰ ζ(i)(x, h) ⪰ − δ−1C4(w0), i = 1, . . . , n.By the comparison principle applied to (1.1), we obtain 
+
+u(x, ti) − q(i) 
+
+> δ
+
+(x, h) ≤ ∥ (u(·, ti−1) − q(i) 
+
+> δ
+
+(·, 0 )) +∥L∞ (Rd ) + Λ2Cd
+
+√εh3/2 + dΛ3Λ24
+
+2
+
+εh2
+
+δ2 . (2.39) From (2.38) we have 
+
+∥(u(x, ti) − vδ(x, ti)) +∥L∞ (Rd ) ≤ ∥ (u(·, ti−1) − vδ(·, ti−1)) +∥L∞ (Rd ) + Λ2Cd
+
+√εh3/2 + dΛ3Λ24
+
+2
+
+εh2
+
+δ2
+
+≤ ∥ (u(·, t0) − vδ(·, t0)) +∥L∞ (Rd ) + Λ2Cd(ih )√εh + dΛ3Λ4
+
+2
+
+ε(ih )h
+
+δ2
+
+≤ ∥ (u0 − w0)+∥L∞ (Rd ) + Λ2Cd T√εh + dΛ3Λ24T
+
+2
+
+εh
+
+δ2 . (2.40) 
+
+> 20
+
+Step 3. Combine the estimates. From (2.37) and (2.40) we obtain (2.31). 
+
+∥(u(·, ti) − v(·, ti)) +∥L∞ (Rd ) ≤ ∥ (u(·, ti) − vδ(·, ti)) +∥L∞ (Rd ) + ∥(vδ(·, ti) − v(·, ti)) +∥L∞ (Rd )
+
+≤ ∥ (u0 − w0)+∥L∞ (Rd ) + ∥(w0 − v0)+∥L∞ (Rd )
+
++ Λ2Cd T√εh + dΛ3Λ24T
+
+2
+
+εh
+
+δ2 + d max {SC (w0), CH }Tδ.
+
+□
+
+We recall the following chain rule lemma used in the proof of Proposition 2.8. 
+
+Lemma 2.9. Let φ ∈ Lip (Td × [0, t]) . Let ˜φ(x, t) := SHε 
+
+> t
+
+φ(x, t), we have 
+
+∂t ˜φ(x, t) = SHε 
+
+> t
+
+φt(x, t) + ε∆ ˜φ(x, t) in Td × (0, h).
+
+Proof of Lemma 2.9. For t ∈ (0, h) and |δ| small such that t, t + δ ∈ (0, h), we have ˜φ(x, t + δ) − ˜φ(x, t)
+
+δ = S Ht+δ φ(x, t + δ) − S Ht+δ φ(x, t)
+
+δ + S Ht+δ φ(x, t) − S Ht φ(x, t)
+
+δ
+
+=
+
+Z
+
+> Rd
+
+Φε(x − y, t + δ)
+
+ φ(y, t + δ) − φ(y)
+
+δ
+
+
+
+dy +
+
+Z
+
+> Rd
+
+ Φε(y, t + δ) − Φε(y, t)
+
+δ
+
+
+
+φ(x − y, t) dy .For the second term, it is clear that lim 
+
+> δ→0
+
+Z
+
+> Rd
+
+ Φε(y, t + δ) − Φε(y, t)
+
+δ
+
+
+
+φ(x − y, t) dy =
+
+Z
+
+> Rd
+
+∂tΦε(y, t)φ(x − y, t) dy 
+
+=
+
+Z
+
+> Rd
+
+ε∆Φ ε(y, t)φ(x − y, t) dy = ε∆
+
+Z
+
+> Rd
+
+Φε(y, t)φ(x − y, t)
+
+
+
+= ε∆ ˜φ(x, t).For the first term, we observe that for every t ∈ (0, h), the set 
+
+Et = {y ∈ Td : ∂t φ(y, t) does not exists }
+
+is a null set in Td. This comes from the fact that, as φ ∈ Lip (Td × [0, h]) , φ is differentiable for a.e. 
+
+(y, t) ∈ Td × (0, h). Hence 
+
+E = {(y, t) ∈ Td × (0, h) : ∂t φ(y, t) does not exists }
+
+is a null set in Td × [0, h]. By Fubini-Tonelli Theorem we have 
+
+|E| =
+
+Z 
+
+> Td×[0, h]
+
+1E(y, t) dydt =
+
+Z h
+
+> 0
+
+Z
+
+> Td
+
+1E(y, t) dy 
+
+
+
+dt =
+
+Z h
+
+> 0
+
+|Et|dt .Hence Et is a null set in Td for every t. We therefore can use the Dominated Convergence Theorem to obtain lim 
+
+> δ→0
+
+Z
+
+> Td
+
+Φε(x − y, t + δ)
+
+ φ(y, t + δ) − φ(y)
+
+δ
+
+
+
+dy =
+
+Z
+
+> Td
+
+Φε(x − y, t)φt(y, t) dy = SH 
+
+> t
+
+φ(x, t).The conclusion follows. □
+
+> 21
+
+2.4. Proof of Theorem 1.1 and Proposition 1.2. 
+
+Proof of Theorem 1.1. 
+
+(i) The proof of (i) follows directly from (2.30) in Proposition 2.8-(i) with u0 ≡ v0.(ii) Let ρ ∈ C∞ 
+
+> c
+
+(Rd) be a standard mollifier with R 
+
+> Rd
+
+ρ dx = 1, ρ ≥ 0 and ρκ (x) = κ−dρ(κ−1 x).We define wκ 
+
+> 0
+
+= ρκ ∗ u0 ∈ C∞(Rd) with Lip (wκ 
+
+> 0
+
+) ≤ Lip (u0), ∥D2wκ 
+
+> 0
+
+∥L∞ (Rd ) ≤ 1
+
+κ ∥D2u0∥L∞ (Rd ), ∥wκ 
+
+> 0
+
+− u0∥L∞ (Rd ) ≤ Cκ
+
+where C = Lip (u0) R 
+
+> Rd
+
+|x|ρ(x) dx . From (2.31) in Proposition 2.8-(ii), with u0 ≡ v0 and 
+
+w0 = wκ
+
+> 0
+
+, we obtain 
+
+∥(u(·, ti) − v(·, ti)) +∥L∞ (Rd ) ≤ 2Cκ + CT 
+
+√εh + εh
+
+δ2κ2 + δ max {SC (wκ 
+
+> 0
+
+), CH }
+
+
+
+.
+
+Case 1. If u0 ∈ W1, ∞(Rd), then the estimate becomes 2Cκ + CT 
+
+√εh + εh
+
+δ2κ2 + δκ
+
+
+
+≤ C(Tεh)1/7 ,by choosing κ = ( Tεh)1/7 and δ = κ2, where C depends only on H, Lip (u0).
+
+Case 2. If u0 is semiconcave, then SC (wκ 
+
+> 0
+
+) ≤ SC (u0), thus by choosing κ = δ = ( Tεh)1/5 ,we obtain the conclusion where C depends only on H, Lip (u0), SC (u0).
+
+Case 3. If u0 ∈ C2(Rd), then from (2.31) in Proposition 2.8-(ii), with u0 ≡ v0 ≡ w0, we obtain 
+
+∥(u(·, ti) − v(·, ti)) +∥L∞ (Rd ) ≤ CT 
+
+√εh + εh
+
+δ2 + δ
+
+
+
+where C depends only on H, Lip (u0), and ∥D2u0∥L∞ . Taking δ = ( εh)1/3 yields the conclu-sion. 
+
+□
+
+We analyze the error of the splitting scheme (1.4) under the additional assumption that x 7 →
+
+H(x, ξ) is periodic. We state the following comparison Lemma as a preparation. 
+
+Lemma 2.10. Let z ∈ Td × [0, h] be a classical solution to the following problem 
+
+(zt + b(x, t) · Dz − ε∆z = ϕ(x, t) (x, t) ∈ Td × (0, h)
+
+z(x, 0 ) = z0(x) x ∈ Rd.
+
+Assume ϕ ∈ L1(Td) × (0, h), z0 ∈ L1(Td), and b ∈ L1(( 0, h); L∞(Td)) , such that div (b(x, t)) ≤ ℓ in 
+
+D′(Td). Then 
+
+∥z(·, t)∥L1(Td ) ≤ eℓt
+
+
+
+∥z0∥L1(Td ) +
+
+Z t
+
+> 0
+
+∥ϕ(·, s)∥L1(Td )ds 
+
+
+
+.
+
+Proof of Lemma 2.10. Multiply both sides of the equation by sign (z(x)) . A standard regularization of the sign function can be used to justify this step rigorously. We have 
+
+−
+
+Z
+
+> Tn
+
+sign (z)∆z dx =
+
+Z
+
+> Tn
+
+Dz 
+
+|Dz | · Dz dx =
+
+Z
+
+> Tn
+
+|Dz | dx ≥ 0
+
+Z
+
+> Td
+
+sign (z b(x, t) · Dz (x) dx =
+
+Z
+
+> Tn
+
+b(x, t) · D(|z|) dx = −
+
+Z
+
+> Tn
+
+div (b)|z| dx .
+
+> 22
+
+From 
+
+ddt 
+
+Z
+
+> Tn
+
+|z| dx +
+
+Z
+
+> Td
+
+sign (z) b(x, t) · Dz dx − ε
+
+Z
+
+> Td
+
+sign (z)∆z dx =
+
+Z
+
+> Tn
+
+f (x, t) sign (z) dx 
+
+we have ddt 
+
+Z
+
+> Tn
+
+|z| dx ≤
+
+Z
+
+> Tn
+
+| f (x, t)| dx + ℓ
+
+Z
+
+> Tn
+
+|z| dz .By Grönwall’s inequality we obtain the conclusion. □
+
+Proof of Proposition 1.2. Let v0 ∈ W1, ∞(Rd) be semiconcave, and for i = 1, 2, . . . , n we define v(x, ti),
+
+ζ(i)(x, t) as in (2.27), namely, for i = 1, . . . , n,
+
+∥Dv (·, ti)∥L∞ (Rd ) ≤ ∥ Dζ(i)(·, h)∥L∞ (Rd ) ≤ C0(v0).where C0(w0) is given by (2.18). We proceed similar to Proposition 2.8 to arrive at (2.35), namely 
+
+∂tq(i)(x, t) + H(x, Dq (i)(x, t)) − ε∆q(i)(x, t)= H(x, DSHε 
+
+> t
+
+ζ(i)(x, t)) − S Hε 
+
+> t
+
+H(x, Dζ(i)(x, t)) = R(x, t).The lower bound follows as in Proposition 2.8-(i), since the L1(Td) estimate is implied by the 
+
+L∞(Td) bound. For the upper bound, Proposition 2.4-(iv) implies that 
+
+∥R(·, t)∥L1(Tn ) ≤ Λ5(ζ(i))√εt
+
+where 
+
+Λ5(ζ(i)) = 
+
+
+
+ΛH (2d + C2
+
+> d
+
+) + 2Lip (ζ(i))Λ3(ζ(i))
+
+| {z } 
+
+> C=C(ΛH,d,C0)
+
+∥Dζ(i)∥BV (Rd ) + dΛH .Thanks to Proposition 2.6 we have 
+
+∥Dζ(i)∥BV (Td ) ≤ Lip (ζ(i)) + 2d · SC (ζ(i)) ≤ C0(v0) + 2d · C2(v0).Hence Λ5(ζ(i)) is stable and uniformly bounded for i = 1, 2, . . . , n. We can rename this constant to be C5(v0). Let 
+
+z(x, t) = u(x, ti−1 + t) − q(i)(x, t) for (x, t) ∈ Td × [0, h].Then z is a classical solution to 
+
+zt + H(x, Du (x, ti−1 + t)) − H(x, Dq (i)(x, t)) − ε∆z = −R(x, t) in Td × (0, h).Let 
+
+b(x, t) = 
+
+Z 10
+
+Dp H x, sDu (x, ti−1 + t) + ( 1 − s)Dq (i)(x, t) ds , (x, t) ∈ Td × (0, h).We note that b is defined everywhere, since u and q(i) are both C2. We have 
+
+H(x, Du (x, ti−1 + t)) − H(x, Dq (i)(x, t)) = b(x, t) · Dz (x, t).It is clear that b ∈ L∞(Td × [0, h]) . We compute div (b(x, t)) = 
+
+Z 10
+
+tr (D2 
+
+> xp
+
+H(x, sDu (x, ti−1 + t) + ( 1 − s)Dq (i)(x, t))) ds 
+
++
+
+Z
+
+> Tn
+
+tr (D2 
+
+> pp
+
+H(x, sDu (x, ti−1 + t) + ( 1 − s)Dq (i)(x, t)) · (sD 2u(x, ti−1 + t) + ( 1 − s)D2q(i)(x, t)) ds .
+
+> 23
+
+Since D2u(x, t) ⪯ C2(u0), D2q(i)(x, t) ⪯ C2(v0) and Dpp H ≥ 0 and the Lipschitz estimates on Du 
+
+and Dq (i), we have from (H2) that div (b(x, t)) ≤ ΛH + C6(u0, v0) in D′(Td)
+
+where C6(u0, v0) depends on C0(u0), C0(v0), C2(u0), C2(v0). By Lemma 2.10 we have 
+
+∥z(·, t)∥L1(Td ) ≤ eC6(u0,v0)t
+
+
+
+∥z(·, 0 )∥L1(Td ) +
+
+Z t
+
+> 0
+
+∥R(·, t)∥L1(Td ) ds 
+
+
+
+.In other words, at t = h we have 
+
+∥u(·, ti) − v(·, ti)∥L∞ (Td ) ≤ eC6(u0,v0)h 
+
+∥u(·, ti−1) − v(·, ti−1)∥L∞ (Td ) + C5(v0)√εh3/2 
+
+≤ eC6(u0,v0)T ∥u0 − v0∥L∞ (Td ) + C5(v0)( eC6(u0,v0)T − 1)√εh.Let u0 = v0 we obtain the conclusion. □
+
+3. F IRST -ORDER HAMILTON -J ACOBI EQUATIONS : PI-λ ALGORITHM 
+
+In this section, we focus on the first-order Hamilton–Jacobi equation (1.3) . Its solution is formu-lated as the value function of an optimal control problem (1.6)–(1.7); see Subsection 1.1.2. 3.1. Value-gradient policy iteration–based algorithm. We refer to [ 54 ] and the references therein for the standard policy iteration and its convergence analysis. We recall the value-gradient policy 
+
+Algorithm 2 Standard Policy iteration Step 1. Given u(k)(x, t), we solve for a(k+1)(x, t):
+
+(∂tu(k)(x, t) − Du (k)(x, t) · f (x, a(k)(x, t)) − ℓ(x, a(k)(x, t)) = 0 in Rd × (0, T),
+
+u(k)(x, 0 ) = u0(x) on Rd. (3.1) Step 2. Policy update: a(k+1) is obtained from the optimization problem 
+
+a(k+1)(x, t) = arg max 
+
+> a∈A
+
+
+
+Du (k)(x, t) ·   − f (x, a) − ℓ(x, a)
+
+
+
+.iteration–based Algorithm 1 and derive (1.9). Define the value-gradient function 
+
+λ(x, t) = Du (x, t), (x, t) ∈ Rn × (0, T).Let a(·) = ˆa(·) be the optimal policy in Algorithm 2, we have 
+
+∂tu(x, t) = λ(x, t) · f (x, ˆ a(x, t)) + ℓ(x, ˆ a(x, t)) , (3.2) ˆa(x, t) = arg max 
+
+> a∈Rp
+
+
+
+Du (x, t) ·   − f (x, a) − ℓ(x, a)
+
+
+
+, (3.3) for (x, t) ∈ Rd × (0, T). Let us derive the PDE for λ(x, t) based on (3.2). Write 
+
+λ = ( λ1, . . . , λn), f = ( f1, . . . , fn), and a = ( a1, . . . , ap).
+
+> 24
+
+Taking the derivative with respect to xi for i ∈ { 1, . . . , n} of (3.2), we obtain 
+
+ddt · ∂u
+
+∂xi
+
+(x, t) = ∂∂xi
+
+> n
+
+# ∑
+
+> j=1
+
+λj(x, t) · fj(x, ˆ a(x, t)) 
+
+!
+
++ ∂∂xi
+
+ℓ(x, ˆ a(x, t)) =
+
+> n
+
+# ∑
+
+> j=1
+
+" ∂λ j
+
+∂xi
+
+(x, t) · fj (x, ˆ a(x, t)) + λj(x, t) · ∂ fj
+
+∂xi
+
++
+
+> p
+
+# ∑
+
+> k=1
+
+∂ fj
+
+∂ak
+
+· ∂ ˆak
+
+∂xi
+
+!# 
+
++ ∂ℓ
+
+∂xi
+
++
+
+> p
+
+# ∑
+
+> k=1
+
+∂ℓ
+
+∂ak
+
+· ∂ ˆak
+
+∂xi
+
+!
+
+=
+
+> n
+
+# ∑
+
+> j=1
+
+ ∂λ j
+
+∂xi
+
+(x, t) · fj
+
+ x, ˆ a(x, t) + λj(x, t) · ∂ fj
+
+∂xi
+
+
+
++ ∂ℓ
+
+∂xi
+
++
+
+> p
+
+# ∑
+
+> k=1
+
+∂ ˆak
+
+∂xi
+
+" n
+
+# ∑
+
+> j=1
+
+λj(x, t) · ∂ fj
+
+∂ak
+
++ ∂ℓ
+
+∂ak
+
+#
+
+.Here ˆa = ( ˆa1, . . . , ˆap), and ˆak = ˆak(x, t) for each component k = 1, 2, . . . , p. Assume that (3.3) admits a unique optimal solution ˆa(x, t). Then the following first-order necessary condition holds. 
+
+∂∂ak
+
+−
+
+> n
+
+# ∑
+
+> j=1
+
+λj(x, t) fj(x, a) − ℓ(x, a)
+
+!
+
+= 0 for k = 1, 2, . . . , p.Therefore 
+
+> n
+
+# ∑
+
+> j=1
+
+λj(x, t) ∂ fj
+
+∂ak
+
+(x, ˆ a) + ∂ℓ
+
+∂ak
+
+(x, ˆ a) = 0, k = 1, 2, . . . , p. (3.4) We deduce that 
+
+ddt · ∂u
+
+∂xi
+
+(x, t) = 
+
+> n
+
+# ∑
+
+> j=1
+
+ ∂λ j
+
+∂xi
+
+(x, t) · fj
+
+ x, ˆ a(x, t) + λj(x, t) · ∂ fj
+
+∂xi
+
+
+
++ ∂ℓ
+
+∂xi
+
+, i = 1, 2, . . . , n,where ˆ a satisfies (3.3). In other words, assuming Dλ is symmetric ( u ∈ C2), we have 
+
+(λt(x, t) = DT λ(x, t) · f (x, ˆ a(x, t)) + DT f (x, ˆ a(x, t)) · λ(x, t) + ∇x ℓ(x, ˆ a(x)) ,
+
+λ(x, 0 ) = ∇u0(x). (3.5) 3.2. Key Estimates and Error Analysis. Proposition 3.1 (Estimate for λ(k) and a(k)). Assume (A0), (A1). We define λ(0)(x, t) = ∇u0(x).(i) For every k ∈ N and (x, t) ∈ Rd × (0, T) we have 
+
+|a(k)(x, t)| ≤ Cf
+
+ℓ0
+
+|λ(k)(x, t)| + 1. (3.6) 
+
+(ii) If T ≤ T1 :=
+
+
+
+ln   32
+
+
+
+2Cf (1 + 2Λ20 
+
+> Cf
+> ℓ0
+
+) ,
+
+> Λ0
+> 3
+
+Cf + Cℓ
+
+
+
+1 + 2Λ0
+
+> Cf
+> ℓ0
+
+ (3.7) 
+
+then |λ(k)(x, t)| ≤ 2Λ0(1 + |x|) for all (x, t) ∈ Rd × (0, T).Proof. 
+
+(i). Estimate for a(k). By the minimization in (1.11) and the form of f in (A1), we have 
+
+cTf · λ(k)(x, t) + Daℓ x, a(k)(x, t) = 0 =⇒ ℓ0(|a(k)(x, t)| − 1) ≤ Cf |λ(k)(x, t)| (3.8) by using the lower bound of Daℓ in (A1). Since a(k)(x, t) = arg min a
+
+
+
+f (x, a) · λ(k)(x, t) + ℓ(x, a)
+
+
+
+we deduce the conclusion (3.6). 
+
+> 25
+
+(ii). Estimate for λ(k). We proceed by induction. By (A0), |λ(0)(x, t)| ≤ Λ0(1 + |x|). We derive a constant Θk such that 
+
+|λ(k)(x, t)| ≤ Θk(1 + |x|) =⇒ |λ(k)(x, t)| ≤ Θk+1(1 + |x|), (3.9) where Θ0 = Λ0. We show that if T is sufficiently small, then Θk ≤ 2Λ0 implies Θk+1 ≤ 2Λ0 as well. For simplicity, by (3.6) we assume 
+
+|a(k)(x, t)| ≤ Ak(1 + |x|), where Ak = Cf
+
+ℓ0
+
+Θk + 1. (3.10) Let (x, t) ∈ Rd × (0, T) and η : [0, t] → Rd be a trajectory to 
+
+( ˙η(s) = − f  η(s), a(k)(η(s), s), s ∈ (0, t)
+
+η(t) = x. (3.11) From the growth of f in (A1) we have 
+
+f  η(s), a(k)(η(s), s) ≤ Cf (1 + |η(s)| + |a(k)(η(s), s)|) ≤ Cf (1 + Ak)( 1 + |η(s)|).Since η(t) = x, integrating backward from t to s gives 1 + |η(s)| ≤ (1 + |x|) + Cf (1 + Ak)
+
+Z ts
+
+(1 + |η(r)|) dr .By Grönwall’s inequality (backward in time), we obtain 1 + |η(s)| ≤ (1 + |x|) eCf (1+Ak )( t−s), s ∈ [0, t] =⇒ 1 + |η(0)| ≤ (1 + |x|) eCf (1+Ak )t. (3.12) Along the characteristic (3.11), equation (1.10) yields 
+
+dds 
+
+
+
+λ(k+1)(η(s), s)
+
+
+
+= Dx f (η(s), a(k)(η(s), s)) · λ(k)(η(s), s) + Dxℓ(η(s), a(k)(η(s), s)) .From the growth conditions of D f , ℓ in (A1) and (3.10) we have 
+
+dds 
+
+
+
+λ(k+1)(η(s), s)
+
+
+
+≤ (Cf + Cℓ(1 + Ak))( 1 + |η(s)|), s ∈ [0, t].Integrating from 0 to t and using the initial condition λ(k+1)(η(0), 0 ) = ∇u0(η(0)) , we obtain 
+
+|λ(k+1)(η(t), t)| ≤ Λ0(1 + |η(0)|) + ( Cf + Cℓ(1 + Ak)) 
+
+Z t
+
+> 0
+
+(1 + |η(s)|) ds ,where we used (A0) that |∇ u0(x)| ≤ Λ0(1 + |x|). Since η(t) = x, using (3.12) we obtain 
+
+|λ(k+1)(x, t)| ≤ Λ0(1 + |x|)eCf (1+Ak )t + ( Cf + Cℓ(1 + Ak))( 1 + |x|)
+
+Z t
+
+> 0
+
+eCf (1+Ak )( t−s) ds 
+
+≤ (1 + |x|)
+
+
+
+Λ0 · eCf (1+Ak )T + Cf + Cℓ(1 + Ak)
+
+Cf (1 + Ak)
+
+
+
+eCf (1+Ak )T − 1
+
+
+
+≤ (1 + |x|)
+
+
+
+Λ0 · eCf (1+Ak )T + Cf + Cℓ(1 + Ak)
+
+Cf (1 + Ak) · Cf (1 + Ak)T · eCf (1+Ak )T
+
+
+
+= ( 1 + |x|)eCf (1+Ak )T Λ0 +  Cf + Cℓ(1 + Ak)T
+
+where we use ex − 1 ≤ xe x for all x ≥ 0. Choose T satisfying (3.7) such that 
+
+eCf (1+Ak )T ≤ 32 and Λ0 +  Cf + Cℓ(1 + Ak)T ≤ 43 Λ0,
+
+> 26
+
+then Θk+1 ≤ 32 · 43 Λ0 = 2Λ0. We obtain the conclusion by induction. □
+
+Next, uniform estimates on Da (k) and Dλ(k) require stronger assumptions. 
+
+Proposition 3.2. Assume (A0), (A1), (A2).(i) For every k ∈ N we have 
+
+|Dx a(k)(x, t)| ≤ 1
+
+ℓ0
+
+
+
+Cf |Dλ(k)(x, t)| + Cℓ
+
+
+
+. (3.13) 
+
+(ii) If T ≤ T2 := min 
+
+
+
+ln   32
+
+
+
+Cf
+
+
+
+1 + 2Λ0Cf +Cℓ
+
+> ℓ0
+
+ , Λ0
+
+3
+
+
+
+2Λ0Cf
+
+
+
+1 + Cℓ
+
+> ℓ0
+
+
+
++ 2Cf Λ0 + Cℓ + C2
+
+> ℓ
+> ℓ0
+
+ (3.14) 
+
+then 
+
+|Dλ(k)(x, t)| ≤ 2Λ0 for all (x, t) ∈ Rd × (0, T), (3.15) 
+
+(iii) For k = 1, 2, . . . and (x, t) ∈ Rd × [0, T] we have 
+
+|a(k)(x, t) − a(k−1)(x, t)| ≤ Cf
+
+ℓ0
+
+|λ(k)(x, t) − λ(k−1)(x, t)|. (3.16) 
+
+Proof. 
+
+(i). Estimate for Da (k). Differentiating (3.8) with respect to x, we obtain 
+
+D2 
+
+> ax
+
+ℓ(x, a(k)) + D2
+
+> aa
+
+ℓ(x, a(k)) · Dx a(k) + cTf · Dλ(k) = 0. Solving for Dx a(k)(x, t), we obtain 
+
+Dx a(k)(x, t) = −
+
+
+
+D2
+
+> aa
+
+ℓ(x, a(k)(x, t)) 
+
+−1 
+
+c f · Dλ(k)(x, t) + D2 
+
+> ax
+
+ℓ x, a(k)(x, t)
+
+.By (A1), |c f | ≤ Cf . By (A2), D2
+
+> aa
+
+ℓ(x, a) ≻ ℓ0 Id and |D2 
+
+> ax
+
+ℓ(x, a)| ≤ Cℓ, yielding (3.13). 
+
+(ii). Estimate for Dλ(k). With λ(0)(x, t) = ∇u0(x), we have |Dλ(0)(x, t)| = |D2uT (x)| ≤ Λ0 by 
+
+(A0). We use induction to show that |Dλ(k)(x, t)| ≤ 2Λ0 for all k ∈ N provided that T is small so that (3.14) is satisfied. Assume 
+
+|Dλ(k)(x, t)| ≤ 2Λ0. (3.17) Let η be the characteristic curve of (3.11), and set p(s) = Dλ(k+1)(η(s), s) for s ∈ (t, T). Then 
+
+dds p(s) = dds 
+
+
+
+Dλ(k+1)(η(s), s)
+
+
+
+− D2λ(k+1)(η(s), s) · f
+
+
+
+η(s), a(k)(η(s), s)
+
+
+
+. (3.18) We derive an equation for p(s). From (1.10) we have 
+
+∂tλ(k+1)(x, t) = Dλ(k+1) · f (x, a(k)) + Dx f (x, a(k)) · λ(k) + ∇x ℓ(x, a(k)).Taking the derivative in x on both sides, we have 
+
+∂t Dλ(k+1)(x, t) = D2λ(k+1) · f (x, a(k)) + Dλ(k+1) · Dx ( f (x, a(k))) + Dx
+
+ ∇xℓ(x, a(k)).
+
+> 27
+
+We have 
+
+Dx
+
+
+
+Dλ(k+1) · f (x, a(k))
+
+
+
+= D2λ(k+1) · f (x, a(k)) + Dλ(k+1) · Dx
+
+  f (x, a(k))
+
+= D2λ(k+1) · f (x, a(k)) + Dλ(k+1) · Dx f (x, a(k)) + Dλ(k+1) · Da f (x, a(k)) · Dx a(k)
+
+Dx
+
+
+
+Dx f (x, a(k)) · λ(k)
+
+= Dx(Dx f (x, a(k))) · λ(k) + Dx f (x, a(k)) · Dλ(k)
+
+Dx∇ℓ(x, a(k)) = D2 
+
+> xx
+
+ℓ(x, a(k)) + D2
+
+> xa
+
+ℓ(x, a(k)) · Dx a(k).From the structure of f in (A1), we obtain 
+
+∂t Dλ(k+1) + D2λ(k+1) · f (x, a(k)) = Dλ(k+1) · A(k)(x, t) + B(k)(x, t) (3.19) where 
+
+A(k)(x, t) = Dx f0(x) + c f · Dx a(k)
+
+B(k)(x, t) = Dx (Dx f0(x)) · λ(k) + Dx f0(x) · Dλ(k) + D2 
+
+> xx
+
+ℓ(x, a(k)) + D2
+
+> xa
+
+ℓ(x, a(k)) · Dx a(k).For A(k), by the growth of f , |Dx f0| ≤ Cf in (A1), and (3.13), we obtain 
+
+|A(k)(x, t)| ≤ Cf + Cf
+
+ℓ0
+
+
+
+Cf |Dλ(k)(x, t)| + Cℓ
+
+
+
+. (3.20) For B(k), we use (1.19) in (A2), the growth of f , and the properties of ℓ in (A2), together with 
+
+|λ(k)(x, t)| ≤ 2Λ0(1 + |x|), |Dλ(k)(x, t)| ≤ 2Λ0 from Proposition 3.1 to deduce that 
+
+|B(k)(x, t)| ≤ Cf
+
+1 + |x| · 2Λ0(1 + |x|) + Cf |Dλ(k)(x, t)| + Cℓ + Cℓ
+
+ℓ0
+
+
+
+Cf |Dλ(k)(x, t)| + Cℓ
+
+
+
+= Cf
+
+
+
+1 + Cℓ
+
+ℓ0
+
+
+
+|Dλ(k)(x, t)| + 2Cf Λ0 + Cℓ + C2
+
+> ℓ
+
+ℓ0
+
+!
+
+. (3.21) From (3.20), (3.21) and (3.17), we have 
+
+Dλ(k+1) · A(k)(x, t) + B(k)(x, t) ≤ K1|Dλ(k+1)(x, t)| + K2,where 
+
+K1 = Cf
+
+
+
+1 + 2Λ0Cf + Cℓ
+
+ℓ0
+
+
+
+, K2 = 2Λ0Cf
+
+
+
+1 + Cℓ
+
+ℓ0
+
+
+
++ 2Cf Λ0 + Cℓ + C2
+
+> ℓ
+
+ℓ0
+
+.Evaluating along the characteristic using (3.18), we deduce that 
+
+| ˙p(s)| ≤ K1|p(s)| + K2, s ∈ (0, t).Recall that |p(0)| = |Dλ(k+1)(x, 0 )| = |D2u0(x)| ≤ Λ0. Hence, by (A2) we have 
+
+|p(t)| ≤ | p(0)| +
+
+Z t
+
+> 0
+
+| ˙p(s)| ds ≤ Λ0 + K2t + K1
+
+Z t
+
+> 0
+
+|p(s)| ds .By Grönwall inequality we obtain 
+
+|p(t)| ≤ (Λ0 + K2(T − t)) eK1(T−t) ≤ (Λ0 + K2T)eK1 T.Choose T > 0 sufficiently small such that (3.14) holds, then the conclusion follows: 
+
+|Dλ(k+1)(x, t)| ≤ (Λ0 + K2T)eK1 T ≤ 43 Λ0 · 32 = 2Λ0.
+
+> 28
+
+(iii). Estimate for |a(k) − a(k−1)|. From (1.11) we have 
+
+Daℓ(x, a(k)(x, t)) + c f · λ(k)(x, t) = Daℓ(x, a(k−1)(x, t)) + c f · λ(k−1)(x, t) = 0Therefore 
+
+c f ·
+
+
+
+λ(k)(x, t) − λ(k−1)(x, t)
+
+
+
+= −
+
+
+
+Daℓ(x, a(k)(x, t)) − Daℓ(x, a(k−1)(x, t)) 
+
+
+
+.Using the convexity of ℓ(x, a) in (A1) we deduce that ∥D2
+
+> aa
+
+ℓ(·, ·)∥ ≥ ℓ0. Therefore, the above equation implies (3.16). □
+
+We derive an error estimate for Algorithm 1 as k → ∞ in a weighted L2 space–time norm. The weight involves a factor γ, which allows greater flexibility than in the time-independent case, where it appears as the discount factor determined by the equation [12]. 
+
+Proof of Theorem 1.4. Let 
+
+T ≤ T0 = min {T1, T2}
+
+where T1, T2 are given by (3.7) and (3.14), respectively. We also define 
+
+γ0 := 2Cf
+
+
+
+1 + 2Cf Λ0 + Cℓ
+
+ℓ0
+
++ 5α
+
+
+
++ 6 2Λ0C2 
+
+> f
+
++ CℓCf + Cf ℓ0
+
+2ℓ0
+
+!
+
+.By definition of λ(k) we have 
+
+∂tλ(k+1) = Dλ(k+1) · f  x, a(k) + DT f  x, a(k) · λ(k) + ∇x ℓ x, a(k)
+
+∂tλ(k) = Dλ(k) · f  x, a(k−1) + DT f  x, a(k−1) · λ(k−1) + ∇x ℓ x, a(k−1).Subtracting the two equations and multiply both sides by e−γt
+
+ λ(k+1) −λ(k)
+
+> (1+|x|2)2α
+
+
+
+and integrate, we have 
+
+I0 =
+
+Z T
+
+> 0
+
+Z
+
+> Rd
+
+e−γt ∂t(λ(k+1) − λ(k)) λ(k+1) − λ(k)
+
+(1 + |x|2)2α
+
+!
+
+dxdt = I1 + I2 + I3 + I4 + I5,where 
+
+I1 =
+
+Z T
+
+> 0
+
+Z
+
+> Rd
+
+ Dλ(k+1) − Dλ(k) f (x, a(k−1))e−γt λ(k+1) − λ(k)
+
+(1 + |x|2)2α
+
+!
+
+dxdt I2 =
+
+Z T
+
+> 0
+
+Z
+
+> Rd
+
+Dλ(k+1)
+
+f (x, a(k)) − f (x, a(k−1))
+
+
+
+e−γt λ(k+1) − λ(k)
+
+(1 + |x|2)2α
+
+!
+
+dxdt I3 =
+
+Z T
+
+> 0
+
+Z
+
+> Rd
+
+DT f (x, a(k)) ·
+
+
+
+λ(k) − λ(k−1)
+
+e−γt λ(k+1) − λ(k)
+
+(1 + |x|2)2α
+
+!
+
+dxdt I4 =
+
+Z T
+
+> 0
+
+Z
+
+> Rd
+
+λ(k−1)
+
+DT f (x, a(k)) − DT f (x, a(k−1))
+
+
+
+e−γt λ(k+1) − λ(k)
+
+(1 + |x|2)2α
+
+!
+
+dxdt I5 =
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+∇x ℓ(x, a(k)) − ∇ x ℓ(x, a(k−1)) λ(k+1) − λ(k)
+
+(1 + |x|2)2α
+
+!
+
+dxdt .
+
+Estimates for I0. For the left-hand side, we have 
+
+I0 = 12
+
+Z
+
+> Rd
+
+1
+
+(1 + |x|2)2α
+
+Z T
+
+> 0
+
+∂t
+
+ |λ(k+1) − λ(k)|2e−γt dt 
+
+!
+
+dx .
+
+> 29
+
+For each x ∈ Rd, integrating by parts in time over [0, T] and using λ(k)(x, 0 ) = ∇u0(x) for all 
+
+k ∈ N, we obtain 
+
+Z T
+
+> 0
+
+∂t
+
+
+
+|λ(k+1) − λ(k)|2
+
+e−γt dt = eγT |λ(k+1)(x, T) − λ(k)(x, T)|2 + γ
+
+Z T
+
+> 0
+
+e−γt|λ(k+1) − λ(k)|2 dt .As a consequence, we have 
+
+I0 ≥ γ
+
+2
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+|λ(k+1) − λ(k)|2
+
+(1 + |x|2)2α dxdt = γ
+
+2 ek+1.
+
+Estimates for I1, I2, I3, I4, I5. We will make use |Dx f (x, a)| ≤ Cf , |Da f (x, a)| = |c f | ≤ Cf from 
+
+(A1), and |λ(k)(x, t)| ≤ 2Λ0(1 + |x|) from Proposition (3.1). To estimate I1, we observe that Dx (λ(k+1) − λ(k)) = 12 Dx
+
+ |λ(k+1) − λ(k)|2, which means 
+
+I1 = 12
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+D |λ(k+1) − λ(k)|2 f (x, a(k−1))(1 + |x|2)2α dx dt .By integration by parts, the boundary terms in the following integral vanishes due to the linear growth |λ(k)(x, t)| ≤ 2Λ0(1 + |x|) and the fact that α > 1: 
+
+Z
+
+> Rd
+
+Dx
+
+
+
+|λ(k+1) − λ(k)|2
+
+· f (x, a(k−1))(1 + |x|2)2α dx = −
+
+Z
+
+> Rd
+
+|λ(k+1) − λ(k)|2 Dx
+
+f (x, a(k−1))(1 + |x|2)2α
+
+!
+
+dx 
+
+= −
+
+Z
+
+> Rd
+
+|λ(k+1) − λ(k)|2
+
+(1 + |x|2)2α
+
+
+
+∇x
+
+
+
+f (x, a(k−1))
+
+
+
+− 4 f (x, a(k)) αx
+
+(1 + |x|2)
+
+
+
+. (3.22) We estimate 
+
+Dx
+
+
+
+f (x, a(k−1))
+
+
+
+= Dx f (x, a(k−1)) + Da f (x, a(k−1)) · Da (k−1)
+
+≤ Cf + Cf |Da (k−1)| ≤ Cf + Cf · 2Cf Λ0 + Cℓ
+
+ℓ0
+
+, (3.23) where we use the bound for Da (k−1) from (3.13) and the bound for Dλ(k) from (3.15) . On the other hand, we have | f (x, a(k−1)(x)) | ≤ Cf (1 + |x|), thus 
+
+f (x, a(k)) αx
+
+(1 + |x|2) ≤ Cf
+
+α|x|(1 + |x|)(1 + |x|2)2α ≤ 5Cf α
+
+4 . (3.24) Using (3.23) and (3.24) in (3.22) we deduce that 
+
+Z
+
+> Rd
+
+Dx
+
+
+
+|λ(k+1) − λ(k)|2
+
+· f (x, a(k−1))(1 + |x|2)2α dx ≤ Cf
+
+
+
+1 + 2Cf Λ0 + Cℓ
+
+ℓ0
+
++ 5α
+
+ Z
+
+> Rd
+
+f (x, a(k−1))(1 + |x|2)2α dx .Therefore 
+
+|I1| ≤ Cf
+
+
+
+1 + 2Cf Λ0 + Cℓ
+
+ℓ0
+
++ 5α
+
+
+
+ek+1.To estimate I2, we write 
+
+I2 =
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+Dλ(k+1) ·
+
+
+
+f (x, a(k)) − f (x, a(k−1))
+
+
+
+· λ(k+1) − λ(k)
+
+(1 + |x|2)2α dxdt .
+
+> 30
+
+From the bound for Dλ(k) from (3.15), f (x, a) = c f · a + f0(x), and (3.16) we deduce that 
+
+|I2| ≤ 
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+|Dλ(k+1)| · | c f | · | a(k) − a(k−1)| λ(k+1) − λ(k)
+
+(1 + |x|2)2α dxdt 
+
+≤ 2Λ0C2
+
+> f
+
+ℓ0
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+|λ(k) − λ(k−1)| · |λ(k+1) − λ(k)|
+
+(1 + |x|2)2α dxdt 
+
+≤ Λ0C2
+
+> f
+
+ℓ0
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+|λ(k+1) − λ(k)|2
+
+(1 + |x|2)2α dxdt +
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+|λ(k) − λ(k−1)|2
+
+(1 + |x|2)2α dxdt 
+
+!
+
+≤ Λ0C2
+
+> f
+
+ℓ0
+
+(ek+1 + ek).For I3, from |Dx f | ≤ Cf we have 
+
+|I3| =
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+Dx f (x, a(k)) ·  λ(k) − λ(k−1)  λ(k+1) − λ(k)
+
+(1 + |x|2)2α dxdt 
+
+≤ Cf
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+|λ(k) − λ(k−1)| · |λ(k+1) − λ(k)|
+
+(1 + |x|2)2α dxdt ≤ Cf
+
+2 (ek + ek+1).We observe that I4 = 0. Indeed, by (1.15) we have f (x, a) = f0(x) + c f · a, and hence 
+
+Dx f (x, a) = D f 0(x) =⇒ λ(k−1)
+
+DT f (x, a(k)) − DT f (x, a(k−1))
+
+
+
+= 0. For I5, as in the estimate of I2, we have 
+
+|I5| =
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+
+
+∇x ℓ(x, a(k)) − ∇ x ℓ(x, a(k−1))
+
+  λ(k+1) − λ(k)
+
+(1 + |x|2)2α dxdt 
+
+≤ Cℓ
+
+Z T
+
+> 0
+
+e−γt
+
+Z
+
+> Rd
+
+a(k) − a(k−1)
+
+ λ(k+1) − λ(k)
+
+(1 + |x|2)2α dxdt ≤ CℓCf
+
+2ℓ0
+
+(ek + ek+1).Combining all estimates for Ii with i = 0, 1, 2, . . . , 5, we deduce that 
+
+γ
+
+2 ek+1 ≤ Ae k+1 + Be k (3.25) where 
+
+A = Cf
+
+
+
+1 + 2Cf Λ0 + Cℓ
+
+ℓ0
+
++ 5α
+
+
+
++ 2Λ0C2 
+
+> f
+
++ CℓCf + Cf ℓ0
+
+2ℓ0
+
+, B = 2Λ0C2 
+
+> f
+
++ CℓCf + Cf ℓ0
+
+2ℓ0
+
+.If γ ≥ γ0 = 2A + 4B, then (3.25) implies that ek+1 ≤ 12 ek. The proof is complete. □
+
+4. M ACHINE LEARNING CHARACTERISTIC METHODS AND NUMERICAL EXPERIMENTS 
+
+4.1. Machine Learning Characteristic Methods. We consider linear Hamilton–Jacobi equation (3.1). A forward Euler discretization in time gives 
+
+u(k)(x, s + h) − u(k)(x, s)
+
+h − Du (k)(x, s) · f (x, a(k)(x, s)) = ℓ(x, a(k)(x, s)) .
+
+> 31
+
+Setting 
+
+V (x) := u(k)(x, s + h), G(x) := f (x, a(k)(x, s)) ,
+
+L(x) := ℓ(x, a(k)(x, s)) + 1
+
+h u(k)(x, s), κ := 1
+
+h ,we obtain the stationary transport equation 
+
+κV (x) − DV (x) · G (x) = L(x), x ∈ Rd. (4.1) Let x(t) solve the characteristic system ddt x(t) = G(x(t)) , x(0) = x0 ∈ Rd. (4.2) Along x(t), equation (4.1) reduces to the ODE 
+
+κV (x(t)) − ddt V (x(t)) = L(x(t)) =⇒ ddt
+
+
+
+e−κtV (x(t)) 
+
+
+
+= −e−κtL(x(t)) 
+
+by multiplying by e−κt. Assuming lim t→∞ e−κtV (x(t)) = 0, we obtain the representation formula 
+
+V (x(t)) =  
+
+> Z∞
+> t
+
+e−κ(t′ −t)L(x(t′)) dt′. (4.3) Differentiating (4.1) with respect to xi and applying the same argument gives, for each component 
+
+λi = ∂xi V,
+
+λi(x(t)) =  
+
+> Z∞
+> t
+
+e−κ(t′ −t)∂xi L(x(t′)) dt′. (4.4) For numerical implementation, we generate characteristic curves {x(n)}Nn=1 from initial states 
+
+{x(n) 
+
+> 0
+
+}Nn=1 (e.g., uniformly sampled in the state space). Equations (4.3) – (4.4) allow simultaneous evaluation of V and ∇V along each trajectory. Each characteristic trajectory is discretized into a finite set of approximately equispaced snapshots in space. To extend the labelled data from these trajectories to the whole domain, we introduce a parametric approximation bVθ (x) (e.g., Galerkin expansions, radial basis functions, or neural networks). The parameter vector θ is determined by minimizing the loss functional 
+
+L(θ) = μ
+
+> N
+
+# ∑ 
+
+> n=1
+> ZT
+> 0
+
+V (x(n)(t)) − bVθ (x(n)(t)) 2 dt
+
++ ( 1 − μ)
+
+> N
+
+# ∑ 
+
+> n=1
+> ZT
+> 0
+
+λ(x(n)(t)) − ∇ bVθ (x(n)(t)) 2 dt,(4.5) where 0 ≤ μ ≤ 1 balances value and gradient matching, ∥ · ∥ denotes the Euclidean norm in 
+
+Rd, and ∇ bVθ is computed by automatic differentiation and by results of the previous step. The minimization of (4.5) is performed using standard stochastic gradient methods such as ADAM [ 44 ]. The overall procedure is embedded within a policy iteration framework based on λ. At each iteration k, characteristic data are recomputed and the model is retrained. The number of trajectories 
+
+N controls the data coverage, while the number of optimization steps controls approximation accuracy. In practice, the time integrals in (4.5) are replaced by discrete sums over trajectory snapshots. To improve spatial coverage, sampling points are distributed approximately uniformly in space rather than uniformly in time; we employ arc-length parametrization along each trajectory. 
+
+> 32
+
+The selection of initial states {x(n) 
+
+> 0
+
+}Nn=1 influences the spatial exploration of the characteristics and should ensure adequate coverage of the state space. 4.2. Numerical Experiments. We present numerical tests for the quadratic control problem 
+
+f (x, a) = Ax + Ba , ℓ(x, a) = |x|2 + |a|2, x(0) = x0,with B = Id, a ∈ Rd and A ∈ Rd×d. The corresponding Hamiltonian is given by (1.8) that 
+
+H(x, p) = − inf 
+
+> a∈Rd
+
+
+
+p · f (x, a) + ℓ(x, a)
+
+
+
+= 14 |p|2 − p · Ax − | x|2, (x, p) ∈ Rd × Rd. (4.6) We choose the initial condition u0(x) = e−x2
+
+, and consider the problem for t ∈ [0, 1 ].
+
+Test configurations: Tables 1–4 correspond to the following settings: 
+
+• Table 1: ε = 0, h = 0.01, d = 32. In this test, the code does not need the operator splitting step. 
+
+• Table 2: ε = 0.01, h = 0.1, d = 5. 
+
+• Table 4: ε = 1, h = 0.05, d = 5. For each table we consider two choices of A:
+
+• T1: A = Id.
+
+• T2: A = 1 
+
+> d
+
+(a⊤a + Id), where a ∈ Rd×d has i.i.d. standard Gaussian entries. 
+
+Training procedure: The value function is computed in the box [−1, 1 ]d. Initial states {x(n) 
+
+> 0
+
+}Nn=1
+
+are sampled uniformly from this domain, and only trajectory data remaining inside the box are used for training. The loss L(θ) is minimized by full-batch ADAM [ 44 ]. We vary the number of characteristic trajectories N ∈ { 12, . . . , 20 }, which controls the amount of labelled data. At each policy iteration, the supervised training is performed for 1000 ADAM steps (or until a prescribed tolerance is reached), and the number of policy iterations is fixed at 30. Accuracy is measured by the mean residual of the stationary HJB equation, evaluated at Np = 10 4 points uniformly sampled in [−1, 1 ]d:error = 1
+
+NpNp
+
+# ∑
+
+> j=1
+
+κ bVθ (x(j)) − G (x(j)) · ∇ bVθ (x(j)) − L (x(j)) . (4.7) For each fixed N, the same initial states are used for different μ. We report the average residual over the last 20 policy iterations. In summary, for this example, the proposed policy iteration exhibits stable and accurate con-vergence even when the number of characteristic trajectories or the number of training steps is limited. 
+
+Acknowledgements. The authors would like to thank Jiayue Han and Sheung Chi Phillip Yam for their help and discussions. Son Tu thanks Hung Tran and Khai Nguyen for helpful discussions on policy iteration and optimal control. REFERENCES    
+
+> [1] A. Alla, M. Falcone, and D. Kalise. An Efficient Policy Iteration Algorithm for Dynamic Programming Equations.
+> SIAM Journal on Scientific Computing , 37(1):A181–A200, 2015. _eprint: https://doi.org/10.1137/130932284. [2] H. Amann and M. G. Crandall. On Some Existence Theorems for Semi-linear Elliptic Equations. Indiana University Mathematics Journal , 27(5):779–790, 1978.
+> 33
+
+The number of characteristics trajectories N
+
+μ 12 14 16 18 20 T1 0.8 0.0712 0.1096 0.0387 0.1056 0.0266 0.6 0.1053 0.0913 0.0195 0.0131 0.0737 0.4 0.0881 0.0854 0.0206 0.0465 0.0655 0.2 0.0443 0.0998 0.1041 0.0361 0.0439 T2 0.8 0.0889 0.0761 0.1089 0.0417 0.1078 0.6 0.0425 0.0402 0.0352 0.0339 0.4058 0.4 0.0206 0.0541 0.0391 0.0255 0.0352 0.2 0.0628 0.0492 0.0174 0.0741 0.0203 
+
+TABLE 1. Error (HJB residual) for various μ when the number of trajectories N
+
+changes. T1, T2 refer to the two tests in the text. 
+
+The number of characteristics trajectories N
+
+μ 12 14 16 18 20 T1 0.8 0.0049 0.0054 0.0059 0.0029 0.0036 0.6 0.0043 0.0069 0.0041 0.0068 0.0097 0.4 0.0042 0.0055 0.0071 0.0033 0.0050 0.2 0.0086 0.0089 0.0031 0.0034 0.0072 T2 0.8 0.0044 0.0075 0.0118 0.0056 0.0038 0.6 0.0047 0.0034 0.0058 0.0063 0.0018 0.4 0.0021 0.0019 0.0051 0.0020 0.0029 0.2 0.0025 0.0095 0.0028 0.0057 0.0027 
+
+TABLE 2. Error (HJB residual) for various μ when the number of trajectories N
+
+changes. T1, T2 refer to the two tests in the text. 
+
+The number of characteristics trajectories N
+
+μ 12 14 16 18 20 T1 0.8 0.0118 0.0073 0.0138 0.0050 0.0167 0.6 0.0095 0.0075 0.0042 0.0028 0.0065 0.4 0.0079 0.0073 0.0040 0.0122 0.0075 0.2 0.0075 0.0089 0.0021 0.0047 0.0088 T2 0.8 0.0056 0.0075 0.0087 0.0039 0.0297 0.6 0.0055 0.0184 0.0070 0.0036 0.0167 0.4 0.0072 0.0018 0.0079 0.0057 0.0086 0.2 0.0036 0.0034 0.0053 0.0031 0.0068 
+
+TABLE 3. Error (HJB residual) for various μ when the number of trajectories N
+
+changes. T1, T2 refer to the two tests in the text.   
+
+> [3] S. N. Armstrong and H. V. Tran. Viscosity solutions of general viscous Hamilton–Jacobi equations. Mathematische Annalen , 361(3):647–687, Apr. 2015.
+> 34
+
+The number of characteristics trajectories N
+
+μ 12 14 16 18 20 T1 0.8 0.0118 0.0073 0.0138 0.0050 0.0167 0.6 0.0095 0.0075 0.0042 0.0028 0.0065 0.4 0.0079 0.0073 0.0040 0.0122 0.0075 0.2 0.0075 0.0089 0.0021 0.0047 0.0088 T2 0.8 0.0056 0.0075 0.0087 0.0039 0.0297 0.6 0.0055 0.0184 0.0070 0.0036 0.0167 0.4 0.0072 0.0018 0.0079 0.0057 0.0086 0.2 0.0036 0.0034 0.0053 0.0031 0.0068 
+
+TABLE 4. Error (HJB residual) for various μ when the number of trajectories N
+
+changes. T1, T2 refer to the two tests in the text. 
+
+[4] M. Bardi and I. Capuzzo-Dolcetta. Optimal Control and Viscosity Solutions of Hamilton–Jacobi–Bellman Equations .Modern Birkhäuser Classics. Birkhäuser Basel, 1997. [5] M. Bardi and I. Capuzzo-Dolcetta. Optimal Control and Viscosity Solutions of Hamilton–Jacobi–Bellman Equations .Modern Birkhäuser Classics. Birkhäuser Basel, 1997. [6] G. Barles. Convergence of Numerical Schemes for Degenerate Parabolic Equations Arising in Finance Theory. In D. Talay and L. C. G. Rogers, editors, Numerical Methods in Finance , Publications of the Newton Institute, pages 1–21. Cambridge University Press, Cambridge, 1997. [7] G. Barles and P. E. Souganidis. Convergence of approximation schemes for fully nonlinear second order equations. 
+
+Asymptotic Analysis , 4(3):271–283, Jan. 1991. [8] R. W. Bea. Successive Galerkin approximation algorithms for nonlinear optimal and robust control. International Journal of Control , 71(5):717–743, 1998. [9] R. W. Beard, G. N. Saridis, and J. T. Wen. Galerkin approximations of the generalized Hamilton-Jacobi-Bellman equation. Automatica , 33(12):2159–2177, 1997. [10] R. W. Beard, G. N. Saridis, and J. T. Wen. Approximate solutions to the time-invariant Hamilton–Jacobi–Bellman equation. Journal of Optimization Theory and Applications , 96(3):589–626, 1998. [11] A. Bensoussan. Estimation and Control of Dynamical Systems . Interdisciplinary Applied Mathematics. Springer International Publishing, 2018. [12] A. Bensoussan, J. Han, S. C. P. Yam, and X. Zhou. Value-Gradient Based Formulation of Optimal Control Problem and Machine Learning Algorithm. SIAM Journal on Numerical Analysis , 61(2):973–994, Apr. 2023. Publisher: Society for Industrial and Applied Mathematics. [13] A. Bensoussan, Y. Li, D. Phan Cao Nguyen, M.-B. Tran, S. C. P. Yam, and X. Zhou. Machine Learning and Control Theory. to apper in NUMERICAL CONTROL: PART B, volume 24 of Handbook of Numerical Analysis, Elsever , June 2020. [14] A. Bensoussan and S. C. P. Yam. Control problem on space of random variables and master equation. ESAIM: Control, Optimisation and Calculus of Variations , 25:10, 2019. Publisher: EDP Sciences. [15] D. P. Bertsekas. Dynamic Programming and Optimal Control, Vol. I, 2nd Ed. Athena Scientific, Belmont, MA, 2001. [16] D. P. Bertsekas. Reinforcement Learning and Optimal Control . Athena Scientific, Belmont, MA, 2019. [17] J. Calder. Lecture notes on viscosity solutions, July 2024. [18] F. Camilli, A. Goffi, and C. Mendico. Quantitative and qualitative properties for Hamilton-Jacobi PDEs via the nonlinear adjoint method, Nov. 2024. arXiv:2307.12932 [math]. [19] P. Cannarsa and C. Sinestrari. Semiconcave Functions, Hamilton—Jacobi Equations, and Optimal Control . Birkhäuser, Boston, MA, 2004. [20] L.-P. Chaintron and S. Daudin. Optimal rate of convergence in the vanishing viscosity for quadratic Hamilton-Jacobi equations, Feb. 2025. arXiv:2502.09103 [math]. [21] Y. T. Chow, J. Darbon, S. Osher, and W. Yin. Algorithm for overcoming the curse of dimensionality for time-dependent non-convex hamilton–jacobi equations arising from optimal control and differential games problems. 
+
+Journal of Scientific Computing , 73(2):617–643, 2017. 
+
+> 35
+
+[22] Y. T. Chow, J. Darbon, S. Osher, and W. Yin. Algorithm for overcoming the curse of dimensionality for certain non-convex Hamilton–Jacobi equations, projections and differential games. Annals of Mathematical Sciences and Applications , 3(2):369–403, 2018. [23] Y. T. Chow, W. Li, S. Osher, and W. Yin. Algorithm for Hamilton–Jacobi equations in density space via a generalized Hopf formula. Journal of Scientific Computing , 80(2):1195–1239, 2019. [24] M. Cirant and A. Goffi. Convergence rates for the vanishing viscosity approximation of Hamilton-Jacobi equations: the convex case, Feb. 2025. arXiv:2502.15495 [math]. [25] M. G. Crandall, H. Ishii, and P.-L. Lions. User’s guide to viscosity solutions of second order partial differential equations. Bull. Amer. Math. Soc. (N.S.) 27 (1992) 1-67 , July 1992. [26] M. G. Crandall and P. L. Lions. Two Approximations of Solutions of Hamilton-Jacobi Equations. Mathematics of Computation , 43(167):1–19, 1984. Publisher: American Mathematical Society. [27] J. Darbon and S. Osher. Algorithms for overcoming the curse of dimensionality for certain Hamilton–Jacobi equations arising in control theory and elsewhere. Research in the Mathematical Sciences , 3(1):1–26, 2016. [28] P. Dutta, K. T. Nguyen, and S. N. T. Tu. On the rate of convergence in superquadratic hamilton–jacobi equations with state constraints. Nonlinear Differential Equations and Applications NoDEA , 33(3):63, 2026. [29] W. E, J. Han, and A. Jentzen. Algorithms for solving high dimensional PDEs: From nonlinear Monte Carlo to machine learning. arXiv preprint arXiv:2008.13333 , 2020. [30] L. C. Evans. Adjoint and Compensated Compactness Methods for Hamilton–Jacobi PDE. Archive for Rational Mechanics and Analysis , 197(3):1053–1088, Sept. 2010. [31] M. Falcone and R. Ferretti. Semi-Lagrangian approximation schemes for linear and Hamilton—Jacobi equations . SIAM, 2013. [32] A. Fathi. The Weak KAM Theorem in Lagrangian Dynamics . Cambridge University Press, Mar. 2008. [33] W. Fleming and H. Soner. Controlled Markov Processes and Viscosity Solutions . Stochastic Modelling and Applied Probability. Springer New York, 2006. [34] W. H. Fleming. The convergence problem for differential games. Journal of Mathematical Analysis and Applications ,3(1):102–116, 1961. [35] W. H. Fleming and R. W. Rishel. Deterministic and Stochastic Optimal Control . Stochastic Modelling and Applied Probability. Springer New York, 1975. [36] X. Guo, H. V. Tran, and Y. P. Zhang. Policy iteration for nonconvex viscous Hamilton–Jacobi equations, Mar. 2025. arXiv:2503.02159 [math]. [37] Y. Han and S. N. T. Tu. Remarks on the Vanishing Viscosity Process of State-Constraint Hamilton–Jacobi Equations. 
+
+Applied Mathematics & Optimization , 86(1):3, June 2022. [38] M. B. Horowitz, A. Damle, and J. W. Burdick. Linear Hamilton-Jacobi-Bellman equations in high dimensions. In 
+
+53rd IEEE Conference on Decision and Control , pages 5880–5887, 2014. [39] D. Izzo, E. Öztürk, and M. Märtens. Interplanetary transfers via deep representations of the optimal policy and/or of the value function. In Proceedings of the Genetic and Evolutionary Computation Conference Companion , GECCO ’19, page 1971–1979, New York, NY, USA, 2019. Association for Computing Machinery. [40] E. R. Jakobsen, K. H. Karlsen, and N. H. Risebro. On the Convergence Rate of Operator Splitting for Hamilton–Jacobi Equations with Source Terms. SIAM Journal on Numerical Analysis , 39(2):499–518, Jan. 2001. [41] D. Kalise and K. Kunisch. Polynomial approximation of high-dimensional Hamilton-Jacobi-Bellman equations and applications to feedback control of semilinear parabolic PDES. SIAM Journal on Scientific Computing , 40(2):A629– A652, 2018. [42] W. Kang and L. Wilcox. A causality free computational method for HJB equations with application to rigid body satellites. In AIAA Guidance, Navigation, and Control Conference , page 2009, 2015. [43] W. Kang and L. C. Wilcox. Mitigating the curse of dimensionality: sparse grid characteristics method for optimal feedback control and HJB equations. Computational Optimization and Applications , 68(2):289–315, 2017. [44] D. P. Kingma and J. Ba. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980 , 2014. [45] J. O. Langseth, A. Tveito, and R. Winther. On the convergence of operator splitting applied to conservation laws with source terms. SIAM Journal on Numerical Analysis , 33(3):843–863, 1996. [46] J. Y. Lee and Y. Kim. Hamilton–jacobi based policy-iteration via deep operator learning. Neurocomputing , 646:130515, 2025. 
+
+> 36
+
+[47] A. T. Lin, Y. T. Chow, and S. J. Osher. A splitting method for overcoming the curse of dimensionality in Hamil-ton–Jacobi equations arising from nonlinear optimal control and differential games with applications to trajectory generation. Communications in Mathematical Sciences , 16(7), 1 2018. [48] P.-L. Lions. Generalized Solutions of Hamilton–Jacobi Equations . Chapman & Hall/CRC research notes in mathematics series. Pitman, 1982. [49] Luca Gerardo-Giorda and M. B. Tran. Parallelizing the Kolmogorov-Fokker-Planck equation. ESAIM: Mathematical Modelling and Numerical Analysis , Sept. 2014. [50] T. Nakamura-Zimmerer, Q. Gong, and W. Kang. Adaptive deep learning for high-dimensional hamilton–jacobi– bellman equations. SIAM Journal on Scientific Computing , 43(2):A1221–A1247, 2021. [51] T. Nakamura-Zimmerer, Q. Gong, and W. Kang. Qrnet: Optimal regulator design with lqr-augmented neural networks. IEEE Control Systems Letters , 5(4):1303–1308, 2021. [52] S. Osher and J. A. Sethian. Fronts propagating with curvature-dependent speed: Algorithms based on Hamilton-Jacobi formulations. Journal of Computational Physics , 79(1):12–49, 1988. [53] M. Oster, L. Sallandt, and R. Schneider. Approximating the stationary Hamilton-Jacobi-Bellman equation by hierarchical tensor products. arXiv: 1911.00279 , nov 2019. [54] M. L. Puterman and S. L. Brumelle. On the Convergence of Policy Iteration in Stationary Dynamic Programming. 
+
+Mathematics of Operations Research , 4(1):60–69, 1979. [55] J. Qian, T. Sprekeler, H. V. Tran, and Y. Yu. Optimal Rate of Convergence in Periodic Homogenization of Viscous Hamilton-Jacobi Equations. Multiscale Modeling & Simulation , 22(4):1558–1584, Dec. 2024. Publisher: Society for Industrial and Applied Mathematics. [56] B. Recht. A Tour of Reinforcement Learning: The View from Continuous Control. Annual Review of Control, Robotics, and Autonomous Systems , 2(1):253–279, 2019. [57] P. E. Souganidis. Max-min representations and product formulas for the viscosity solutions of Hamilton-Jacobi equations with applications to differential games. Nonlinear Analysis: Theory, Methods & Applications , 9(3):217–257, Mar. 1985. [58] M. Sun. Alternating direction algorithms for solving Hamilton-Jacobi-Bellman equations. Applied Mathematics and Optimization , 34(3):267–277, Nov. 1996. [59] R. S. Sutton and A. G. Barto. Reinforcement Learning: An Introduction . Adaptive Computation and Machine Learning series. MIT Press, 2018. [60] W. Tang, H. V. Tran, and Y. P. Zhang. Policy Iteration for the Deterministic Control Problems—A Viscosity Approach. 
+
+SIAM Journal on Control and Optimization , 63(1):375–401, Feb. 2025. Publisher: Society for Industrial and Applied Mathematics. [61] H. V. Tran. Adjoint methods for static Hamilton–Jacobi equations. Calculus of Variations and Partial Differential Equations , 41(3):301–319, July 2011. [62] H. V. Tran. Hamilton-Jacobi Equations: Theory and Applications , volume 213 of Graduate Studies in Mathematics .American Mathematical Society, 2021. [63] Y.-H. R. Tsai, L.-T. Cheng, S. Osher, and H.-K. Zhao. Fast sweeping algorithms for a class of Hamilton–Jacobi equations. SIAM Journal on Numerical Analysis , 41(2):673–694, 2003. [64] J. N. Tsitsiklis. Efficient algorithms for globally optimal trajectories. In Proceedings of 1994 33rd IEEE Conference on Decision and Control , volume 2, pages 1368–1373 vol.2, 1994. [65] Z. Wang and J. Zhang. On the vanishing viscosity limit of Hamilton-Jacobi equations with nearly optimal discount, Sept. 2025. arXiv:2509.17402 [math].  
+
+> ∗
+
+NAVEEN JINDAL SCHOOL OF MANAGEMENT , T HE UNIVERSITY OF TEXAS AT DALLAS , R ICHARDSON , TX 75080, USA 
+
+Email address : alain.bensoussan@utdallas.edu  
+
+> ∗∗
+
+DEPARTMENT OF MATHEMATICS , I NTERNATIONAL UNIVERSITY - V IETNAM NATIONAL UNIVERSITY HCM C ITY ,QUARTER 33, L INH XUAN WARD , H O CHI MINH CITY , VN 
+
+Email address : bthien624@gmail.com  
+
+> ∗∗∗
+
+DEPARTMENT OF MATHEMATICS , T EXAS A&M U NIVERSITY , C OLLEGE STATION , TX 77843, USA 
+
+Email address : minhbinh@tamu.edu  
+
+> 37 †
+
+DEPARTMENT OF MATHEMATICS , B AYLOR UNIVERSITY , W ACO , TX 76706, USA 
+
+Email address : Son_Tu@baylor.edu 
+
+38

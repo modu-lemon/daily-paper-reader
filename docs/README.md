@@ -6,82 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-17
-- 运行时间：2026-03-17 19:46:25 UTC
+- 最新运行日期：2026-03-18
+- 运行时间：2026-03-18 19:46:36 UTC
 - 运行状态：成功
-- 本次总论文数：20
-- 精读区：9
+- 本次总论文数：17
+- 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日精选 20 篇 AI for Science 前沿论文，深度解析 Deep Ritz 物理信息神经网络与非线性 PDE 嵌入学习。
-重点关注以满分领衔的变分不等式求解新法，以及针对 Burgers 方程的高效算子推断与结构保持网络。
-建议优先研读物理约束下的神经网络优化策略，并关注神经形态计算在科学计算中的鲁棒性潜力。
-- 详情：[/202603/17/README](/202603/17/README)
+今日深度解析 17 篇 AI+Science 论文，重点突破极紫外光刻模拟与电子密度预测两大物理瓶颈。
+满分论文展示了物理信息神经系统在 EUV 电磁波衍射中的卓越表现，以及 FNO 算子在量子化学计算中的高精度应用。
+推荐关注物理规律驱动的 PDE 求解新范式，深入了解 AI 如何重塑底层物理仿真的精度与效率。
+- 详情：[/202603/18/README](/202603/18/README)
 
 ### 精读区论文标签
-1. [Deep Ritz Physics-Informed Neural Network Method for Solving the Variational Inequality](/202603/17/2603.11544v1-deep-ritz-physics-informed-neural-network-method-for-solving-the-variational-inequality)  
+1. [Physics-Informed Neural Systems for the Simulation of EUV Electromagnetic Wave Diffraction from a Lithography Mask](/202603/18/2603.15584v2-physics-informed-neural-systems-for-the-simulation-of-euv-electromagnetic-wave-diffraction-from-a-lithography-mask)  
    标签：评分：10.0/10、query:pinn
-   evidence：用于求解变分不等式的Deep Ritz物理信息神经网络
-2. [Learning embeddings of non-linear PDEs: the Burgers' equation](/202603/17/2603.07812v1-learning-embeddings-of-non-linear-pdes-the-burgers-equation)  
+   evidence：PINNs 与神经算子在波衍射问题中的对比
+2. [V2Rho-FNO: Fourier Neural Operator for Electronic Density Prediction](/202603/18/2603.15669v1-v2rho-fno-fourier-neural-operator-for-electronic-density-prediction)  
+   标签：评分：10.0/10、query:pinn
+   evidence：用于电子密度预测的傅里叶神经算子
+3. [Physics-informed neural networks for solving strong-field saddle-point equations in strong-field physics with tailored fields](/202603/18/2603.15786v1-physics-informed-neural-networks-for-solving-strong-field-saddle-point-equations-in-strong-field-physics-with-tailored-fields)  
+   标签：评分：10.0/10、query:pinn
+   evidence：用于求解鞍点方程的物理信息神经网络
+4. [Physics-integrated neural differentiable modeling for immersed boundary systems](/202603/18/2603.16277v1-physics-integrated-neural-differentiable-modeling-for-immersed-boundary-systems)  
    标签：评分：9.0/10、query:pinn
-   evidence：将解嵌入概念推广到物理信息神经网络
-3. [Physics-Informed Global Extraction of the Universal Small-$x$ Dipole Amplitude](/202603/17/2603.08008v1-physics-informed-global-extraction-of-the-universal-small-x-dipole-amplitude)  
+   evidence：用于浸没边界系统的物理集成神经PDE求解器
+5. [pADAM: A Plug-and-Play All-in-One Diffusion Architecture for Multi-Physics Learning](/202603/18/2603.16757v1-padam-a-plug-and-play-all-in-one-diffusion-architecture-for-multi-physics-learning)  
    标签：评分：9.0/10、query:pinn
-   evidence：用于物理信息全局分析的PINN
-4. [A Least-Squares-Based Regularity-Conforming Neural Networks (LS-ReCoNNs) for Solving Parametric Transmission Problems](/202603/17/2603.09663v1-a-least-squares-based-regularity-conforming-neural-networks-ls-reconns-for-solving-parametric-transmission-problems)  
+   evidence：用于多物理场PDE学习的统一生成框架
+6. [GIST: Gauge-Invariant Spectral Transformers for Scalable Graph Neural Operators](/202603/18/2603.16849v1-gist-gauge-invariant-spectral-transformers-for-scalable-graph-neural-operators)  
    标签：评分：9.0/10、query:pinn
-   evidence：求解参数化传输问题的深度学习方法
-5. [A Physics-Informed, Global-in-Time Neural Particle Method for the Spatially Homogeneous Landau Equation](/202603/17/2603.10874v1-a-physics-informed-global-in-time-neural-particle-method-for-the-spatially-homogeneous-landau-equation)  
-   标签：评分：9.0/10、query:pinn
-   evidence：用于Landau方程的物理信息神经粒子方法
-6. [Graph In-Context Operator Networks for Generalizable Spatiotemporal Prediction](/202603/17/2603.12725v1-graph-in-context-operator-networks-for-generalizable-spatiotemporal-prediction)  
-   标签：评分：9.0/10、query:pinn
-   evidence：用于时空预测的上下文算子学习
-7. [RUNNs: Ritz-Uzawa Neural Networks for Solving Variational Problems](/202603/17/2603.12982v1-runns-ritz-uzawa-neural-networks-for-solving-variational-problems)  
-   标签：评分：9.0/10、query:pinn
-   evidence：基于神经网络的变分偏微分方程求解框架
-8. [A deep backward regression-based scheme for high-dimensional nonlinear partial differential equations](/202603/17/2603.14721v1-a-deep-backward-regression-based-scheme-for-high-dimensional-nonlinear-partial-differential-equations)  
-   标签：评分：9.0/10、query:pinn
-   evidence：高维非线性偏微分方程的深度学习方案
-9. [The Evolution of Computer-Assisted Proof In Analysis](/202603/17/2603.15073v1-the-evolution-of-computer-assisted-proof-in-analysis)  
-   标签：评分：9.0/10、query:pinn
-   evidence：物理信息神经网络（PINNs）与离散近似的分析
+   evidence：用于网格和图结构数据的可扩展图神经算子
 
 ### 速读区论文标签
-1. [PolyFormer: learning efficient reformulations for scalable optimization under complex physical constraints](/202603/17/2603.08283v1-polyformer-learning-efficient-reformulations-for-scalable-optimization-under-complex-physical-constraints)  
+1. [Disentangled Latent Dynamics Manifold Fusion for Solving Parameterized PDEs](/202603/18/2603.12676v1-disentangled-latent-dynamics-manifold-fusion-for-solving-parameterized-pdes)  
    标签：评分：8.0/10、query:pinn
-   evidence：物理信息机器学习用于约束下的优化
-2. [NN-OpInf: an operator inference approach using structure-preserving composable neural networks](/202603/17/2603.08488v1-nn-opinf-an-operator-inference-approach-using-structure-preserving-composable-neural-networks)  
+   evidence：求解参数化偏微分方程的神经代理模型
+2. [PDE-SSM: A Spectral State Space Approach to Spatial Mixing in Diffusion Transformers](/202603/18/2603.13663v1-pde-ssm-a-spectral-state-space-approach-to-spatial-mixing-in-diffusion-transformers)  
    标签：评分：8.0/10、query:pinn
-   evidence：用于降阶建模的神经网络算子推断
-3. [Intrinsic Numerical Robustness and Fault Tolerance in a Neuromorphic Algorithm for Scientific Computing](/202603/17/2603.10246v1-intrinsic-numerical-robustness-and-fault-tolerance-in-a-neuromorphic-algorithm-for-scientific-computing)  
+   evidence：可学习的PDE算子替代Transformer中的注意力机制
+3. [LawMind: A Law-Driven Paradigm for Discovering Analytical Solutions to Partial Differential Equations](/202603/18/2603.14353v1-lawmind-a-law-driven-paradigm-for-discovering-analytical-solutions-to-partial-differential-equations)  
    标签：评分：8.0/10、query:pinn
-   evidence：用于求解偏微分方程的类脑算法
-4. [Adaptive Diffusion Posterior Sampling for Data and Model Fusion of Complex Nonlinear Dynamical Systems](/202603/17/2603.12635v1-adaptive-diffusion-posterior-sampling-for-data-and-model-fusion-of-complex-nonlinear-dynamical-systems)  
+   evidence：偏微分方程解析解的符号发现
+4. [Preconditioned One-Step Generative Modeling for Bayesian Inverse Problems in Function Spaces](/202603/18/2603.14798v1-preconditioned-one-step-generative-modeling-for-bayesian-inverse-problems-in-function-spaces)  
    标签：评分：8.0/10、query:pinn
-   evidence：使用神经算子的非线性动力系统代理建模
-5. [Graph-Instructed Neural Networks for parametric problems with varying boundary conditions](/202603/17/2603.08304v1-graph-instructed-neural-networks-for-parametric-problems-with-varying-boundary-conditions)  
+   evidence：用于PDE贝叶斯反问题的神经算子骨干网络
+5. [DiFVM: A Vectorized Graph-Based Finite Volume Solver for Differentiable CFD on Unstructured Meshes](/202603/18/2603.15920v1-difvm-a-vectorized-graph-based-finite-volume-solver-for-differentiable-cfd-on-unstructured-meshes)  
+   标签：评分：8.0/10、query:pinn
+   evidence：用于混合物理机器学习的可微计算流体力学
+6. [Differentiable Thermodynamic Phase-Equilibria for Machine Learning](/202603/18/2603.11249v2-differentiable-thermodynamic-phase-equilibria-for-machine-learning)  
    标签：评分：7.0/10、query:pinn
-   evidence：用于参数化偏微分方程的图指令神经网络
-6. [Upper Generalization Bounds for Neural Oscillators](/202603/17/2603.09742v1-upper-generalization-bounds-for-neural-oscillators)  
+   evidence：热力学相平衡的物理一致性机器学习
+7. [Operator Splitting, Policy Iteration, and Machine Learning for Stochastic Optimal Control](/202603/18/2603.12167v1-operator-splitting-policy-iteration-and-machine-learning-for-stochastic-optimal-control)  
    标签：评分：7.0/10、query:pinn
-   evidence：逼近算子的神经振荡器泛化界限
-7. [Surrogate models for nuclear fusion with parametric Shallow Recurrent Decoder Networks: applications to magnetohydrodynamics](/202603/17/2603.10678v1-surrogate-models-for-nuclear-fusion-with-parametric-shallow-recurrent-decoder-networks-applications-to-magnetohydrodynamics)  
+   evidence：机器学习求解二阶Hamilton-Jacobi方程
+8. [Weak Adversarial Neural Pushforward Method for Fractional Fokker-Planck Equations](/202603/18/2603.12869v1-weak-adversarial-neural-pushforward-method-for-fractional-fokker-planck-equations)  
    标签：评分：7.0/10、query:pinn
-   evidence：磁流体动力学方程的数据驱动代理模型
-8. [MCMC Informed Neural Emulators for Uncertainty Quantification in Dynamical Systems](/202603/17/2603.10987v1-mcmc-informed-neural-emulators-for-uncertainty-quantification-in-dynamical-systems)  
+   evidence：分数阶Fokker-Planck方程的神经网络求解器
+9. [Computing the Gross-Pitaevskii Ground State via Wasserstein Gradient Flow in Diffeomorphism Space](/202603/18/2603.13579v1-computing-the-gross-pitaevskii-ground-state-via-wasserstein-gradient-flow-in-diffeomorphism-space)  
    标签：评分：7.0/10、query:pinn
-   evidence：用于动力系统不确定性量化的神经仿真器
-9. [Mitigating Frequency Learning Bias in Quantum Models via Multi-Stage Residual Learning](/202603/17/2603.10083v1-mitigating-frequency-learning-bias-in-quantum-models-via-multi-stage-residual-learning)  
+   evidence：基于神经微分方程的Gross-Pitaevskii方程无网格求解器
+10. [A Score Filter Enhanced Data Assimilation Framework for Data-Driven Dynamical Systems](/202603/18/2603.14863v1-a-score-filter-enhanced-data-assimilation-framework-for-data-driven-dynamical-systems)  
    标签：评分：6.0/10、query:pinn
-   evidence：受经典傅里叶神经算子（FNO）进展的启发
-10. [Dynamics-Informed Deep Learning for Predicting Extreme Events](/202603/17/2603.10777v1-dynamics-informed-deep-learning-for-predicting-extreme-events)  
+   evidence：数据驱动动力系统的数据同化
+11. [Prior-Informed Neural Network Initialization: A Spectral Approach for Function Parameterizing Architectures](/202603/18/2603.16376v1-prior-informed-neural-network-initialization-a-spectral-approach-for-function-parameterizing-architectures)  
    标签：评分：6.0/10、query:pinn
-   evidence：动力学告知的深度学习用于混沌系统
-11. [Differentiable Thermodynamic Phase-Equilibria for Machine Learning](/202603/17/2603.11249v1-differentiable-thermodynamic-phase-equilibria-for-machine-learning)  
-   标签：评分：6.0/10、query:pinn
-   evidence：热力学平衡的物理一致性机器学习
+   evidence：用于函数参数化的谱方法和快速傅里叶变换
 
 
 <div class="dpr-home-promo-card">
