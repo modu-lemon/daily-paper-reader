@@ -1,0 +1,448 @@
+Title: Symmetry-Reduced Physics-Informed Learning of Tensegrity Dynamics
+
+URL Source: https://arxiv.org/pdf/2603.17824v1
+
+Published Time: Thu, 19 Mar 2026 01:26:04 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# Symmetry-Reduced Physics-Informed Learning of Tensegrity Dynamics 
+
+Jing Qin ∗ Muhao Chen †
+
+Abstract 
+
+Tensegrity structures possess intrinsic geometric symmetries that govern their dynamic be-havior. However, most existing physics-informed neural network (PINN) approaches for tenseg-rity dynamics do not explicitly exploit these symmetries, leading to high computational complex-ity and unstable optimization. In this work, we propose a symmetry-reduced physics-informed neural network (SymPINN) framework that embeds group-theory-based symmetry directly into both the solution expression and the neural network architecture to predict tensegrity dynam-ics. By decomposing nodes into symmetry orbits and representing free nodal coordinates us-ing a symmetry basis, the proposed method constructs a reduced coordinate representation that preserves geometric symmetry of the structure. The full coordinates are then recovered via symmetry transformations of the reduced solution learned by the network, ensuring that the predicted configurations automatically satisfy the symmetry constraints. In this frame-work, equivariance is enforced through orbit-based coordinate generation, symmetry-consistent message passing, and physics residual constraints. In addition, SymPINN improves training effectiveness by encoding initial conditions as hard constraints, incorporating Fourier feature encoding to enhance the representation of dynamic motions, and employing a two-stage opti-mization strategy. Extensive numerical experiments on symmetric T-bars and lander structures demonstrate significantly improved prediction accuracy and computational efficiency compared to standard physics-informed models, indicating the great potential of symmetry-aware learning for structure-preserving modeling of tensegrity dynamics. 
+
+Keywords: tensegrity, symmetry-invariant, dynamical system, physics-informed learning, deep neural networks 
+
+# 1 Introduction 
+
+Tensegrity structures are spatial frameworks composed of isolated compression members embedded within a continuous network of tension elements [1]. In a tensegrity system, compression members do not directly contact one another but are stabilized by a surrounding tension network, resulting in lightweight yet mechanically efficient structures [2]. Due to their high strength-to-weight ratio, deployability, and structural adaptability, tensegrity systems have attracted considerable attention in aerospace engineering, robotics, and architectural design [3, 4, 5]. The mechanical behavior of tensegrity structures is governed by highly nonlinear dynamics, subject to geometric constraints, prestress states, and coupled interactions among structural members [6]. These nonlinear character-istics make the accurate simulation of tensegrity dynamics computationally challenging. Traditional approaches, e.g., finite element methods, often require significant computational effort, particularly when repeated simulations are required for structural design, control, or real-time prediction [7]. 
+
+> ∗Department of Mathematics, University of Kentucky, Lexington, KY
+> †Department of Mechanical and Aerospace Engineering, University of Houston, TX
+
+1
+
+> arXiv:2603.17824v1 [cs.LG] 18 Mar 2026
+
+In recent years, physics-informed neural networks (PINNs) have emerged as a promising alter-native framework for solving differential equations using deep learning. Different from traditional discretization-based methods, PINNs incorporate governing physical laws directly into the train-ing process of neural networks by embedding the residuals of the governing equations into the loss function [8, 9]. This approach enables neural networks to learn solutions that are consistent with both the observed data and the underlying physical laws. By incorporating the governing equations directly into the training process, PINNs can effectively combine data-driven modeling with physics-based constraints. As a result, they have shown strong potential for analyzing and designing tensegrity structures. Recent studies have successfully applied PINNs to problems such as tensegrity form-finding [10] and the design and control of tensegrity systems [11]. Applying PINNs to tensegrity dynamics provides a flexible framework for learning structural responses while enforcing physical laws [12]. However, several challenges arise when applying stan-dard PINNs to solve tensegrity dynamical systems. First, the dimensionality of the variables in the governing equation increases with the number of nodes, resulting in high-dimensional learning problems that significantly increase the computational burden of training. Second, the nonlinear and strongly coupled interactions among structural members can lead to stiff dynamical behavior, which may slow down or destabilize the optimization process. Third, conventional PINN formula-tions typically ignore intrinsic structural symmetries, resulting in redundant representations that fail to exploit the system’s underlying geometric structure. Finally, the vanilla PINN framework has limited capability to accurately capture long-time or periodic dynamics when only a small number of training data points are available. To address these challenges, it is useful to exploit intrinsic structural properties of the system. One distinctive feature of many tensegrity systems is the presence of geometric symmetry. Regular tensegrity configurations, such as prisms, towers, and spherical tensegrity structures, of-ten exhibit cyclic or dihedral symmetries due to repeated arrangements of nodes and structural members. These symmetries can be described mathematically through group actions involving permutations of nodes together with spatial transformations. Exploiting symmetry has been rec-ognized as an effective strategy for simplifying structural analysis. In particular, symmetry can reduce the dimensionality of the configuration space and enable decomposition of structural equa-tions into symmetry-adapted subspaces. Such ideas have been extensively studied in the theory of symmetric frameworks and applied to tensegrity systems for equilibrium analysis, form-finding, and stability analysis [13, 14]. In practical applications, symmetry constraints have been shown to reduce the number of design variables in form-finding methods such as the force density method or energy-based equilibrium formulations [15, 16]. Recently, symmetry-based reinforcement learning has been proposed to improve tensegrity locomotion performance [17]. Despite these advances, most existing work focuses on analytical modeling or structural optimization, while the integration of symmetry principles into modern learning-based approaches for tensegrity dynamics remains relatively limited. Motivated by these observations, we propose an efficient symmetry-reduced physics-informed neural network (SymPINN) framework for modeling tensegrity dynamics that explicitly incorpo-rates structural geometric symmetry into the learning process. By identifying symmetry transfor-mations via node permutations, together with spatial operations such as rotations and reflections, we characterize the admissible configurations of a tensegrity structure as a symmetry-invariant sub-space and construct a corresponding basis to represent the structural coordinates using a reduced set of variables. A physics-informed neural network is then trained in this reduced coordinate space to approximate the time evolution of these variables while enforcing the governing physical laws through physics-based loss functions. This formulation offers three main advantages: it reduces the dimensionality of the learning problem, improving computational efficiency and training stability; 2it ensures that predicted solutions automatically satisfy the symmetry constraints; and it improves interpretability by revealing the fundamental motion patterns associated with the symmetry group of the tensegrity system. The rest of the paper is organized as follows. In Section 2, we describe symmetric tensegrity structures and their mathematical representations. In Section 3, we reformulate the governing equation in the symmetry subspace, and propose a physics-informed neural network approach by embedding the tensegrity symmetry. Numerical experiments on various data sets are presented in Section 4, together with a brief discussion of method configurations. Finally, we conclude the paper in Section 5. 
+
+# 2 Symmetry of Tensegrity Structures 
+
+In many real-world applications, tensegrity structures have symmetry to some extent, which can be utilized to further simplify the modeling and reduce computational complexities. Specifically, symmetry in tensegrity refers to a set of geometric transformations (motions) that map a tensegrity configuration onto itself without changing its equilibrium state. It can be described by a finite symmetry group acting on the set of nodes and edges of the structure. In [13], symmetry is used to classify prismatic tensegrities and simplify the stiffness matrix and equilibrium equations. In [14], symmetry in tensegrities is analyzed using group representation theories. The primary symmetry operations encountered in tensegrity structures arise from point groups in Euclidean space. The collection of all operations that leave a tensegrity configuration unchanged forms a symmetry group, which is typically a cyclic or dihedral point group. In this work, we focus on these two common types of symmetry. 
+
+2.1 Cyclic Symmetry 
+
+A tensegrity structure is said to possess cyclic symmetry of order n if its configuration is invariant under rotation by an angle 2π/n about a specified axis, where n is a positive integer. Given the nodes of the tensegrity structure as {q1, . . . , qm}, we define the nodal coordinate matrix as 
+
+Q = [ q1, . . . , qm] ∈ R3×m.
+
+Let Rz (α) ∈ R3×3 denote the rotation matrix corresponding to a rotation by angle α about the 
+
+z-axis. The structure is said to have Cn symmetry if the rotation R := Rz (2 π/n ) maps the set of nodes onto itself. Since the nodes may be relabeled after the rotation, this invariance can be expressed as RQ = QP , where P ∈ Rm×m is a permutation matrix representing the induced relabeling of nodes. Equivalently, the nodal configuration is invariant under the cyclic group 
+
+Cn =
+
+{
+
+Rz
+
+( 2kπ n
+
+)
+
+: k = 0 , 1, . . . , n − 1
+
+}
+
+,
+
+which consists of all rotations generated by repeated application of Rz (2 π/n ). Cyclic symmetry commonly occurs in tensegrity structures composed of identical modules arranged around a central axis, such as prismatic towers and ring-like configurations. 
+
+2.2 Dihedral Symmetry 
+
+A tensegrity structure is said to possess dihedral symmetry of order 2n if it is invariant under the action of the dihedral group 
+
+Dn = ⟨R, S⟩ := {I, R, R2, . . . , Rn−1, S, SR , SR 2, . . . , SR n−1},
+
+3which consists of n rotations and n reflections. Here I is an identity matrix with the same size as R, R = Rz (2 π/n ) generates the rotational subgroup Cn, and S ∈ R3×3 denotes a reflection with respect to a plane containing the symmetry axis, for example, the xz -plane. The tensegrity structure with nodes as columns of the matrix Q is said to have Dn symmetry if for every group element B ∈ D n, it holds BQ = QP B , for some permutation matrix PB . This condition implies that the structure is invariant under both rotations by multiples of 2π/n and reflections across planes passing through the symmetry axis. Many prismatic tensegrity structures formed by two parallel n-node rings connected by vertical or inclined members naturally exhibit Dn symmetry. 
+
+# 3 Symmetry-Reduced Physics-Informed Learning 
+
+Suppose a tensegrity structure consists of ne elements, including both bars and strings, and nn nodes in total. Among these nodes, na are free nodes and nb are constrained nodes, with nn = na + nb.The all nodal coordinates at time t are stacked into a column vector n(t) ∈ R3nn , which collects the three-dimensional coordinates of all nodes. Furthermore, by denoting the free nodal coordinates by na ∈ R3na and the constrained nodal coordinates by nb ∈ R3nb , we have 
+
+n = Eana + Ebnb, (1) where Ea ∈ R3nn×3na and Eb ∈ R3nn×3nb are the respective indicator matrices for the free and constrained nodes. In addition, we make the following assumptions on the tensegrity structure: (a) the structure is symmetric with respect to the nodal coordinates as well as the string and bar connectivity; (b) the constrained nodes are arranged symmetrically so that the constraints are invariant under the symmetry transformation; (c) gravity acts in the vertical direction and therefore preserves the symmetry of the structure; (d) the external forces are symmetric; (e) the initial conditions are symmetric; and (f) the force densities and material properties are identical for members belonging to the same symmetry orbit. 
+
+3.1 Symmetry-Reduced Dynamic Equation 
+
+Consider a nonlinear tensegrity dynamic equation of the following form [7]: 
+
+ETa (M ¨n + D ˙n + K(n, t )n − fex (t) + g) = 0, (2) where 0 denotes the zero vector, M , D, and K are the respective mass, damping, and stiffness matrices, fex stands for the external force, and g corresponds to the gravity. Specifically, M =
+
+Ms ⊗ I3, K = Ks ⊗ I3 and g are defined as follows: 
+
+Ms = 16
+
+(
+
+|C|T diag( m)|C| + ⌊| C|T diag( m)|C|⌋ 
+
+)
+
+, (3) 
+
+Ks = ( CT diag( x(n, t )) C), (4) 
+
+g = g
+
+2 (|C|T m) ⊗ [ 0 0 1 ] T , (5) where C ∈ Rne×nn is the connectivity matrix, m ∈ Rne is the mass vector, I3 is the 3-by-3 identity matrix, x ∈ Rne is the force density vector depending on n and t, | · | is an operator to get the absolute value componentwise, diag returns a diagonal matrix whose diagonal entries are from the vector, ⌊·⌋ zeroes out the off-diagonal entries, and ⊗ is the Kronecker product. Because the element 4force density x depends on the current configuration and time, K is generally nonlinear in (n, t ).The initial conditions are defined as 
+
+n(0) = ϕ, ˙n(0) = ψ, (6) where ϕ and ψ represent the initial coordinates and velocity, respectively. Then the problem boils down to solving the second-order dynamical system for na. By denoting 
+
+Ma = ETa M Ea, Da = ETa DEa, Ka = ETa KEa,
+
+wa = ETa (−M E b ¨nb − DE b ˙nb − KE bnb + fex − g),
+
+we get a reduced system for the free nodes 
+
+Ma ¨na + Da ˙na + Kana − wa = 0. (7) The initial conditions are reduced to 
+
+na(0) = ϕa := ETa (ϕ − Ebnb(0)) ,
+
+˙na(0) = ψa := ETa (ψ − Eb ˙nb(0)) . (8) Next, we reshape the nodal coordinates as a matrix and then derive the symmetry condition and symmetry basis. Let N ∈ Rna×3 denote the free nodal coordinate matrix whose vectorized form satisfies n = vec( N T ), where vec( ·) converts a matrix to a vector by columnwise stacking. Due to the symmetry assumption for the tensegrity structure, there exists a permutation matrix 
+
+P ∈ Rnn×nn and an orthogonal matrix R ∈ R3×3 corresponding to a rotation or a composition of rotation with reflection such that 
+
+(N − 1cT )R = P (N − 1cT ), (9) where the center of symmetry c ∈ R3 is the mean coordinates of all the nodes in N and 1 ∈ Rnn
+
+is a all-one vector. For the simplicity of discussion, we assume c = 0 without loss of generality, since the symmetry can always be applied to coordinates relative to the center c. In practice, this condition can be used to check the dynamic nodal symmetry. Under the symmetry assumptions, the node set of a tensegrity structure can be partitioned into multiple orbits, where each orbit is a subset of nodes that are mapped to one another under the action of the symmetry group. Let nr denote the number of representative nodes, i.e., one node selected from each orbit, with nr ≤ na. For example, in a C3 prism tensegrity consisting of six nodes arranged in two rings, the symmetry partitions the nodes into two orbits, i.e., top ring and bottom ring, and thus the number of representative nodes nr = 2 .To obtain a reduced representation of the solution, we introduce a symmetry basis, defined as the subspace of coordinates that remain invariant under the symmetry transformation described in (9). By taking the transpose of the symmetry relation N R = P N and moving the right term to the left, we get its equivalent form 
+
+RT N T Ina − I3N T P T = O.
+
+Here O is the 3 × na zero matrix. Using the property of Kronecker products 
+
+(A ⊗ B) vec( X) = vec( BXA T ), (10) 5we have 
+
+vec( RT N T Ina ) = Ina ⊗ RT vec( N T ),
+
+vec( I3N T P T ) = P ⊗ I3 vec( N T ).
+
+Since vec( N T ) = na, we obtain 
+
+(Ina ⊗ RT − P ⊗ I3)n = 0.
+
+This shows that the symmetry-invariant coordinate vectors belong to the nullspace of the matrix 
+
+S := Inn ⊗ RT − P ⊗ I3. (11) Therefore, the symmetry basis is any basis spanning the nullspace of S. The dimension of this space equals the number of independent symmetric degrees of freedom, i.e., the number of symmetry orbits. Since both P and R are orthogonal matrices, their eigenvalues lie on a unit circle in the complex space C. By taking the respective eigendecompositions of P and RT , we find their common eigenvalues, denoted by λi. Assume vi’s are the orthonormal eigenvectors of P and wi’s are the orthonormal eigenvectors of RT such that 
+
+P v i = λivi and RT wi = λiwi.
+
+Then the vectors ui = vi ⊗ wi form a symmetry basis. In the special case where the symmetry involves only a permutation matrix P , the symmetry basis can be obtained from the orthonormal eigenvectors of P corresponding to the eigenvalue one. Let U ∈ R3na×nr denote the matrix whose columns form the symmetry basis. Using this basis, the nodal coordinate vector can be expressed as 
+
+na(t) = U z (t) and z(t) ∈ Rnr . (12) Since U T U = Inr , we have U T na(t) = z(t). Substituting this representation into the governing dynamics for the free nodes (7) followed by multiplying U T on the left yields the reduced system 
+
+Mr ¨z + Dr ˙z + Krz − wr = 0. (13) Here Mr = U T MaU , Dr = U T DaU , Kr = U T KaU and wr = U T wa. The reduced initial conditions are 
+
+z(0) = U T ϕa and ˙z(0) = U T ψa. (14) With this formulation, the neural network is trained to learn the reduced coordinates z(t). Since the dimension of the reduced system satisfies nr ≪ 3nn, this symmetry-based reduction significantly decreases the computational cost. In particular, the computational complexity is reduced from 
+
+O(T n 2
+
+> a
+
+) to O(T n 2 
+
+> r
+
+), where T is the total number of training time points. 
+
+3.2 Symmetry-Reduced PINN 
+
+In this section, we introduce a symmetry-reduced physics-informed learning framework with hard constraints, referred to as SymPINN. The overall pipeline of the proposed SymPINN framework is illustrated in Fig. 1. It consists of several steps, including symmetry detection, construction of the symmetry basis, preparation of dimension-reduced data under the symmetry transforma-tion, training a neural network using the reduced data and the reduced governing equation, and reconstruction of the full solution in the original coordinate space. 6Symmetry Identification                            
+
+> 1. Check geometric and dynamics symmetry
+> 2. Find symmetry basis 𝑼𝑼
+> Recover Dynamics
+> Trajectories for free nodes
+> 𝒏𝒏 𝒂𝒂 =𝑼𝑼𝑼𝑼
+> Symmetry-reduced dynamical equation:
+> 𝑴𝑴 𝒓𝒓 𝑼𝑼 ̈+𝑫𝑫𝒓𝒓 𝑼𝑼 ̇+𝑲𝑲 𝒓𝒓 (𝒕𝒕 ,𝑼𝑼 )𝑼𝑼 − 𝒘𝒘 𝒓𝒓 =𝟎𝟎
+> Initial conditions:
+> 𝑼𝑼 (𝟎𝟎 ) = 𝝓𝝓 𝒓𝒓 ,𝑼𝑼 ′(𝟎𝟎 ) = 𝝍𝝍 𝒓𝒓
+> Encode the initial conditions:
+> 𝑼𝑼 (𝒕𝒕 ) = 𝝓𝝓 𝒓𝒓 +𝒕𝒕𝝍𝝍 𝒓𝒓 +𝝆𝝆𝒕𝒕 𝟐𝟐 𝑼𝑼 𝜽𝜽 (𝒕𝒕 )
+> Input:
+> Time 𝒕𝒕
+> Output :
+> 𝑼𝑼 𝜽𝜽 (𝒕𝒕 )
+
+Figure 1: Pipeline of the proposed SymPINN framework. The neural network learns the dynamics in a symmetry-reduced subspace using Fourier feature embeddings, and the full free nodal trajectories are reconstructed by mapping the reduced solution back to the original space. In practice, we identify the geometric symmetry of a tensegrity structure by examining the connectivity patterns of its strings and bars. Specifically, we analyze how the nodes are connected by these structural elements and determine whether a permutation of the nodes preserves the connectivity relationships among them. If a node permutation maps each string to another string and each bar to another bar with the same connectivity pattern, then this permutation is considered a symmetry of the structure. In other words, the structural graph defined by the bar and string connections remains unchanged under such a transformation. To implement this procedure, we first inspect the connectivity matrices that describe the bar and string elements of the tensegrity system. By comparing the connectivity patterns before and after candidate node permutations, we can identify transformations that leave both the bar and string networks invariant. These permutations indicate that the corresponding nodes belong to the same symmetry orbit and therefore share identical structural roles within the tensegrity framework. Once these symmetric node groups are determined, they can be used to construct a reduced representation of the system in which only the independent node coordinates are retained. In particular, we create a symmetry basis matrix U for the symmetry transform defined in (11). This symmetry identification step plays a crucial role in enabling the symmetry-reduced modeling framework used in our approach. Next, we describe how to incorporate symmetry into the design of a physics-informed neural network. In the standard formulation of PINNs [12], the training objective is typically constructed as a weighted combination of several loss components. These components usually include a physics loss that measures the residual of the governing differential equations, a data-fitting loss that en-forces agreement between the network predictions and the available observations, and additional terms that impose the initial or boundary conditions of the dynamical system. Together, these loss terms guide the neural network to learn solutions that are consistent with both the observed data and the underlying physical laws. However, for second-order dynamical systems, computing higher-order derivatives of the neural network can amplify numerical errors and increase computational cost, making training more challenging. to properly balance the weights of these loss terms dur-ing training. In the meantime, many tensegrity structures possess intrinsic geometric symmetries that can be exploited to reduce computational complexity by reducing the number of independent 7variables. Motivated by this observation, we integrate symmetry into a physics-informed learning framework and enforce the initial conditions through a hard constraint. Specifically, we assume the solution of the reduced system (13) takes the form 
+
+z(t) = z0 + t ˙z0 + ρt 2zθ(t), (15) where z0 and ˙z0 are defined in (14), and the tuning parameter ρ > 0 controls the convergence speed with a typical range [1 , 100] . The function zθ(t) is represented by a neural network parameterized by θ, which learns the remaining temporal dynamics of the reduced coordinates. By differentiating both sides of (15) with respect to t, we obtain 
+
+˙z(t) = ˙ z0 + 2 ρt zθ(t) + ρt 2 ˙zθ(t) (16) 
+
+≈ ˙z0 + 2 ρt zθ(t), (17) where ˙zθ(t) denotes the time derivative of the neural network output. When t is small, the term 
+
+ρt 2 ˙zθ(t) can be neglected with minimal loss of accuracy, thereby reducing the computational cost. This simplification is particularly beneficial because evaluating neural network derivatives via auto-matic differentiation (autograd) based on computational graph and chain rule is typically computa-tionally intensive; consequently, the resulting formulation requires only a single autograd evaluation when computing the physics loss. Given a set of training time points {ti}Ti=0 , where t0 = 0 is the initial time, we partition them into two subsets. The first subset, denoted by TG, contains NG collocation time points used to evaluate the physics-based loss associated with the governing equations. The second subset, denoted by TD,contains ND measurement time points used to compute the data-driven loss. In general, the sets 
+
+TG and TD may overlap or be disjoint. In this work, we focus on the case where the collocation points coincide with the measurement points, i.e., TG = TD.Let zθ(ti) denote the solution of the reduced system (13) predicted by the neural network with parameters θ at time ti, and let z(ti) denote the corresponding reference solution, which is either exact or measured. The training loss for the proposed SymPINN is defined as 
+
+L = λGLG + λDLD,
+
+where LG represents the physics-based loss associated with the residual of the reduced dynamical system (13), and LD denotes the data-driven loss measuring the discrepancy between the predicted solution zθ and the reference solution z. The weighting parameters λG and λD are used to balance the contributions of the two loss terms. In practice, one of these parameters can be fixed to one to reduce the tuning burden. The two loss terms are defined as 
+
+LG = 1
+
+NG
+
+∑
+
+> t∈TG
+
+∥Mr ¨zθ + Dr ˙zθ + Krzθ − wr∥2, (18) 
+
+LD = 1
+
+ND
+
+∑
+
+> t∈TD
+
+∥zθ(t) − z(t)∥2. (19) In the definition of the physics loss, we consider the symmetry-reduced governing equation (13) for free nodes. We adopt the same fully connected neural network architecture as in [12], where the neural network is implemented as a multilayer perceptron (MLP) with several hidden layers and nonlinear activation functions. The key difference in our formulation is that the initial conditions 
+
+z0 and ˙z0 are explicitly incorporated into the network through the hard-constraint representation of the solution (15) and using the approximated version of (17) with ˙zθ(t) omitted to enhance the 8computational efficiency. In this way, the neural network only learns the remaining component 
+
+zθ(t), while the initial conditions are automatically satisfied exactly by construction. To improve the expressiveness of the neural network for representing time-dependent dynamics, we incorporate Fourier feature encoding [18] into the SymPINN framework. Fourier features are commonly used to mitigate the spectral bias of neural networks and enhance their ability to ap-proximate high-frequency components of the solution. Instead of directly feeding the time variable 
+
+t into the neural network, we first map it into a higher-dimensional feature space using sinusoidal embeddings. Specifically, we define the Fourier feature mapping to be 
+
+γ(t) = 
+
+
+
+sin(2 πω 1t)cos(2 πω 1t)
+
+...
+
+sin(2 πω K t)cos(2 πω K t)
+
+
+
+, (20) where {ωk}Kk=1 are the frequency parameters randomly chosen from a Gaussian distribution. The encoded feature vector γ(t) is used as the input of the neural network that predicts the reduced coordinates 
+
+zθ(t) = Nθ(γ(t)) ,
+
+where Nθ represents the neural network with parameters θ. The full nodal coordinates are recon-structed using the symmetry basis U through (12). Through our extensive numerical experiments, it can be observed that using Fourier features improves the ability of the neural network to capture oscillatory behaviors and sharp temporal variations that frequently arise in tensegrity dynamics. This is particularly beneficial for the SymPINN framework, where the reduced coordinates z(t)
+
+may still exhibit complex temporal patterns even after symmetry reduction. For training, we minimize the total loss using a two-stage optimization strategy commonly adopted in physics-informed learning. In the first stage, the parameters of the neural network are optimized using the Adam optimizer for the first 1000 epochs, which provides efficient stochastic gradient updates and helps the training process quickly approach a good region of the parameter space. In the second stage, we switch to the L-BFGS optimizer to further refine the solution. The quasi-Newton updates in L-BFGS typically lead to faster convergence and improved accuracy by effectively exploiting curvature information of the loss landscape, thereby helping the optimization escape shallow local minima and achieve a more accurate approximation of the tensegrity dynamics. Our experiments have shown that L-BFGS can greatly accelerate data loss decay and improve prediction accuracy. 
+
+# 4 Numerical Experiments 
+
+In this section, we conduct numerical experiments to evaluate the performance of the proposed SymPINN method on two datasets, namely the T-bar and the lander structures. For each dataset, we split the data into two subsets: a training set and a testing set. The training data consist of col-location and measurement points obtained through uniform random sampling, while the remaining data points are used for testing and performance evaluation. For simplicity, the collocation points are taken to be the same as the measurement points, which is appropriate since the tensegrity dynamics are smooth and the symmetry reduction reduces the effective dimensionality of the sys-tem. The sampling ratios considered in the experiments are {0.1, 0.2, 0.3, 0.4, 0.5}. To avoid the imbalance of physics loss and data loss, we divide the physics loss by the Frobenius norm of the 9Dataset T-bar lander bar material wood steel string material rubber band steel string Young’s modulus of bars 8.10 × 10 9 Pa 2.06 × 10 11 Pa Young’s modulus of strings 2.00 × 10 6 Pa 7.60 × 10 10 Pa Table 1: Simulation configurations for each dataset. matrix Kr. Unless otherwise specified, the parameters are set as λG = 1 and λI = 10 . In fact, the final performance in our experiments is not very sensitive to the choice of these two parameters. In the SymPINN architecture, we employ two hidden layers with layer size 32 for both the T-bar and the lander cases, and let ρ = 20 in (17). During the optimization procedure, the Adam optimizer is executed for a maximum of 1000 epochs, followed by 10 iterations of the L-BFGS algorithm for both datasets. For each optimizer, the iterations terminate when the relative change in the total loss falls below the tolerance ε = 10 −5. Let the matrix Y = [ nti1 , . . . , ntiT ] contain the actual solutions evaluated at the testing time points ti1 , . . . , t iT , and Yθ = [ ̂ nti1 , . . . , ̂ ntiT ] be the predicted version of Y by our method. To evaluate the prediction accuracy quantitatively, we use the following two metrics. (a) Mean Squared Error (MSE) between the true solution and its estimation at the testing time points is defined as 
+
+MSE = 1
+
+T
+
+> T
+
+∑
+
+> j=1
+
+∥ntij −̂ ntij ∥, (21) where ∥·∥ denotes the ℓ2-norm of a vector, i.e., the square root of the sum of the squares of its components. (b) Relative Error (RE) between the true solution and its estimation at the testing time points is defined as 
+
+RE = ∥Yθ − Y ∥F
+
+∥Y ∥F
+
+, (22) where ∥·∥ F denotes the Frobenius norm of a matrix, i.e., the square root of the sum of all squared entries. One can see that RE is a scale-invariant performance metric, independent of the magnitude of the quantities involved, and therefore enables fair comparisons across datasets with different scales. However, RE may become unstable when the entries of Y are extremely small, since the denomina-tor in its definition approaches zero. In contrast, the MSE does not involve such normalization and therefore remains numerically stable in these cases. Throughout our experiments, the two metrics exhibit similar trends, with only minor differences. All numerical experiments are conducted in Python 3 on a desktop computer equipped with an Intel Core i9-9960X CPU (3.10 GHz, 16 cores), 64 GB RAM, and dual NVIDIA Quadro RTX 5000 GPUs running Windows 10 Pro. The datasets, including time points ti, ground-truth solutions 
+
+n(ti), mass matrix M , damping matrix D, time-varying stiffness matrix K, and external force 
+
+fex in (2), are generated using the TsgFEM package [19] in MATLAB R2024b. For simplicity, all nodes are treated as free nodes in both datasets, and the bars and strings are modeled as linear elastic materials. Table 1 summarizes the material configurations. 10 4.1 Experiment 1: T-Bar 
+
+In the first experiment, we consider the T-bar dataset consisting of four free nodes (with no con-strained nodes). The T-bar tensegrity belongs to the C2 symmetry group defined in Section 2.1, provided the structure is arranged in the standard symmetric configuration. Using symmetry de-tection, we obtain the corresponding permutation and rotation matrices 
+
+P =
+
+
+
+0 0 1 00 0 0 11 0 0 00 1 0 0
+
+ , R =
+
+
+
+−1 0 00 −1 00 0 1
+
+ .
+
+This symmetry partitions the nodes into two orbits. Consequently, the dimension of the solution vector for the free nodes, originally na = 12 , can be reduced to nr = 6 . The corresponding symmetry basis matrix is denoted by U ∈ R12 ×6. Specifically, the matrix U is given by 
+
+U = 1
+
+√2
+
+[ I6
+
+I2 ⊗ R
+
+]
+
+∈ R12 ×6.
+
+The normalization constant 1/√2 is added to guarantee that U T U = I6. Therefore, each free nodal vector at time t can be expressed by 
+
+na(t) = 1
+
+√2
+
+[ z(t)(I2 ⊗ R)z(t)
+
+]
+
+,
+
+where z(t) is trained through the neural network. To satisfy the symmetry assumptions, we central-ize the original dataset at 1001 time points evenly distributed over the time interval [0 , 1] seconds by subtracting the nodal and velocity centroids. The initial node configuration of the T-bar is shown in Fig. 2. In Fig. 3, we plot the trajectories of the x and y coordinates of the two orbit nodes over the given time period, namely node 1 and node 3, in the T-bar structure. Here, the z
+
+coordinate is omitted since it remains zero throughout the motion. One can see that the resulting trajectories have periodic behaviors. In addition, the MSE and RE values of the predicted trajectories at the testing time points under different training data sampling rates are reported in Figs. 4 and 5, respectively. From these figures, it can be observed that the prediction errors decrease consistently as the amount of training data increases. In particular, there is a notable improvement in accuracy when the sampling rate increases from 10% to 20%, indicating that a small increase in the available training data can significantly enhance the predictive performance of the model. As the sampling rate continues to grow, the errors further decrease and gradually stabilize, which implies that the proposed model is capable of achieving reliable predictions even with a relatively limited amount of training data. The smaller variance for large sampling rates, especially in RE, indicates stability and robustness of SymPINN. Furthermore, we compare the proposed SymPINN with the standard PINN method [12] under identical neural network architectures and optimization settings to ensure a fair comparison. Note that the maximum number of function evaluations in each L-BFGS step is reduced from 500 to 50 to decrease runtime, while maintaining comparable accuracy. The average performance on the T-bar dataset, measured in terms of prediction accuracy and runtime, is summarized in Table 2. Since MSE and RE have similar trends across all experiments, we report only RE in the table for a more concise presentation. In addition, the RE of PINN can be improved by increasing the network depth or width, or by allowing more function evaluations in the L-BFGS optimizer. However, this 11 -1 -0.5 0 0.5 1
+
+x
+
+-1 -0.5 00.5 1
+
+> y
+
+Figure 2: Initial configuration of the T-bar. The black and red lines represent bars and strings, respectively. The bar length is 1 m. 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1   
+
+> time (s)
+> -1 -0.5 00.5 1
+> coordinate (m)
+> Node 1: x Node 1: y Node 2: x Node 2: y
+
+Figure 3: Trajectories of the x and y coordinates of the two orbit nodes in the T-bar structure. significantly increases the computational cost. For example, allowing up to 500 function evaluations in L-BFGS may reduce the RE to below 0.01 with a small probability, but each training run would take more than 20 minutes. Table 2 shows that SymPINN consistently outperforms PINN in terms of both prediction ac-curacy and computational efficiency under various training data sampling rates. In particular, SymPINN achieves significantly lower relative errors while also requiring less runtime compared to the standard PINN under the same experimental setup. This improvement can be interpreted by the symmetry-reduced representation, which effectively decreases the dimensionality of the learning problem and allows the neural network to focus on the essential degrees of freedom of the tenseg-rity dynamics. As the sampling rate increases, the runtime naturally increases for both methods because a larger number of training data points leads to higher computational costs during opti-mization. We also observe that for PINN, the Adam optimization often converges before reaching 1000 epochs, and the subsequent L-BFGS iterations provide only limited improvement in reducing the data loss. However, for SymPINN, the L-BFGS refinement plays a much more significant role, 12 0.1 0.2 0.3 0.4 0.5 
+
+# sampling rate of the training data 
+
+## 10 -6 
+
+## 10 -4 
+
+## 10 -2 
+
+> MSE values (log scale)
+
+MSE Envelope 
+
+Mean MSE 
+
+Min/Max MSE Figure 4: Prediction MSE on the T-bar dataset for different training data sampling rates. Rate PINN SymPINN RE Time (s) RE Time (s) 0.1 0.1850 272.4 7.40 × 10 −2 48.01 0.2 0.1813 347.7 2.85 × 10 −3 61.66 0.3 0.1817 392.2 2.24 × 10 −3 81.24 0.4 0.1769 446.1 2.18 × 10 −3 110.69 0.5 0.1768 480.2 2.03 × 10 −3 152.24 Table 2: Prediction performance comparison between PINN and SymPINN on the T-bar dataset under various training data rates. leading to further substantial decay of the loss after the Adam stage. SymPINN is able to capture the long-time periodic motion better than the vanilla PINN. Nevertheless, SymPINN maintains a clear advantage over PINN across all the sampling rates. 
+
+4.2 Experiment 2: Lander 
+
+In the second experiment, we consider the lander dataset, which consists of 12 free nodes. The lander tensegrity also belongs to the C2 symmetry group in Section 2.1, implying that there are two orbits and the number of variables can be reduced from 36 to 18 in our SymPINN. The permutation matrix P is constructed according to the following permutation of node indices: 
+
+p = (3 , 4, 1, 2, 6, 5, 8, 7, 12 , 11 , 10 , 9) .
+
+The corresponding rotation matrix is given by 
+
+R =
+
+
+
+−1 0 00 −0.6 0.80 0.8 0.6
+
+ .
+
+13 0.1 0.2 0.3 0.4 0.5 
+
+# sampling rate of the training data 
+
+## 10 -4 
+
+## 10 -3 
+
+## 10 -2 
+
+## 10 -1 
+
+## 10 0
+
+> RE values (log scale)
+
+RE Envelope 
+
+Mean RE 
+
+Min/Max RE Figure 5: Prediction RE on the T-bar dataset for different training data sampling rates. To obtain the symmetry basis numerically, we first construct the symmetry constraint matrix associated with the permutation–rotation symmetry. Specifically, we define the symmetry transform matrix as S = I6 ⊗ R − P ⊗ I3. Next, we perform the Singular Value Decomposition (SVD) of 
+
+S and let the numerical rank of S be determined by the number of singular values exceeding a small tolerance, e.g., 10 −6. That is, we determine the numerical rank of S by r = {σi : σi > 10 −6}.Then the symmetry basis matrix U is constructed from the last (36 − r) right singular vectors corresponding to the singular values smaller than 10 −6. The initial velocity is applied along the z-axis. To ensure consistency with the structural symmetry, the external force fex ∈ R36 at each time point is constructed by first reshaping the original time-varying external force f0,ex (t) ∈ R36 into a matrix F0,ex (t) ∈ Rna×3. The force is then symmetrized by applying the symmetry transformation 
+
+Fex (t) = 12 (F0,ex (t) + P F 0,ex (t)R) .
+
+The resulting matrix Fex (t) is subsequently reshaped back into a vector fex (t) ∈ R36 for use in the dynamic system. The initial nodal configuration of the lander structure is illustrated in Fig. 6. In Fig. 7, we present the trajectories of all coordinate components for two representative nodes in the lander tensegrity structure, namely node 1 and node 12, after removing the centroid motion. Figures 8 and 9 report the respective MSE and RE values for the lander dataset under different training data sampling rates. Similar to the observations for the T-bar dataset, both error metrics exhibit a pronounced decrease when the sampling rate increases from 0.1 to 0.2. This indicates that even a modest increase in the number of training samples can significantly enhance the model’s ability to capture the underlying tensegrity dynamics. As the sampling rate continues to increase beyond 0.2, the improvements in both MSE and RE gradually diminish, and the errors become stabilized, suggesting that the model has already learned an accurate approximation of the system dynamics with a moderate amount of training data. Under the same neural network architecture and optimization settings, the lander dataset generally achieves lower prediction errors than the T-bar dataset. In particular, the MSE values for the lander dataset fall below 10 −6 once the sampling rate exceeds 0.1, indicating highly accurate reconstruction of the nodal trajectories. This behavior 14 Figure 6: Initial configuration of the six-bar tensegrity lander. The bar length is 1 m. 0 0.2 0.4 0.6 0.8 1
+
+> time (s)
+> -0.5 00.5
+> coordinate (m)
+> Node 1: x
+> Node 1: y
+> Node 1: z
+> Node 2: x
+> Node 2: y
+> Node 2: z
+
+Figure 7: Trajectories of the x, y and z coordinates of the two nodes in the lander structure. suggests that the lander system may exhibit smoother dynamical behavior or a more favorable symmetry structure, allowing the proposed SymPINN framework to learn the governing dynamics more efficiently even with limited training data. Finally, we compare the performance of PINN and SymPINN on the lander dataset in terms of relative error and runtime in Table 3. Similar to the T-bar case, we use the same neural network configuration and two-phase optimization procedure but with a reduced maximum number of function re-evaluations in L-BFGS from 500 to 50 to make the runtime manageable. SymPINN demonstrates significantly improved efficiency over the vanilla PINN in both prediction accuracy and computational cost. In particular, the L-BFGS optimization in the standard PINN becomes substantially more expensive as the number of nodes increases, due to the higher dimensionality of the solution and the associated intensive computation of physics loss. Under the same L-BFGS setting used in our SymPINN, one training run of the vanilla PINN would take several hours to complete. In the meantime, since the dimension of the solution in the reduced system is reduced by half and expensive graph-based automatic differentiation is only applied once rather than twice, SymPINN achieves faster training and improved prediction accuracy. These results highlight the 15 0.1 0.2 0.3 0.4 0.5 
+
+# sampling rate of the training data 
+
+## 10 -6 
+
+## 10 -4 
+
+## 10 -2 
+
+> MSE values (log scale)
+
+MSE Envelope 
+
+Mean MSE 
+
+Min/Max MSE Figure 8: Prediction MSE on the lander dataset for different training data sampling rates. Rate PINN SymPINN RE Time (s) RE Time (s) 0.1 6.84 × 10 −2 2419.48 1.79 × 10 −2 113.13 0.2 6.77 × 10 −2 2634.08 2.30 × 10 −3 153.42 0.3 6.88 × 10 −2 3068.93 2.18 × 10 −3 226.37 0.4 6.81 × 10 −2 3068.56 2.01 × 10 −3 341.22 0.5 6.72 × 10 −2 2797.26 2.10 × 10 −3 515.33 Table 3: Prediction performance comparison between PINN and SymPINN on the lander dataset under various training data rates. strong potential of SymPINN for modeling the dynamics of large symmetric tensegrity systems. 
+
+# 5 Conclusion 
+
+In this paper, we developed a symmetry-reduced physics-informed neural network framework, termed SymPINN, for learning the dynamics of tensegrity structures with geometric symmetry, especially cyclic and dihedral symmetries. By exploiting the inherent symmetry of the structure, the proposed method reduces the dimensionality of the governing dynamic system and enforces the symmetry constraint directly within the neural network representation. Specifically, a symmetry basis is constructed from the nullspace of the symmetry operator corresponding to the rotation and permutation transformations of the tensegrity structure. This allows the full nodal coordinates to be expressed in terms of a reduced set of symmetry-consistent coordinates. The physics-informed neural network is then trained to approximate the evolution of these reduced coordinates, while the full configuration is reconstructed through the symmetry basis. As a result, the predicted solution automatically satisfies the geometric symmetry of the structure. Compared with standard PINN, the proposed SymPINN framework significantly reduces the 16 0.1 0.2 0.3 0.4 0.5 
+
+# sampling rate of the training data 
+
+## 10 -4 
+
+## 10 -3 
+
+## 10 -2 
+
+## 10 -1 
+
+## 10 0
+
+> RE values (log scale)
+
+RE Envelope 
+
+Mean RE 
+
+Min/Max RE Figure 9: Prediction RE on the lander dataset for different training data sampling rates. dimension of training variables and improves training efficiency. The reduced formulation also en-hances numerical stability by eliminating symmetry-breaking modes that may arise during training. Moreover, initial conditions are encoded in the solution as hard constraints. Fourier features are incorporated into the neural network design, and a two-phase optimization scheme is employed to accelerate convergence and greatly improve prediction accuracy. Numerical experiments on sym-metric tensegrity structures demonstrate that SymPINN can learn the system dynamics with high accuracy while requiring substantially fewer training data and neural network parameters. The proposed framework provides a systematic way to incorporate group symmetry into physics-informed neural networks for structural dynamics. The future work includes extending this method to more general symmetry groups by integrating symmetry-aware architectures for large-scale tensegrity systems and applying this framework to other classes of mechanical systems with in-herent geometric symmetry. 
+
+# References 
+
+[1] Robert E Skelton and Mauricio C De Oliveira. Tensegrity systems , volume 1. Springer, 2009. [2] Aguinaldo Fraddosio, Andrea Micheletti, Gaetano Pavone, and Mario Daniele Piccioni. Afast strategy to determine efficient shape changes of adaptable v-expander tensegrity columns. 
+
+Journal of Structural Engineering , 150(4):04024025, 2024. [3] Rana Nazifi Charandabi, Enrico Babilio, Gerardo Carpentieri, Giovanni Spagnuolo, Ada Amendola, and Fernando Fraternali. A tensegrity structure for a solar stadium roof with sun-tracking capability. Thin-Walled Structures , 210:113033, 2025. [4] Fuhui Ding, Wenxiang Chen, Jiaze Zhang, and Bingxing Chen. A high-frequency oscillating tensegrity robotic fish with wide-ranging online body stiffness adjustability. Ocean Engineering ,328:121063, 2025. 17 [5] Shuo Ma, Doris R Swai, Jiaxing Tang, Yongcan Dong, and Xingfei Yuan. Equilibrium the-ory and matrix analysis of tensegrity-beam structures. International Journal of Solids and Structures , page 113805, 2025. [6] Shuo Ma, Muhao Chen, Xingfei Yuan, and Robert E Skelton. Design and analysis of deployable clustered tensegrity cable domes. In Proceedings of IASS Annual Symposia , volume 2020, pages 1–13. International Association for Shell and Spatial Structures (IASS), 2020. [7] Shuo Ma, Muhao Chen, and Robert E Skelton. Tensegrity system dynamics based on finite element method. Composite Structures , 280:114838, 2022. [8] Maziar Raissi, Paris Perdikaris, and George E Karniadakis. Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. Journal of Computational physics , 378:686–707, 2019. [9] George Em Karniadakis, Ioannis G Kevrekidis, Lu Lu, Paris Perdikaris, Sifan Wang, and Liu Yang. Physics-informed machine learning. Nature Reviews Physics , 3(6):422–440, 2021. [10] Jin Wang, Mingliang Zhu, and Zhiwei Miao. Two-stage physics-informed deep neural networks framework for form-finding of tensegrity structures. Computer-Aided Design , 186:103898, 2025. [11] Mingliang Zhu, Jin Wang, and Jiamin Guo. Physics-informed neural networks for displacement control of cable domes. In Structures , volume 73, page 108522. Elsevier, 2025. [12] Youyun Xu, Haruku Aono, Muhao Chen, and Jing Qin. Predicting dynamics of tenseg-rity structures using physics-informed neural networks. In NAECON 2025-IEEE National Aerospace and Electronics Conference , pages 1–6. IEEE, 2025. [13] Robert Connelly and Allen Back. Mathematics and tensegrity: Group and representation theory make it possible to form a complete catalogue of” strut-cable” constructions with pre-scribed symmetries. American scientist , 86(2):142–151, 1998. [14] Robert Connelly and Simon D Guest. Frameworks, tensegrities, and symmetry . Cambridge University Press, 2022. [15] R Pandia Raj and SD Guest. Using symmetry for tensegrity form-finding. Journal of the International Association for Shell and Spatial Structures , 47(3):245–252, 2006. [16] Yao Chen, Qiuzhi Sun, and Jian Feng. Improved form-finding of tensegrity structures us-ing blocks of symmetry-adapted force density matrix. Journal of Structural Engineering ,144(10):04018174, 2018. [17] David Surovik, Kun Wang, Massimo Vespignani, Jonathan Bruce, and Kostas E Bekris. Adap-tive tensegrity locomotion: Controlling a compliant icosahedron with symmetry-reduced rein-forcement learning. The International journal of robotics research , 40(1):375–396, 2021. [18] Matthew Tancik, Pratul Srinivasan, Ben Mildenhall, Sara Fridovich-Keil, Nithin Raghavan, Utkarsh Singhal, Ravi Ramamoorthi, Jonathan Barron, and Ren Ng. Fourier features let networks learn high frequency functions in low dimensional domains. Advances in neural information processing systems , 33:7537–7547, 2020. [19] Shuo Ma, Muhao Chen, and Robert E Skelton. TsgFEM: Tensegrity finite element method. 
+
+Journal of Open Source Software , 7(75):3390, 2022. 18

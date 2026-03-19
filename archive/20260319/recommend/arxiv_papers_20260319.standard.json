@@ -1,0 +1,659 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-19T20:14:53.764518+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 11,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 11,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2603.15786v2",
+      "title": "Physics-informed neural networks for solving saddle-point equations in strong-field physics with tailored fields",
+      "abstract": "We develop an unsupervised physics-informed neural network to solve saddle-point equations (SPEs) governing direct above-threshold ionization (ATI) within the strong-field approximation. This setting provides a well-understood testbed in which the saddle-point structure is known for tailored driving fields, enabling systematic validation of the proposed solver. The network is trained by minimizing the residual of the SPEs and requires only the definition of the driving-field shape and its parameters, such as intensity, carrier-envelope phase, ellipticity, and relative phase. We introduce a window parametrization strategy that maps network outputs to prescribed regions of the complex-time plane, guiding the optimization toward physically relevant solutions and improving convergence stability. We benchmark the PINN against a conventional solver for a range of fields, demonstrating robust recovery of the dominant complex ionization times over wide parameter ranges. The network tracks changes in ionization event dominance as laser parameters are varied, enabling exploration of regimes where conventional solvers require repeated manual initialization. Using the PINN-derived solutions, we compute coherent ATI photoelectron momentum distributions and show the symmetries of the driving fields are reflected in both the saddle-point structure and the resulting spectra. These results establish PINNs as a promising framework for semiclassical strong-field calculations and provide a foundation for extending machine-learning solvers to Coulomb-corrected models or to more complex processes, such as rescattered ATI for which the SPEs are highly nonlinear and the presence of multiple closely-spaced solutions makes conventional Newton-type root-finding highly sensitive to initial guesses, which hinders systematic investigations across laser-parameter spaces, particularly for tailored fields.",
+      "authors": [
+        "Jiakang Chen",
+        "Sufia Hashim",
+        "Carla Figueira de Morisson Faria"
+      ],
+      "primary_category": "physics.atom-ph",
+      "categories": [
+        "physics.atom-ph",
+        "physics.comp-ph",
+        "quant-ph"
+      ],
+      "published": "2026-03-16T18:12:44+00:00",
+      "link": "https://arxiv.org/pdf/2603.15786v2",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Uses PINNs to solve saddle-point equations in physics",
+      "llm_evidence_cn": "使用PINN求解物理中的鞍点方程",
+      "llm_evidence": "使用PINN求解物理中的鞍点方程",
+      "canonical_evidence": "使用PINN求解物理中的鞍点方程",
+      "llm_tldr_en": "Develops an unsupervised PINN to solve saddle-point equations in strong-field physics with tailored fields.",
+      "llm_tldr_cn": "开发了一种无监督PINN，用于求解强场物理中定制场下的鞍点方程。",
+      "llm_tldr": "开发了一种无监督PINN，用于求解强场物理中定制场下的鞍点方程。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Physics-informed neural networks for partial differential equations",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.17022v1",
+      "title": "Contingency-Aware Planning via Certified Neural Hamilton-Jacobi Reachability",
+      "abstract": "Hamilton-Jacobi (HJ) reachability provides formal safety guarantees for dynamical systems, but solving high-dimensional HJ partial differential equations limits its use in real-time planning. This paper presents a contingency-aware multi-goal navigation framework that integrates learning-based reachability with sampling-based planning in unknown environments. We use Fourier Neural Operator (FNO) to approximate the solution operator of the Hamilton-Jacobi-Isaacs variational inequality under varying obstacle configurations. We first provide a theoretical under-approximation guarantee on the safe backward reach-avoid set, which enables formal safety certification of the learned reachable sets. Then, we integrate the certified reachable sets with an incremental multi-goal planner, which enforces reachable-set constraints and a recovery policy that guarantees finite-time return to a safe region. Overall, we demonstrate that the proposed framework achieves asymptotically optimal navigation with provable contingency behavior, and validate its performance through real-time deployment on KUKA's youBot in Webots simulation.",
+      "authors": [
+        "Kasidit Muenprasitivej",
+        "Derya Aksaray"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "eess.SY"
+      ],
+      "published": "2026-03-17T18:04:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.17022v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Fourier Neural Operator to approximate the solution operator of Hamilton-Jacobi PDEs",
+      "llm_evidence_cn": "利用傅里叶神经算子逼近 Hamilton-Jacobi 偏微分方程的解算子",
+      "llm_evidence": "利用傅里叶神经算子逼近 Hamilton-Jacobi 偏微分方程的解算子",
+      "canonical_evidence": "利用傅里叶神经算子逼近 Hamilton-Jacobi 偏微分方程的解算子",
+      "llm_tldr_en": "Uses FNO to solve high-dimensional HJ partial differential equations for real-time safety planning.",
+      "llm_tldr_cn": "利用 FNO 求解高维 HJ 偏微分方程，以实现实时安全规划。",
+      "llm_tldr": "利用 FNO 求解高维 HJ 偏微分方程，以实现实时安全规划。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Fourier Neural Operator for scientific computing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.17523v1",
+      "title": "Translation Invariance of Neural Operators for the FitzHugh-Nagumo Model",
+      "abstract": "Neural Operators (NOs) are a powerful deep learning framework designed to learn the solution operator that arise from partial differential equations. This study investigates NOs ability to capture the stiff spatio-temporal dynamics of the FitzHugh-Nagumo model, which describes excitable cells. A key contribution of this work is evaluating the translation invariance using a novel training strategy. NOs are trained using an applied current with varying spatial locations and intensities at a fixed time, and the test set introduces a more challenging out-of-distribution scenario in which the applied current is translated in both time and space. This approach significantly reduces the computational cost of dataset generation. Moreover we benchmark seven NOs architectures: Convolutional Neural Operators (CNOs), Deep Operator Networks (DONs), DONs with CNN encoder (DONs-CNN), Proper Orthogonal Decomposition DONs (POD-DONs), Fourier Neural Operators (FNOs), Tucker Tensorized FNOs (TFNOs), Localized Neural Operators (LocalNOs). We evaluated these models based on training and test accuracy, efficiency, and inference speed. Our results reveal that CNOs performs well on translated test dynamics. However, they require higher training costs, though their performance on the training set is similar to that of the other considered architectures. In contrast, FNOs achieve the lowest training error, but have the highest inference time. Regarding the translated dynamics, FNOs and their variants provide less accurate predictions. Finally, DONs and their variants demonstrate high efficiency in both training and inference, however they do not generalize well to the test set. These findings highlight the current capabilities and limitations of NOs in capturing complex ionic model dynamics and provide a comprehensive benchmark including their application to scenarios involving translated dynamics.",
+      "authors": [
+        "Luca Pellegrini"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "math.NA"
+      ],
+      "published": "2026-03-18T09:28:48+00:00",
+      "link": "https://arxiv.org/pdf/2603.17523v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Neural Operators for FitzHugh-Nagumo PDE",
+      "llm_evidence_cn": "用于FitzHugh-Nagumo偏微分方程的神经算子",
+      "llm_evidence": "用于FitzHugh-Nagumo偏微分方程的神经算子",
+      "canonical_evidence": "用于FitzHugh-Nagumo偏微分方程的神经算子",
+      "llm_tldr_en": "Investigates translation invariance and generalization of Neural Operators for stiff spatio-temporal PDEs.",
+      "llm_tldr_cn": "研究了神经算子在处理刚性时空偏微分方程时的平移不变性和泛化能力。",
+      "llm_tldr": "研究了神经算子在处理刚性时空偏微分方程时的平移不变性和泛化能力。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Neural operator methods for solving PDEs",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.17532v1",
+      "title": "Anisotropic Permeability Tensor Prediction from Porous Media Microstructure via Physics-Informed Progressive Transfer Learning with Hybrid CNN-Transformer",
+      "abstract": "Accurate prediction of permeability tensors from pore-scale microstructure images is essential for subsurface flow modeling, yet direct numerical simulation requires hours per sample, fundamentally limiting large-scale uncertainty quantification and reservoir optimization workflows. A physics-informed deep learning framework is presented that resolves this bottleneck by combining a MaxViT hybrid CNN-Transformer architecture with progressive transfer learning and differentiable physical constraints. MaxViT's multi-axis attention mechanism simultaneously resolves grain-scale pore-throat geometry via block-local operations and REV-scale connectivity statistics through grid-global operations, providing the spatial hierarchy that permeability tensor prediction physically requires. Training on 20000 synthetic porous media samples spanning three orders of magnitude in permeability, a three-phase progressive curriculum advances from an ImageNet-pretrained baseline with D4-equivariant augmentation and tensor transformation, through component-weighted loss prioritizing off-diagonal coupling, to frozen-backbone transfer learning with porosity conditioning via Feature-wise Linear Modulation (FiLM). Onsager reciprocity and positive definiteness are enforced via differentiable penalty terms. On a held-out test set of 4000 samples, the framework achieves variance-weighted R2 = 0.9960 (R2_Kxx = 0.9967, R2_Kxy = 0.9758), a 33% reduction in unexplained variance over the supervised baseline. The results offer three transferable principles for physics-informed scientific machine learning: large-scale visual pretraining transfers effectively across domain boundaries; physical constraints are most robustly integrated as differentiable architectural components; and progressive training guided by diagnostic failure-mode analysis enables unambiguous attribution of performance gains across methodological stages.",
+      "authors": [
+        "Mohammad Nooraiepour"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "physics.flu-dyn"
+      ],
+      "published": "2026-03-18T09:41:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.17532v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Physics-informed deep learning for permeability prediction",
+      "llm_evidence_cn": "用于渗透率预测的物理信息深度学习",
+      "llm_evidence": "用于渗透率预测的物理信息深度学习",
+      "canonical_evidence": "用于渗透率预测的物理信息深度学习",
+      "llm_tldr_en": "Combines CNN-Transformers with differentiable physical constraints for porous media flow modeling.",
+      "llm_tldr_cn": "结合CNN-Transformer与可微物理约束，用于多孔介质流体建模。",
+      "llm_tldr": "结合CNN-Transformer与可微物理约束，用于多孔介质流体建模。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.17824v1",
+      "title": "Symmetry-Reduced Physics-Informed Learning of Tensegrity Dynamics",
+      "abstract": "Tensegrity structures possess intrinsic geometric symmetries that govern their dynamic behavior. However, most existing physics-informed neural network (PINN) approaches for tensegrity dynamics do not explicitly exploit these symmetries, leading to high computational complexity and unstable optimization. In this work, we propose a symmetry-reduced physics-informed neural network (SymPINN) framework that embeds group-theory-based symmetry directly into both the solution expression and the neural network architecture to predict tensegrity dynamics. By decomposing nodes into symmetry orbits and representing free nodal coordinates using a symmetry basis, the proposed method constructs a reduced coordinate representation that preserves geometric symmetry of the structure. The full coordinates are then recovered via symmetry transformations of the reduced solution learned by the network, ensuring that the predicted configurations automatically satisfy the symmetry constraints. In this framework, equivariance is enforced through orbit-based coordinate generation, symmetry-consistent message passing, and physics residual constraints. In addition, SymPINN improves training effectiveness by encoding initial conditions as hard constraints, incorporating Fourier feature encoding to enhance the representation of dynamic motions, and employing a two-stage optimization strategy. Extensive numerical experiments on symmetric T-bars and lander structures demonstrate significantly improved prediction accuracy and computational efficiency compared to standard physics-informed models, indicating the great potential of symmetry-aware learning for structure-preserving modeling of tensegrity dynamics.",
+      "authors": [
+        "Jing Qin",
+        "Muhao Chen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-18T15:23:23+00:00",
+      "link": "https://arxiv.org/pdf/2603.17824v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Symmetry-reduced PINN for tensegrity dynamics",
+      "llm_evidence_cn": "用于张拉整体动力学的对称性简化PINN",
+      "llm_evidence": "用于张拉整体动力学的对称性简化PINN",
+      "canonical_evidence": "用于张拉整体动力学的对称性简化PINN",
+      "llm_tldr_en": "Develops SymPINN, embedding geometric symmetry into PINNs to predict the dynamics of tensegrity structures.",
+      "llm_tldr_cn": "开发了SymPINN，将几何对称性嵌入PINN中以预测张拉整体结构的动力学。",
+      "llm_tldr": "开发了SymPINN，将几何对称性嵌入PINN中以预测张拉整体结构的动力学。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Physics-informed neural networks for partial differential equations",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.17867v1",
+      "title": "RHYME-XT: A Neural Operator for Spatiotemporal Control Systems",
+      "abstract": "We propose RHYME-XT, an operator-learning framework for surrogate modeling of spatiotemporal control systems governed by input-affine nonlinear partial integro-differential equations (PIDEs) with localized rhythmic behavior. RHYME-XT uses a Galerkin projection to approximate the infinite-dimensional PIDE on a learned finite-dimensional subspace with spatial basis functions parameterized by a neural network. This yields a projected system of ODEs driven by projected inputs. Instead of integrating this non-autonomous system, we directly learn its flow map using an architecture for learning flow functions, avoiding costly computations while obtaining a continuous-time and discretization-invariant representation. Experiments on a neural field PIDE show that RHYME-XT outperforms a state-of-the-art neural operator and is able to transfer knowledge effectively across models trained on different datasets, through a fine-tuning process.",
+      "authors": [
+        "Marijn Ruiter",
+        "Miguel Aguiar",
+        "Jake Rap",
+        "Karl H. Johansson",
+        "Amritam Das"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "eess.SY",
+        "math.OC"
+      ],
+      "published": "2026-03-18T15:55:26+00:00",
+      "link": "https://arxiv.org/pdf/2603.17867v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "neural operator framework for spatiotemporal control systems",
+      "llm_evidence_cn": "用于时空控制系统的神经算子框架",
+      "llm_evidence": "用于时空控制系统的神经算子框架",
+      "canonical_evidence": "用于时空控制系统的神经算子框架",
+      "llm_tldr_en": "Introduces RHYME-XT, an operator-learning framework for surrogate modeling of nonlinear PIDEs.",
+      "llm_tldr_cn": "引入了RHYME-XT，一种用于非线性PIDE代理建模的算子学习框架。",
+      "llm_tldr": "引入了RHYME-XT，一种用于非线性PIDE代理建模的算子学习框架。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Neural operator methods for solving PDEs",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.14193v1",
+      "title": "A Robust Learning-Based Method for the Helmholtz Equation in Dissipative Media and Complex Domains",
+      "abstract": "To mitigate pollution effects in high-frequency Helmholtz problems, Learning-based Numerical Methods (LbNM) reconstruct solution operators using complete systems of exact solutions. However, the previously used fundamental-solution (FS) basis suffers from instability in dissipative media and requires sensitive geometric tuning. In this paper, we propose a robust alternative using a Bessel basis (BB). From a learning theory perspective, the BB forms a complete hypothesis space of standing waves, ensuring immunity to dissipation-induced signal loss. We establish a convergence result that depends on intrinsic regularity. Numerical experiments demonstrate that the proposed method achieves machine-precision accuracy in dissipative regimes where FS fails, significantly outperforms the Finite Element Method (FEM) in efficiency, and demonstrates the framework's geometric extensibility via a multi-center strategy.",
+      "authors": [
+        "Lifu Song",
+        "Tingyue Li",
+        "Jin Cheng"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-15T03:06:44+00:00",
+      "link": "https://arxiv.org/pdf/2603.14193v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "learning-based numerical method for Helmholtz equation",
+      "llm_evidence_cn": "亥姆霍兹方程的学习型数值方法",
+      "llm_evidence": "亥姆霍兹方程的学习型数值方法",
+      "canonical_evidence": "亥姆霍兹方程的学习型数值方法",
+      "llm_tldr_en": "Proposes a robust learning-based method using Bessel basis for high-frequency Helmholtz problems.",
+      "llm_tldr_cn": "提出了一种基于贝塞尔基的鲁棒学习方法，用于解决高频亥姆霍兹问题。",
+      "llm_tldr": "提出了一种基于贝塞尔基的鲁棒学习方法，用于解决高频亥姆霍兹问题。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.14135v1",
+      "title": "Solving physics-constrained inverse problems with conditional flow matching",
+      "abstract": "This study presents a conditional flow matching framework for solving physics-constrained Bayesian inverse problems. In this setting, samples from the joint distribution of inferred variables and measurements are assumed available, while explicit evaluation of the prior and likelihood densities is not required. We derive a simple and self-contained formulation of both the unconditional and conditional flow matching algorithms, tailored specifically to inverse problems. In the conditional setting, a neural network is trained to learn the velocity field of a probability flow ordinary differential equation that transports samples from a chosen source distribution directly to the posterior distribution conditioned on observed measurements. This black-box formulation accommodates nonlinear, high-dimensional, and potentially non-differentiable forward models without restrictive assumptions on the noise model. We further analyze the behavior of the learned velocity field in the regime of finite training data. Under mild architectural assumptions, we show that overtraining can induce degenerate behavior in the generated conditional distributions, including variance collapse and a phenomenon termed selective memorization, wherein generated samples concentrate around training data points associated with similar observations. A simplified theoretical analysis explains this behavior, and numerical experiments confirm it in practice. We demonstrate that standard early-stopping criteria based on monitoring test loss effectively mitigate such degeneracy. The proposed method is evaluated on several physics-based inverse problems. We investigate the impact of different choices of source distributions, including Gaussian and data-informed priors. Across these examples, conditional flow matching accurately captures complex, multimodal posterior distributions while maintaining computational efficiency.",
+      "authors": [
+        "Agnimitra Dasgupta",
+        "Ali Fardisi",
+        "Mehrnegar Aminy",
+        "Brianna Binder",
+        "Bryan Shaddy",
+        "Assad Oberai"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG"
+      ],
+      "published": "2026-03-14T21:43:48+00:00",
+      "link": "https://arxiv.org/pdf/2603.14135v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "physics-constrained machine learning for inverse problems",
+      "llm_evidence_cn": "用于反问题的物理约束机器学习",
+      "llm_evidence": "用于反问题的物理约束机器学习",
+      "canonical_evidence": "用于反问题的物理约束机器学习",
+      "llm_tldr_en": "Uses conditional flow matching to solve physics-constrained Bayesian inverse problems.",
+      "llm_tldr_cn": "使用条件流匹配来解决物理约束的贝叶斯反问题。",
+      "llm_tldr": "使用条件流匹配来解决物理约束的贝叶斯反问题。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.14101v1",
+      "title": "Tensorial Reduced-Order Models for Parametric Coupled Reaction-Diffusion Systems: Application to Brain Tumor Growth Modeling",
+      "abstract": "We construct efficient surrogate models for parametric forward operators arising in brain tumor growth simulations, governed by coupled semilinear parabolic reaction-diffusion systems on heterogeneous two- and three-dimensional domains. We consider two models of increasing complexity: a scalar single-species formulation and a six-state, nine-parameter multi-species go-or-grow model. The governing equations are discretized using a finite volume method and integrated in time via an operator-splitting strategy. We develop tensorial reduced-order model (TROM) surrogates based on the Higher-Order Singular Value Decomposition in Tucker format and the Tensor Train decomposition, each in intrusive and non-intrusive variants. The models are compared against a classical proper orthogonal decomposition (POD) ROM baseline. Numerical experiments with up to $m=9$ model parameters demonstrate speedups of $85\\times$-$120\\times$ relative to the full-order solver while maintaining excellent accuracy, establishing tensorial surrogates as a rigorous and efficient computational foundation for many-query workflows.",
+      "authors": [
+        "Asikul Islam",
+        "Md Rezwan Bin Mizan",
+        "Maxim Olshanskii",
+        "Andreas Mang"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-14T20:05:19+00:00",
+      "link": "https://arxiv.org/pdf/2603.14101v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Surrogate models for parametric forward operators in reaction-diffusion systems",
+      "llm_evidence_cn": "反应扩散系统中参数化正向算子的代理模型",
+      "llm_evidence": "反应扩散系统中参数化正向算子的代理模型",
+      "canonical_evidence": "反应扩散系统中参数化正向算子的代理模型",
+      "llm_tldr_en": "Develops tensorial reduced-order models as surrogates for complex reaction-diffusion PDE systems.",
+      "llm_tldr_cn": "开发张量阶数缩减模型，作为复杂反应扩散偏微分方程系统的代理模型。",
+      "llm_tldr": "开发张量阶数缩减模型，作为复杂反应扩散偏微分方程系统的代理模型。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.15797v2",
+      "title": "OMNIFLOW: A Physics-Grounded Multimodal Agent for Generalized Scientific Reasoning",
+      "abstract": "Large Language Models (LLMs) have demonstrated exceptional logical reasoning capabilities but frequently struggle with the continuous spatiotemporal dynamics governed by Partial Differential Equations (PDEs), often resulting in non-physical hallucinations. Existing approaches typically resort to costly, domain-specific fine-tuning, which severely limits cross-domain generalization and interpretability. To bridge this gap, we propose OMNIFLOW, a neuro-symbolic architecture designed to ground frozen multimodal LLMs in fundamental physical laws without requiring domain-specific parameter updates. OMNIFLOW introduces a novel \\textit{Semantic-Symbolic Alignment} mechanism that projects high-dimensional flow tensors into topological linguistic descriptors, enabling the model to perceive physical structures rather than raw pixel values. Furthermore, we construct a Physics-Guided Chain-of-Thought (PG-CoT) workflow that orchestrates reasoning through dynamic constraint injection (e.g., mass conservation) and iterative reflexive verification. We evaluate OMNIFLOW on a comprehensive benchmark spanning microscopic turbulence, theoretical Navier-Stokes equations, and macroscopic global weather forecasting. Empirical results demonstrate that OMNIFLOW significantly outperforms traditional deep learning baselines in zero-shot generalization and few-shot adaptation tasks. Crucially, it offers transparent, physically consistent reasoning reports, marking a paradigm shift from black-box fitting to interpretable scientific reasoning.",
+      "authors": [
+        "Hao Wu",
+        "Yongheng Zhang",
+        "Yuan Gao",
+        "Fan Xu",
+        "Fan Zhang",
+        "Ruobing Xie",
+        "Ruijian Gou",
+        "Yuxuan Liang",
+        "Xiaomeng Huang",
+        "Xian Wu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-16T18:29:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.15797v2",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Grounds LLMs in physical laws governed by PDEs using neuro-symbolic architecture",
+      "llm_evidence_cn": "利用神经符号架构将大语言模型植根于受偏微分方程支配的物理定律中",
+      "llm_evidence": "利用神经符号架构将大语言模型植根于受偏微分方程支配的物理定律中",
+      "canonical_evidence": "利用神经符号架构将大语言模型植根于受偏微分方程支配的物理定律中",
+      "llm_tldr_en": "Proposes OMNIFLOW to ground multimodal LLMs in physical laws to prevent non-physical hallucinations in PDE tasks.",
+      "llm_tldr_cn": "提出OMNIFLOW，将多模态大模型植根于物理定律，防止PDE任务中的非物理幻觉。",
+      "llm_tldr": "提出OMNIFLOW，将多模态大模型植根于物理定律，防止PDE任务中的非物理幻觉。",
+      "llm_tags": [
+        "query:pinn:composite"
+      ],
+      "matched_query_tag": "query:pinn:composite",
+      "matched_query_text": "Papers central to 物理信息神经网络与神经算子求解偏微分方程论文检索, especially work that connects or combines: p; Physics-informed neural networks for partial differential equations; Neural operator methods for solving PDEs; Deep operator networks for differential equations; Fourier Neural Operator for scientific computing; Deep learning based partial differential equation solvers; Recent advances in physics informed neural networks and neural operators; Comparison between PINNs and neural operators for PDE solving; Applications of neural operators in computational fluid dynamics; Hybrid physics informed machine learning for differential equations.",
+      "matched_requirement_id": "req-composite-pinn",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.14135v2",
+      "title": "Solving physics-constrained inverse problems with conditional flow matching",
+      "abstract": "This study presents a conditional flow matching framework for solving physics-constrained Bayesian inverse problems. In this setting, samples from the joint distribution of inferred variables and measurements are assumed available, while explicit evaluation of the prior and likelihood densities is not required. We derive a simple and self-contained formulation of both the unconditional and conditional flow matching algorithms, tailored specifically to inverse problems. In the conditional setting, a neural network is trained to learn the velocity field of a probability flow ordinary differential equation that transports samples from a chosen source distribution directly to the posterior distribution conditioned on observed measurements. This black-box formulation accommodates nonlinear, high-dimensional, and potentially non-differentiable forward models without restrictive assumptions on the noise model. We further analyze the behavior of the learned velocity field in the regime of finite training data. Under mild architectural assumptions, we show that overtraining can induce degenerate behavior in the generated conditional distributions, including variance collapse and a phenomenon termed selective memorization, wherein generated samples concentrate around training data points associated with similar observations. A simplified theoretical analysis explains this behavior, and numerical experiments confirm it in practice. We demonstrate that standard early-stopping criteria based on monitoring test loss effectively mitigate such degeneracy. The proposed method is evaluated on several physics-based inverse problems. We investigate the impact of different choices of source distributions, including Gaussian and data-informed priors. Across these examples, conditional flow matching accurately captures complex, multimodal posterior distributions while maintaining computational efficiency.",
+      "authors": [
+        "Agnimitra Dasgupta",
+        "Ali Fardisi",
+        "Mehrnegar Aminy",
+        "Brianna Binder",
+        "Bryan Shaddy",
+        "Assad Oberai"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG"
+      ],
+      "published": "2026-03-14T21:43:48+00:00",
+      "link": "https://arxiv.org/pdf/2603.14135v2",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Uses conditional flow matching for physics-constrained inverse problems",
+      "llm_evidence_cn": "使用条件流匹配解决物理约束的逆问题",
+      "llm_evidence": "使用条件流匹配解决物理约束的逆问题",
+      "canonical_evidence": "使用条件流匹配解决物理约束的逆问题",
+      "llm_tldr_en": "Introduces a flow matching framework for solving physics-constrained Bayesian inverse problems without explicit priors.",
+      "llm_tldr_cn": "引入流匹配框架，在无需显式先验的情况下解决物理约束的贝叶斯逆问题。",
+      "llm_tldr": "引入流匹配框架，在无需显式先验的情况下解决物理约束的贝叶斯逆问题。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.16239v2",
+      "title": "Neural Pushforward Samplers for the Fokker-Planck Equation on Embedded Riemannian Manifolds",
+      "abstract": "In this paper, we extend the Weak Adversarial Neural Pushforward Method to the Fokker--Planck equation on compact embedded Riemannian manifolds. The method represents the solution as a probability distribution via a neural pushforward map that is constrained to the manifold by a retraction layer, enforcing manifold membership and probability conservation by construction. Training is guided by a weak adversarial objective using ambient plane-wave test functions, whose intrinsic differential operators are derived in closed form from the geometry of the embedding, yielding a fully mesh-free and chart-free algorithm. Both steady-state and time-dependent formulations are developed, and numerical results on a double-well problem on the two-sphere demonstrate the capability of the method in capturing multimodal invariant distributions on curved spaces.",
+      "authors": [
+        "Andrew Qing He",
+        "Wei Cai"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA",
+        "cs.LG"
+      ],
+      "published": "2026-03-17T08:24:52+00:00",
+      "link": "https://arxiv.org/pdf/2603.16239v2",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Neural pushforward method for solving Fokker-Planck PDE on manifolds",
+      "llm_evidence_cn": "求解流形上 Fokker-Planck 偏微分方程的神经前推方法",
+      "llm_evidence": "求解流形上 Fokker-Planck 偏微分方程的神经前推方法",
+      "canonical_evidence": "求解流形上 Fokker-Planck 偏微分方程的神经前推方法",
+      "llm_tldr_en": "A mesh-free neural sampler for solving the Fokker-Planck equation on embedded Riemannian manifolds.",
+      "llm_tldr_cn": "一种用于求解嵌入黎曼流形上 Fokker-Planck 方程的无网格神经采样方法。",
+      "llm_tldr": "一种用于求解嵌入黎曼流形上 Fokker-Planck 方程的无网格神经采样方法。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.15797v1",
+      "title": "OMNIFLOW: A Physics-Grounded Multimodal Agent for Generalized Scientific Reasoning",
+      "abstract": "Large Language Models (LLMs) have demonstrated exceptional logical reasoning capabilities but frequently struggle with the continuous spatiotemporal dynamics governed by Partial Differential Equations (PDEs), often resulting in non-physical hallucinations. Existing approaches typically resort to costly, domain-specific fine-tuning, which severely limits cross-domain generalization and interpretability. To bridge this gap, we propose OMNIFLOW, a neuro-symbolic architecture designed to ground frozen multimodal LLMs in fundamental physical laws without requiring domain-specific parameter updates. OMNIFLOW introduces a novel \\textit{Semantic-Symbolic Alignment} mechanism that projects high-dimensional flow tensors into topological linguistic descriptors, enabling the model to perceive physical structures rather than raw pixel values. Furthermore, we construct a Physics-Guided Chain-of-Thought (PG-CoT) workflow that orchestrates reasoning through dynamic constraint injection (e.g., mass conservation) and iterative reflexive verification. We evaluate OMNIFLOW on a comprehensive benchmark spanning microscopic turbulence, theoretical Navier-Stokes equations, and macroscopic global weather forecasting. Empirical results demonstrate that OMNIFLOW significantly outperforms traditional deep learning baselines in zero-shot generalization and few-shot adaptation tasks. Crucially, it offers transparent, physically consistent reasoning reports, marking a paradigm shift from black-box fitting to interpretable scientific reasoning.",
+      "authors": [
+        "Hao Wu",
+        "Yongheng Zhang",
+        "Yuan Gao",
+        "Fan Xu",
+        "Fan Zhang",
+        "Ruobing Xie",
+        "Ruijian Gou",
+        "Yuxuan Liang",
+        "Xiaomeng Huang",
+        "Xian Wu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-16T18:29:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.15797v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Neuro-symbolic architecture for grounding LLMs in physical laws (PDEs)",
+      "llm_evidence_cn": "将大语言模型与物理定律（PDE）结合的神经符号架构",
+      "llm_evidence": "将大语言模型与物理定律（PDE）结合的神经符号架构",
+      "canonical_evidence": "将大语言模型与物理定律（PDE）结合的神经符号架构",
+      "llm_tldr_en": "Proposes OMNIFLOW to ground multimodal LLMs in PDEs for generalized scientific reasoning.",
+      "llm_tldr_cn": "提出OMNIFLOW架构，将多模态大模型与物理方程结合，提升科学推理的物理真实性。",
+      "llm_tldr": "提出OMNIFLOW架构，将多模态大模型与物理方程结合，提升科学推理的物理真实性。",
+      "llm_tags": [
+        "query:pinn:composite"
+      ],
+      "matched_query_tag": "query:pinn:composite",
+      "matched_query_text": "Papers central to 物理信息神经网络与神经算子求解偏微分方程论文检索, especially work that connects or combines: p; Physics-informed neural networks for partial differential equations; Neural operator methods for solving PDEs; Deep operator networks for differential equations; Fourier Neural Operator for scientific computing; Deep learning based partial differential equation solvers; Recent advances in physics informed neural networks and neural operators; Comparison between PINNs and neural operators for PDE solving; Applications of neural operators in computational fluid dynamics; Hybrid physics informed machine learning for differential equations.",
+      "matched_requirement_id": "req-composite-pinn",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.17209v1",
+      "title": "A scalable neural bundle map for multiphysics prediction in lithium-ion battery across varying configurations",
+      "abstract": "Efficient and accurate prediction of Multiphysics evolution across diverse cell geometries is fundamental to the design, management and safety of lithium-ion batteries. However, existing computational frameworks struggle to capture the coupled electrochemical, thermal, and mechanical dynamics across diverse cell geometries and varying operating conditions. Here, we present a Neural Bundle Map (NBM), a mathematically rigorous framework that reformulates multiphysics evolution as a bundle map over a geometric base manifold. This approach enables the complete decoupling of geometric complexity from underlying physical laws, ensuring strong operator continuity across varying domains. Our framework achieves high-fidelity spatiotemporal predictions with a normalized mean absolute error of less than 1% across varying configurations, while maintaining stability during long-horizon forecasting far beyond the training window and reducing computational costs by two orders of magnitude compared with conventional solvers. Leveraging this capability, we rapidly explored a vast configurational space to identify an optimal battery design that yields a 38% increase in energy density while adhering to thermal safety constraints. Furthermore, the NBM demonstrates remarkable scalability to multi-cell systems through few-shot transfer learning, providing a foundational paradigm for the intelligent design and real-time monitoring of complex energy storage infrastructures.",
+      "authors": [
+        "Zhiwei Zhao",
+        "Changqing Liu",
+        "Jie Lin",
+        "Fan Yang",
+        "Yifan Zhang",
+        "Yan Jin",
+        "Yingguang Li"
+      ],
+      "primary_category": "cs.CE",
+      "categories": [
+        "cs.CE",
+        "cs.AI"
+      ],
+      "published": "2026-03-17T23:15:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.17209v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "neural bundle map for multiphysics operator continuity",
+      "llm_evidence_cn": "用于多物理场算子连续性的神经丛映射",
+      "llm_evidence": "用于多物理场算子连续性的神经丛映射",
+      "canonical_evidence": "用于多物理场算子连续性的神经丛映射",
+      "llm_tldr_en": "Presents a Neural Bundle Map for predicting multiphysics evolution across varying battery geometries.",
+      "llm_tldr_cn": "提出了一种神经丛映射，用于预测不同电池几何形状下的多物理场演化。",
+      "llm_tldr": "提出了一种神经丛映射，用于预测不同电池几何形状下的多物理场演化。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Neural operator methods for solving PDEs",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.16583v1",
+      "title": "Trajectory-Optimized Time Reparameterization for Learning-Compatible Reduced-Order Modeling of Stiff Dynamical Systems",
+      "abstract": "Stiff dynamical systems present a challenge for machine-learning reduced-order models (ML-ROMs), as explicit time integration becomes unstable in stiff regimes while implicit integration within learning loops is computationally expensive and often degrades training efficiency. Time reparameterization (TR) offers an alternative by transforming the independent variable so that rapid physical-time transients are spread over a stretched-time coordinate, enabling stable explicit integration on uniformly sampled grids. Although several TR strategies have been proposed, their effect on learnability in ML-ROMs remains incompletely understood. This work investigates time reparameterization as a stiffness-mitigation mechanism for neural ODE reduced-order modeling and introduces a trajectory-optimized TR (TOTR) formulation. The proposed approach casts time reparameterization as an optimization problem in arc-length coordinates, in which a traversal-speed profile is selected to penalize acceleration in stretched time. By targeting the smoothness of the training dynamics, this formulation produces reparameterized trajectories that are better conditioned and easier to learn than existing TR methods. TOTR is evaluated on three stiff problems: a parameterized stiff linear system, the van der Pol oscillator, and the HIRES chemical kinetics model. Across all cases, the proposed approach yields smoother reparameterizations and improved physical-time predictions under identical training regimens than other TR approaches. Quantitative results demonstrate loss reductions of one to two orders of magnitude compared to benchmark algorithms. These results highlight that effective stiffness mitigation in ML-ROMs depends critically on the regularity and learnability of the time map itself, and that optimization-based TR provides a robust framework for explicit reduced-order modeling of multiscale dynamical systems.",
+      "authors": [
+        "Joe Standridge",
+        "Daniel Livescu",
+        "Paul Cizmas"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-17T14:33:59+00:00",
+      "link": "https://arxiv.org/pdf/2603.16583v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Machine-learning reduced-order models for stiff systems",
+      "llm_evidence_cn": "刚性系统的机器学习降阶模型",
+      "llm_evidence": "刚性系统的机器学习降阶模型",
+      "canonical_evidence": "刚性系统的机器学习降阶模型",
+      "llm_tldr_en": "Investigates time reparameterization to improve the learnability and stability of ML-based ROMs for stiff ODEs.",
+      "llm_tldr_cn": "研究时间再参数化技术，以提高基于机器学习的刚性常微分方程降阶模型的学习能力和稳定性。",
+      "llm_tldr": "研究时间再参数化技术，以提高基于机器学习的刚性常微分方程降阶模型的学习能力和稳定性。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.17906v1",
+      "title": "Decoupled Divergence-Free Neural Networks Basis Method for Incompressible Fluid Problems",
+      "abstract": "We propose a decoupled divergence-free neural networks basis (Decoupled-DFNN) method for solving incompressible flow problems, including the Stokes and Navier-Stokes equations. To ensure the divergence free property exactly, the velocity field is represented as the curl of a stream function in two dimensions and as the curl of a vector potential in three dimensions. Beyond classical stream-function or velocity-vorticity formulations, we further utilize the properties of the curl operator to derive two specific decoupled subproblems for the velocity (through the stream function or vector potential) and the pressure, respectively. The proposed formulations enable a sequential solution strategy, in which the velocity and pressure are solved independently. To resolve the inherent nonlinearity of the Navier-Stokes equations, we employ a Gauss-Newton linearization strategy, transforming the nonlinear velocity subproblem into a sequence of linear subproblems. These decoupled subproblems for velocity and pressure are subsequently solved using the TransNet framework. Compared with existing methods, the proposed approach reduces computational cost while strictly preserving the incompressibility constraint.",
+      "authors": [
+        "Jinbao Cheng",
+        "Jianguo Huang",
+        "Haoqin Wang",
+        "Tao Zhou"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA",
+        "physics.flu-dyn"
+      ],
+      "published": "2026-03-18T16:43:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.17906v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "neural networks basis method for incompressible fluid problems",
+      "llm_evidence_cn": "用于不可压缩流体问题的神经网络基方法",
+      "llm_evidence": "用于不可压缩流体问题的神经网络基方法",
+      "canonical_evidence": "用于不可压缩流体问题的神经网络基方法",
+      "llm_tldr_en": "Develops a decoupled divergence-free neural network method for solving Stokes and Navier-Stokes equations.",
+      "llm_tldr_cn": "开发了一种解耦的无散神经网络方法，用于求解Stokes和Navier-Stokes方程。",
+      "llm_tldr": "开发了一种解耦的无散神经网络方法，用于求解Stokes和Navier-Stokes方程。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.17750v1",
+      "title": "Towards Infinitely Long Neural Simulations: Self-Refining Neural Surrogate Models for Dynamical Systems",
+      "abstract": "Recent advances in autoregressive neural surrogate models have enabled orders-of-magnitude speedups in simulating dynamical systems. However, autoregressive models are generally prone to distribution drift: compounding errors in autoregressive rollouts that severely degrade generation quality over long time horizons. Existing work attempts to address this issue by implicitly leveraging the inherent trade-off between short-time accuracy and long-time consistency through hyperparameter tuning. In this work, we introduce a unifying mathematical framework that makes this tradeoff explicit, formalizing and generalizing hyperparameter-based strategies in existing approaches. Within this framework, we propose a robust, hyperparameter-free model implemented as a conditional diffusion model that balances short-time fidelity with long-time consistency by construction. Our model, Self-refining Neural Surrogate model (SNS), can be implemented as a standalone model that refines its own autoregressive outputs or as a complementary model to existing neural surrogates to ensure long-time consistency. We also demonstrate the numerical feasibility of SNS through high-fidelity simulations of complex dynamical systems over arbitrarily long time horizons.",
+      "authors": [
+        "Qi Liu",
+        "Laure Zanna",
+        "Joan Bruna"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-18T14:14:40+00:00",
+      "link": "https://arxiv.org/pdf/2603.17750v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Neural surrogate models for dynamical systems and PDEs",
+      "llm_evidence_cn": "用于动力系统和PDE的神经代理模型",
+      "llm_evidence": "用于动力系统和PDE的神经代理模型",
+      "canonical_evidence": "用于动力系统和PDE的神经代理模型",
+      "llm_tldr_en": "Develops a self-refining framework to address distribution drift in long-term neural simulations.",
+      "llm_tldr_cn": "开发了一个自我修正框架，解决了神经代理模型在长程动力系统模拟中的分布漂移问题。",
+      "llm_tldr": "开发了一个自我修正框架，解决了神经代理模型在长程动力系统模拟中的分布漂移问题。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

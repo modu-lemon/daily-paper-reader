@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-18
-- 运行时间：2026-03-18 19:46:36 UTC
+- 最新运行日期：2026-03-19
+- 运行时间：2026-03-19 20:21:25 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度解析 17 篇 AI+Science 论文，重点突破极紫外光刻模拟与电子密度预测两大物理瓶颈。
-满分论文展示了物理信息神经系统在 EUV 电磁波衍射中的卓越表现，以及 FNO 算子在量子化学计算中的高精度应用。
-推荐关注物理规律驱动的 PDE 求解新范式，深入了解 AI 如何重塑底层物理仿真的精度与效率。
-- 详情：[/202603/18/README](/202603/18/README)
+今日精选 17 篇前沿成果，重点攻克强场物理中的鞍点方程求解与具备安全认证的神经 Hamilton-Jacobi 规划。
+满分论文展示了 PINNs 在复杂物理场建模中的卓越性能，同时多模态智能体 OMNIFLOW 正开启通用科学推理的新范式。
+建议深入探索 AI 求解器在物理仿真及安全敏感型规划任务中的应用，把握物理定律与深度学习融合的技术趋势。
+- 详情：[/202603/19/README](/202603/19/README)
 
 ### 精读区论文标签
-1. [Physics-Informed Neural Systems for the Simulation of EUV Electromagnetic Wave Diffraction from a Lithography Mask](/202603/18/2603.15584v2-physics-informed-neural-systems-for-the-simulation-of-euv-electromagnetic-wave-diffraction-from-a-lithography-mask)  
+1. [Physics-informed neural networks for solving saddle-point equations in strong-field physics with tailored fields](/202603/19/2603.15786v2-physics-informed-neural-networks-for-solving-saddle-point-equations-in-strong-field-physics-with-tailored-fields)  
    标签：评分：10.0/10、query:pinn
-   evidence：PINNs 与神经算子在波衍射问题中的对比
-2. [V2Rho-FNO: Fourier Neural Operator for Electronic Density Prediction](/202603/18/2603.15669v1-v2rho-fno-fourier-neural-operator-for-electronic-density-prediction)  
+   evidence：使用PINN求解物理中的鞍点方程
+2. [Contingency-Aware Planning via Certified Neural Hamilton-Jacobi Reachability](/202603/19/2603.17022v1-contingency-aware-planning-via-certified-neural-hamilton-jacobi-reachability)  
    标签：评分：10.0/10、query:pinn
-   evidence：用于电子密度预测的傅里叶神经算子
-3. [Physics-informed neural networks for solving strong-field saddle-point equations in strong-field physics with tailored fields](/202603/18/2603.15786v1-physics-informed-neural-networks-for-solving-strong-field-saddle-point-equations-in-strong-field-physics-with-tailored-fields)  
+   evidence：利用傅里叶神经算子逼近 Hamilton-Jacobi 偏微分方程的解算子
+3. [Translation Invariance of Neural Operators for the FitzHugh-Nagumo Model](/202603/19/2603.17523v1-translation-invariance-of-neural-operators-for-the-fitzhugh-nagumo-model)  
    标签：评分：10.0/10、query:pinn
-   evidence：用于求解鞍点方程的物理信息神经网络
-4. [Physics-integrated neural differentiable modeling for immersed boundary systems](/202603/18/2603.16277v1-physics-integrated-neural-differentiable-modeling-for-immersed-boundary-systems)  
+   evidence：用于FitzHugh-Nagumo偏微分方程的神经算子
+4. [Anisotropic Permeability Tensor Prediction from Porous Media Microstructure via Physics-Informed Progressive Transfer Learning with Hybrid CNN-Transformer](/202603/19/2603.17532v1-anisotropic-permeability-tensor-prediction-from-porous-media-microstructure-via-physics-informed-progressive-transfer-learning-with-hybrid-cnn-transformer)  
    标签：评分：9.0/10、query:pinn
-   evidence：用于浸没边界系统的物理集成神经PDE求解器
-5. [pADAM: A Plug-and-Play All-in-One Diffusion Architecture for Multi-Physics Learning](/202603/18/2603.16757v1-padam-a-plug-and-play-all-in-one-diffusion-architecture-for-multi-physics-learning)  
+   evidence：用于渗透率预测的物理信息深度学习
+5. [Symmetry-Reduced Physics-Informed Learning of Tensegrity Dynamics](/202603/19/2603.17824v1-symmetry-reduced-physics-informed-learning-of-tensegrity-dynamics)  
    标签：评分：9.0/10、query:pinn
-   evidence：用于多物理场PDE学习的统一生成框架
-6. [GIST: Gauge-Invariant Spectral Transformers for Scalable Graph Neural Operators](/202603/18/2603.16849v1-gist-gauge-invariant-spectral-transformers-for-scalable-graph-neural-operators)  
+   evidence：用于张拉整体动力学的对称性简化PINN
+6. [RHYME-XT: A Neural Operator for Spatiotemporal Control Systems](/202603/19/2603.17867v1-rhyme-xt-a-neural-operator-for-spatiotemporal-control-systems)  
    标签：评分：9.0/10、query:pinn
-   evidence：用于网格和图结构数据的可扩展图神经算子
+   evidence：用于时空控制系统的神经算子框架
 
 ### 速读区论文标签
-1. [Disentangled Latent Dynamics Manifold Fusion for Solving Parameterized PDEs](/202603/18/2603.12676v1-disentangled-latent-dynamics-manifold-fusion-for-solving-parameterized-pdes)  
+1. [A Robust Learning-Based Method for the Helmholtz Equation in Dissipative Media and Complex Domains](/202603/19/2603.14193v1-a-robust-learning-based-method-for-the-helmholtz-equation-in-dissipative-media-and-complex-domains)  
    标签：评分：8.0/10、query:pinn
-   evidence：求解参数化偏微分方程的神经代理模型
-2. [PDE-SSM: A Spectral State Space Approach to Spatial Mixing in Diffusion Transformers](/202603/18/2603.13663v1-pde-ssm-a-spectral-state-space-approach-to-spatial-mixing-in-diffusion-transformers)  
+   evidence：亥姆霍兹方程的学习型数值方法
+2. [OMNIFLOW: A Physics-Grounded Multimodal Agent for Generalized Scientific Reasoning](/202603/19/2603.15797v2-omniflow-a-physics-grounded-multimodal-agent-for-generalized-scientific-reasoning)  
    标签：评分：8.0/10、query:pinn
-   evidence：可学习的PDE算子替代Transformer中的注意力机制
-3. [LawMind: A Law-Driven Paradigm for Discovering Analytical Solutions to Partial Differential Equations](/202603/18/2603.14353v1-lawmind-a-law-driven-paradigm-for-discovering-analytical-solutions-to-partial-differential-equations)  
+   evidence：利用神经符号架构将大语言模型植根于受偏微分方程支配的物理定律中
+3. [Neural Pushforward Samplers for the Fokker-Planck Equation on Embedded Riemannian Manifolds](/202603/19/2603.16239v2-neural-pushforward-samplers-for-the-fokker-planck-equation-on-embedded-riemannian-manifolds)  
    标签：评分：8.0/10、query:pinn
-   evidence：偏微分方程解析解的符号发现
-4. [Preconditioned One-Step Generative Modeling for Bayesian Inverse Problems in Function Spaces](/202603/18/2603.14798v1-preconditioned-one-step-generative-modeling-for-bayesian-inverse-problems-in-function-spaces)  
+   evidence：求解流形上 Fokker-Planck 偏微分方程的神经前推方法
+4. [A scalable neural bundle map for multiphysics prediction in lithium-ion battery across varying configurations](/202603/19/2603.17209v1-a-scalable-neural-bundle-map-for-multiphysics-prediction-in-lithium-ion-battery-across-varying-configurations)  
    标签：评分：8.0/10、query:pinn
-   evidence：用于PDE贝叶斯反问题的神经算子骨干网络
-5. [DiFVM: A Vectorized Graph-Based Finite Volume Solver for Differentiable CFD on Unstructured Meshes](/202603/18/2603.15920v1-difvm-a-vectorized-graph-based-finite-volume-solver-for-differentiable-cfd-on-unstructured-meshes)  
+   evidence：用于多物理场算子连续性的神经丛映射
+5. [Decoupled Divergence-Free Neural Networks Basis Method for Incompressible Fluid Problems](/202603/19/2603.17906v1-decoupled-divergence-free-neural-networks-basis-method-for-incompressible-fluid-problems)  
    标签：评分：8.0/10、query:pinn
-   evidence：用于混合物理机器学习的可微计算流体力学
-6. [Differentiable Thermodynamic Phase-Equilibria for Machine Learning](/202603/18/2603.11249v2-differentiable-thermodynamic-phase-equilibria-for-machine-learning)  
+   evidence：用于不可压缩流体问题的神经网络基方法
+6. [Solving physics-constrained inverse problems with conditional flow matching](/202603/19/2603.14135v1-solving-physics-constrained-inverse-problems-with-conditional-flow-matching)  
    标签：评分：7.0/10、query:pinn
-   evidence：热力学相平衡的物理一致性机器学习
-7. [Operator Splitting, Policy Iteration, and Machine Learning for Stochastic Optimal Control](/202603/18/2603.12167v1-operator-splitting-policy-iteration-and-machine-learning-for-stochastic-optimal-control)  
+   evidence：用于反问题的物理约束机器学习
+7. [Solving physics-constrained inverse problems with conditional flow matching](/202603/19/2603.14135v2-solving-physics-constrained-inverse-problems-with-conditional-flow-matching)  
    标签：评分：7.0/10、query:pinn
-   evidence：机器学习求解二阶Hamilton-Jacobi方程
-8. [Weak Adversarial Neural Pushforward Method for Fractional Fokker-Planck Equations](/202603/18/2603.12869v1-weak-adversarial-neural-pushforward-method-for-fractional-fokker-planck-equations)  
+   evidence：使用条件流匹配解决物理约束的逆问题
+8. [OMNIFLOW: A Physics-Grounded Multimodal Agent for Generalized Scientific Reasoning](/202603/19/2603.15797v1-omniflow-a-physics-grounded-multimodal-agent-for-generalized-scientific-reasoning)  
    标签：评分：7.0/10、query:pinn
-   evidence：分数阶Fokker-Planck方程的神经网络求解器
-9. [Computing the Gross-Pitaevskii Ground State via Wasserstein Gradient Flow in Diffeomorphism Space](/202603/18/2603.13579v1-computing-the-gross-pitaevskii-ground-state-via-wasserstein-gradient-flow-in-diffeomorphism-space)  
+   evidence：将大语言模型与物理定律（PDE）结合的神经符号架构
+9. [Trajectory-Optimized Time Reparameterization for Learning-Compatible Reduced-Order Modeling of Stiff Dynamical Systems](/202603/19/2603.16583v1-trajectory-optimized-time-reparameterization-for-learning-compatible-reduced-order-modeling-of-stiff-dynamical-systems)  
    标签：评分：7.0/10、query:pinn
-   evidence：基于神经微分方程的Gross-Pitaevskii方程无网格求解器
-10. [A Score Filter Enhanced Data Assimilation Framework for Data-Driven Dynamical Systems](/202603/18/2603.14863v1-a-score-filter-enhanced-data-assimilation-framework-for-data-driven-dynamical-systems)  
+   evidence：刚性系统的机器学习降阶模型
+10. [Towards Infinitely Long Neural Simulations: Self-Refining Neural Surrogate Models for Dynamical Systems](/202603/19/2603.17750v1-towards-infinitely-long-neural-simulations-self-refining-neural-surrogate-models-for-dynamical-systems)  
+   标签：评分：7.0/10、query:pinn
+   evidence：用于动力系统和PDE的神经代理模型
+11. [Tensorial Reduced-Order Models for Parametric Coupled Reaction-Diffusion Systems: Application to Brain Tumor Growth Modeling](/202603/19/2603.14101v1-tensorial-reduced-order-models-for-parametric-coupled-reaction-diffusion-systems-application-to-brain-tumor-growth-modeling)  
    标签：评分：6.0/10、query:pinn
-   evidence：数据驱动动力系统的数据同化
-11. [Prior-Informed Neural Network Initialization: A Spectral Approach for Function Parameterizing Architectures](/202603/18/2603.16376v1-prior-informed-neural-network-initialization-a-spectral-approach-for-function-parameterizing-architectures)  
-   标签：评分：6.0/10、query:pinn
-   evidence：用于函数参数化的谱方法和快速傅里叶变换
+   evidence：反应扩散系统中参数化正向算子的代理模型
 
 
 <div class="dpr-home-promo-card">
