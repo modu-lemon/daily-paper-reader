@@ -1,0 +1,639 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-20T19:19:54.320122+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 7,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 12,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2603.18328v1",
+      "title": "A Family of Adaptive Activation Functions for Mitigating Failure Modes in Physics-Informed Neural Networks",
+      "abstract": "Physics-Informed Neural Networks(PINNs) are a powerful and flexible learning framework that has gained significant attention in recent years. It has demonstrated strong performance across a wide range of scientific and engineering problems. In parallel, wavelets have been extensively used as efficient computational tools due to their strong approximation capabilities. Motivated by the common failure modes observed in standard PINNs, this work introduces a novel family of adaptive wavelet-based activation functions. The proposed activation functions significantly improve training stability and expressive power by combining trainable wavelet functions with either trainable or fixed hyperbolic tangent and softplus functions. Five distinct activation functions are developed within the PINN framework and systematically evaluated across four representative classes of partial differential equations (PDEs). Comprehensive comparisons using bar plots demonstrate improved robustness and accuracy compared to traditional activation functions. Furthermore, the proposed approach is validated through direct comparisons with baseline PINNs, transformer-based architectures such as PINNsFormer, and other deep learning models, highlighting its effectiveness and generality.",
+      "authors": [
+        "Krishna Murari"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-18T22:24:40+00:00",
+      "link": "https://arxiv.org/pdf/2603.18328v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Adaptive activation functions to mitigate failure modes in PINNs",
+      "llm_evidence_cn": "自适应激活函数以减轻PINN的失效模式",
+      "llm_evidence": "自适应激活函数以减轻PINN的失效模式",
+      "canonical_evidence": "自适应激活函数以减轻PINN的失效模式",
+      "llm_tldr_en": "Introduces wavelet-based adaptive activation functions to improve PINN training stability and power.",
+      "llm_tldr_cn": "引入基于小波的自适应激活函数，提高PINN训练的稳定性和表达能力。",
+      "llm_tldr": "引入基于小波的自适应激活函数，提高PINN训练的稳定性和表达能力。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Physics-informed neural networks for partial differential equations",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.18225v1",
+      "title": "A Hybrid Conditional Diffusion-DeepONet Framework for High-Fidelity Stress Prediction in Hyperelastic Materials",
+      "abstract": "Predicting stress fields in hyperelastic materials with complex microstructures remains challenging for traditional deep learning surrogates, which struggle to capture both sharp stress concentrations and the wide dynamic range of stress magnitudes. Convolutional architectures such as UNet tend to oversmooth high-frequency gradients, while neural operators like DeepONet exhibit spectral bias and underpredict localized extremes. Diffusion models can recover fine-scale structure but often introduce low-frequency amplitude drift, degrading physical scaling. To address these limitations, we propose a hybrid surrogate framework, cDDPM-DeepONet, that decouples stress morphology from magnitude. A conditional denoising diffusion probabilistic model (cDDPM), built on a UNet backbone, generates normalized von Mises stress fields conditioned on geometry and loading. In parallel, a modified DeepONet predicts global scaling parameters (minimum and maximum stress), enabling reconstruction of full-resolution physical stress maps. This separation allows the diffusion model to focus on spatial structure while the operator network corrects global amplitude, mitigating spectral and scaling biases. We evaluate the framework on nonlinear hyperelastic datasets with single and multiple polygonal voids. The proposed model consistently outperforms UNet, DeepONet, and standalone cDDPM baselines by one to two orders of magnitude. Spectral analysis shows strong agreement with finite element solutions across all wavenumbers, preserving both global behavior and localized stress concentrations.",
+      "authors": [
+        "Purna Vindhya Kota",
+        "Meer Mehran Rashid",
+        "Somdatta Goswami",
+        "Lori Graham-Brady"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG"
+      ],
+      "published": "2026-03-18T19:20:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.18225v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Hybrid Diffusion-DeepONet for stress prediction in materials",
+      "llm_evidence_cn": "混合扩散-DeepONet用于材料应力预测",
+      "llm_evidence": "混合扩散-DeepONet用于材料应力预测",
+      "canonical_evidence": "混合扩散-DeepONet用于材料应力预测",
+      "llm_tldr_en": "Proposes a hybrid framework combining diffusion models and DeepONet for high-fidelity material stress modeling.",
+      "llm_tldr_cn": "提出结合扩散模型与DeepONet的混合框架，用于高保真材料应力建模。",
+      "llm_tldr": "提出结合扩散模型与DeepONet的混合框架，用于高保真材料应力建模。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep operator networks for differential equations",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.19165v1",
+      "title": "Rigorous Error Certification for Neural PDE Solvers: From Empirical Residuals to Solution Guarantees",
+      "abstract": "Uncertainty quantification for partial differential equations is traditionally grounded in discretization theory, where solution error is controlled via mesh/grid refinement. Physics-informed neural networks fundamentally depart from this paradigm: they approximate solutions by minimizing residual losses at collocation points, introducing new sources of error arising from optimization, sampling, representation, and overfitting. As a result, the generalization error in the solution space remains an open problem.   Our main theoretical contribution establishes generalization bounds that connect residual control to solution-space error. We prove that when neural approximations lie in a compact subset of the solution space, vanishing residual error guarantees convergence to the true solution. We derive deterministic and probabilistic convergence results and provide certified generalization bounds translating residual, boundary, and initial errors into explicit solution error guarantees.",
+      "authors": [
+        "Amartya Mukherjee",
+        "Maxwell Fitzsimmons",
+        "David C. Del Rey Fernández",
+        "Jun Liu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "math.AP",
+        "math.FA"
+      ],
+      "published": "2026-03-19T17:19:48+00:00",
+      "link": "https://arxiv.org/pdf/2603.19165v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "error certification and generalization bounds for PINNs",
+      "llm_evidence_cn": "PINN的误差认证与泛化界限研究",
+      "llm_evidence": "PINN的误差认证与泛化界限研究",
+      "canonical_evidence": "PINN的误差认证与泛化界限研究",
+      "llm_tldr_en": "Establishes theoretical generalization bounds connecting residual control to solution-space error for neural PDE solvers.",
+      "llm_tldr_cn": "建立了将残差控制与神经PDE求解器解空间误差联系起来的理论泛化界限。",
+      "llm_tldr": "建立了将残差控制与神经PDE求解器解空间误差联系起来的理论泛化界限。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Physics-informed neural networks for partial differential equations",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.16186v1",
+      "title": "Weak Adversarial Neural Pushforward Method for the McKean-Vlasov / Mean-Field Fokker-Planck Equation",
+      "abstract": "We extend the Weak Adversarial Neural Pushforward Method (WANPM) to the McKean-Vlasov mean-field Fokker-Planck equation. For the quadratic interaction kernel, the mean-field nonlinearity reduces to a batch sample mean, requiring no secondary sampling. We focus on the stationary problem, identifying key training subtleties: gradient flow through the self-consistent mean estimate is essential for uniqueness, and adversarial test function frequencies must be initialized at a sufficiently large scale to avoid spurious minimizers. A numerical benchmark on the 1D linear McKean-Vlasov equation confirms accurate recovery of the exact Gaussian stationary distribution.",
+      "authors": [
+        "Andrew Qing He",
+        "Wei Cai"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-17T07:13:14+00:00",
+      "link": "https://arxiv.org/pdf/2603.16186v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Neural method for solving the McKean-Vlasov Fokker-Planck PDE",
+      "llm_evidence_cn": "求解McKean-Vlasov Fokker-Planck偏微分方程的神经方法",
+      "llm_evidence": "求解McKean-Vlasov Fokker-Planck偏微分方程的神经方法",
+      "canonical_evidence": "求解McKean-Vlasov Fokker-Planck偏微分方程的神经方法",
+      "llm_tldr_en": "Extends the Weak Adversarial Neural Pushforward Method to solve mean-field Fokker-Planck equations.",
+      "llm_tldr_cn": "将弱对抗神经推前方法扩展到求解平均场Fokker-Planck方程。",
+      "llm_tldr": "将弱对抗神经推前方法扩展到求解平均场Fokker-Planck方程。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.16239v1",
+      "title": "Neural Pushforward Samplers for the Fokker-Planck Equation on Embedded Riemannian Manifolds",
+      "abstract": "We extend the Weak Adversarial Neural Pushforward (WANPF) Method to the Fokker--Planck equation posed on a compact, smoothly embedded Riemannian manifold M in $R^n$. The key observation is that the weak formulation of the Fokker--Planck equation, together with the ambient-space representation of the Laplace--Beltrami operator via the tangential projection $P(x)$ and the mean-curvature vector $H(x)$, permits all integrals to be evaluated as expectations over samples lying on M, using test functions defined globally on $R^n$. A neural pushforward map is constrained to map the support of a base distribution into M at all times through a manifold retraction, so that probability conservation and manifold membership are enforced by construction. Adversarial ambient plane-wave test functions are chosen, and their Laplace--Beltrami operators are derived in closed form, enabling autodiff-free, mesh-free training. We present both a steady-state and a time-dependent formulation, derive explicit Laplace--Beltrami formulae for the sphere $S^{n-1}$ and the flat torus $T^n$, and demonstrate the method numerically on a double-well steady-state Fokker--Planck equation on $S^2$.",
+      "authors": [
+        "Andrew Qing He",
+        "Wei Cai"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA",
+        "cs.LG"
+      ],
+      "published": "2026-03-17T08:24:52+00:00",
+      "link": "https://arxiv.org/pdf/2603.16239v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "neural pushforward map for solving Fokker-Planck equations on manifolds",
+      "llm_evidence_cn": "流形上Fokker-Planck方程的神经网络推进映射求解",
+      "llm_evidence": "流形上Fokker-Planck方程的神经网络推进映射求解",
+      "canonical_evidence": "流形上Fokker-Planck方程的神经网络推进映射求解",
+      "llm_tldr_en": "Applies neural pushforward samplers to solve Fokker-Planck equations on embedded Riemannian manifolds.",
+      "llm_tldr_cn": "应用神经网络推进采样器求解嵌入黎曼流形上的Fokker-Planck方程。",
+      "llm_tldr": "应用神经网络推进采样器求解嵌入黎曼流形上的Fokker-Planck方程。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.18907v1",
+      "title": "Neural Galerkin Normalizing Flow for Transition Probability Density Functions of Diffusion Models",
+      "abstract": "We propose a new Neural Galerkin Normalizing Flow framework to approximate the transition probability density function of a diffusion process by solving the corresponding Fokker-Planck equation with an atomic initial distribution, parametrically with respect to the location of the initial mass. By using Normalizing Flows, we look for the solution as a transformation of the transition probability density function of a reference stochastic process, ensuring that our approximation is structure-preserving and automatically satisfies positivity and mass conservation constraints. By extending Neural Galerkin schemes to the context of Normalizing Flows, we derive a system of ODEs for the time evolution of the Normalizing Flow's parameters. Adaptive sampling routines are used to evaluate the Fokker-Planck residual in meaningful locations, which is of vital importance to address high-dimensional PDEs. Numerical results show that this strategy captures key features of the true solution and enforces the causal relationship between the initial datum and the density function at subsequent times. After completing an offline training phase, online evaluation becomes significantly more cost-effective than solving the PDE from scratch. The proposed method serves as a promising surrogate model, which could be deployed in many-query problems associated with stochastic differential equations, like Bayesian inference, simulation, and diffusion bridge generation.",
+      "authors": [
+        "Riccardo Saporiti",
+        "Fabio Nobile"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "math.NA"
+      ],
+      "published": "2026-03-19T13:43:18+00:00",
+      "link": "https://arxiv.org/pdf/2603.18907v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Neural Galerkin framework for solving Fokker-Planck equations",
+      "llm_evidence_cn": "求解Fokker-Planck方程的神经Galerkin框架",
+      "llm_evidence": "求解Fokker-Planck方程的神经Galerkin框架",
+      "canonical_evidence": "求解Fokker-Planck方程的神经Galerkin框架",
+      "llm_tldr_en": "A Neural Galerkin Normalizing Flow framework to approximate transition probability density functions of PDEs.",
+      "llm_tldr_cn": "一种神经Galerkin归一化流框架，用于近似偏微分方程的转移概率密度函数。",
+      "llm_tldr": "一种神经Galerkin归一化流框架，用于近似偏微分方程的转移概率密度函数。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.19096v1",
+      "title": "GLENN: Neural network-enhanced computation of Ginzburg-Landau energy minimizers",
+      "abstract": "In this work, we propose a neural network-enhanced finite element strategy to compute the minimizer of the Ginzburg--Landau energy based on an unsupervised deep Ritz-type strategy. We treat the parameter $κ$ as a variable input parameter to obtain possible minimizers for a large range of $κ$-values. This allows for two possible strategies: 1) The neural network may be extensively trained to work as a stand-alone solver. 2) Neural network results are used as starting values for a subsequent classical iterative minimization procedure. The latter strategy particularly circumvents the missing reliability of the neural network-based approach. Numerical examples are presented that show the potential of the proposed strategy.",
+      "authors": [
+        "Michael Crocoll",
+        "Christian Döding",
+        "Benjamin Dörich",
+        "Roland Maier"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-19T16:21:56+00:00",
+      "link": "https://arxiv.org/pdf/2603.19096v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Unsupervised deep Ritz-type strategy for energy minimizers",
+      "llm_evidence_cn": "用于能量极小化器的无监督深度Ritz策略",
+      "llm_evidence": "用于能量极小化器的无监督深度Ritz策略",
+      "canonical_evidence": "用于能量极小化器的无监督深度Ritz策略",
+      "llm_tldr_en": "Proposes a neural network-enhanced finite element strategy for computing Ginzburg-Landau energy minimizers.",
+      "llm_tldr_cn": "提出一种神经网络增强的有限元策略，用于计算Ginzburg-Landau能量极小值点。",
+      "llm_tldr": "提出一种神经网络增强的有限元策略，用于计算Ginzburg-Landau能量极小值点。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.15091v1",
+      "title": "Trustworthy Koopman Operator Learning: Invariance Diagnostics and Error Bounds",
+      "abstract": "Koopman operator theory provides a global linear representation of nonlinear dynamics and underpins many data-driven methods. In practice, however, finite-dimensional feature spaces induced by a user-chosen dictionary are rarely invariant, so closure failures and projection errors lead to spurious eigenvalues, misleading Koopman modes, and overconfident forecasts. This paper addresses a central validation problem in data-driven Koopman methods: how to quantify invariance and projection errors for an arbitrary feature space using only snapshot data, and how to use these diagnostics to produce actionable guarantees and guide dictionary refinement? A unified a posteriori methodology is developed for certifying when a Koopman approximation is trustworthy and improving it when it is not. Koopman invariance is quantified using principal angles between a subspace and its Koopman image, yielding principal observables and a principal angle decomposition (PAD), a dynamics-informed alternative to SVD truncation with significantly improved performance. Multi-step error bounds are derived for Koopman and Perron--Frobenius mode decompositions, including RKHS-based pointwise guarantees, and are complemented by Gaussian process expected error surrogates. The resulting toolbox enables validated spectral analysis, certified forecasting, and principled dictionary and kernel learning, demonstrated on chaotic and high-dimensional benchmarks and real-world datasets, including cavity flow and the Pluto--Charon system.",
+      "authors": [
+        "Gustav Conradie",
+        "Nicolas Boullé",
+        "Jean-Christophe Loiseau",
+        "Steven L. Brunton",
+        "Matthew J. Colbrook"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA",
+        "cs.LG",
+        "math.DS",
+        "math.OC"
+      ],
+      "published": "2026-03-16T10:44:31+00:00",
+      "link": "https://arxiv.org/pdf/2603.15091v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "diagnostics and error bounds for Koopman operator learning",
+      "llm_evidence_cn": "Koopman算子学习的诊断与误差界限",
+      "llm_evidence": "Koopman算子学习的诊断与误差界限",
+      "canonical_evidence": "Koopman算子学习的诊断与误差界限",
+      "llm_tldr_en": "A methodology for certifying invariance and projection errors in data-driven Koopman operator methods.",
+      "llm_tldr_cn": "一种用于证明数据驱动Koopman算子方法中不变性和投影误差的方法论。",
+      "llm_tldr": "一种用于证明数据驱动Koopman算子方法中不变性和投影误差的方法论。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Neural operator methods for solving PDEs",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.13496v1",
+      "title": "Deep Invertible Autoencoders for Dimensionality Reduction of Dynamical Systems",
+      "abstract": "Constructing reduced-order models (ROMs) capable of efficiently predicting the evolution of high-dimensional, parametric systems is crucial in many applications in engineering and applied sciences. A popular class of projection-based ROMs projects the high-dimensional full-order model (FOM) dynamics onto a low-dimensional manifold. These projection-based ROMs approaches often rely on classical model reduction techniques such as proper orthogonal decomposition (POD) or, more recently, on neural network architectures such as autoencoders (AEs). In the case that the ROM is constructed by the POD, one has approximation guaranteed based based on the singular values of the problem at hand. However, POD-based techniques can suffer from slow decay of the singular values in transport- and advection-dominated problems. In contrast to that, AEs allow for better reduction capabilities than the POD, often with the first few modes, but at the price of theoretical considerations. In addition, it is often observed, that AEs exhibits a plateau of the projection error with the increment of the dimension of the trial manifold. In this work, we propose a deep invertible AE architecture, named inv-AE, that improves upon the stagnation of the projection error typical of traditional AE architectures, e.g., convolutional, and the reconstructions quality. Inv-AE is composed of several invertible neural network layers that allows for gradually recovering more information about the FOM solutions the more we increase the dimension of the reduced manifold. Through the application of inv-AE to a parametric 1D Burgers' equation and a parametric 2D fluid flow around an obstacle with variable geometry, we show that (i) inv-AE mitigates the issue of the characteristic plateau of (convolutional) AEs and (ii) inv-AE can be combined with popular projection-based ROM approaches to improve their accuracy.",
+      "authors": [
+        "Nicolò Botteghi",
+        "Silke Glas",
+        "Christoph Brune"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-13T18:19:32+00:00",
+      "link": "https://arxiv.org/pdf/2603.13496v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Neural network architectures for dimensionality reduction of dynamical systems",
+      "llm_evidence_cn": "用于动力系统降维的神经网络架构",
+      "llm_evidence": "用于动力系统降维的神经网络架构",
+      "canonical_evidence": "用于动力系统降维的神经网络架构",
+      "llm_tldr_en": "Explores deep invertible autoencoders for constructing reduced-order models of parametric systems.",
+      "llm_tldr_cn": "探索了用于构建参数系统降阶模型的深度可逆自编码器。",
+      "llm_tldr": "探索了用于构建参数系统降阶模型的深度可逆自编码器。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.15284v1",
+      "title": "Multilevel Sparse Tensor Approximation for High-Dimensional Parametric PDEs",
+      "abstract": "In this paper the efficiency of multilevel sparse tensor approximation methods for high-dimensional affine parametric diffusion equations is investigated. Methodologically, the recently presented Sparse Alternating Least Squares (SALS) algorithm is employed to construct adaptive tensor train (TT) approximations of quantities of interest (QoI). By combining this tensor-based approach with a multilevel Galerkin discretization strategy, the solution's regularity can be exploited to significantly reduce computational costs by level-adapted sample sizes. A rigorous theoretical analysis is derived, demonstrating that the work overhead for the proposed multilevel method remains independent of the discretization level, which stands in stark contrast to the exponential growth observed in single-level approaches. The presented analysis is quite general and not constrained to the sparse TT format but uses a generic framework that can be extended to other model classes. Numerical experiments validate the predicted efficiency gains in high-dimensional settings.",
+      "authors": [
+        "Martin Eigel",
+        "Philipp Trunschke",
+        "Dana Wrischnig"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-16T13:47:10+00:00",
+      "link": "https://arxiv.org/pdf/2603.15284v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "multilevel sparse tensor approximation for parametric PDEs",
+      "llm_evidence_cn": "用于参数化偏微分方程的多级稀疏张量逼近",
+      "llm_evidence": "用于参数化偏微分方程的多级稀疏张量逼近",
+      "canonical_evidence": "用于参数化偏微分方程的多级稀疏张量逼近",
+      "llm_tldr_en": "Investigates multilevel sparse tensor methods for high-dimensional parametric diffusion equations.",
+      "llm_tldr_cn": "研究了用于高维参数化扩散方程的多级稀疏张量逼近方法。",
+      "llm_tldr": "研究了用于高维参数化扩散方程的多级稀疏张量逼近方法。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.14831v2",
+      "title": "Neural Networks as Local-to-Global Computations",
+      "abstract": "We construct a cellular sheaf from any feedforward ReLU neural network by placing one vertex for each intermediate quantity in the forward pass and encoding each computational step - affine transformation, activation, output - as a restriction map on an edge. The restricted coboundary operator on the free coordinates is unitriangular, so its determinant is $1$ and the restricted Laplacian is positive definite for every activation pattern. It follows that the relative cohomology vanishes and the forward pass output is the unique harmonic extension of the boundary data. The sheaf heat equation converges exponentially to this output despite the state-dependent switching introduced by piecewise linear activations. Unlike the forward pass, the heat equation propagates information bidirectionally across layers, enabling pinned neurons that impose constraints in both directions, training through local discrepancy minimization without a backward pass, and per-edge diagnostics that decompose network behavior by layer and operation type. We validate the framework experimentally on small synthetic tasks, confirming the convergence theorems and demonstrating that sheaf-based training, while not yet competitive with stochastic gradient descent, obeys quantitative scaling laws predicted by the theory.",
+      "authors": [
+        "Vicente Bosca",
+        "Robert Ghrist"
+      ],
+      "primary_category": "math.AT",
+      "categories": [
+        "math.AT",
+        "cs.LG",
+        "math.DS"
+      ],
+      "published": "2026-03-16T05:23:31+00:00",
+      "link": "https://arxiv.org/pdf/2603.14831v2",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Neural networks interpreted through sheaf theory and heat equations",
+      "llm_evidence_cn": "通过层论和热方程解释神经网络",
+      "llm_evidence": "通过层论和热方程解释神经网络",
+      "canonical_evidence": "通过层论和热方程解释神经网络",
+      "llm_tldr_en": "Models ReLU networks as cellular sheaves where the forward pass is a harmonic extension of boundary data.",
+      "llm_tldr_cn": "将 ReLU 网络建模为细胞层，其中前向传播被视为边界数据的调和延拓。",
+      "llm_tldr": "将 ReLU 网络建模为细胞层，其中前向传播被视为边界数据的调和延拓。",
+      "llm_tags": [
+        "query:pinn:composite"
+      ],
+      "matched_query_tag": "query:pinn:composite",
+      "matched_query_text": "Papers central to 物理信息神经网络与神经算子求解偏微分方程论文检索, especially work that connects or combines: p; Physics-informed neural networks for partial differential equations; Neural operator methods for solving PDEs; Deep operator networks for differential equations; Fourier Neural Operator for scientific computing; Deep learning based partial differential equation solvers; Recent advances in physics informed neural networks and neural operators; Comparison between PINNs and neural operators for PDE solving; Applications of neural operators in computational fluid dynamics; Hybrid physics informed machine learning for differential equations.",
+      "matched_requirement_id": "req-composite-pinn",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.18237v1",
+      "title": "Gradient-Informed Temporal Sampling Improves Rollout Accuracy in PDE Surrogate Training",
+      "abstract": "Researchers train neural simulators on uniformly sampled numerical simulation data. But under the same budget, does systematically sampled data provide the most effective information? A fundamental yet unformalized problem is how to sample training data for neural simulators so as to maximize rollout accuracy. Existing data sampling methods either tend to collapse into locally high-information-density regions, or preserve diversity but remain insufficiently model-specific, often leading to performance that is no better than uniform sampling. To address this, we propose a data sampling method tailored to neural simulators, Gradient-Informed Temporal Sampling (GITS). GITS jointly optimizes pilot-model local gradients and set-level temporal coverage, thereby effectively balancing model specificity and dynamical information. Compared with multiple sampling baselines, the data selected by GITS achieves lower rollout error across multiple PDE systems, model backbones and sample ratios. Furthermore, ablation studies demonstrate the necessity and complementarity of the two optimization objectives in GITS. In addition, we analyze the successful sampling patterns of GITS as well as the typical PDE systems and model backbones on which GITS fails.",
+      "authors": [
+        "Wenshuo Wang",
+        "Fan Zhang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-18T19:45:44+00:00",
+      "link": "https://arxiv.org/pdf/2603.18237v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Data sampling for training neural PDE simulators",
+      "llm_evidence_cn": "用于训练神经 PDE 模拟器的数据采样",
+      "llm_evidence": "用于训练神经 PDE 模拟器的数据采样",
+      "canonical_evidence": "用于训练神经 PDE 模拟器的数据采样",
+      "llm_tldr_en": "Proposes GITS, a gradient-informed sampling method to improve the rollout accuracy of neural PDE solvers.",
+      "llm_tldr_cn": "提出 GITS，一种梯度信息采样方法，旨在提高神经 PDE 求解器的滚动预测精度。",
+      "llm_tldr": "提出 GITS，一种梯度信息采样方法，旨在提高神经 PDE 求解器的滚动预测精度。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.19043v1",
+      "title": "Complexity bounds on neural networks for the solution of structured linear systems of equations",
+      "abstract": "We derive upper bounds on the complexity of ReLU neural networks approximating the solution of a linear system given the matrix and the right-hand side. We focus on matrices which are symmetric positive definite and sparse, as they appear in the context of finite difference and finite element methods. For such matrices, we extend available results for the matrix inversion to the task of solving a linear system, where we leverage favorable properties of classical methods such as the modified Richardson and the conjugate gradient method. Our bounds on the number of layers and neurons are not only explicit with respect to the size of the matrices, but also with respect to their condition numbers.",
+      "authors": [
+        "Benjamin Dörich",
+        "Roland Maier",
+        "Lukas Ullmer"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-19T15:39:32+00:00",
+      "link": "https://arxiv.org/pdf/2603.19043v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Neural network complexity for linear systems in finite element contexts",
+      "llm_evidence_cn": "有限元背景下线性系统的神经网络复杂度",
+      "llm_evidence": "有限元背景下线性系统的神经网络复杂度",
+      "canonical_evidence": "有限元背景下线性系统的神经网络复杂度",
+      "llm_tldr_en": "Derives complexity bounds for ReLU networks approximating solutions to structured linear systems from PDEs.",
+      "llm_tldr_cn": "推导了ReLU网络在近似求解源自PDE的结构化线性系统时的复杂度界限。",
+      "llm_tldr": "推导了ReLU网络在近似求解源自PDE的结构化线性系统时的复杂度界限。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.18251v1",
+      "title": "Christoffel Adaptive Sampling for Sparse Random Feature Expansions",
+      "abstract": "Random Feature Models (RFMs) have become a powerful tool for approximating multivariate functions and solving partial differential equations efficiently. Sparse Random Feature Expansions (SRFE) improve traditional RFMs by incorporating sparsity, making it particularly effective in data-scarce settings. In this work, we integrate active learning with sparse random feature approximations to improve sampling efficiency. Specifically, we incorporate the Christoffel function to guide an adaptive sampling process, dynamically selecting informative sample points based on their contribution to the function space. This approach optimizes the distribution of sample points by leveraging the Christoffel function associated with an iteratively-chosen basis obtained by the sparse recovery solver. We conduct numerical experiments comparing adaptive and nonadaptive sampling strategies with the SRFE framework and examine their accuracy for various function approximation tasks. Overall, our results demonstrate the advantages of adaptive sampling in maintaining high accuracy while reducing sample complexity for SRFE, highlighting its potential for scientific computing tasks where data is expensive to acquire.",
+      "authors": [
+        "Ben Adcock",
+        "Khiem Can",
+        "Xuemeng Wang"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-18T20:19:49+00:00",
+      "link": "https://arxiv.org/pdf/2603.18251v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Solving partial differential equations using random feature models",
+      "llm_evidence_cn": "使用随机特征模型求解偏微分方程",
+      "llm_evidence": "使用随机特征模型求解偏微分方程",
+      "canonical_evidence": "使用随机特征模型求解偏微分方程",
+      "llm_tldr_en": "Integrates active learning with sparse random feature expansions for efficient PDE solving.",
+      "llm_tldr_cn": "结合主动学习与稀疏随机特征扩展，提高偏微分方程求解的采样效率。",
+      "llm_tldr": "结合主动学习与稀疏随机特征扩展，提高偏微分方程求解的采样效率。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.18331v1",
+      "title": "Understanding the Theoretical Foundations of Deep Neural Networks through Differential Equations",
+      "abstract": "Deep neural networks (DNNs) have achieved remarkable empirical success, yet the absence of a principled theoretical foundation continues to hinder their systematic development. In this survey, we present differential equations as a theoretical foundation for understanding, analyzing, and improving DNNs. We organize the discussion around three guiding questions: i) how differential equations offer a principled understanding of DNN architectures, ii) how tools from differential equations can be used to improve DNN performance in a principled way, and iii) what real-world applications benefit from grounding DNNs in differential equations. We adopt a two-fold perspective spanning the model level, which interprets the whole DNN as a differential equation, and the layer level, which models individual DNN components as differential equations. From these two perspectives, we review how this framework connects model design, theoretical analysis, and performance improvement. We further discuss real-world applications, as well as key challenges and opportunities for future research.",
+      "authors": [
+        "Hongjue Zhao",
+        "Yizhuo Chen",
+        "Yuchen Wang",
+        "Hairong Qi",
+        "Lui Sha",
+        "Tarek Abdelzaher",
+        "Huajie Shao"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-18T22:41:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.18331v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Survey on differential equations as a foundation for DNNs",
+      "llm_evidence_cn": "关于微分方程作为深度神经网络理论基础的综述",
+      "llm_evidence": "关于微分方程作为深度神经网络理论基础的综述",
+      "canonical_evidence": "关于微分方程作为深度神经网络理论基础的综述",
+      "llm_tldr_en": "A survey exploring the theoretical links between differential equations and deep neural network architectures.",
+      "llm_tldr_cn": "一份探讨微分方程与深度神经网络架构之间理论联系的综述。",
+      "llm_tldr": "一份探讨微分方程与深度神经网络架构之间理论联系的综述。",
+      "llm_tags": [
+        "query:pinn:composite"
+      ],
+      "matched_query_tag": "query:pinn:composite",
+      "matched_query_text": "Papers central to 物理信息神经网络与神经算子求解偏微分方程论文检索, especially work that connects or combines: p; Physics-informed neural networks for partial differential equations; Neural operator methods for solving PDEs; Deep operator networks for differential equations; Fourier Neural Operator for scientific computing; Deep learning based partial differential equation solvers; Recent advances in physics informed neural networks and neural operators; Comparison between PINNs and neural operators for PDE solving; Applications of neural operators in computational fluid dynamics; Hybrid physics informed machine learning for differential equations.",
+      "matched_requirement_id": "req-composite-pinn",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.18527v1",
+      "title": "Born-Series-Inspired Residual Metric for Learning-based Preconditioners",
+      "abstract": "Loss functions for learning-based PDE preconditioners implicitly choose a \\emph{metric} in which residuals are matched, yet most approaches still optimize an unpreconditioned Euclidean residual norm. For indefinite operators such as the high-frequency Helmholtz equation, this default metric can make both learning and iterative correction overly sensitive to near-resonant spectral components, while classical preconditioning succeeds precisely by reshaping the residual geometry. We show that the Born Series and shifted-Laplacian left preconditioning are linked by the identity $ I-G_ηV_η= G_ηA = L_η^{-1}A, $ which turns the reference Green operator $G_η$ into a natural Riesz-map residual metric $ R_η= G_η^\\ast G_η$ and suggests measuring the physical residual via $ \\|r\\|_{R_η}=\\|G_ηr\\|_2. $ Building on this viewpoint, we propose a \\emph{Neural Preconditioned Born Series} (NPBS) iteration that replaces the scalar CBS relaxation with a residual-driven neural operator, together with a metric-matched Born-series-inspired loss $\\mathcal{L}_{\\mathrm{bs}}^{R_η}$. The framework is architecture-agnostic and supports fast $\\mathcal{O}(N\\log N)$ evaluation via FFT/DST/DCT. Numerical experiments on heterogeneous Helmholtz problems demonstrate the effectiveness of our method, and its advantage becomes more pronounced as the systems grow more ill-conditioned; we then extend the framework to other PDE classes, including convection--diffusion--reaction equations and linearized Newton systems for nonlinear PDEs, where it also yields substantial iteration reductions.",
+      "authors": [
+        "Juntao Wang",
+        "Xinliang Liu",
+        "Jiwei Jia"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-19T06:17:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.18527v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Learning-based PDE preconditioners and residual metrics",
+      "llm_evidence_cn": "基于学习的 PDE 预条件子和残差度量",
+      "llm_evidence": "基于学习的 PDE 预条件子和残差度量",
+      "canonical_evidence": "基于学习的 PDE 预条件子和残差度量",
+      "llm_tldr_en": "Develops a Born-series-inspired residual metric to improve the training of learning-based PDE preconditioners.",
+      "llm_tldr_cn": "开发了一种受 Born 系列启发的残差度量，以改进基于学习的 PDE 预条件子的训练。",
+      "llm_tldr": "开发了一种受 Born 系列启发的残差度量，以改进基于学习的 PDE 预条件子的训练。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.18548v1",
+      "title": "SINDy-KANs: Sparse identification of non-linear dynamics through Kolmogorov-Arnold networks",
+      "abstract": "Kolmogorov-Arnold networks (KANs) have arisen as a potential way to enhance the interpretability of machine learning. However, solutions learned by KANs are not necessarily interpretable, in the sense of being sparse or parsimonious. Sparse identification of nonlinear dynamics (SINDy) is a complementary approach that allows for learning sparse equations for dynamical systems from data; however, learned equations are limited by the library. In this work, we present SINDy-KANs, which simultaneously train a KAN and a SINDy-like representation to increase interpretability of KAN representations with SINDy applied at the level of each activation function, while maintaining the function compositions possible through deep KANs. We apply our method to a number of symbolic regression tasks, including dynamical systems, to show accurate equation discovery across a range of systems.",
+      "authors": [
+        "Amanda A. Howard",
+        "Nicholas Zolman",
+        "Bruno Jacob",
+        "Steven L. Brunton",
+        "Panos Stinis"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-19T07:03:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.18548v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "hybrid KAN and SINDy for nonlinear dynamics identification",
+      "llm_evidence_cn": "结合KAN与SINDy的混合非线性动力学识别",
+      "llm_evidence": "结合KAN与SINDy的混合非线性动力学识别",
+      "canonical_evidence": "结合KAN与SINDy的混合非线性动力学识别",
+      "llm_tldr_en": "Combines Kolmogorov-Arnold Networks with SINDy to learn interpretable sparse equations for dynamical systems.",
+      "llm_tldr_cn": "结合KAN与SINDy方法，从数据中学习动力系统可解释的稀疏方程。",
+      "llm_tldr": "结合KAN与SINDy方法，从数据中学习动力系统可解释的稀疏方程。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
