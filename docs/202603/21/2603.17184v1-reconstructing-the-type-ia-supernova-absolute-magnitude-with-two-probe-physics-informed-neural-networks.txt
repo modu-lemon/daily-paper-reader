@@ -1,0 +1,990 @@
+Title: Reconstructing the Type Ia Supernova Absolute Magnitude with Two-Probe Physics-Informed Neural Networks
+
+URL Source: https://arxiv.org/pdf/2603.17184v1
+
+Published Time: Thu, 19 Mar 2026 00:26:02 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+## Reconstructing the Type Ia Supernova Absolute Magnitude with Two-Probe Physics-Informed Neural Networks 
+
+Denitsa Staicova 1, ∗
+
+> 1
+
+Institute for Nuclear Research and Nuclear Energy, Bulgarian Academy of Sciences 
+
+We apply two variants of Physics-Informed Neural Networks (PINNs) to reconstruct the Type Ia supernova absolute magnitude MB (z) from joint BAO and supernova data under four cosmolog-ical models ( ΛCDM, CPL, GEDE, ΛsCDM) and two DESI DR2 fiducial sets. A heteroscedastic single-network method tested across four constraint configurations establishes that the Etherington distance duality relation is more fundamental constraint than cosmological model priors, with DDR violations of 30–52 mmag under physical constraints versus 85–2330 mmag without. Under full constraints all models recover MB ≈ − 19 .3 mag with biases below 0.05 mag. A Fisher information-weighted two-network variant trains independent networks on BAO and SN data, providing clean probe separation and finding no significant MB evolution in z ∈ [0 .3, 1.5] . The heteroscedastic method identifies a persistent 2 − 3σ residual at z ∼ 0.4 − 0.5 that is consistent across all four mod-els and both fiducials; the Fisher method finds no significant pointwise deviation in z ∈ [0 .3, 1.5] 
+
+but shows a systematic separation of redshift-binned MB distributions consistent with the same underlying tension. While the origin of this feature remains ambiguous, its model-independence and cross-method consistency warrant further investigation with forthcoming data. 
+
+I. INTRODUCTION 
+
+The standardization of Type Ia supernovae (SNe Ia) as cosmological distance indicators rests on the assumption that their peak luminosities, after corrections for light curve shape and color, yield a universal absolute magni-tude MB ≈ − 19 .3 mag in the B-band [1]. Accumulat-ing evidence, however, suggests this assumption may be oversimplified. Recent analyses report statistically sig-nificant evolution in Hubble residuals that persist after accounting for observational systematics, attributed to metallicity evolution in progenitor populations, changes in explosion physics, or host-galaxy environmental de-pendencies correlated with redshift or as a sign of the Hubble tension [2–12]. While in some papers, there is a claim for more than 3σ deviation in MB (z), its posi-tion on the z-axis and physical origins differ. Rigorous, model-independent tests of MB (z) evolution are therefore needed for establishing the reliability of supernova-based cosmological constraints and for identifying potential new physics. In previous works we developed non-parametric re-construction of absolute magnitude MB (z) from BAO data using Gaussian Process (GP) regression and artifi-cial neural networks (ANN) [13, 14]. The results showed that MB remains constant within 1σ at current data pre-cision, consistent with the analyses cited above. In the current paper, we re-examine the reconstruction MB (z)
+
+through the PINN method and test whether it exhibits systematic evolution beyond intrinsic supernova scatter. The main tool we use is a Physics-Informed Neural Network (PINN) [15–19] that is capable of simultane-ously fitting BAO and SNe Ia data, while enforcing the Etherington distance duality relation dL = (1 + z)2DA 
+
+> ∗dstaicova@inrne.bas.bg
+
+and the model cosmology s a hard loss term. We formulate training as heteroscedastic maximum likeli-hood, learning both the distance-redshift relations and their redshift-dependent uncertainties. By enabling or disabling the distance duality and cosmological model constraints independently, we obtain four configurations (TT, TF, FT, FF) that isolate the contribution of each prior to the final MB (z) reconstruction. We apply this to four models spanning standard and dynamical dark en-ergy: ΛCDM, CPL [20, 21], GEDE (Generalised Emer-gent Dark Energy) [22], and LsCDM [Lambda-sign CDM, 23, 24], using DESI DR2 best-fit parameters [25] under two fiducial sets (DESI+CMB [26] and DESI+PP [27]). Additionally, we present results from alternative version of the PINN code that uses instead the Fisher densities to sample the z distribution and errors. The advantages of the Fisher information-weighted method are that trains independent networks on BAO and SN data, providing clean probe separation. 
+
+II. THEORETICAL FRAMEWORK A. Cosmological Distance Relations 
+
+The angular diameter distance in a flat or curved FLRW cosmology is 
+
+DA(z) = cH0(1 + z)
+
+Z z
+
+> 0
+
+dz ′
+
+E(z′) , (1) where E(z) = H(z)/H 0 and E(z) =pΩm(1 + z)3 + Ω k(1 + z)2 + Ω ΛfDE (z). Since we use in flat cosmology, we use Ωk = 0 and therefore 
+
+ΩΛ = 1 − Ωm.The dark energy evolution function fDE (z) equals unity for ΛCDM, (1 + z)3(1+ w0) for a constant equation-
+
+> arXiv:2603.17184v1 [astro-ph.CO] 17 Mar 2026
+
+2of-state model, and for the CPL parametrization [20, 21] 
+
+fDE (z) = (1 + z)3(1+ w0+wa) exp 
+
+
+
+− 3waz
+
+1 + z
+
+
+
+. (2) The (Generalised Emergent Dark Energy (GEDE) 
+
+model [22] introduces a single parameter ∆ that controls a smooth transition of the dark energy density. The di-mensionless Hubble parameter squared is same as above with fDE = fGEDE :
+
+fGEDE (z) = 1 − tanh 
+
+h
+
+∆ log 10 
+
+ 1+ z
+
+> 1+ zt
+
+i 
+
+1 + tanh[∆ log 10 (1 + zt)] . (3) The transition redshift zt is not a free parameter but is derived from the condition ΩDE (zt) = Ω m(1 + zt)3
+
+(matter-dark energy equality). For ∆ = 0 , fGEDE = 1 everywhere and ΛCDM is re-covered. For ∆ < 0 (the best-fit regime from DESI DR2), dark energy was suppressed at high redshift, easing the transition from matter domination. The ΛsCDM (Lambda-sign CDM) model [23, 24] ex-tends ΛCDM by allowing the cosmological constant to switch sign at a transition redshift z†, motivated by a conjectured transition from anti-de Sitter to de Sitter vacua in the late universe. The original model defines an abrupt sign switch Λs ∝ sgn( z† − z), giving 
+
+E2(z) = Ω m(1 + z)3 + Ω Λ sgn( z† − z), (4) where ΩΛ = 1 − Ωm. For z < z† the cosmological term is positive (de Sitter phase, consistent with the ob-served accelerated expansion); for z > z † it is negative (anti-de Sitter phase). Since a true step function is not differentiable and therefore incompatible with gradient-based PINN training, we replace the sign function with a smooth approximation: 
+
+E2(z) = Ω m(1 + z)3 + Ω Λ tanh[ η (z† − z)] , (5) with η = 10 1.5 ≈ 31 .6, which reproduces the step func-tion to within 10 −14 everywhere except within ∆z ∼ 0.1
+
+of z†. The model predicts a local minimum in E(z) near 
+
+z† and a modified expansion history relative to ΛCDM, with ΛCDM recovered only in the limit z† → ∞ .The Etherington distance duality relation (DDR), con-necting the angular and luminosity distance: 
+
+dL(z) = (1 + z)2DA(z), (6) holds in any metric theory of gravity with photon number conservation. The distance modulus is 
+
+μ(z) = 5 log 10 (dL(z)/Mpc ) + 25 , (7) and the absolute magnitude enters as μobs = μ(z) + MB
+
+for the standardized SN Ia apparent magnitude.  
+
+> B. Observational Data
+
+BAO surveys measure DM (z)/r d = (1 + z)DA(z)/r d,where rd is the sound horizon at the baryon drag epoch. We fix rd = 147 .0 Mpc consistent with Planck 2018 [26]; as shown in [13], alternative values shift MB by a con-stant offset without affecting the redshift-dependent re-construction. We use measurements from DESI DR2 [25] spanning 0.3 ≲ z ≲ 2.33 .For supernovae we use the Pantheon+ compilation [2, 27] ( N ≈ 1700 SNe Ia, 0.01 < z < 2.3) with its full co-variance matrix; We adopt the fiducial MB = −19 .3 mag noting that the Planck-preferred value ( −19 .44 mag) would shift absolute biases by ∼ 0.14 mag but not af-fect relative comparisons. We use two fiducial models: under two fiducial sets (DESI+CMB [26] and DESI+PP [27]) to check how much the results depend on the fiducial cosmology. Table IV lists the four fiducial models and their DESI DR2 best-fit parameters under the two fiducial sets used in this work with values from [25] .  
+
+> III. PINN ARCHITECTURE AND TRAINING
+
+We apply two variants of Physics-Informed Neural Net-works to reconstruct MB (z): a single shared-backbone heteroscedastic network that jointly fits BAO and su-pernova data with physical constraints, and a Fisher information-weighted variant using two fully independent networks — one trained on BAO data, one on supernovae — that provides clean separation of the two probes.   
+
+> A. Heteroscedastic Method
+> 1. Network Design
+
+We use a feed-forward network mapping z →{DA/r d, μ, log σ2 
+
+> DA
+
+, log σ2
+
+> μ
+
+}, with four hidden layers (128–64–64–32 neurons) and Swish activations. The in-put is normalized as ˜z = z/ 3. The two distance out-puts use softplus activations with physically motivated bias initialization ( DA/r d: bias 10.0; μ: linear with bias 40.0). The log-variance outputs convert to standard de-viations as σ = exp( s/ 2) at inference time, where s is the raw network output. This log-variance parametriza-tion is numerically stable and naturally aligned with the negative log-likelihood loss described below.  
+
+> 2. Loss Function
+
+The total loss is 
+
+L = LNLL-BAO + LNLL-SN + λphys Lphys + λcosmo Lcosmo ,
+
+(8) where each term is described below. 3
+
+a. Data terms. The heteroscedastic NLL for observ-able y with known measurement uncertainty σobs and learned model uncertainty σmodel (z) is 
+
+LNLL =12N
+
+> N
+
+X
+
+> i=1
+
+"
+
+(yobs  
+
+> i
+
+− ypred  
+
+> i
+
+)2
+
+σ2 
+
+> obs ,i
+
++ esi + log  σ2 
+
+> obs ,i
+
++ esi  − log σ2
+
+> obs ,i
+
+#
+
+,
+
+(9) where si = log σ2 
+
+> model ,i
+
+is the network output. This form is applied to both BAO and SN data. For the super-nova term the diagonal σ2 
+
+> obs
+
+in the fit residual is re-placed by the full Pantheon+ covariance matrix C (or the PCA equivalent), and the NLL uncertainty term is down-weighted by 0.1 to prevent variance learning from dominating fit quality. A known limitation of this weight-ing is that the network tends to learn σmodel ≈ 0; we address this with an excess-variance parametrisation in Appendix C and show the main conclusions are robust. 
+
+b. Physics constraint (DDR). At Ncoll = 500 collo-cation points zi ∼ U (0 , 2.5) resampled each iteration: 
+
+Lphys = 1
+
+Ncoll 
+
+> Ncoll
+
+X
+
+> i=1
+
+h
+
+μpred  
+
+> i
+
+− μDDR 
+
+> i
+
+i2
+
+, (10) where μDDR = 5 log 10 [(1 + z)2Dpred  
+
+> A
+
+rd] + 25 + MB . This enforces internal consistency between the two network output heads across the full redshift range. 
+
+c. Cosmological model constraint. 
+
+Lcosmo = 1
+
+Ncoll 
+
+×
+
+> Ncoll
+
+X
+
+> i=1
+
+h
+
+(DA/r d)pred  
+
+> i
+
+− (DA/r d)theory 
+
+> i
+
+i2
+
++
+
+h
+
+μpred  
+
+> i
+
+− μtheory 
+
+> i
+
+i2
+
+,
+
+(11) where both (DA/r d)theory and μtheory are evaluated from the fiducial cosmological model Eq. (1). 
+
+d. Constraint configurations. Setting λphys ∈{0, 10 } and λcosmo ∈ { 0, 30 } independently yields four configurations: TT (both enabled), TF (DDR only), 
+
+FT (cosmology only), FF (purely data-driven). These allow systematic isolation of each prior’s contribution to the reconstruction. 
+
+B. Fisher Information-Weighted Extension 
+
+Standard heteroscedastic training weights data by σ−2
+
+> i
+
+but does not account for non-uniform redshift sampling. Dense low-z coverage can cause the network to overfit the crowded region while underfitting sparse high-z data. To address this, we developed a Fisher information-weighted variant that incorporates data quality and spatial den-sity jointly, and separates the supernova and BAO in-ference channels into independent networks to obtain a clean MB (z) reconstruction. 
+
+1. Two-Network Architecture 
+
+The heteroscedastic method of Section III A uses a single shared-backbone network that outputs both 
+
+DA/r d(z) and μ(z), which entangles the two probes and obscures the errors of the residual MB (z). The Fisher variant replaces the single network with two fully inde-pendent heteroscedastic networks trained with separate optimisers and gradient tapes: 
+
+• DA-net : z 7 →  DA/r d, log σ2
+
+> DA
+
+, trained only on BAO data plus physics regularisation (DDR consis-tency, derivative matching, boundary conditions). 
+
+• μ-net : z 7 →  μ, log σ2
+
+> μ
+
+, trained on supernova data only (with the full PCA-compressed covariance). Both networks share the same architecture ([32 , 128 , 64 , 64 , 32] with tanh activations) but have entirely independent weights. The absolute magnitude is then reconstructed as 
+
+MB (z) = μnet (z) − 5 log 10 
+
+(1+ z)2 DA, net (z) rd
+
+ − 25 ,
+
+(12) and because the two networks are statistically indepen-dent, the uncertainty adds in quadrature: 
+
+σ2 
+
+> MB
+
+(z) = σ2
+
+> μ, net
+
+(z) + 
+
+ ∂μ ∂D A
+
+2
+
+σ2
+
+> DA,net
+
+(z), (13) where ∂μ ∂D A = 5ln 10 1 
+
+> DA/r d
+
+.This construction ensures that any signal in MB (z)
+
+reflects a genuine tension between the two datasets rather than internal self-consistency of a single fit. 
+
+2. Loss Function Structure 
+
+Both networks use the excess-variance parametrisation 
+
+σ2total = σ2obs (1+ es), ensuring σtotal ≥ σobs . The variance NLL per point is 
+
+ℓvar (ri, s i) = 12
+
+"
+
+r2
+
+> i
+
+σ2obs ,i (1 + esi ) + log(1 + esi )
+
+#
+
+, (14) where ri is the residual. The DA-net loss combines data, physics, and regularisation terms: 
+
+LDA =
+
+X
+
+> i
+
+wiLBAO  
+
+> χ2
+
++ X
+
+> i
+
+wnll ,i ℓvar 
+
+| {z }
+
+> BAO data
+
++
+
+λphys LDDR + λderiv LdD A/dz 
+
+| {z }
+
+> physics
+
++LDA 
+
+> reg
+
+, (15) Where LBAO  
+
+> χ2
+
+= r2 
+
+> i
+
+/σ 2obs ,i is the standard χ2 terms comparing measurements with their observational er-rors, with hybrid Fisher density weights wi concentrating 4the gradient on the most informative data points. The second term is the variance NLL weighted by inverse-Fisher weights wnll ,i , learning the redshift-dependent un-certainty. Both weight sets are defined in Section III B 3. The derivative loss LdD A/dz penalises deviations of the network slope dDA/dz from the theoretical prediction via finite differences, encoding the cosmological model’s shape constraint. The regularization terms in both cases are described in Appendix A. The μ-net is purely data-driven: 
+
+Lμ = LSN  
+
+> χ2
+
++ 5 X
+
+> i
+
+wnll ,i ℓvar 
+
+| {z }
+
+> SN data
+
++Lμ
+
+> reg
+
+, (16) with LSN  
+
+> χ2
+
+computed using the full PCA-compressed Pan-theon+ covariance. The factor of 5 on the variance NLL balances the large number of supernovae against the BAO chi2 scale. No physics prior enters Lμ, ensuring the su-pernova distance modulus is a model-independent recon-struction.  
+
+> 3. Fisher Information Weighting
+
+Standard heteroscedastic NLL training weights data implicitly by σ−2 
+
+> i
+
+but ignores non-uniform redshift sam-pling. To address both simultaneously we construct two sets of weights from the per-point Fisher information 
+
+Ii = 1
+
+σ2
+
+> i
+
+X
+
+> θ
+
+ ∂f ∂θ 
+
+2
+
+, (17) where the sum runs over all active cosmological parame-ters θ and derivatives are evaluated by finite differences at the fiducial values. 
+
+Hybrid χ2 weights. The mean-network gradient is concentrated on the most informative data points via 
+
+wi = I αF 
+
+> i
+
+· 1
+
+pNneighbors (zi) , (18) where Nneighbors (zi) counts points within a fixed redshift bandwidth (inverse square-root density weighting) and we fix αF = 0 .5.These weights wi enter the χ2 term of the DA-net loss (Eq. 15). 
+
+Inverse-Fisher NLL weights. The variance head of each network receives gradient signal only at observed data points, giving it no direct information about uncer-tainty in sparse redshift regions. To address this, the vari-ance NLL term is weighted by the inverse Fisher infor-mation, interpolated from a combined BAO +SN Fisher curve and floored at its 5th percentile: 
+
+wnll ,i = 1
+
+I(zi) , normalised to max  
+
+> i
+
+(wnll ,i ) = 1 , floor 0.1.
+
+(19) Where Fisher information is low (sparse data, large er-rors), the NLL weight is high, penalising underestimated uncertainty more severely. Separate weight arrays wBAO nll 
+
+and wSN nll are evaluated at the BAO and SN redshifts re-spectively and passed to the DA-net and μ-net variance losses.  
+
+> C. Collocation Sampling and Training
+
+Physics collocation points for the heteroscedastic method are sampled uniformly from z ∈ [0 .001 , 2.5] and resampled at each training step. For the Fisher variant, points are drawn from a mixture of 50% uniform and 50% adaptive samples from p(z) ∝ I total (z)β with β = +1 ,supplemented by the BAO redshifts themselves, so that physics enforcement is concentrated in information-rich regions. The physics loss on collocation points is addi-tionally weighted by inverse Fisher information. Both methods use a four-phase training schedule with pro-gressive constraint ramping; full details are given in Ap-pendix A.  
+
+> D. Uncertainty Quantification
+
+The PINN framework produces two distinct uncer-tainty measures on MB (z) that we use throughout the paper. The per-point predictive uncertainty 
+
+σ2 
+
+> MB
+
+(z) = σ2 
+
+> μ, model
+
++
+
+ 5ln 10 
+
+2 σ2
+
+> DA,model
+
+D2
+
+> A
+
+(z) , (20) propagates the two learned variances through the dis-tance duality relation and represents the aleatoric uncer-tainty of the fit at redshift z, as opposed to the epistemic 
+
+uncertainty of a GP reconstruction which quantifies how well the function is constrained given finite, noisy data. A theoretical lower bound follows from the observational inputs: the BAO term contributes ∼ 0.02 –0.05 mag and adding the SN measurement floor σμ ∼ 0.1 mag in quadrature gives a physical floor of ∼ 0.1 mag. The distribution scatter 
+
+σdist  
+
+> MB
+
+= std z
+
+MB (z) (21) measures how much the inferred absolute magnitude varies across cosmic time for a given cosmological model — essentially the amplitude of any redshift trend in 
+
+MB (z), independently of the per-point uncertainty. Astatistically significant non-zero value would indicate ei-ther a genuine physical evolution of the SN Ia popula-tion or a tension between the assumed cosmology and the data. A value σdist  
+
+> MB
+
+≪ 0.1 mag is consistent with a redshift-independent MB .A known limitation of both PINN variants is that the variance head receives gradient signal only at observed data points, so it has no direct information about uncer-tainty in unsampled redshift regions. In the standard heteroscedastic method this manifests as uncertainties that remain roughly flat or even decrease toward high z,5contrary to the expectation that sparse coverage should imply larger uncertainty. The Fisher inverse-weighting partially addresses this by penalising the variance head more severely where Fisher information is low, and the effect is visible in Fig. 5: Fisher uncertainties grow appro-priately at z < 0.2 and z > 1.5, while the heteroscedastic uncertainties remain underestimated in those regions. By contrast, Gaussian process reconstructions au-tomatically inflate uncertainty away from data points through the kernel length-scale, which superficially looks more conservative. However, this inflation is itself a prior assumption — a GP with a long kernel will report small uncertainty even in gaps if the surrounding data is pre-cise, while a short kernel inflates uncertainty aggressively regardless of data quality. Neither approach is strictly su-perior; the PINN uncertainty is more honest about what the data directly constrain, while the GP uncertainty is more honest about what the model cannot exclude. We compare our results quantitatively to the GP reconstruc-tion of [13] in Section V C.   
+
+> E. MBReconstruction
+
+At each test redshift the absolute magnitude is ex-tracted as 
+
+MB (z) = μpred (z) − 5 log 10 
+
+h
+
+(1 + z)2 Dpred  
+
+> A
+
+(z) rd
+
+i
+
+− 25 ,
+
+(22) with uncertainty propagated as in Eq. (20). For the Fisher variant, μpred and Dpred  
+
+> A
+
+come from the inde-pendent μ-net and DA-net respectively, so any signal in MB (z) reflects a genuine tension between the two datasets. We evaluate Eq. (22) on a uniform grid of 200 redshifts spanning z ∈ [0 .001 , 2.5] . 
+
+> IV. RESULTS
+
+We trained PINNs for all combinations of four mod-els ( ΛCDM, CPL, GEDE, LsCDM), two fiducial sets (DESI+CMB, DESI+PP), and for the heteroscedastic case on four constraint configurations (TT, TF, FT, FF). Primary analysis uses Pantheon+ and DESI DR2 datasets.  
+
+> A. Heteroscedastic Method
+
+Goodness of Fit Figure 1 summarises the goodness of fit across all models, constraint configurations, and fidu-cials on the Pantheon+ dataset. BAO and SN χ2/dof val-ues cluster near unity for the constrained configurations (H-TT, H-TF), confirming adequate fits to both probes simultaneously. The notable exception is CPL under the DESI+CMB fiducial, which shows catastrophically poor BAO fits ( χ2/dof ∼ 50 ), reflecting the known ten-sion between CMB-preferred CPL parameters and BAO data. The DESI+PP fiducial resolves this tension for CPL, consistent with the better mutual consistency of the PP-preferred parameters. The total variation P |∆MB (z)| in the right panel of Fig. 1 provides a diagnostic for unphysical oscillations: unconstrained configurations (H-FF) reach ∼ 7–8 mag, while constrained methods cluster at ∼ 1.5–2 mag, con-sistent with genuine data features rather than network freedom. 
+
+DDR violation: We quantify internal consistency be-tween the two network output heads via the DDR vio-lation ∆DDR (z) = |μpred (z) − μDDR (z)|, where μDDR =5 log 10 [(1 + z)2Dpred  
+
+> A
+
+rd] + 25 + MB . A well-trained and DDR-consistent model should have |∆DDR | < 50 mmag across 0 < z < 2.5.Table I quantifies DDR compliance across all runs. TT and TF configurations achieve mean violations of 30–52 mmag, while FT and FF show violations 2–50 ×
+
+larger. This establishes a clear hierarchy: the Ethering-ton distance duality relation provides more fundamental regularisation than the specific cosmological model prior.                   
+
+> Config DESI+CMB DESI+PP Mean Max Mean Max TT 31–51 120–193 32–46 109–182 TF 36–52 134–193 32–51 115–179 FT 85–181 276–449 85–195 302–857 FF 120–579 250–5115 127–178 256–664 Table I. DDR violations [mmag], Pantheon+ dataset, aver-aged over four models. Ranges indicate model-to-model vari-ation.
+
+MB Reconstruction: Table II and Fig. 2 present the reconstructed MB for all models, fiducials, and con-straint configurations on the Pantheon+ dataset. Under full physical constraints (H-TT) all four models recover 
+
+MB consistent with constancy at MB ≈ − 19 .3 mag, with values spanning −19 .27 to −19 .34 mag across all mod-els and both fiducials. The DESI+PP fiducial generally yields values closer to −19 .3 than DESI+CMB, consis-tent with the better BAO fit quality seen in Fig. 1. 
+
+Bimodality found with kernel density estimation with peak-finding, appears in several configurations and is not confined to unconstrained runs as might be naively ex-pected. GEDE shows bimodality already under H-TT (CMB fiducial), CPL under H-TT (PP fiducial) and H-FF (CMB fiducial), and ΛsCDM is unimodal in all con-figurations. ΛCDM shows bimodality only under H-FT. We interpret this pattern as reflecting genuine degener-acy in the DA–μ loss landscape for dynamical dark en-ergy models: without both the DDR and cosmological model constraints simultaneously, the network can trade off DA and μ in two distinct ways that fit the data equally well. The fact that this degeneracy persists even under H-TT for GEDE and CPL suggests it is driven by the ad-ditional freedom in w(z) rather than by insufficient regu-larisation. ΛCDM and ΛsCDM, whose expansion histo-6LCDM CPL GEDE LsCDM         
+
+> 0.1
+> 1
+> 10
+> 2/dof
+> 2/dof (BAO)
+> LCDM CPL GEDE LsCDM
+> 2/dof (SN, diag. )
+> LCDM CPL GEDE LsCDM
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 7
+> 8
+> | MB(z)| [mag]
+> Total variation of MB(z)
+
+Goodness of Fit PANTHEON      
+
+> H-TT H-TF H-FT H-FF CMB (filled) PP (open)
+
+Figure 1. Goodness-of-fit summary for all models, configurations, and fiducials on the Pantheon+ dataset. Left and centre :
+
+χ2/dof for BAO and SN Ia (diagonal errors), respectively, on a shared logarithmic scale. The dotted line marks χ2/dof = 1 .
+
+Right : total variation P |∆MB (z)| of the reconstructed MB (z) curve, a measure of high-frequency oscillation. Filled circles indicate DESI+CMB fiducial; open triangles indicate DESI+PP. Colours denote the constraint configuration: H-TT (blue), H-TF (green), H-FT (red), H-FF (purple). See text for a discussion on the outliers H-TT          
+
+> H-TF
+> H-FT
+> H-FF
+> H-TT
+> H-TF
+> H-FT
+> H-FF
+> H-TT
+> H-TF
+> H-FT
+> H-FF
+> H-TT
+> H-TF
+> H-FT
+> H-FF
+> 19.7
+> 19.6
+> 19.5
+> 19.4
+> 19.3
+> 19.2
+> 19.1
+> 19.0
+> 18.9
+> MB [mag]
+> LCDM CPL GEDE LsCDM
+> CMB fiducial
+> LCDM
+> CPL
+> GEDE
+> LsCDM
+> H-TT
+> H-TF
+> H-FT
+> H-FF
+> Scatter err (mean precision)
+> Epistemic (network)
+> H-TT
+> H-TF
+> H-FT
+> H-FF
+> H-TT
+> H-TF
+> H-FT
+> H-FF
+> H-TT
+> H-TF
+> H-FT
+> H-FF
+> H-TT
+> H-TF
+> H-FT
+> H-FF
+> MB [mag]
+> LCDM CPL GEDE LsCDM
+> PP fiducial
+
+MB reconstruction summary PANTHEON 
+
+Figure 2. Summary of reconstructed mean MB for all models, configurations, and fiducials on the Pantheon+ dataset. Left panel shows DESI+CMB, right: DESI+PP. Colours denote the cosmological model; marker shapes denote the constraint configuration. Thick error bars show the scatter-based standard error on the mean σerr ; thin error bars show the epistemic uncertainty from the network σep . The dashed line and the shaded band marks MB, fid = −19 .3 ± 0.5 mag. 
+
+ries are more tightly constrained, remain unimodal un-der full constraints. All reconstructed values are within 
+
+∼ 0.15 mag of the fiducial MB, fid = −19 .3 mag regard-less of configuration, confirming that the PINN does not produce pathological solutions. 
+
+a. Statistical significance of MB evolution. To as-sess whether MB (z) deviates significantly from a con-stant fiducial value, we compute the significance 
+
+S(z) = |MB (z) − MB, fid |
+
+σbin (z) , (23) where σbin (z) is the observationally-floored standard error of the mean MB per redshift bin: 
+
+σbin (z) = max( σscatter (z), ¯σμ, bin )
+
+pNbin (z) , (24) with σscatter the standard deviation of individual MB val-ues within the bin and ¯σμ, bin the mean observational un-certainty of SNe Ia in that bin. This quantity measures the statistical robustness of any MB (z) trend to the pre-cision actually achieved by the network, rather than the 7
+
+Table II. Reconstructed MB [mag] for all models, fiducials, and constraint configurations, PANTHEON dataset. Each model group shows two rows: DESI+CMB (top) and DESI+PP (bottom) fiducial. Bimodal cases list both peaks (peak 1 / peak 2). Uncertainties are shown in Fig. 2. Model / Fiducial H-TT H-TF H-FT H-FF 
+
+ΛCDM 
+
+CMB −19 .34 −19 .31 −19 .36 / − 19 .31 −19 .38 
+
+PP −19 .30 −19 .34 −19 .31 −19 .37 
+
+CPL 
+
+CMB −19 .32 −19 .31 −19 .27 −19 .40 / − 19 .29 
+
+PP −19 .34 / − 19 .30 −19 .34 −19 .33 −19 .43 
+
+GEDE 
+
+CMB −19 .30 / − 19 .27 −19 .34 −19 .37 −19 .35 
+
+PP −19 .30 −19 .33 −19 .33 / − 19 .30 −19 .41 
+
+LsCDM 
+
+CMB −19 .31 −19 .31 −19 .35 −19 .41 
+
+PP −19 .33 −19 .29 −19 .33 −19 .41 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00                   
+
+> Redshift z
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> |MB(z) MB | /  MB
+> 1
+> 3
+> 5
+> H-TT (solid) vs H-TF (dashed) CMB fiducial
+> LCDM
+> CPL
+> GEDE
+> LsCDM
+> H-TT (solid)
+> H-TF (dashed)
+> 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00
+> Redshift z
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> |MB(z) MB | /  MB
+> 1
+> 3
+> 5
+> H-TT (solid) vs H-TF (dashed) PP fiducial
+> MB(z)Deviation Significance from MB= const
+
+Figure 3. Significance of MB (z) deviation from its mean value |MB (z) − ⟨ MB ⟩| /σ MB , for H-TT (solid) and H-TF (dashed) configurations. Left panel: DESI+CMB fiducial; right panel: DESI+PP fiducial. Colors indicate cosmological model. Gray shading marks the < 1σ region. Horizontal dotted lines indicate 1σ, 3σ, and 5σ thresholds. The uncertainty σMB is the observationally-floored standard error of the mean per redshift bin (Eq. 24). The plot is restricted to 0.15 < z < 2 where SN Ia coverage is reliable. 
+
+broader epistemic uncertainty on the reconstruction it-self. Figure 3 shows the significance for the two physically most constrained configurations (H-TT and H-TF) for the two fiducials in the reliable range 0.15 < z < 2.Under full constraints (H-TT) most models remain be-low ∼ 2σ in the well-sampled range z ∈ [0 .3, 1.5] , con-sistent with a constant MB , though ΛCDM, CPL, and 
+
+ΛsCDM show excursions above 3σ at z ≲ 0.3 where BAO constraints are absent and the low-z SN Ia systemat-ics already discussed above. These deviations reoccur at 
+
+z ∼ 0.5 for ΛCDM and ΛsCDM under the CMB fiducial, and for all models except GEDE under the PP fiducial. H-TF (DDR only) shows 2–5σ peaks across z ∼ 0.4–0.75 
+
+that are consistent across all four models and both fidu-cials, suggesting a residual signal that the cosmological model prior partially absorbs in H-TT. These features are robust to the choice of fiducial: CMB and PP fiducial sets give qualitatively identical significance profiles, with the PP fiducial showing somewhat lower peak significance. The partially and fully unconstrained configurations (H-FT and H-FF) reveal the role of each prior more starkly. Removing all constraints (H-FF) produces peaks of 3–5σ near z ∼ 0.4–0.5, driven by network freedom rather than physical evolution — H-FF is effectively an unconstrained ANN fit whose significance peaks should 8not be interpreted as a physical signal. H-FT (cosmol-ogy only, no DDR) is noisier and less consistent across models than H-TF, confirming that DDR is the more es-sential constraint. The full comparison across all four configurations and both fiducials is shown in Fig. 6 in Appendix C. The z ∼ 0.4–0.5 peak corresponds to the densest SN Ia coverage in Pantheon+, so it is driven by genuine data signal rather than sparse-sampling noise. Under a more conservative uncertainty treatment (Appendix C) the peak significance is reduced by a factor of ∼ 2, remaining above 1σ but falling below 3σ. All models are consistent with MB = const at z > 1.0.
+
+b. Low-Redshift Feature All models and configura-tions show an elevated MB excursion at z < 0.1, peaking near z ∼ 0.05 . This feature is consistent with the low-z
+
+spike reported in [13] using Gaussian Process methods and likely reflects the absence of BAO constraints below 
+
+z ∼ 0.1 combined with the transition between local and Hubble-flow SN Ia subsamples. It is not interpreted as physical evolution since it happens in a region with no BAO coverage.  
+
+> B. Fisher Method
+
+Figure 4 presents the reconstructed MB distributions from the Fisher two-network method for all four cosmo-logical models and both fiducial priors, colour-coded by redshift bin. Several features are noteworthy. The redshift-binned distributions are clearly separated in all models: low-z bins ( z < 0.3) consistently yield MB
+
+values ∼ 0.1 mag fainter than high-z bins ( z > 0.8), a pattern robust across all four cosmologies and both fidu-cials. This separation confirms that the two-network ar-chitecture successfully decouples the SN and BAO chan-nels — any signal in MB (z) reflects a genuine ten-sion between the two datasets rather than internal self-consistency of a single fit. The DESI+PP fiducial produces narrower distribu-tions than DESI+CMB in all models, consistent with the tighter constraint on the distance–redshift relation provided by the local calibration. GEDE and CPL show broader distributions than ΛCDM and ΛsCDM, reflect-ing the additional freedom in w(z): models with evolving dark energy allow more variation in DA(z), which prop-agates directly into the MB residual. Figure 5 shows the continuous ∆MB (z) reconstruction. In the well-constrained region z ∈ [0 .3, 2] all models are consistent with zero deviation at the 1σ level, indicating no significant evidence for MB evolution in this range. Notably, GEDE shows a positive excursion of ∼ 0.15 mag around z ∼ 1 under the CMB fiducial that is absent under the PP fiducial, suggesting this feature is driven by the tension between CMB-preferred GEDE parameters and the BAO data rather than a genuine MB signal. The oscillatory feature at z ≲ 0.2 is common to all models and both fiducials, suggesting a data-driven rather than model-dependent origin, consistent with the low-z feature already discussed. At z > 1.5 the models diverge: ΛCDM shows a neg-ative drift of ∼ 0.3 mag under the CMB fiducial that is absent in GEDE, while the PP fiducial produces a uni-form negative trend across all models at z > 2. This high-z behaviour should be interpreted with caution as SN coverage is sparse and the reconstruction is driven primarily by DA-net extrapolation beyond the last BAO measurement at z ≈ 2.33 .The Fisher method’s learned uncertainties grow appro-priately at low and high redshift, reaching ∼ 0.5 mag at 
+
+z < 0.1 where the ∂μ/∂D A ∝ 1/D A divergence ampli-fies the DA-net uncertainty into the MB error budget. This redshift-dependent uncertainty structure represents an improvement over the heteroscedastic method’s ten-dency to underestimate uncertainty in sparse regions, as discussed in Section III D. Table III summarises the Fisher two-network recon-struction statistics. The biases are systematically nega-tive across all models and both fiducials, ranging from 
+
+−0.07 mag ( ΛsCDM, CMB) to −0.16 mag (GEDE, PP), indicating that the independently reconstructed SN dis-tances are consistently shorter than the BAO-inferred distances at the fiducial MB = −19 .3 mag. These biases are larger than the heteroscedastic values in Table II be-cause the two-network architecture eliminates the cross-talk through which the shared-backbone method par-tially absorbs the SN–BAO tension into its fit; the Fisher biases therefore provide a more direct measure of the off-set between the two distance scales. The mean uncertain-ties ¯σMB ∼ 0.05 –0.13 mag in the well-constrained region 
+
+z ∈ [0 .3, 2] are consistent with the observational error floor propagated through Eq. (13), confirming that the inverse-Fisher NLL weighting produces physically moti-vated uncertainties without artificial inflation.   
+
+> V. DISCUSSION A. Hierarchy of Constraints
+
+The systematic comparison across four constraint con-figurations establishes that the Etherington distance du-ality relation provides more fundamental regularisation than specific cosmological model assumptions. This is not merely a numerical observation — it reflects a deeper physical point: the DDR is a geometric identity that holds in any metric theory of gravity with photon number conservation, while the cosmological model prior encodes assumptions about dark energy that may not be correct. The extreme deviations of FT configurations (cosmol-ogy only, no DDR) are instructive: without the geometric consistency enforced by the DDR, the network is free to find solutions where the DA and μ heads are mutually inconsistent, producing large DDR violations even when both heads individually fit their respective data well. This suggests that for any neural network approach to 90                                             
+
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> CMB (TT)
+> Freq.
+> CDM CPL GEDE sCDM
+> 20.0 19.8 19.6 19.4 19.2 19.0 18.8 18.6
+> MB[mag]
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> Pantheon+
+> Freq.
+> 20.0 19.8 19.6 19.4 19.2 19.0 18.8 18.6
+> MB[mag]
+> 20.0 19.8 19.6 19.4 19.2 19.0 18.8 18.6
+> MB[mag]
+> 20.0 19.8 19.6 19.4 19.2 19.0 18.8 18.6
+> MB[mag]
+> Fisher PINN MBDistribution ( = + 1 )
+> z[0.0, 0.3] z[0.3, 0.8] z[0.8, 1.5] z[1.5, 2.5]
+
+Figure 4. MB distributions reconstructed by the Fisher two-network method, colour-coded by redshift bin ( z ∈ [0 .0, 0.3] ,
+
+[0 .3, 0.8] , [0 .8, 1.5] , [1 .5, 2.5] ). Top row: DESI+CMB fiducial; bottom row: Pantheon+ (DESI+PP) fiducial. GEDE and CPL show broader distributions reflecting additional dark energy freedom. 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25           
+
+> Redshift z
+> 1.00
+> 0.75
+> 0.50
+> 0.25
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> MB(z) Mfid
+> B [mag]
+> MB(z) Reconstruction
+> CDM
+> CPL
+> GEDE
+> sCDM 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25
+> Redshift z
+> 1.00
+> 0.75
+> 0.50
+> 0.25
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> MB(z) Mfid
+> B [mag]
+> MB(z) Reconstruction
+> CDM
+> CPL
+> GEDE
+> sCDM
+
+Figure 5. ∆MB (z) = MB (z) − M fid  
+
+> B
+
+reconstructed by the Fisher method. Left: DESI+CMB fiducial; right: DESI+PP fiducial. Shaded bands show 1σ uncertainties. All models are consistent with zero deviation in z ∈ [0 .3, 2] . The oscillatory feature at 
+
+z ≲ 0.2 is data-driven and common to all models. At z > 1.5 models diverge as SN coverage becomes sparse and reconstruction relies on BAO. 
+
+joint BAO+SN inference, DDR compliance should be pri-mary, regardless of what cosmological model is assumed. 
+
+B. Physical Interpretation and Model Comparison 
+
+Significance of MB (z) trends. The 2–3σ signifi-cance peaks at z ∼ 0.4–0.75 seen in H-TF configura-tions and some TT ones reflect a genuine mild tension in the data, but require careful interpretation. With 
+
+∼ 100 –200 SNe Ia per bin the uncertainty on the mean is σ/ √N ∼ 10 –30 mmag, making even a 50 mmag sys-tematic shift appear highly significant. That H-TT sup-presses these peaks while H-TF does not indicates the cosmological model prior absorbs part of this tension — the prior effectively pulls the reconstruction toward the assumed expansion history, masking residuals that ap-pear when only the DDR is enforced. The feature at 
+
+z ∼ 0.4–0.5 is present in both fiducials and all four mod-els, ruling out a model-specific or fiducial-specific arti-fact. That it persists even under H-TT for some models suggests the tested cosmologies cannot fully absorb this tension. 
+
+Fisher method and fiducial dependence. The Fisher method provides a complementary and more di-rect probe of this tension. Under full constraints it finds no significant deviation from MB = const in z ∈
+
+[0 .3, 0.75] , but shows a minor excursion around z ∼ 1 that is more pronounced for GEDE under the CMB fiducial and nearly absent under the PP fiducial. This fiducial dependence is physically meaningful: DESI+CMB and DESI+PP correspond to different underlying datasets and preferred parameter combinations, so a feature that appears under one but not the other points to an incom-patibility between the CMB-preferred parameters and the joint BAO+SN dataset at these redshifts, likely re-lated to the known tension between the PP and CMB datasets, rather than a genuine MB signal. The PP 10                                                              
+
+> Table III. Reconstructed MBstatistics from the Fisher two-network method, Pantheon+ dataset. Each model group shows two rows: DESI+CMB (top) and DESI+PP (bottom) fiducial. The Npeaks column shows 1 for unimodal distributions or the peak positions [mag] for bimodal cases. Model Fid. Mean MBσdist Bias ¯σMBBimodal Npeaks
+> ΛCDM CMB −19 .394 0.105 −0.094 0 .119 Yes −19 .40 /−19 .31
+> PP −19 .393 0.092 −0.093 0 .123 No 1CPL CMB −19 .453 0.111 −0.153 0 .080 Yes −19 .48 /−19 .34
+> PP −19 .447 0.124 −0.147 0 .132 No 1GEDE CMB −19 .402 0.111 −0.102 0 .051 No 1PP −19 .456 0.116 −0.156 0 .135 Yes −19 .47 /−19 .30 ΛsCDM CMB −19 .370 0.080 −0.070 0 .125 No 1PP −19 .428 0.106 −0.128 0 .104 No 1
+
+fiducial produces a nearly flat ∆MB (z) for all models in the well-constrained region, while the CMB fiducial shows a broader excursion peaking near z ∼ 1 — the same redshift where the heteroscedastic method shows its secondary feature, though shifted slightly from the 
+
+z ∼ 0.4–0.5 primary peak. Whether this shift reflects a genuine difference between the two method architectures or a dependence on the uncertainty floor deserves further investigation. 
+
+Model comparison and bimodality. ΛCDM and ΛsCDM show the most stable MB reconstruction across all configurations, remaining unimodal and within 0.05 mag of −19 .3 even in partially constrained runs. GEDE and CPL show the strongest evidence for tension, exhibiting bimodality under TT and larger scatter in the significance profiles, consistent with their additional dark energy freedom allowing more degenerate solutions in the 
+
+DA–μ loss landscape. For the heteroscedastic method this bimodality reflects the network finding two equally valid fits to the data; for the Fisher method it reflects an incompatibility between the data and the assumed fidu-cial parameters. In both cases the practical implication is the same: analyses inferring H0 from SN data alone without BAO anchoring may encounter multimodal pos-teriors for CPL and GEDE, and single-mode summaries of such posteriors would be misleading.  
+
+> C. Comparison with Previous Work
+
+Our results are broadly consistent with the GP and ANN reconstructions of [13] and [14], which found MB
+
+constant within 1σ at current data precision. The PINN approach adds two capabilities those methods lack: ex-plicit enforcement of physical constraints through loss terms, yielding DDR compliance of 30–50 mmag even in sparse data regions where GP relies entirely on ker-nel smoothness; and the two-network Fisher architec-ture which ensures that any MB (z) signal reflects a gen-uine tension between independent BAO and SN datasets rather than a fitting artefact. The heteroscedastic uncertainties ( σ ∼ 0.13 –0.15 mag for the primary variant) are smaller than typical GP es-timates ( ∼ 0.15 –0.25 mag) because the NLL formula-tion incorporates epistemic model uncertainty, while GP uncertainties reflect only kernel-based interpolation vari-ance. As discussed in Section III D, neither approach is strictly superior, they measure different things — the PINN uncertainty reflects what the data can accommo-date, while the GP uncertainty reflects what the model cannot exclude. The conservative excess-variance variant (Appendix C) produces uncertainties of ∼ 0.2–0.7 mag, closer to GP estimates, while leaving the mean MB (z)
+
+reconstruction unchanged to within 5 mmag. Taken together, the heteroscedastic and Fisher meth-ods provide independent lines of evidence pointing to a possible deviation: the former through a 2–3σ signifi-cance peak at z ∼ 0.4–0.5 under relaxed constraints, the latter through a systematic separation of redshift-binned 
+
+MB distributions that persists across all models and both fiducials. The consistency between two architecturally distinct algorithms suggests this is a genuine feature of the joint BAO+SN dataset rather than a methodologi-cal artifact, and warrants consideration as either unac-counted systematic effects in the SN Ia standardisation at these redshifts or a mild signal of new physics in the distance–redshift relation.  
+
+> VI. CONCLUSIONS
+
+We have applied two variants of Physics-Informed Neu-ral Networks to reconstruct MB (z) from joint BAO and SN Ia data under four cosmological models and two DESI DR2 fiducial sets. The heteroscedastic method establishes a clear hierarchy: enforcing the Etherington DDR yields 2–50 × smaller violations than enforcing only the cosmological model prior, confirming that geometric consistency is the more fundamental constraint for stable joint BAO+SN inference. Under full constraints all mod-els recover MB ≈ − 19 .3 mag, consistent with standard supernova standardisation at current precision. The Fisher two-network method, training independent networks on each probe, finds no significant MB evolution 11 in z ∈ [0 .3, 1.0] under full constraints. The bimodality of 
+
+MB distributions for CPL and GEDE in unconstrained runs is a novel result: analyses inferring H0 from SN data alone without DDR enforcement may encounter multi-modal posteriors for these models. Both methods independently identify an interesting feature, persistent across the models and fiducials. Its model-independence disfavours a purely systematic ori-gin, and it warrants serious consideration as either a tension in the joint BAO+Pantheon+ dataset or a gen-uine signal in the supernova distance scale. Forthcoming DESI data releases and next-generation SN Ia surveys will be decisive in resolving its nature. 
+
+[1] Eleonora Di Valentino et al. The CosmoVerse White Pa-per: Addressing observational tensions in cosmology with systematics and fundamental physics. Phys. Dark Univ. ,49:101965, 2025. [2] Dillon Brout et al. The Pantheon+ Analysis: Cosmolog-ical Constraints. Astrophys. J. , 938(2):110, 2022. [3] Benjamin M. Rose, Brodie Popovic, Dan Scolnic, and Dillon Brout. Constraining RV variation using highly reddened Type Ia supernovae from the Pantheon+ sam-ple. Mon. Not. Roy. Astron. Soc. , 516(4):4822–4832, 2022. [4] Leandros Perivolaropoulos and Foteini Skara. On the homogeneity of SnIa absolute magnitude in the Pantheon+ sample. Mon. Not. Roy. Astron. Soc. ,520(4):5110–5125, 2023. [5] Jun-Qian Jiang, Davide Pedrotti, Simony Santos da Costa, and Sunny Vagnozzi. Nonparametric late-time expansion history reconstruction and implications for the Hubble tension in light of recent DESI and type Ia su-pernovae data. Phys. Rev. D , 110(12):123519, 2024. [6] Shubham Barua and Shantanu Desai. Effect of peak ab-solute magnitude of Type Ia supernovae and sound hori-zon values on the Hubble constant using DESI Data Re-lease 1 results. Eur. Phys. J. C , 85(4):470, 2025. [7] M. Dixon et al. Calibrating the absolute magnitude of type Ia supernovae in nearby galaxies using [O ii] and implications for H0. Mon. Not. Roy. Astron. Soc. ,538(2):782–796, 2025. [8] Stephen Thorp, Kaisey S. Mandel, David O. Jones, Robert P. Kirshner, and Peter M. Challis. Using rest-frame optical and NIR data from the RAISIN survey to explore the redshift evolution of dust laws in SN Ia host galaxies. Mon. Not. Roy. Astron. Soc. , 530(4):4016–4031, 2024. [9] Chul Chung, Seunghyun Park, Junhyuk Son, Hyejeon Cho, and Young-Wook Lee. Strong progenitor age bias in supernova cosmology – I. Robust and ubiquitous evidence from a larger sample of host galaxies in a broader redshift range. Mon. Not. Roy. Astron. Soc. , 538(4):3340–3350, 2025. [10] Rodrigo von Marttens, Javier Gonzalez, and Jailson Al-caniz. Reconstructing the redshift evolution of Type Ia supernovae absolute magnitude. 4 2025. [11] Akshay Rana. Testing the constancy of type Ia supernova luminosities with Gaussian process. Phys. Dark Univ. ,52:102256, 2026. [12] P. Wiseman et al. A galaxy-driven model of type Ia su-pernova luminosity variations. Mon. Not. Roy. Astron. Soc. , 515(3):4587–4605, 2022. [13] David Benisty, Jurgen Mifsud, Jackson Levi Said, and Denitsa Staicova. On the robustness of the constancy of the Supernova absolute magnitude: Non-parametric reconstruction & Bayesian approaches. Phys. Dark Univ. ,39:101160, 2023. [14] Denitsa Staicova. Studying the Supernova Absolute Mag-nitude Constancy with Baryonic Acoustic Oscillations. 
+
+PoS , CORFU2023:180, 2024. [15] M. Raissi, P. Perdikaris, and G. E. Karniadakis. Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. Journal of Computational Physics , 378:686–707, February 2019. [16] Maziar Raissi, Paris Perdikaris, Nazanin Ahmadi, and George Em Karniadakis. Physics-informed neural net-works and extensions, 2024. [17] Zhenyu Dai, Ben Moews, Ricardo Vilalta, and Romeel Dave. Physics-informed neural networks in the recreation of hydrodynamic simulations from dark matter. Mon. Not. Roy. Astron. Soc. , 527(2):3381–3394, 2023. [18] Luca Gomez Bachar, Augusto T. Chantada, Susana J. Landau, Claudia G. Scóccola, and Pavlos Protopapas. Evolution of linear matter perturbations with error-bounded bundle physics-informed neural networks. Phys. Rev. D , 112(6):063515, 2025. [19] Anshul Verma, Shashwat Sourav, Pavan K. Aluri, and David F. Mota. Cosmology-informed Neural Networks to infer dark energy equation-of-state. 8 2025. [20] Michel Chevallier and David Polarski. Accelerating uni-verses with scaling dark matter. International Journal of Modern Physics D , 10(2):213–223, 2001. [21] Eric V. Linder. Exploring the expansion history of the universe. Physical Review Letters , 90(9):091301, 2003. [22] Xiaolei Li and Arman Shafieloo. Evidence for Emergent Dark Energy. Astrophys. J. , 902(1):58, 2020. [23] Özgür Akarsu, Suresh Kumar, Emre Özülker, and J. Al-berto Vazquez. Relaxing cosmological tensions with a sign switching cosmological constant. Phys. Rev. D ,104(12):123512, 2021. [24] Özgür Akarsu, Antonio De Felice, Eleonora Di Valentino, Suresh Kumar, Rafael C. Nunes, Emre Özülker, J. Al-berto Vazquez, and Anita Yadav. Cosmological con-straints on ΛsCDM scenario in a type II minimally mod-ified gravity. Phys. Rev. D , 110(10):103527, 2024. [25] M. Abdul Karim et al. DESI DR2 results. II. Measure-ments of baryon acoustic oscillations and cosmological constraints. Phys. Rev. D , 112(8):083515, 2025. [26] Planck Collaboration. Planck 2018 results. vi. cosmolog-ical parameters. A&A , 641:A6, 2020. [27] Dan Scolnic et al. The pantheon+ analysis: The full data set and light-curve release. ApJ , 938(2):113, 2022. [28] Diederik P. Kingma and Jimmy Ba. Adam: A Method for Stochastic Optimization. 12 2014. [29] Himanshu Chaudhary, Salvatore Capozziello, Vipin Ku-mar Sharma, Isidro Gómez-Vargas, and G. Mustafa. Ev-12 
+
+> idence for evolving dark energy from DESI DR2 BAO and Pantheon +, DES-Dovekie, and Union3. 8 2025.
+> Appendix A: Fiducial Parameters and Implementation Details
+
+Table IV lists the fiducial cosmological parameters used in this work. Both PINN variants use the Adam op-timiser [28] with learning rate 10 −3 and gradient clipping (max norm 1.0). The random seed is fixed ( SEED =43) for reproducibility. Implementation uses TensorFlow 2.x and SciPy. 
+
+a. Heteroscedastic method. Training proceeds in three phases of progressive constraint ramping: Phase 1 (3000 steps, 0.1×λtarget ) establishes the data fit; Phase 2 (5000 steps, 0.5 × λtarget ) introduces physics; Phase 3 (8000 steps, λtarget ) enforces full constraints. Colloca-tion points are resampled uniformly at each step. 
+
+b. Fisher method. Training proceeds in four phases. A warmup (1000 steps, MSE only) initialises both net-works before any NLL or physics terms are active. Phase 1 (2000 steps, 0.1×λphys ) and Phase 2 (9000 steps, full λphys ) both use stop-gradient on the residuals fed to the variance NLL. Phase 3 (3000 steps) removes the stop-gradient, reduces the learning rate to 0.3×, tightens gradient clipping to max norm 5, and reduces physics regularisation ( λphys → 0.5λphys , λderiv → 0.3λderiv ). 
+
+c. Regularisation terms. Both networks penalise curvature of their mean output and log-variance output on a uniform grid of 60 points spanning z ∈ [0 .001 , 2.5] :
+
+Lreg = λsm 
+
+X
+
+> k
+
+(fk+1 −2fk+fk−1)2+λsv 
+
+X
+
+> k
+
+(sk+1 −2sk+sk−1)2,
+
+(A1) where f is the mean output ( DA/r d or μ), s is the log-variance output, and λsm = 10 , λsv = 50 . The DA-net regularisation additionally includes a boundary loss 
+
+Lbnd pinning DA-net to the theoretical DA/r d value at 
+
+z = 0 .001 and z = 2 .5, with non-finite theory values masked out for non-standard cosmologies. 
+
+> Appendix B: Cross-Validation and Outlier Analysis
+
+To test generalisation we perform cosmic K-fold cross-validation by dividing the redshift range into K windows, training on all data outside each window, and measuring prediction smoothness inside via the standard deviation of the second finite difference: 
+
+S = std[ f (zi+2 ) − 2f (zi+1 ) + f (zi)] . (B1) Lower S indicates smoother extrapolation. All methods degrade at z < 0.3 and z > 1.5; H-FF shows the highest smoothness variation, consistent with overfitting risk in the absence of constraints. Outliers are identified via standardised residuals ri =(yi − ytheory )/σ i, flagging |ri| > 3. Two BAO outliers are found at z = 0 .51 and z = 0 .93 across all models, likely reflecting systematic effects in those survey mea-surements. No SN Ia outliers are found at the 3σ level; the covariance matrix adequately accounts for correlated systematics. 
+
+> Appendix C: Conservative Heteroscedastic Loss
+
+The standard heteroscedastic loss with w = 0 .1 weight-ing on the NLL uncertainty term causes the network to learn σmodel ≈ 0, yielding per-bin scatter systematically below the observational noise floor (ratio 0.34–0.92 across bins). To address this we implement an excess-variance parametrisation in which the network output s(z) en-codes the excess variance above the observational floor: 
+
+σ2total (z) = σ2obs (z)
+
+
+
+1 + es(z)
+
+, (C1) guaranteeing σtotal ≥ σobs at all redshifts. The corre-sponding loss 
+
+Lcons SN = χ2SN 
+
+NSN 
+
++
+
+*
+
+r2
+
+> i
+
+σ2obs ,i (1 + esi ) + 12 log(1 + esi )
+
++
+
+(C2) is bounded below by zero, with minimum at es =
+
+r2 
+
+> i
+
+/σ 2obs ,i −1 when residuals exceed the observational floor and at s → −∞ otherwise. Rerunning the full ΛCDM analysis with this loss for all four constraint configurations confirms that the mean 
+
+MB (z) curves are indistinguishable from the standard-loss runs (differences < 5 mmag), while uncertainties in-crease by a factor of ∼ 10 –30 to σtotal ∼ 0.2–0.7 mag. The z ∼ 0.4–0.5 significance peak in Fig. 6 is repro-duced at comparable significance, confirming that the main conclusions are robust to the choice of uncertainty parametrisation. 13 
+
+Table IV. Fiducial cosmological parameters as published in [25] for ΛCDM and CPL, [29] for GEDE, and [24] for LsCDM. All models assume Ωk = 0 .Model DESI+CMB DESI+PP 
+
+ΛCDM Ωm = 0 .3027 Ωm = 0 .2975 
+
+CPL Ωm = 0 .352 , w0 = −0.43 , wa = −1.70 Ω m = 0 .298 , w0 = −0.888 , wa = −0.477 
+
+GEDE Ωm = 0 .306 , ∆ = −1.10 Ωm = 0 .306 , ∆ = −0.94 
+
+LsCDM Ωm = 0 .300 , z† = 2 .0 Ωm = 0 .295 , z† = 1 .80.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00                   
+
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> |MB(z) MB | /  MB 1
+> 3
+> 5
+> H-TT (solid) vs H-TF (dashed)
+> LCDM
+> CPL
+> GEDE
+> LsCDM
+> TT or FT (solid)
+> TF or FF (dashed)
+> 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> 1
+> 3
+> 5
+> CMB fiducial
+> H-FT (solid) vs H-FF (dashed)
+> 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00
+
+Redshift z         
+
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> |MB(z) MB | /  MB 1
+> 3
+> 5
+> 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00
+
+Redshift z  
+
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> 1
+> 3
+> 5
+> PP fiducial
+
+MB(z) Deviation Significance from MB = const 
+
+Figure 6. MB (z) deviation significance for all four constraint configurations (H-TT, H-TF, H-FT, H-FF) and both fiducials using the excess-variance loss (Eq. C2). The z ∼ 0.4–0.5 significance peak is reproduced in both constrained configurations, confirming robustness to the uncertainty parametrisation.

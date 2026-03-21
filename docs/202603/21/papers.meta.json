@@ -1,0 +1,65 @@
+{
+  "label": "2026-03-21",
+  "date": "2026-03-21",
+  "generated_at": "2026-03-21T19:27:21",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202603/21/2603.17184v1-reconstructing-the-type-ia-supernova-absolute-magnitude-with-two-probe-physics-informed-neural-networks",
+      "section": "deep",
+      "title_en": "Reconstructing the Type Ia Supernova Absolute Magnitude with Two-Probe Physics-Informed Neural Networks",
+      "authors": "Denitsa Staicova",
+      "date": "2026-03-17",
+      "pdf": "https://arxiv.org/pdf/2603.17184v1",
+      "score": "9.0",
+      "evidence": "用于宇宙学模型重建的PINN",
+      "tldr": "本研究利用物理信息神经网络（PINN）的两种变体，结合重子声学振荡（BAO）和超新星数据，在多种宇宙学模型下重建了 Ia 型超新星的绝对星等 $M_B(z)$。研究对比了异方差单网络与 Fisher 加权双网络方法，发现距离二元性关系（DDR）是比模型先验更基本的约束。结果显示 $M_B$ 约为 -19.3 mag 且无显著演化，但在 $z \\sim 0.4-0.5$ 处发现了一致的 $2-3\\sigma$ 残差，为理解宇宙学张力提供了新线索。",
+      "tags": "query:pinn",
+      "abstract_en": "We apply two variants of Physics-Informed Neural Networks (PINNs) to reconstruct the Type Ia supernova absolute magnitude $M_B(z)$ from joint BAO and supernova data under four cosmological models ($Λ$CDM, CPL, GEDE, $Λ_s$CDM) and two DESI DR2 fiducial sets. A heteroscedastic single-network method tested across four constraint configurations establishes that the Etherington distance duality relation is more fundamental constraint than cosmological model priors, with DDR violations of 30--52 mmag under physical constraints versus 85--2330 mmag without. Under full constraints all models recover $M_B \\approx -19.3$ mag with biases below 0.05 mag. A Fisher information-weighted two-network variant trains independent networks on BAO and SN data, providing clean probe separation and finding no significant $M_B$ evolution in $z \\in [0.3, 1.5]$. The heteroscedastic method identifies a persistent $2-3σ$ residual at $z \\sim 0.4-0.5$ that is consistent across all four models and both fiducials; the Fisher method finds no significant pointwise deviation in $z\\in[0.3,1.5]$ but shows a systematic separation of redshift-binned $M_B$ distributions consistent with the same underlying tension. While the origin of this feature remains ambiguous, its model-independence and cross-method consistency warrant further investigation with forthcoming data.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/21/2603.12834v1-physics-constrained-diffusion-model-for-synthesis-of-3d-turbulent-data",
+      "section": "deep",
+      "title_en": "Physics-Constrained Diffusion Model for Synthesis of 3D Turbulent Data",
+      "authors": "Tianyi Li, Michele Buzzicotti, Fabio Bonaccorso, Luca Biferale",
+      "date": "2026-03-13",
+      "pdf": "https://arxiv.org/pdf/2603.12834v1",
+      "score": "8.0",
+      "evidence": "用于湍流的物理约束扩散模型",
+      "tldr": "合成三维湍流场是流体力学中的长期难题，面临高维、多尺度波动及物理约束（如不可压缩性）等挑战。本文提出物理约束扩散模型（PCDM），将先验物理约束直接融入生成动力学中。以旋转湍流为基准，该模型能稳定合成具有统计保真度的三维速度场，准确复现能谱和间歇性，且训练收敛速度显著优于标准扩散模型，为物理约束下的高维复杂系统建模提供了新思路。",
+      "tags": "query:pinn",
+      "abstract_en": "Synthesizing fully developed three-dimensional turbulent velocity fields remains a long-standing problem in fluid mechanics and an open challenge for generative modeling. The difficulty arises from the coexistence of extreme dimensionality, multiscale rough fluctuations and strong intermittency, together with exact physical constraints such as incompressibility and zero-mean momentum. We propose a physics-constrained diffusion model (PCDM) in which these \\emph{a priori} constraints are incorporated directly into the generative dynamics. Using rotating turbulence as a stringent benchmark, we show that the proposed framework enables stable and statistically faithful synthesis of inertial-range three-dimensional turbulent velocity fields at medium resolution, accurately reproducing anisotropic energy spectra, intermittency statistics, and physical constraints. By contrast, standard denoising diffusion probabilistic models without such constraints exhibit multiscale statistical deviations, violations of physical consistency, and substantially slower training convergence. These findings point to broader implications for generative modeling of high-dimensional complex systems under physical constraints.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/21/2603.14272v1-learning-in-function-spaces-an-unified-functional-analytic-view-of-supervised-and-unsupervised-learning",
+      "section": "quick",
+      "title_en": "Learning in Function Spaces: An Unified Functional Analytic View of Supervised and Unsupervised Learning",
+      "authors": "K. Lakshmanan",
+      "date": "2026-03-15",
+      "pdf": "https://arxiv.org/pdf/2603.14272v1",
+      "score": "6.0",
+      "evidence": "函数空间学习与基于算子的框架",
+      "tldr": "本研究提出了一个统一的泛函分析框架，将多种机器学习算法视为在数据分布诱导的函数空间上的变分优化过程。该框架通过数据分布定义的算子捕捉数据的结构特性，将监督学习（风险最小化）与无监督学习（相似性/平滑性约束）统一起来，揭示了核方法、谱聚类和流形学习等算法在函数表示上的内在联系，为理解学习算法提供了新视角。",
+      "tags": "query:pinn",
+      "abstract_en": "Many machine learning algorithms can be interpreted as procedures for estimating functions defined on the data distribution. In this paper we present a conceptual framework that formulates a wide range of learning problems as variational optimization over function spaces induced by the data distribution. Within this framework the data distribution defines operators that capture structural properties of the data, such as similarity relations or statistical dependencies. Learning algorithms can then be viewed as estimating functions expressed in bases determined by these operators.   This perspective provides a unified way to interpret several learning paradigms. In supervised learning the objective functional is defined using labeled data and typically corresponds to minimizing prediction risk, whereas unsupervised learning relies on structural properties of the input distribution and leads to objectives based on similarity or smoothness constraints. From this viewpoint, the distinction between learning paradigms arises primarily from the choice of the functional being optimized rather than from the underlying function space.   We illustrate this framework by discussing connections with kernel methods, spectral clustering, and manifold learning, highlighting how operators induced by data distributions naturally define function representations used by learning algorithms. The goal of this work is not to introduce a new algorithm but to provide a conceptual framework that clarifies the role of function spaces and operators in modern machine learning.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/21/2603.16583v2-trajectory-optimized-time-reparameterization-for-learning-compatible-reduced-order-modeling-of-stiff-dynamical-systems",
+      "section": "quick",
+      "title_en": "Trajectory-Optimized Time Reparameterization for Learning-Compatible Reduced-Order Modeling of Stiff Dynamical Systems",
+      "authors": "Joe Standridge, Daniel Livescu, Paul Cizmas",
+      "date": "2026-03-17",
+      "pdf": "https://arxiv.org/pdf/2603.16583v2",
+      "score": "6.0",
+      "evidence": "刚性系统的学习兼容降阶建模",
+      "tldr": "针对刚性动力系统在机器学习降阶模型（ML-ROM）中显式积分不稳定、隐式积分开销大的挑战，本文提出了一种轨迹优化时间再参数化（TOTR）方法。该方法通过在弧长坐标下优化遍历速度，惩罚拉伸时间下的加速度，从而平滑训练动力学。在多个刚性系统上的实验表明，TOTR显著提升了模型的学习效率和预测精度，相比现有方法降低了1-2个数量级的误差，为多尺度动力学建模提供了稳健的显式方案。",
+      "tags": "query:pinn",
+      "abstract_en": "Stiff dynamical systems present a challenge for machine-learning reduced-order models (ML-ROMs), as explicit time integration becomes unstable in stiff regimes while implicit integration within learning loops is computationally expensive and often degrades training efficiency. Time reparameterization (TR) offers an alternative by transforming the independent variable so that rapid physical-time transients are spread over a stretched-time coordinate, enabling stable explicit integration on uniformly sampled grids. Although several TR strategies have been proposed, their effect on learnability in ML-ROMs remains incompletely understood. This work investigates time reparameterization as a stiffness-mitigation mechanism for neural ODE reduced-order modeling and introduces a trajectory-optimized TR (TOTR) formulation. The proposed approach casts time reparameterization as an optimization problem in arc-length coordinates, in which a traversal-speed profile is selected to penalize acceleration in stretched time. By targeting the smoothness of the training dynamics, this formulation produces reparameterized trajectories that are better conditioned and easier to learn than existing TR methods. TOTR is evaluated on three stiff problems: a parameterized stiff linear system, the van der Pol oscillator, and the HIRES chemical kinetics model. Across all cases, the proposed approach yields smoother reparameterizations and improved physical-time predictions under identical training regimens than other TR approaches. Quantitative results demonstrate loss reductions of one to two orders of magnitude compared to benchmark algorithms. These results highlight that effective stiffness mitigation in ML-ROMs depends critically on the regularity and learnability of the time map itself, and that optimization-based TR provides a robust framework for explicit reduced-order modeling of multiscale dynamical systems.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
