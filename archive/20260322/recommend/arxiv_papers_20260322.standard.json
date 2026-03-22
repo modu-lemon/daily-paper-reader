@@ -1,0 +1,232 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-22T19:44:37.331345+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [
+    {
+      "id": "2603.15194v1",
+      "title": "PiGRAND: Physics-informed Graph Neural Diffusion for Intelligent Additive Manufacturing",
+      "abstract": "A comprehensive understanding of heat transport is essential for optimizing various mechanical and engineering applications, including 3D printing. Recent advances in machine learning, combined with physics-based models, have enabled a powerful fusion of numerical methods and data-driven algorithms. This progress is driven by the availability of limited sensor data in various engineering and scientific domains, where the cost of data collection and the inaccessibility of certain measurements are high. To this end, we present PiGRAND, a Physics-informed graph neural diffusion framework. In order to reduce the computational complexity of graph learning, an efficient graph construction procedure was developed. Our approach is inspired by the explicit Euler and implicit Crank-Nicolson methods for modeling continuous heat transport, leveraging sub-learning models to secure the accurate diffusion across graph nodes. To enhance computational performance, our approach is combined with efficient transfer learning. We evaluate PiGRAND on thermal images from 3D printing, demonstrating significant improvements in prediction accuracy and computational performance compared to traditional graph neural diffusion (GRAND) and physics-informed neural networks (PINNs). These enhancements are attributed to the incorporation of physical principles derived from the theoretical study of partial differential equations (PDEs) into the learning model. The PiGRAND code is open-sourced on GitHub: https://github.com/bu32loxa/PiGRAND",
+      "authors": [
+        "Benjamin Uhrich",
+        "Tim Häntschel",
+        "Erhard Rahm"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-16T12:31:11+00:00",
+      "link": "https://arxiv.org/pdf/2603.15194v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Physics-informed graph neural diffusion",
+      "llm_evidence_cn": "物理信息图神经扩散",
+      "llm_evidence": "物理信息图神经扩散",
+      "canonical_evidence": "物理信息图神经扩散",
+      "llm_tldr_en": "Combines graph neural networks with physics-based models for heat transport in additive manufacturing.",
+      "llm_tldr_cn": "结合图神经网络与物理模型，用于增材制造中的热传输分析。",
+      "llm_tldr": "结合图神经网络与物理模型，用于增材制造中的热传输分析。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.18107v1",
+      "title": "ARTEMIS: A Neuro Symbolic Framework for Economically Constrained Market Dynamics",
+      "abstract": "Deep learning models in quantitative finance often operate as black boxes, lacking interpretability and failing to incorporate fundamental economic principles such as no-arbitrage constraints. This paper introduces ARTEMIS (Arbitrage-free Representation Through Economic Models and Interpretable Symbolics), a novel neuro-symbolic framework combining a continuous-time Laplace Neural Operator encoder, a neural stochastic differential equation regularised by physics-informed losses, and a differentiable symbolic bottleneck that distils interpretable trading rules. The model enforces economic plausibility via two novel regularisation terms: a Feynman-Kac PDE residual penalising local no-arbitrage violations, and a market price of risk penalty bounding the instantaneous Sharpe ratio. We evaluate ARTEMIS against six strong baselines on four datasets: Jane Street, Optiver, Time-IMM, and DSLOB (a synthetic crash regime). Results demonstrate ARTEMIS achieves state-of-the-art directional accuracy, outperforming all baselines on DSLOB (64.96%) and Time-IMM (96.0%). A comprehensive ablation study confirms each component's contribution: removing the PDE loss reduces directional accuracy from 64.89% to 50.32%. Underperformance on Optiver is attributed to its long sequence length and volatility-focused target. By providing interpretable, economically grounded predictions, ARTEMIS bridges the gap between deep learning's power and the transparency demanded in quantitative finance.",
+      "authors": [
+        "Rahul D Ray"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CE",
+        "q-fin.ST"
+      ],
+      "published": "2026-03-18T13:00:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.18107v1",
+      "tags": [
+        "keyword:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Laplace Neural Operator with physics-informed losses",
+      "llm_evidence_cn": "带有物理信息损失的拉普拉斯神经算子",
+      "llm_evidence": "带有物理信息损失的拉普拉斯神经算子",
+      "canonical_evidence": "带有物理信息损失的拉普拉斯神经算子",
+      "llm_tldr_en": "Integrates Laplace Neural Operators and Feynman-Kac PDE residuals for arbitrage-free finance modeling.",
+      "llm_tldr_cn": "整合拉普拉斯神经算子与Feynman-Kac方程残差，用于无套利金融建模。",
+      "llm_tldr": "整合拉普拉斯神经算子与Feynman-Kac方程残差，用于无套利金融建模。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.16951v1",
+      "title": "Minimum-Action Learning: Energy-Constrained Symbolic Model Selection for Physical Law Identification from Noisy Data",
+      "abstract": "Identifying physical laws from noisy observational data is a central challenge in scientific machine learning. We present Minimum-Action Learning (MAL), a framework that selects symbolic force laws from a pre-specified basis library by minimizing a Triple-Action functional combining trajectory reconstruction, architectural sparsity, and energy-conservation enforcement. A wide-stencil acceleration-matching technique reduces noise variance by 10,000x, transforming an intractable problem (SNR ~0.02) into a learnable one (SNR ~1.6); this preprocessing is the critical enabler shared by all methods tested, including SINDy variants. On two benchmarks -- Kepler gravity and Hooke's law -- MAL recovers the correct force law with Kepler exponent p = 3.01 +/- 0.01 at ~0.07 kWh (40% reduction vs. prediction-error-only baselines). The raw correct-basis rate is 40% for Kepler and 90% for Hooke; an energy-conservation-based criterion discriminates the true force law in all cases, yielding 100% pipeline-level identification. Basis library sensitivity experiments show that near-confounders degrade selection (20% with added r^{-2.5} and r^{-1.5}), while distant additions are harmless, and the conservation diagnostic remains informative even when the correct basis is absent. Direct comparison with noise-robust SINDy variants, Hamiltonian Neural Networks, and Lagrangian Neural Networks confirms MAL's distinct niche: interpretable, energy-constrained model selection that combines symbolic basis identification with dynamical rollout validation.",
+      "authors": [
+        "Martin G. Frasch"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-16T20:45:49+00:00",
+      "link": "https://arxiv.org/pdf/2603.16951v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "identifying physical laws via energy-conservation enforcement",
+      "llm_evidence_cn": "通过能量守恒约束识别物理定律",
+      "llm_evidence": "通过能量守恒约束识别物理定律",
+      "canonical_evidence": "通过能量守恒约束识别物理定律",
+      "llm_tldr_en": "A framework for symbolic physical law identification from noisy data using energy-constrained learning.",
+      "llm_tldr_cn": "一种利用能量约束学习从噪声数据中识别符号物理定律的框架。",
+      "llm_tldr": "一种利用能量约束学习从噪声数据中识别符号物理定律的框架。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.15964v1",
+      "title": "Unifying Finite Differences and Semi-Lagrangian Schemes via Localized Matrix Exponentials",
+      "abstract": "We present a unified framework for the construction of localized exponential integrators that bypasses the traditional trade-off between the accuracy of global spectral methods and the efficiency of sparse finite differences. By evaluating the matrix exponential of a discrete operator strictly within a local stencil of size $n$, we \"harvest\" integration weights that naturally incorporate high-order temporal corrections. We prove that this Local Matrix Exponential Propagator (LMEP) is algebraically isomorphic to optimal semi-Lagrangian transport for advection and provides algebraically exact coupled evolution for mixed-physics operators, effectively eliminating the commutator errors associated with operator splitting. The framework is extended to semi-linear systems via a localized augmented matrix approach, facilitating the evaluation of Exponential Time Differencing (ETD) $φ$-functions through sparse, banded operations. Numerical experiments on the viscous Burgers, Korteweg-de Vries, and Allen-Cahn equations demonstrate that the method preserves high-order temporal accuracy and exhibits superior stability at high Courant numbers across both periodic and non-periodic domains. We empirically demonstrate that this localized approach yields optimal $\\mathcal{O}(N)$ scaling and, for high-CFL upwind configurations, total execution times that remain strictly independent of the spatial approximation order.",
+      "authors": [
+        "Víctor Bayona"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-16T22:26:00+00:00",
+      "link": "https://arxiv.org/pdf/2603.15964v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Localized matrix exponentials for mixed-physics operators",
+      "llm_evidence_cn": "用于混合物理算子的局部矩阵指数",
+      "llm_evidence": "用于混合物理算子的局部矩阵指数",
+      "canonical_evidence": "用于混合物理算子的局部矩阵指数",
+      "llm_tldr_en": "Presents a unified framework for localized exponential integrators to solve mixed-physics evolution.",
+      "llm_tldr_cn": "提出了一个统一的局部指数积分器框架，用于解决混合物理算子的演化问题。",
+      "llm_tldr": "提出了一个统一的局部指数积分器框架，用于解决混合物理算子的演化问题。",
+      "llm_tags": [
+        "query:pinn:composite"
+      ],
+      "matched_query_tag": "query:pinn:composite",
+      "matched_query_text": "Papers central to 物理信息神经网络与神经算子求解偏微分方程论文检索, especially work that connects or combines: p; Physics-informed neural networks for partial differential equations; Neural operator methods for solving PDEs; Deep operator networks for differential equations; Fourier Neural Operator for scientific computing; Deep learning based partial differential equation solvers; Recent advances in physics informed neural networks and neural operators; Comparison between PINNs and neural operators for PDE solving; Applications of neural operators in computational fluid dynamics; Hybrid physics informed machine learning for differential equations.",
+      "matched_requirement_id": "req-composite-pinn",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.16976v1",
+      "title": "Implementation of tangent linear and adjoint models for neural networks based on a compiler library tool",
+      "abstract": "This paper presents TorchNWP, a compilation library tool for the efficient coupling of artificial intelligence components and traditional numerical models. It aims to address the issues of poor cross-language compatibility, insufficient coupling flexibility, and low data transfer efficiency between operational numerical models developed in Fortran and Python-based deep learning frameworks. Based on LibTorch, it optimizes and designs a unified application-layer calling interface, converts deep learning models under the PyTorch framework into a static binary format, and provides C/C++ interfaces. Then, using hybrid Fortran/C/C++ programming, it enables the deployment of deep learning models within numerical models. Integrating TorchNWP into a numerical model only requires compiling it into a callable link library and linking it during the compilation and linking phase to generate the executable. On this basis, tangent linear and adjoint model based on neural networks are implemented at the C/C++ level, which can shield the internal structure of neural network models and simplify the construction process of four-dimensional variational data assimilation systems. Meanwhile, it supports deployment on heterogeneous platforms, is compatible with mainstream neural network models, and enables mapping of different parallel granularities and efficient parallel execution. Using this tool requires minimal code modifications to the original numerical model, thus reducing coupling costs. It can be efficiently integrated into numerical weather prediction models such as CMA-GFS and MCV, and has been applied to the coupling of deep learning-based physical parameterization schemes (e.g., radiation, non-orographic gravity wave drag) and the development of their tangent linear and adjoint models, significantly improving the accuracy and efficiency of numerical weather prediction.",
+      "authors": [
+        "Sa Xiao",
+        "Hao Jing",
+        "Honglu Sun",
+        "Haoyu Li"
+      ],
+      "primary_category": "cs.MS",
+      "categories": [
+        "cs.MS",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-17T13:11:22+00:00",
+      "link": "https://arxiv.org/pdf/2603.16976v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Coupling neural networks with traditional numerical PDE models",
+      "llm_evidence_cn": "神经网络与传统数值PDE模型的耦合",
+      "llm_evidence": "神经网络与传统数值PDE模型的耦合",
+      "canonical_evidence": "神经网络与传统数值PDE模型的耦合",
+      "llm_tldr_en": "Introduces TorchNWP for efficient coupling of deep learning models with traditional Fortran-based numerical solvers.",
+      "llm_tldr_cn": "推出了TorchNWP工具，用于实现深度学习模型与传统Fortran数值求解器的效率耦合。",
+      "llm_tldr": "推出了TorchNWP工具，用于实现深度学习模型与传统Fortran数值求解器的效率耦合。",
+      "llm_tags": [
+        "query:pinn:composite"
+      ],
+      "matched_query_tag": "query:pinn:composite",
+      "matched_query_text": "Papers central to 物理信息神经网络与神经算子求解偏微分方程论文检索, especially work that connects or combines: p; Physics-informed neural networks for partial differential equations; Neural operator methods for solving PDEs; Deep operator networks for differential equations; Fourier Neural Operator for scientific computing; Deep learning based partial differential equation solvers; Recent advances in physics informed neural networks and neural operators; Comparison between PINNs and neural operators for PDE solving; Applications of neural operators in computational fluid dynamics; Hybrid physics informed machine learning for differential equations.",
+      "matched_requirement_id": "req-composite-pinn",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.17175v1",
+      "title": "Domain-informed explainable boosting machines for trustworthy lateral spread predictions",
+      "abstract": "Explainable Boosting Machines (EBMs) provide transparent predictions through additive shape functions, enabling direct inspection of feature contributions. However, EBMs can learn non-physical relationships that reduce their reliability in natural hazard applications. This study presents a domain-informed framework to improve the physical consistency of EBMs for lateral spreading prediction. Our approach modifies learned shape functions based on domain knowledge. These modifications correct non-physical behavior while maintaining data-driven patterns. We apply the method to the 2011 Christchurch earthquake dataset and correct non-physical trends observed in the original EBM. The resulting model produces more physically consistent global and local explanations, with an acceptable tradeoff in accuracy (4--5\\%).",
+      "authors": [
+        "Cheng-Hsi Hsiao",
+        "Krishna Kumar",
+        "Ellen M. Rathje"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "physics.geo-ph"
+      ],
+      "published": "2026-03-17T22:09:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.17175v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "domain-informed framework for physical consistency",
+      "llm_evidence_cn": "用于物理一致性的领域知识框架",
+      "llm_evidence": "用于物理一致性的领域知识框架",
+      "canonical_evidence": "用于物理一致性的领域知识框架",
+      "llm_tldr_en": "Improves physical consistency of Explainable Boosting Machines using domain knowledge for lateral spread prediction.",
+      "llm_tldr_cn": "利用领域知识改进可解释提升机的物理一致性，用于侧向扩展预测。",
+      "llm_tldr": "利用领域知识改进可解释提升机的物理一致性，用于侧向扩展预测。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
