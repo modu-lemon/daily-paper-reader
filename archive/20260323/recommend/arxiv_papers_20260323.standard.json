@@ -1,0 +1,314 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-23T20:09:01.491408+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 5,
+    "deep_cap": 6,
+    "deep_selected": 5,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2603.19326v1",
+      "title": "Mathematical Modeling of Cancer-Bacterial Therapy: Analysis and Numerical Simulation via Physics-Informed Neural Networks",
+      "abstract": "Bacterial cancer therapy exploits anaerobic bacteria's ability to target hypoxia tumor regions, yet the interactions among tumor growth, bacterial colonization, oxygen levels, immunosuppressive cytokines, and bacterial communication remain poorly quantified. We present a mathematical model of five coupled nonlinear reaction-diffusion equations in a two-dimensional tissue domain. We proved the global well-posedness of the model and identified its steady states to analyze stability. Furthermore, a physics-informed neural network (PINN) solves the system without a mesh and without requiring extensive data. It provides convergence guarantees by combining residual stability and Sobolev approximation error bounds. This results in an overall error rate of O(n^-2 ln^4(n) + N^-1/2), which depends on the network width n and the number of collocation points N. We conducted several numerical experiments, including predicting the tumor's response to therapy. We also performed a sensitivity analysis of certain parameters. The results suggest that long-term therapeutic efficacy may require the maintenance of hypoxia regions in the tumor, or using bacteria that tolerate oxygen better, may be necessary for long-lasting tumor control.",
+      "authors": [
+        "Ayoub Farkane",
+        "David Lassounon"
+      ],
+      "primary_category": "q-bio.QM",
+      "categories": [
+        "q-bio.QM",
+        "cs.LG",
+        "math.AP",
+        "math.NA"
+      ],
+      "published": "2026-03-18T02:04:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.19326v1",
+      "tags": [
+        "keyword:PINN"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "PINN solver for coupled nonlinear reaction-diffusion equations",
+      "llm_evidence_cn": "用于耦合非线性反应扩散方程的PINN求解器",
+      "llm_evidence": "用于耦合非线性反应扩散方程的PINN求解器",
+      "canonical_evidence": "用于耦合非线性反应扩散方程的PINN求解器",
+      "llm_tldr_en": "Applies PINNs to solve a complex cancer-bacterial therapy model consisting of five reaction-diffusion equations.",
+      "llm_tldr_cn": "应用PINN求解由五个反应扩散方程组成的复杂癌症细菌治疗模型。",
+      "llm_tldr": "应用PINN求解由五个反应扩散方程组成的复杂癌症细菌治疗模型。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Physics-informed neural networks for partial differential equations",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.19545v1",
+      "title": "Verifiable Error Bounds for Physics-Informed Neural Network Solutions of Lyapunov and Hamilton-Jacobi-Bellman Equations",
+      "abstract": "Many core problems in nonlinear systems analysis and control can be recast as solving partial differential equations (PDEs) such as Lyapunov and Hamilton-Jacobi-Bellman (HJB) equations. Physics-informed neural networks (PINNs) have emerged as a promising mesh-free approach for approximating their solutions, but in most existing works there is no rigorous guarantee that a small PDE residual implies a small solution error. This paper develops verifiable error bounds for approximate solutions of Lyapunov and HJB equations, with particular emphasis on PINN-based approximations. For both the Lyapunov and HJB PDEs, we show that a verifiable residual bound yields relative error bounds with respect to the true solutions as well as computable a posteriori estimates in terms of the approximate solutions. For the HJB equation, this also yields certified upper and lower bounds on the optimal value function on compact sublevel sets and quantifies the optimality gap of the induced feedback policy. We further show that one-sided residual bounds already imply that the approximation itself defines a valid Lyapunov or control Lyapunov function. We illustrate the results with numerical examples.",
+      "authors": [
+        "Jun Liu"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "cs.LG",
+        "math.OC"
+      ],
+      "published": "2026-03-20T00:58:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.19545v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Verifiable error bounds for PINN solutions of Lyapunov and HJB equations",
+      "llm_evidence_cn": "PINN求解Lyapunov和HJB方程的可验证误差界限",
+      "llm_evidence": "PINN求解Lyapunov和HJB方程的可验证误差界限",
+      "canonical_evidence": "PINN求解Lyapunov和HJB方程的可验证误差界限",
+      "llm_tldr_en": "Provides rigorous error bounds for PINN-based approximations of Lyapunov and Hamilton-Jacobi-Bellman PDEs.",
+      "llm_tldr_cn": "为基于PINN的Lyapunov和HJB偏微分方程近似解提供严格的误差界限。",
+      "llm_tldr": "为基于PINN的Lyapunov和HJB偏微分方程近似解提供严格的误差界限。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Physics-informed neural networks for partial differential equations",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.19561v1",
+      "title": "An Adaptive Machine Learning Framework for Fluid Flow in Dual-Network Porous Media",
+      "abstract": "Porous materials -- natural or engineered -- often exhibit dual pore-network structures that govern processes such as mineral exploration and hydrocarbon recovery from tight shales. Double porosity/permeability (DPP) mathematical models describe incompressible fluid flow through two interacting pore networks with inter-network mass exchange. Despite significant advances in numerical methods, there remains a need for computational frameworks that enable rapid forecasting, data assimilation, and reliable inverse analysis. To address this, we present a physics-informed neural network (PINN) framework for forward and inverse modeling of DPP systems. The proposed approach encodes the governing equations in mixed form, along with boundary conditions, directly into the loss function, with adaptive weighting strategies to balance their contributions. Key features of the framework include adaptive weight tuning, dynamic collocation point selection, and the use of shared trunk neural architectures to efficiently capture the coupled behavior of the dual pore networks. It is inherently mesh-free, making it well-suited for complex geometries typical of porous media. It accurately captures discontinuities in solution fields across layered domains without introducing spurious oscillations commonly observed in classical finite element formulations. Importantly, the framework is well-suited for inverse analysis, enabling robust parameter identification in scenarios where key physical quantities -- such as the mass transfer coefficient in DPP models -- are difficult to measure directly. In addition, a systematic convergence analysis is provided to rigorously assess the stability, accuracy, and reliability of the method. The effectiveness and computational advantages of the approach are demonstrated through a series of representative numerical experiments.",
+      "authors": [
+        "V. S. Maduri",
+        "K. B. Nakshatrala"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA",
+        "cs.LG",
+        "physics.flu-dyn"
+      ],
+      "published": "2026-03-20T02:01:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.19561v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "PINN framework for forward and inverse modeling of DPP systems",
+      "llm_evidence_cn": "用于双重孔隙介质系统正反向建模的PINN框架",
+      "llm_evidence": "用于双重孔隙介质系统正反向建模的PINN框架",
+      "canonical_evidence": "用于双重孔隙介质系统正反向建模的PINN框架",
+      "llm_tldr_en": "Presents a PINN framework for modeling fluid flow in dual-network porous media using mixed-form equations.",
+      "llm_tldr_cn": "提出了一种物理信息神经网络框架，用于双网络多孔介质中流体流动的建模。",
+      "llm_tldr": "提出了一种物理信息神经网络框架，用于双网络多孔介质中流体流动的建模。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Physics-informed neural networks for partial differential equations",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.19463v1",
+      "title": "Deep Hilbert--Galerkin Methods for Infinite-Dimensional PDEs and Optimal Control",
+      "abstract": "We develop deep learning-based approximation methods for fully nonlinear second-order PDEs on separable Hilbert spaces, such as HJB equations for infinite-dimensional control, by parameterizing solutions via Hilbert--Galerkin Neural Operators (HGNOs). We prove the first Universal Approximation Theorems (UATs) which are sufficiently powerful to address these problems, based on novel topologies for Hessian terms and corresponding novel continuity assumptions on the fully nonlinear operator. These topologies are non-sequential and non-metrizable, making the problem delicate. In particular, we prove UATs for functions on Hilbert spaces, together with their Fréchet derivatives up to second order, and for unbounded operators applied to the first derivative, ensuring that HGNOs are able to approximate all the PDE terms. For control problems, we further prove UATs for optimal feedback controls in terms of our approximating value function HGNO.   We develop numerical training methods, which we call Deep Hilbert--Galerkin and Hilbert Actor-Critic (reinforcement learning) Methods, for these problems by minimizing the $L^2_μ(H)$-norm of the residual of the PDE on the whole Hilbert space, not just a projected PDE to finite dimensions. This is the first paper to propose such an approach. The models considered arise in many applied sciences, such as functional differential equations in physics and Kolmogorov and HJB PDEs related to controlled PDEs, SPDEs, path-dependent systems, partially observed stochastic systems, and mean-field SDEs. We numerically solve examples of Kolmogorov and HJB PDEs related to the optimal control of deterministic and stochastic heat and Burgers' equations, demonstrating the promise of our deep learning-based approach.",
+      "authors": [
+        "Samuel N. Cohen",
+        "Filippo de Feo",
+        "Jackson Hebner",
+        "Justin Sirignano"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "math.AP",
+        "math.NA",
+        "math.OC",
+        "math.PR"
+      ],
+      "published": "2026-03-19T20:53:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.19463v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Hilbert-Galerkin Neural Operators for nonlinear PDEs",
+      "llm_evidence_cn": "用于非线性偏微分方程的希尔伯特-伽辽金神经算子",
+      "llm_evidence": "用于非线性偏微分方程的希尔伯特-伽辽金神经算子",
+      "canonical_evidence": "用于非线性偏微分方程的希尔伯特-伽辽金神经算子",
+      "llm_tldr_en": "Develops Hilbert-Galerkin Neural Operators for solving infinite-dimensional nonlinear PDEs with theoretical proofs.",
+      "llm_tldr_cn": "开发了用于求解无限维非线性偏微分方程的希尔伯特-伽辽金神经算子，并提供了理论证明。",
+      "llm_tldr": "开发了用于求解无限维非线性偏微分方程的希尔伯特-伽辽金神经算子，并提供了理论证明。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Neural operator methods for solving PDEs",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.19526v1",
+      "title": "A review of shape-morphing solutions and evolutional neural networks for spatiotemporal dynamics",
+      "abstract": "Shape-morphing solutions (SMS) refer to a class of approximate solutions of partial differential equations (PDEs) with the distinguishing feature that they depend nonlinearly on a set of time-dependent parameters. They generalize Galerkin truncations by allowing the basis (or trial functions) to evolve in time in order to adapt to the solution of the PDE. As such, SMS are particularly suitable for reduced-order modeling as well as high fidelity simulation of multiscale systems which exhibit localized time-dependent features, such as vortices, dispersive wave packets, and shocks. Furthermore, being mesh-free, SMS is scalable for solving PDEs in higher spatial dimensions. As a special case, SMS allows the approximation of the PDE's solution by a neural network whose weights and biases depend on time. Such neural networks are known as evolutional neural networks or neural Galerkin schemes. The evolution of SMS parameters is dictated by the SMS equation, a set of ordinary differential equations derived from the Dirac-Frenkel variational principle. Over the past five years, contributions to the theory and computation of SMS have been growing rapidly. Here, we survey these developments, showcase some applications of SMS, and highlight important open problems for future research. At the same time, this review is structured to serve as a tutorial for applied mathematicians, physicist, and engineers who wish to enter this field.",
+      "authors": [
+        "Mohammad Farazmand"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA",
+        "math.DS"
+      ],
+      "published": "2026-03-19T23:37:14+00:00",
+      "link": "https://arxiv.org/pdf/2603.19526v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Evolutional neural networks for spatiotemporal PDE dynamics",
+      "llm_evidence_cn": "用于时空偏微分方程动力学的演化神经网络",
+      "llm_evidence": "用于时空偏微分方程动力学的演化神经网络",
+      "canonical_evidence": "用于时空偏微分方程动力学的演化神经网络",
+      "llm_tldr_en": "Reviews shape-morphing solutions and evolutional neural networks for solving spatiotemporal PDEs.",
+      "llm_tldr_cn": "综述了用于求解时空偏微分方程的形状变形解和演化神经网络。",
+      "llm_tldr": "综述了用于求解时空偏微分方程的形状变形解和演化神经网络。",
+      "llm_tags": [
+        "query:pinn:composite"
+      ],
+      "matched_query_tag": "query:pinn:composite",
+      "matched_query_text": "Papers central to 物理信息神经网络与神经算子求解偏微分方程论文检索, especially work that connects or combines: p; Physics-informed neural networks for partial differential equations; Neural operator methods for solving PDEs; Deep operator networks for differential equations; Fourier Neural Operator for scientific computing; Deep learning based partial differential equation solvers; Recent advances in physics informed neural networks and neural operators; Comparison between PINNs and neural operators for PDE solving; Applications of neural operators in computational fluid dynamics; Hybrid physics informed machine learning for differential equations.",
+      "matched_requirement_id": "req-composite-pinn",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.19735v1",
+      "title": "Surrogate Modeling with Low-Rank Function Representation for Electromagnetic Simulation",
+      "abstract": "High-fidelity electromagnetic (EM) simulations are indispensable for the design of microwave and wave devices, yet repeated full-wave evaluations over high-dimensional design spaces are often computationally prohibitive. While neural surrogates can amortize this cost, learning high-dimensional EM response mappings remains difficult under limited simulation budgets due to strong and heterogeneous parameter couplings. In this work, we introduce low-rank tensor function representations as a principled surrogate modeling paradigm for EM problems and provide a systematic study of representative low-rank formats, including Tucker-style low-rank tensor function representation (LRTFR) as well as neural functional tensor-train (TT) and tensor-ring (TR) baselines. Building on these insights, we propose a pairwise low-rank tensor network (PLRNet) that uses learnable pairwise interaction factors over compact coordinate-wise embeddings. Experiments on representative EM surrogate tasks demonstrate that the proposed framework achieves a more favorable overall trade-off between accuracy, robustness, and parameter efficiency, with stable optimization in high-dimensional regimes.",
+      "authors": [
+        "Mingze Sun",
+        "Liang Li",
+        "Xile Zhao",
+        "Zheng Tan",
+        "Yulu Hu",
+        "Xing Li",
+        "Bin Li"
+      ],
+      "primary_category": "cs.CE",
+      "categories": [
+        "cs.CE",
+        "math.NA"
+      ],
+      "published": "2026-03-20T08:19:57+00:00",
+      "link": "https://arxiv.org/pdf/2603.19735v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Neural functional representations for surrogate modeling of EM PDEs",
+      "llm_evidence_cn": "用于电磁偏微分方程代理建模的神经泛函表示",
+      "llm_evidence": "用于电磁偏微分方程代理建模的神经泛函表示",
+      "canonical_evidence": "用于电磁偏微分方程代理建模的神经泛函表示",
+      "llm_tldr_en": "Explores low-rank tensor function representations as neural surrogates for electromagnetic simulations.",
+      "llm_tldr_cn": "探索了低秩张量函数表示作为电磁模拟的神经代理模型。",
+      "llm_tldr": "探索了低秩张量函数表示作为电磁模拟的神经代理模型。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep operator networks for differential equations",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.14442v1",
+      "title": "Predicting power grid frequency dynamics with invertible Koopman-based architectures",
+      "abstract": "The system frequency is a critical measure of power system stability and understanding, and modeling it are key to ensure reliable power system operations. Koopman-based autoencoders are effective at approximating complex nonlinear data patterns, with potential applications in the frequency dynamics of power systems. However, their non-invertibility can result in a distorted latent representation, leading to significant prediction errors. Invertible neural networks (INNs) in combination with the Koopman operator framework provide a promising approach to address these limitations. In this study, we analyze different INN architectures and train them on simulation datasets. We further apply extensions to the networks to address inherent limitations of INNs and evaluate their impact. We find that coupling-layer INNs achieve the best performance when used in isolation. In addition, we demonstrate that hybrid approaches can improve the performance when combined with suitable INNs, while reducing the generalization capabilities in combination with disadvantageous architectures. Overall, our results provide a clearer overview of how architectural choices influence INN performance, offering guidance for selecting and designing INNs for modeling power system frequency dynamics.",
+      "authors": [
+        "Eric Lupascu",
+        "Xiao Li",
+        "Benjamin Schäfer"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-15T15:36:35+00:00",
+      "link": "https://arxiv.org/pdf/2603.14442v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Invertible neural networks with Koopman operator framework",
+      "llm_evidence_cn": "结合Koopman算子框架的可逆神经网络",
+      "llm_evidence": "结合Koopman算子框架的可逆神经网络",
+      "canonical_evidence": "结合Koopman算子框架的可逆神经网络",
+      "llm_tldr_en": "Combines invertible neural networks with Koopman operators to predict power grid frequency dynamics.",
+      "llm_tldr_cn": "结合可逆神经网络与Koopman算子来预测电网频率动态。",
+      "llm_tldr": "结合可逆神经网络与Koopman算子来预测电网频率动态。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Neural operator methods for solving PDEs",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.18837v1",
+      "title": "Model Order Reduction of Cerebrovascular Hemodynamics Using POD_Galerkin and Reservoir Computing_based Approach",
+      "abstract": "We investigate model order reduction (MOR) strategies for simulating unsteady hemodynamics within cerebrovascular systems, contrasting a physics-based intrusive approach with a data-driven non-intrusive framework. High-fidelity 3D Computational Fluid Dynamics (CFD) snapshots of an idealised basilar artery bifurcation are first compressed into a low-dimensional latent space using Proper Orthogonal Decomposition (POD). We evaluate the performance of a POD-Galerkin (POD-G) model, which projects the Navier-Stokes equations onto the reduced basis, against a POD-Reservoir Computing (POD-RC) model that learns the temporal evolution of coefficients through a recurrent architecture. A multi-harmonic and multi-amplitude training signal is introduced to improve training efficiency. Both methodologies achieve computational speed-ups on the order of 10^2 to 10^3 compared to full-order simulations, demonstrating their potential as efficient and accurate surrogates for predicting flow quantities such as wall shear stress.",
+      "authors": [
+        "Rahul Halder",
+        "Arash Hajisharifi",
+        "Kabir Bakhshaei",
+        "Gianluigi Rozza"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA",
+        "cs.LG"
+      ],
+      "published": "2026-03-19T12:38:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.18837v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Data-driven modeling of cerebrovascular hemodynamics",
+      "llm_evidence_cn": "脑血管血液动力学的数据驱动建模",
+      "llm_evidence": "脑血管血液动力学的数据驱动建模",
+      "canonical_evidence": "脑血管血液动力学的数据驱动建模",
+      "llm_tldr_en": "Compares physics-based and data-driven reduced-order models for simulating unsteady hemodynamics.",
+      "llm_tldr_cn": "对比了用于模拟非定常血液动力学的物理驱动和数据驱动降阶模型。",
+      "llm_tldr": "对比了用于模拟非定常血液动力学的物理驱动和数据驱动降阶模型。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Applications of neural operators in computational fluid dynamics",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
