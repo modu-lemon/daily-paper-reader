@@ -1,0 +1,2697 @@
+Title: Learning operators on labelled conditional distributions with applications to mean field control of non exchangeable systems
+
+URL Source: https://arxiv.org/pdf/2603.21683v1
+
+Published Time: Tue, 24 Mar 2026 01:57:07 GMT
+
+Number of Pages: 37
+
+Markdown Content:
+# Learning operators on labelled conditional distributions with applications to mean field control of non exchangeable systems 
+
+Samy MEKKAOUI ∗ Huyên PHAM † Xavier WARIN ‡
+
+March 24, 2026 
+
+Abstract 
+
+We study the approximation of operators acting on probability measures on a product space with prescribed marginal. Let I be a label space endowed with a reference measure 
+
+λ, and define Mλ as the set of probability measures on I × Rd with first marginal λ. By disintegration, elements of Mλ correspond to families of labeled conditional distributions. Operators defined on this constrained measure space arise naturally in mean-field control problems with heterogeneous, non-exchangeable agents. Our main theoretical result establishes a universal approximation theorem for continuous operators on Mλ. The proof combines cylindrical approximations of probability measures with a DeepONet-type branch–trunk neural architecture, yielding finite-dimensional representations of such operators. We further introduce a sampling strategy for generating training measures in Mλ, enabling practical learning of such conditional mean-field operators. We apply the method to the numerical resolution of mean-field control problems with heterogeneous interactions, thereby extending previous neural approaches developed for homo-geneous (exchangeable) systems. Numerical experiments illustrate the accuracy and computa-tional effectiveness of the proposed framework. 
+
+MSC Classification : 49N80, 68T07, 91B69 
+
+Key words : Non exchangeable mean field systems; mean field neural networks; learning on Wasserstein space; DeepONet 
+
+# 1 Introduction 
+
+Motivation of MFC with non exchangeable systems. Mean-field control provides a tractable framework for modeling and optimizing large interacting particle systems. In the classical setting, exchangeability of agents allows the population to be described by a single marginal distribution, representing the law of a representative agent, and the associated control problems depend only on this evolving law. This structure underlies standard formulations of mean-field games and mean-field control, see [3] [7], [8]. 
+
+> ∗
+
+École Polytechnique, CMAP, samy.mekkaoui at polytechnique.edu. This author is supported by the S-G Chair “Financial Risks” and the Qube-RT Chair “Deep Finance and Statistics”, samy.mekkaoui at polytechnique.edu 
+
+> †
+
+École Polytechnique, CMAP, huyen.pham at polytechnique.edu. This author is supported by the BNP Paribas Chair “Futures of Quantitative Finance”, the Chair “Financial Risks”, by FiME (Laboratory of Finance and Energy Markets), and the EDF–CACIB Chair “Finance and Sustainable Development”, huyen.pham at polytechnique.edu 
+
+> ‡
+
+EDF R&D, and FiME, xavier.warin at edf.fr 
+
+1
+
+> arXiv:2603.21683v1 [math.OC] 23 Mar 2026
+
+In many applications, however, agents are heterogeneous and cannot be treated as exchangeable. Agents may differ through labels, types, spatial indices, or intrinsic parameters, and heterogeneous interactions are often modeled through graphons or related structures; see e.g. [2], [4], [11], [20]. In such non-exchangeable systems, the population is no longer characterized by a single marginal distribution. Instead, it is described by a family of probability distributions indexed by a label space. Equivalently, the population law is a probability measure on a product space with prescribed first marginal, see [23]. This reformulation leads naturally to operators acting on constrained measure spaces rather than on a single probability distribution. The efficient approximation of such operators is the central objective of this work. More precisely, heterogeneous mean-field control problems lead to nonlinear mappings that associate to a population law its corresponding value function, decoupling field, or feedback control. These mappings act on families of conditional distributions and therefore on probability measures on a product space with prescribed marginal. We formulate this approximation problem in a functional-analytic framework and develop a neural operator methodology adapted to this structure. 
+
+Operators on labelled conditional distributions. Let I be a compact label space, say I =[0 , 1] , endowed with a reference probability measure, e.g., the uniform distribution. We consider the constrained space 
+
+Mλ := μ ∈ P 2(I × Rd) : pr 1♯μ = λ ,
+
+where P2(I × Rd) is the Wasserstein space of square integrable probability measures on I × Rd,
+
+I × Rd ∋ (u, x ) 7 → pr 1(u, x ) = u denotes the projection mapping on the first coordinate and ♯
+
+denotes the pushforward measure. By disintegration, each μ ∈ M λ can be written as 
+
+μ(d u, dx) = λ(d u)μu(d x),
+
+where (μu)u∈I is a λ(d u)-a.e unique family of labelled conditional distributions, valued in 
+
+L2
+
+> λ
+
+(I; P2(Rd)) := I ∋ u 7 → μu ∈ P 2(Rd) measurable and 
+
+Z
+
+> I
+
+W2(μu, δ 0)λ(d u) < ∞ ,
+
+where W2 denotes the 2-Wasserstein distance. We study operators of the form 
+
+ϑ : Mλ ∋ μ 7 −→ V (·, ·, μ ) ∈ L2(μ), (1.1) for some function V on I × Rd × M λ with quadratic growth w.r.t. the first two arguments, and 
+
+L2(μ) is the space of square integrable functions w.r.t. μ ∈ M λ. Such operators arise naturally in heterogeneous mean-field control problems, for instance as decoupling fields associated with forward–backward stochastic systems in maximum principle, see [22], [5], or feedback maps obtained from dynamic programming, see [14]. Unlike classical neural operator learning, the domain here is an infinite-dimensional space of measures subject to a marginal constraint. Preserving this structural constraint is essential both for theoretical consistency and for numerical stability. 
+
+Our main contributions. The main contributions of this work are fourfold. 1. First, we introduce a neural operator framework tailored to operators defined on the constrained Wasserstein space Mλ. The construction combines cylindrical approximations of probability measures with a DeepONet-type branch–trunk architecture, yielding finite-dimensional repre-sentations that are compatible with the marginal constraint pr 1♯μ = λ.22. Second, we establish a universal approximation theorem for continuous operators ϑ as in (1.1). More precisely, we prove that the proposed architecture is dense in the class of such operators with respect to the natural topology induced by the Wasserstein distance. The proof integrates approximation results for probability measures with neural operator theory and shows that the marginal constraint can be preserved at the approximation level. 3. Third, we develop a constructive sampling procedure for generating training measures in Mλ.The method enforces the prescribed marginal on the label space while producing diverse families of conditional laws, thereby enabling practical training of conditional mean-field neural operators in a manner consistent with the theoretical framework. 4. Finally, we apply the proposed methodology to the numerical resolution of mean-field control problems with non-exchangeable interactions. Relying on maximum principle and dynamic programming formulations developed for heterogeneous systems, we approximate decoupling fields, value functions, and feedback controls by conditional mean-field neural operators and use them to solve the associated forward-backward stochastic differential equations and HJB equations. This extends neural mean-field control methods previously developed for homogeneous (exchangeable) systems to the heterogeneous setting. 
+
+Related work. The present work lies at the intersection of neural operator learning, approximation on probability measure spaces, and mean-field control. Neural operator architectures aim at approximating mappings between infinite-dimensional spaces and have been successfully applied to the numerical solution of partial differential equations. DeepONet [27], [24] provide universal approximation results for nonlinear operators between Banach spaces. Related operator-learning frameworks include Fourier neural operators [25] and subsequent developments in operator approximation theory. These approaches, however, are formulated for operators acting on function spaces. In contrast, we consider operators defined on the constrained Wasserstein space Mλ, whose elements are probability measures on a product domain with prescribed marginal. Extending operator-learning techniques to this setting requires combining neural operator theory with measure-theoretic representations compatible with the marginal constraint. Learning and approximation on spaces of probability measures have been studied through permutation-invariant architectures such as DeepSets [34], see [17]. Cylindrical approximations of measures and universal approximation results on Wasserstein spaces have been investigated in [12], [18] and [29]. These approaches typically address functions defined on unconstrained spaces of measures. Numerical methods for mean-field control and mean-field games include PDE or probabilistic schemes and neural network approaches for solving forward–backward systems and HJB equations; see, e.g., [32], [9], [30], [31]. In the non-exchangeable settings, the associated optimality systems involve operators acting on conditional distributions rather than on a single marginal law. To the best of our knowledge, neural operator approximations for such operators on constrained measure spaces arising in heterogeneous mean-field control have not been investigated. 
+
+Outline of the paper. The remainder of the paper is organized as follows. In Section 2, we introduce the functional framework for operators defined on the constrained Wasserstein space 
+
+Mλ, present the conditional mean-field neural operator architecture, and establish the universal approximation theorem. We also describe the sampling procedure for generating training measures in Mλ and the associated training methodology. Section 3 provides numerical experiments illustrating the approximation properties of the proposed neural operators for representative conditional mean-field functionals. In Section 4, we apply the method to the numerical resolution of mean-field control 3problems with non-exchangeable interactions. We describe algorithms based on maximum principle and dynamic programming formulations and approximate the associated decoupling fields, value functions, and feedback controls using conditional mean-field neural operators. 
+
+Notations. 
+
+• We denote by P2(Rd) the Wasserstein space of square integrable probability measures equipped with the 2-Wasserstein distance W2. Given μ ∈ P 2(Rd), we denote by L2(μ) the space of measurable functions on Rd s.t 
+
+|ϕ|2 
+
+> μ
+
+:= 
+
+Z
+
+> Rd
+
+|ϕ(x)|2μ(d x) < +∞.
+
+Given vector-valued maps f, g ∈ L2(μ), we denote ⟨f, g ⟩L2(μ) := R 
+
+> Rd
+
+f (x) · g(x)μ(d x) as their inner product where · is the inner product between vectors. Given μ ∈ P 2(Rd), and ϕ ∈ L2(μ),we set EX∼μ[ϕ(X)] := R 
+
+> Rd
+
+ϕ(x)μ(d x), where X denotes a random variable defined on some probability space (Ω , F, P). We denote by PX the law of X under P. Given a measurable map ϕ : Rd → Rk and a measure μ ∈ P 2(Rd), we denote by ⟨ϕ, μ ⟩ := R 
+
+> Rd
+
+ϕ(x)μ(d x).
+
+• Given an horizon time T > 0 and a normed vector space (E, ∥·∥ E ), we denote by C([ t, T ]; E)
+
+the space of continuous maps from [t, T ] into E endowed with Borel σ-algebra and its supremum norm ∥ω∥C[t,T ]; E) := sup 
+
+> t≤s≤T
+
+∥ωs∥E . When E = Rd, we will only write Cd  
+
+> [t,T ]
+
+and when d = 1 , only C[t,T ]. We denote by WT the Wiener measure on Cd 
+
+> [0 ,T ]
+
+. We also denote by 
+
+C(E) the space of continuous functions on E into R.
+
+# 2 Operator learning of conditional mean field functionals 
+
+Given a function V on I × Rd × M λ valued in Rp, with quadratic growth condition w.r.t the first two arguments, we aim to approximate the infinite dimensional map 
+
+V : μ ∈ M λ 7 → V (·, ·, μ ) ∈ L2(μ),
+
+called non exchangeable mean field function, by a map N constructed by some combinations of neural networks. The mean-field neural network N takes input of two parts: μ a probability measure on Mλ and (u, x ) in the support of μ and outputs N (μ)( u, x ). The quality of this approximation is measured by the error 
+
+L(N ) := 
+
+Z
+
+> Mλ
+
+EN (μ)ρ(d μ),
+
+with 
+
+EN (μ) := |V (μ) − N (μ)|2 
+
+> μ
+
+= E(U,X )∼μ
+
+h
+
+|V (U, X, μ ) − N (μ)( U, X )|2i
+
+,
+
+and where ρ is a probability measure over the Borel space Mλ, called training measure. The learning of the mean-field functional N will then be performed by minimizing over the parameters of the neural network N the loss function 
+
+LM (N ) := 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+EN (μ(m)),
+
+where μ(m), m ∈ J1, M K are training samples of ρ.42.1 Neural network approximation 
+
+We state a universal approximation theorem which will rely on the use of DeepONet architecture, the cylindrical structure and their approximation results on Wasserstein space used to learn operators on Mλ. The universal approximation theorem is stated with an L2-distance, which is the one used in practice during the training process. 
+
+Theorem 2.1 Let ρ be a probability measure on the Borel space Mλ and V a continuous map from 
+
+I × Rd × M λ into Rq such that ∥V ∥2 
+
+> L2(ρ)
+
+:= R 
+
+> Mλ
+
+|V (·, ·, μ )|2
+
+> μ
+
+ρ(d μ) < ∞. Then, for all ϵ > 0, there exists J, r ∈ N⋆, maps φ1, . . . , φ J ∈ C (I × Rd), trunk nets (Tk)1≤k≤r from I × Rd into R and branch nets (Bk)1≤k≤r from RJ → Rq such that 
+
+Z
+
+> Mλ
+
+E(U,X )∼μ
+
+h
+
+V (U, X, μ ) −
+
+> r
+
+X
+
+> k=1
+
+Tk(U, X )Bk(Φ J (μ)) 2i
+
+ρ(d μ) ≤ ϵ, 
+
+where ΦJ (μ) :=  ⟨φ1, μ ⟩, . . . , ⟨φJ , μ ⟩ ∈ RJ .
+
+Remark 2.2 The architecture of Theorem 2.1, i.e. 
+
+I × Rd × M λ ∋ (u, x, μ ) 7 →
+
+> r
+
+X
+
+> k=1
+
+Tk(u, x )Bk(Φ J (μ)) ,
+
+is called DeepONetCyl. In addition to this architecture, we could also consider the more general class of neural network architectures, 
+
+I × Rd × M λ ∋ (u, x, μ ) 7 → Ψθ
+
+
+
+u, x, ΦJ (μ)
+
+
+
+,
+
+where Ψθ : I × Rd × RJ → Rq. Since this architecture produces identical results, we only present those obtained with DeepONetCyl in the sequel. 
+
+2.2 Proof of the universal approximation theorem 
+
+Let ϵ > 0. Fix K a compact subset of I × Rd. For simplicity, we suppose V is a R-valued map but the proof can be easily extended to a vector-valued function. Therefore, let V be a continuous function over I × Rd × M λ into R.
+
+Step n °1 : Separability for a dense class of functions 
+
+Since K is a compact metric space, the space C(K) is separable for the uniform norm and therefore, there exists a dense family (φn)n∈N ∈ C (K) for ∥·∥ ∞;K := sup 
+
+> x∈K
+
+| · | . Then, the family of maps Mλ(K) ∋ μ 7 → ⟨ φn, μ ⟩ ∈ R : n ∈ N where Mλ(K) := μ ∈ P (K) : pr 1♯μ = λ is such that for any μ̸ = ν ∈ M λ(K), there exists j ∈ N s.t ⟨φj , μ ⟩̸ = ⟨φj , ν ⟩.Indeed, let μ, ν ∈ M λ(K) such that μ̸ = ν and let f ∈ C (K) such that ⟨f, μ ⟩̸ = ⟨f, ν ⟩ (such map f
+
+exists by characterization of Borel measures on the compact metric space K by bounded continuous maps) and let δ := | R 
+
+> K
+
+f (x)d μ(x) − R 
+
+> K
+
+f (x)d ν(x) > 0 and j0 ∈ N such that ∥φj0 − f ∥∞;K< δ 
+
+> 4
+
+.Therefore, we have 
+
+Z
+
+> K
+
+φj0 dμ −
+
+Z
+
+> K
+
+φj0 dν =
+
+Z
+
+> K
+
+f dμ −
+
+Z
+
+> K
+
+f dν +
+
+Z
+
+> K
+
+(φj0 − f )d μ −
+
+Z
+
+> K
+
+(φj0 − f )d ν
+
+≥
+
+Z
+
+> K
+
+f dμ −
+
+Z
+
+> K
+
+f dν −
+
+Z
+
+> K
+
+(φj0 − f )d μ −
+
+Z
+
+> K
+
+(φj0 − f )d ν
+
+≥ δ − 2∥φj0 − f ∥∞;K > 0
+
+5For J ∈ N⋆, we define 
+
+Mλ(K) ∋ μ 7 → ΦJ (μ) :=  ⟨φ1, μ ⟩, . . . , ⟨φJ , μ ⟩ ∈ RJ .
+
+By definition of the weak convergence of probability measures and since K is compact, ΦJ is clearly continuous in the topology of the Wasserstein distance. 
+
+Step n °2 : Construction of a dense sub-algebra of C(K × M λ(K)) 
+
+We now denote the class of maps A on K × M λ(K) into R as 
+
+A := 
+
+n
+
+F : K × M λ(K) → R ∃ J, r ∈ N∗, (fk)1≤k≤r ⊂ C (RJ ), (gk)1≤k≤r ⊂ C (K)
+
+such that F (u, x, μ ) = 
+
+> r
+
+X
+
+> k=1
+
+fk
+
+ ΦJ (μ) gk(u, x )
+
+o
+
+.
+
+We claim that given the supremum norm over the compact space K × M λ(K), the closure ¯A =
+
+C(K × P λ 
+
+> 2
+
+(K)) .Following Stone-Weierstrass, it is sufficient to show that A is a sub-algebra of C(K × M λ(K)) 
+
+which containts constant maps and where for any (k1, μ 1)̸ = ( k2, μ 2) where k1, k 2 ∈ K and μ1, μ 2 ∈Mλ(K), there exists F ∈ A such that F (k1, μ 1)̸ = F (k2, μ 2).
+
+• The stability by addition and multiplication are clear. 
+
+• It is clear that A contains constant maps by taking J, r = 1 , f1 = 1 ∈ C (R) and g1 = 1 ∈ C (K).
+
+• Let k1̸ = k2. In this case, take J = 1 , r = 1 , f1 = 1 and g1(k) = d(k, k 1) for which it is clear that F (k1, μ 1) = g1(k1) = 0 ̸ = g1(k2) = F (k2, μ 2) where d (u1, x 1), (u2, x 2) =
+
+|u1 − u2| + |x1 − x2| is the product distance. Suppose now k1 = k2 and μ1̸ = μ2. By the previous result, there exists j0 ∈ N⋆ such that ⟨φj0 , μ 1⟩̸ = ⟨φj0 , μ 2⟩. Then, we take J = j0,
+
+r = 1 , g = 1 and f1 : ( x1, . . . , x j0 ) 7 → xj0 ∈ C (Rj0 ). In this case, we have F (k1, μ 1) = 
+
+⟨φj0 , μ 1⟩̸ = ⟨φj0 , μ 2⟩ = F (k2, μ 2).Therefore by Stone-Weierstrass, A is a dense sub-algebra of C K × M λ(K). Therefore, for any 
+
+ϵ > 0, there exists J, r ∈ N⋆, (fk)1≤k≤r ∈ C (RJ ) and (gk)1≤k≤r ∈ C (K) such that sup 
+
+> (u,x,μ )∈K×M λ(K)
+
+|V (u, x, μ ) −
+
+> r
+
+X
+
+> k=1
+
+fk(Φ J (μ))) gk(u, x )| ≤ ϵ. 
+
+Now, noticing that ˜K = Φ J (Mλ(K)) is compact as the image of a compact by a continuous map, and by the classical universal approximation theorem for finite dimensional functions, for any 
+
+k ∈ J1, r K, there exists a feedforward neural network Bk : RJ → R and Tk : I × Rd → R such that for given δ > 0
+
+
+
+max  
+
+> 1≤k≤r
+
+sup  
+
+> z∈˜K
+
+|fk(z) − B k(z)| ≤ δ, 
+
+max  
+
+> 1≤k≤r
+
+sup 
+
+> z∈K
+
+|gk(z) − T k(z)| ≤ δ, 
+
+Denoting now the cylindrical DeepONetCyl map on I × Rd × M λ(K) as DeepONetCyl (μ)( u, x ) := 
+
+Prk=1 Bk(Φ J (μ)) Tk(u, x ). We now show that sup 
+
+> (u,x,μ )∈K×M λ(K)
+
+|V (u, x, μ ) − DeepONetCyl (u, x, μ )| ≤ ϵ. 
+
+6Denote the positive and finite constants Mf and Mg as 
+
+
+
+Mf := max  
+
+> 1≤k≤r
+
+sup  
+
+> z∈˜K
+
+|fk(z)|,Mg := max  
+
+> 1≤k≤r
+
+sup 
+
+> z∈K
+
+|gk(z)|,
+
+Then sup  
+
+> z∈˜K
+
+|B k(z)| ≤ Mf + δ and sup 
+
+> z∈K
+
+|T k(z)| ≤ Mg + δ.Let (k, μ ) ∈ K × M λ(K). Then, we have 
+
+∥V − DeepONet ∥∞;K×M λ(K) = ∥
+
+> r
+
+X
+
+> k=1
+
+fk(Φ J (·)) gk −
+
+> r
+
+X
+
+> k=1
+
+Bk(Φ J (·)) Tk∥∞;K×M λ(K)
+
+≤
+
+> r
+
+X
+
+> k=1
+
+
+
+∥fk∥∞, ˜K∥gk − T k∥∞;K + ∥T k∥∞,K∥fk − B k∥∞; ˜K
+
+
+
+≤ r(Mf δ + ( Mg + δ)δ)
+
+Choosing δ small enough is enough to get the required result. 
+
+Step n °3 : Approximation theorem on L2(ρ)
+
+Let ϵ > 0 and ν a probability measure on Mλ. Given M ≥ 0 we truncate the map V by defining 
+
+VM on I × Rd × M λ as 
+
+VM (u, x, μ ) := 
+
+(V (u, x, μ ) if |V (u, x, μ )| ≤ M ,
+
+M V (u,x,μ )  
+
+> |V(u,x,μ )|
+
+if |V (u, x, μ )| > M ,so that |VM (u, x, μ )| ≤ M for every (u, x, μ ) ∈ I × Rd × M λ. By definition of VM , we have the point-wise convergence: VM →  
+
+> M→∞
+
+V . Therefore, for a fixed μ ∈ M λ by looking over the space 
+
+L2(μ) and noticing that |VM (·, ·, μ ) − V (·, ·, μ )| ≤ | V (·, ·, μ )| ∈ L2(μ). Therefore, it implies by the dominated convergence theorem that the map μ 7 → | VM (·, ·, μ ) − V (·, ·, μ )|μ converges point-wisely to 0 and since |VM (·, ·, μ ) − V (·, ·, μ )|μ ≤ | V (·, ·, μ )|μ ∈ L2(ρ) by assumption on V , we conclude by the convergence dominated theorem that ∥V − VM ∥2 
+
+> L2(ρ)
+
+→ 0. We can therefore choose M > 
+
+> √ϵ
+> 4
+
+such that 
+
+∥V − VM ∥2 
+
+> L2(ρ)
+
+≤ ϵ
+
+8 . (2.1) Now, we consider some compact set K ⊂ I ×Rd such that ρ Mλ\M λ(K) ≤ ϵ  
+
+> 80 M2
+
+following Lusin’s theorem on complete and separable metric spaces (see Theorem C.1 in [24] ) and we note that VM
+
+is continuous on I × Rd × M λ. Applying the universal approximation theorem from Step n °2, we get r, J ∈ N, (φk)1≤k≤r ∈ C (RJ ) and (ψk)1≤k≤r ∈ C (I × Rd) such that sup 
+
+> (u,x )∈K ,μ ∈M λ(K)
+
+|VM (u, x, μ ) −
+
+> r
+
+X
+
+> k=1
+
+φk(Φ J (μ)) ψk(u, x )| ≤ √ϵ
+
+4 .
+
+Therefore, we have 
+
+|
+
+> r
+
+X
+
+> k=1
+
+φk(Φ J (μ)) ψk(u, x )| ≤ | VM (u, x, μ )| + |VM (u, x, μ ) −
+
+> r
+
+X
+
+> k=1
+
+φk(Φ J (μ)) ψk(u, x )|, (2.2) 
+
+≤ M +
+
+√ϵ
+
+4 ≤ 2M, (u, x ) ∈ K , μ ∈ M λ(K).
+
+7We note that after suitably modifying the linear output layers of the branch and trunk nets neural nets of the previous DeepONetCyl (see Theorem 3.1 in [24]), we can rewrite 
+
+> r
+
+X
+
+> k=1
+
+φk(Φ J (μ)) ψk(u, x ) = 
+
+> l
+
+X
+
+> k=1
+
+Bk(Φ J (μ)) Tk(u, x ),
+
+where the trunk neural nets (Tk)1≤k≤l are orthonormal in L2(μ) for some l ≤ r. In particular, we have 
+
+|
+
+> l
+
+X
+
+> k=1
+
+Bk(Φ J (μ)) Tk(·, ·)|2 
+
+> μ
+
+= |B (Φ J (μ)) |2, μ ∈ M λ, (2.3) and 
+
+|B (Φ J (μ)) | ≤ 2M, ∀μ ∈ M λ,
+
+where we denoted B(μ) := ( B1(μ), . . . , Bl(μ)) . Now, by the clipping lemma (see Lemma C.2 in [24]), there exists a neural network γ : Rl → Rl, satisfying 
+
+(|γ(y) − y| ≤ 
+
+> √ϵ
+> 4
+
+, if |y| ≤ M + 
+
+> √ϵ
+> 4
+
+,
+
+|γ(y)| ≤ 2M, ∀y ∈ Rl. (2.4) We now define the following DeepONetCyl over I × Rd × M λ as DeepONetCyl (μ)( u, x ) := 
+
+> l
+
+X
+
+> k=1
+
+γ(B(Φ j (μ)) Tk(u, x ),
+
+and we have 
+
+|DeepONetCyl (μ)( ·, ·)|μ = |γ(B(Φ J (μ)) | ≤ 2M, 
+
+by (2.4) and since (Tk)1≤k≤l are orthonormal in L2(μ). Moreover, we have 
+
+|VM (·, ·, μ ) − DeepONetCyl (μ)( ·, ·)|μ ≤ | VM (·, ·, μ ) −
+
+> l
+
+X
+
+> k=1
+
+Bk(Φ J (μ)) Tk(·, ·)|μ
+
++ |
+
+> l
+
+X
+
+> k=1
+
+Bk(Φ J (μ)) Tk(·, ·) − DeepONetCyl (μ)( ·, ·)|μ
+
+≤√ϵ
+
+4 +
+
+√ϵ
+
+4 =
+
+√ϵ
+
+2 .
+
+from (2.2), (2.3) and (2.4). We therefore have 
+
+C := 
+
+Z
+
+> Mλ
+
+|VM (·, ·, μ ) − DeepONetCyl (μ)( ·, ·)|2
+
+> μ
+
+ρ(d μ)
+
+≤
+
+Z
+
+> Mλ(K)
+
+|VM (·, ·, μ ) − DeepONetCyl (μ)( ·, ·)|2
+
+> μ
+
+ρ(d μ)+ 2 
+
+Z
+
+> Mλ\M λ(K)
+
+ |VM (·, ·, μ )|2
+
+> μ
+
+| + DeepONetCyl (μ)( ·, ·)|2
+
+> μ
+
+ρ(d μ)
+
+≤ ϵ
+
+4 + 2  M 2 + 4 M 2 ϵ
+
+80 M 2 = 3ϵ
+
+8 ,
+
+8where we used |VM | ≤ M and |DeepOnetCyl (μ)( ·, ·)|μ ≤ 2M . Now, recalling (2.1), we have 
+
+D := 
+
+Z
+
+> Mλ
+
+|V (·, ·, μ ) − DeepONetCyl (·, ·, μ )|2ρ(d μ)
+
+≤ 2
+
+Z
+
+> Mλ
+
+|V (·, ·, μ ) − VM (·, ·, μ )|2
+
+> μ
+
+ρ(d μ)+ 2 
+
+Z
+
+> Mλ
+
+|VM (·, ·, μ ) − DeepONetCyl (·, ·, μ )|2
+
+> μ
+
+ρ(d μ) ≤ 2ϵ
+
+8 + 2 3ϵ
+
+8 = ϵ. 
+
+The proof is therefore completed. 
+
+2.3 Data generation 
+
+The training of neural networks for approximating mean field functions relies on sampling μ ∈ M λ
+
+and a random variable (U, X ) whose law is μ. We first give a Lemma which provides a simple way to sample on Mλ.
+
+Lemma 2.3 (Sampling in Mλ).
+
+Let ν be a non-atomic reference probability in P2(Rd) and (μu)u ∈ L2(I; P2(Rd)) Then, there exists a measurable map T ∈ L2(λ ⊗ ν; Rd) such that T (u, ·)♯ν = μu λ(d u)−a.e. Proof. The proof is a simple application of the randomization lemma (see [21]). Indeed, since the map I ∋ u 7 → μu ∈ P 2(Rd) is measurable, there exists a measurable map F : I × [0 , 1] → Rd
+
+such that  U, F (U, R ) ∼ μ(d u, dx) = μu(d x)λ(d u) where (U, R ) ∼ U ([0 , 1]) ⊗ U ([0 , 1]) where R is used for randomization and U for the labeling of the agents. Disintegrating μ over I, we get that 
+
+F (u, ·)♯U([0 , 1]) = μu λ(d u)-a.e. Let Φ : Rd → [0 , 1] be a measurable isomorphism satisfying Φ♯ν = U([0 , 1]) (which exists since ν is non-atomic on a Borel space). Defining the measurable map T on I × Rd into Rd as 
+
+T (u, x ) := F (u, Φ( x), we end up with the result. We now verify that T ∈ L2(λ ⊗ ν; Rd), i.e. 
+
+Z
+
+> I×Rd
+
+|T (u, x )|2ν(d x)λ(d u) < +∞. (2.5) Now, (2.5) follows noticing that for λ(d u)−a.e, R 
+
+> Rd
+
+|T (u, x )|2ν(d x) = R 
+
+> Rd
+
+|y|2μu(d y) since T (u, ·)♯ν =
+
+μu and because (μu)u ∈ L2(I; P2(Rd)) .From Lemma 2.3, we design two ways to sample on Mλ.
+
+S1: Given a non-atomic measure ν ∈ P 2(Rd), we sample a dense class of maps (Tθ)θ∈Θ ∈
+
+L2(λ ⊗ ν; Rd) (for instance (Tθ)θ∈Θ can be sampled as a parametrized class of neural networks for a set Θ ⊂ Rm. In this case, P(U,T θ (U,Y )) ∈ M λ, where U and Y are random variables on 
+
+(Ω , F, P) s.t (U, Y ) ∼ λ ⊗ ν.
+
+S2: Alternatively, we can sample a class of non-atomic measures ν ∈ S ⊂ P 2(Rd), given a fixed map T ∈ L2(μ ⊗ ν). In this case, we start by sampling (U, Y ) ∼ λ ⊗ ν where ν ∈ S and we set (U, T (U, Y )) whose law belongs to Mλ by construction. However, this method only helps us to sample in the set λ(d u)T (u, ·)♯ν (d y) : ν ∈ S .
+
+Remark 2.4 (Special case of d = 1 ). In the special case of d = 1 , the map T can be explicitly constructed. Indeed, we take ν = U([0 , 1]) .Then, given (μu)u ∈ P 2(R) we denote its cumulative distribution function as Fμu (x) := μu(( −∞ ; x]) 
+
+and we define its quantile function Qμu as 
+
+Qμu (t) := inf {x ∈ R : Fμu (x) ≥ t , t ∈ (0 , 1) .
+
+Then, defining T (u, x ) := Qμu (x) gives the required result. 92.4 Training the mean-field operator 
+
+The algorithm consists in the following parts. 1. In order to use the DeepONetCyl structure and the universal approximation of Theorem 2.1, we need to consider a finite but dense functions in order to compute the quantities ΦJ (μ).In practice, we samples polynomial maps and we choose r and J as hyperparameters. In fact, for 1 ≤ i ≤ J, we choose the moment maps φi(u, x ) := |x|i + ui and we notice that 
+
+⟨φi, μ ⟩ = E(U,X )∼μ[|X|i] up to a constant for μ ∈ M λ.2. We draw samples (μ(m))1≤m≤M of probability measures on Mλ (recalling the previous section). We introduce two neural networks T θ1 parametrized with θ1 and Bθ2 parametrized by θ2. We then minimize over the parameters θ := ( θ1, θ 2) the following loss function 
+
+L(θ) := 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+E(U,X )∼μ(m)
+
+
+
+V (U, X, μ (m)) −
+
+> r
+
+X
+
+> k=1
+
+T θ1
+
+> k
+
+ U, X )Bθ2 
+
+> k
+
+(Φ J (μ(m)) 2
+
+.
+
+It can be summarized in the following algorithm : 
+
+Algorithm 1: Non exchangeable mean field network approximation of a map 
+
+Input : Number of distributions M , batch size N , number of epoch e, learning rate ρ, θ = ( θ1, θ 2) initial parameters of neural networks T θ1 = ( T θ1 
+
+> 1
+
+, . . . , T θ1 
+
+> r
+
+) and Bθ2 = ( Bθ2 
+
+> 1
+
+, . . . , Bθ2 
+
+> r
+
+), J number of moments, r
+
+number of sensors. 
+
+for each epoch e do 
+
+Sample (Um,n , X m,n ) ∼ μ(m) for n ∈ J1, N K where μ(m) ∈ M λ for m ∈ J1, M K
+
+Calculate Φm = ( 1
+
+> N
+
+PNn=1 |Xm,n |j )j∈J1,J K for m ∈ J1, M K
+
+Calculate target function 
+
+J(θ) = 1
+
+M N 
+
+> M
+
+X
+
+> n=1
+> N
+
+X
+
+> j=1
+
+
+
+V (Um,n , X m,n , μ (m)) −
+
+> r
+
+X
+
+> k=1
+
+T θ1 
+
+> k
+
+(Um,n , X m,n )Bθ2 
+
+> k
+
+(Φ m)
+
+2
+
+θ = θ − ρ∇J(θ)
+
+end Return: θ
+
+# 3 Numerical experiments 
+
+We test our algorithms by computing the mean-squared error (MSE) for different cases of non exchangeable mean-field functions V on I × R × M λ. As in the literature, we use a graphon map 
+
+G (i.e. a measurable map on I × I into R+) to represent the interaction between two agents. We propose the two following maps to illustrate our Algorithm 1. 
+
+V1 : A first order non exchangeable mean-field interaction 
+
+V (u, x, μ ) := x − E(U,X )∼μ
+
+G(u, U )X.
+
+V2 : A second order non exchangeable mean-field interaction 
+
+V (u, x, μ ) := E(U,X )∼μ
+
+(x − G(u, U )X)2.
+
+We first generate samples in Mλ by using S2 in Section 2.3, i.e., we fix a transport map T and we sample a class of non-atomic measures. We first propose two simple cases for choice of map T
+
+given the unknown link between X and U ∼ U ([0 , 1]) .10 T1 : T (u, y ) := uy , T2 : T (u, y ) := uy + ( uy )2.
+
+We then draw X = T (U, Y ), with Y sampled according to a distribution picked randomly as a mixture of five gaussian laws. In fact, for each m, we sample for k ∈ J1, 5K, Wm,k ∼ U ([0 , 1]) ,
+
+(μm,k , σ m,k ) ∼ U ([0 , 1]) 2, and then we compute for any n ∈ J1, N K
+
+Ym,n = 1
+
+P5 
+
+> k=1
+
+Wm,k 
+
+> 5
+
+X
+
+> k=1
+
+Wm,k Zm,k,n , with Zm,k,n ∼ N (μm,k , σ 2
+
+> m,k
+
+).
+
+We consider two cases of interacting functions: 1. A smooth graphon 
+
+G1(u, v ) := e−uv .
+
+2. A block-wise graphon 
+
+G2(u, v ) := L
+
+> L
+
+X
+
+> i=1
+
+11 + e(( i−1) L(u−v)) 1( i−1   
+
+> L,iL]
+
+(u)1 ( i−1   
+
+> L,iL]
+
+(v), (3.1) as in [1], modeling L = 5 teams, each team with a given interaction between agents (in the first team agents have an homogeneous interaction) and the different teams have no interaction. The function is represented on Figure 1. 
+
+Figure 1: G2 graphon. All the tests are achieved using the ADAM optimization method with a learning rate of 0.001 . The default value for r is 10 and we consider two architectures for the networks T θ1 and Bθ2 :
+
+• The first one is the classical feedforward network using a tanh activation function using 3 hidden layers of 10 neurons. 
+
+• The second one is a Kolmogorov Arnold Network [26] using two hidden layers of 10 neurons and a grid size equal to 5. In this version, one dimensional functions are approximated using splines (Spline KAN). Notice that no universal approximation theorem is available for this network. 11 • The third one is a Kolmogorov Arnold Network using P1 type finite element functions with adapting support to approximate one dimensional functions (P1KAN) [33]. This network is specially effective to approximate irregular functions. Its convergence is supported by a universal approximation theorem. With this network, we use two hidden layers of 10 neurons and a grid size equal to 10. In the algorithm we use N = 50000 samples to approximate the distribution and take one distribution at each iteration of the gradient algorithm. We now illustrate the convergence of the non exchangeable network using a GPU Nvidia H100 94Go HBM2. All convergence plots are given with 100000 iterations calculating the accuracy every hundred of iterations and smoothing the result obtained with a rolling window of 10 values. On Figures 2, 3 we give the convergence depending on the number of moments. Not surprisingly with mean-field function in V1 , the convergence rate is independent of the number of moment, while with mean-field function in V2 at least two moments are necessary. 
+
+T1 T2 
+
+Figure 2: Mean-field function in V1 , graphon G1 using the feedforward network : log of the error obtained during training depending on J the number of moments. 
+
+T1 T2 
+
+Figure 3: Mean-field function in V2 , graphon G1 using the feedforward network : log of the error obtained during training on J the number of moments. Figure 4 illustrates the fact that choice of the network architecture is crucial to get a very good 12 convergence. For these very regular cases, Spline KAN outperforms the two other networks that behave similarly. KAN networks are known to be more expensive to use than feedforwards but here computing times are very similar. For mean-field function in V2 , with transport map from 
+
+T2 , with one moment, 100 iterations takes 3.56 seconds with a feedforward while it takes 3.74 seconds with the Spline KAN. Using 4 moments, the feedforward network takes 3.61 seconds while the Spline KAN takes 3.75 seconds. Results are similar with the P1KAN network. The crucial point here is to effectively calculate the interaction matrix. 
+
+V1-T1 V1-T2 
+
+V2-T1 V2-T2 
+
+Figure 4: Comparison of feedforward and KAN with G1 interaction function using 3 moments On Figure 5, we plot the convergence using the G2 function which is far more irregular for the two cases of T2 . The convergence is much more difficult to achieve and much more erratic. 13 T1 T2 
+
+Figure 5: Mean-field function from V2 , graphon G2 interaction using the feedforward network : 
+
+log of the error obtained during training on J the number of moments On Figure 6, we show that the KAN networks converge better and faster than the feedforward. As the functions to approximate are rather irregular, the P1KAN network outperforms the two other ones. 
+
+T1 T2 
+
+Figure 6: Comparison of feedforward and KAN with G2 interaction function using 3 moments for mean-field function V2 .On Figure 7, we show that the number of sensors r used is not critical. 14 G1 interaction function. G2 interaction function. Figure 7: Impact of the number of sensors r on the convergence for mean-field function V2 and transport map T2 with 3 moments. Finally, we adopt the sampling method in S1 . We suppose now that Y ∼ N (0 , 1) , and we consider the family of random transport maps ω 7 → T (ω, ·, ·) ∈ L2(λ ⊗ N (0 , 1)) :
+
+T (ω, u, y ) := A(ω)uy + B(ω)( uy + u2y2),
+
+where (A, B ) ∼ U ([0 , 1]) ⊗2
+
+and then we sample X = T (U, Y ) with (U, Y ) independent of (A, B ).On Figure 8, we show with J = 3 moments that the convergence is achieved especially when a KAN network is used. We observe that the convergence curve is smoother than in the sampling method S2 . Again with the G2 interaction function, the P1KAN network outperform the two other networks. 
+
+Graphon G1 Graphon G2
+
+Figure 8: Comparison of feedforward and KAN using 3 moments for mean-field function V2 with the sampling method S1 .15 4 Application to optimal control of non exchangeable mean field systems 
+
+In this section, we propose an application of the theory developed above to solve optimal control problem for non exchangeable mean field systems. Concisely, it can be formulated as the extension of the usual standard McKean-Vlasov control problem without assuming homogeneity between the agents. This naturally leads to an infinite dimensional control problem since the agents are no longer homogeneous. We present below some standard methods to solve optimal controls involving this class of controlled systems. 
+
+4.1 Background on controlled non exchangeable mean field systems 
+
+We first introduce the framework of optimal control on non exchangeable mean field systems in a label-state formulation. On a complete filtered probability space (Ω , F, P) satisfying the usual hypothesis, we are given the following random variables 
+
+• A uniform random variable U over [0 , 1] used for encoding the heterogeneity. 
+
+• A Rn-valued Brownian motion W := ( Wt)0≤t≤T independent of U .
+
+• A Rd-valued initial condition ξ with law m independent of W .
+
+• We denote by FW = ( FWt )0≤t≤T the natural filtration generated by W and by F = ( Ft)0≤t≤T
+
+the filtration given by Ft := FWt ∨ σ(U ) where σ denotes the σ−algebra generated by U ,augmented with the P-null sets. We fix drift and diffusion functions b, σ : I × Rd × M λ × A → Rd, Rd×n on which we make the following standard assumptions 
+
+Assumption 4.1 The functions b, σ : I × Rd × M λ × A → Rd, Rd×n are Borel measurable. Moreover, there exists positive constants L ≥ 0, M ≥ 0 such that 
+
+(|b(u, x, μ, a ) − b(u, x ′, μ ′, a )| ≤ L  |x − x′| + W2(μ, μ ′)
+
+|σ(u, x, μ, a ) − σ(u, x ′, μ ′, a )| ≤ L |x − x′| + W2(μ, μ ′)
+
+and 
+
+|b(u, 0, λ ⊗ δ0, a )| + |σ(u, 0, λ ⊗ δ0, a )| ≤ M  1 + |a|,
+
+for every u ∈ I, x, x ′ ∈ Rd, μ, μ ′ ∈ M λ and a ∈ A.
+
+We denote by A the set of admissible controls that are F-progressively measurable process valued in a convex measurable space (A, A) such that E
+
+h R T 
+
+> 0
+
+|αt|2dt
+
+i
+
+< ∞, and by It the set of admissible initial conditions defined as It = ξ : ξ is Ft-measurable and E[|ξ|2 < ∞ .Given α ∈ A and ξ ∈ I t, we consider the following controlled state process X = ( Xξ,α s )t≤s≤T
+
+satisfying the following SDE 
+
+(dXs = b(U, X s, P(U,X s), α s)d s + σ(U, X s, P(U,X s), α s)d Ws,Xt = ξ, (4.1) 
+
+Theorem 4.2 Given ξ ∈ I t and α ∈ A and under Assumption 4.1, there exists a unique strong solution X = ( Xs)t≤s≤T to Equation (4.1) .
+
+16 Proof. The proof is postponed to Appendix B.1. From standard estimations, there exists a positive constant C such that 
+
+E
+
+h
+
+sup 
+
+> t≤s≤T
+
+|Xs|2i
+
+≤ C
+
+
+
+1 + E|ξ|2 + E Z Tt
+
+|αs|2ds
+
+.
+
+We next introduce the two reward functions f : I × Rd × M λ × A → R and g : I × Rd × M λ → R
+
+on which we make the following assumptions. 
+
+Assumption 4.3 The functions f and g are Borel measurable and there exists a constant M ≥ 0
+
+such that 
+
+(−M  1 + |x|2 + W2(μ, λ ⊗ δ0)2 ≤ f (u, x, μ, a ) ≤ M  1 + |x|2 + W2(μ, λ ⊗ δ0)2 + |a|2
+
+|g(u, x, μ )| ≤ M  1 + |x|2 + W2(μ, λ ⊗ δ0)2,
+
+for every u ∈ I, x ∈ Rd, μ ∈ M λ and a ∈ A.
+
+We define the cost functional as the R-valued map J as follows 
+
+J(t, ξ, α ) := E
+
+h Z Tt
+
+f (U, X s, P(U,X s), α s)d t + g(U, X T , P(U,X T ))
+
+i
+
+, (4.2) where we stressed the dependence of J in the initial condition ξ. Under Assumptions 4.1, 4.3 and from Theorem 4.2, we get that J(α) is well defined for any α ∈ A . The goal is now to study the optimal control problem consisting in minimizing the function J over A, that is, computing 
+
+V0 := inf  
+
+> α∈A
+
+J(0 , ξ, α ), (4.3) and to find an optimal control α⋆ ∈ A , i.e. s.t V0 = J(α⋆). More generally, at any time t ∈ [0 , T ],we can define the cost functional to be minimized as 
+
+V (t, ξ ) = inf  
+
+> α∈A
+
+J(t, ξ, α ), t ∈ [0 , T ]. (4.4) In the sequel, we will analyze two known methods namely, the Pontryagin’s maximum principle and the Bellman equation to solve (4.3). The Pontryagin’s maximum principle will lead to the study of a fully coupled forward backward stochatic differential equation (FBSDE) from which we will be able to characterize the optimality of a control α⋆ whereas the dynamic programming equation will help us to characterize the Bellman function V through a partial differential equation (PDE) and from a backward recursion which enables the possibility to design several efficient algorithms (see [30]). 
+
+Remark 4.4 The current formulation (i.e. (4.1)-(4.2)) can be viewed as a label-state formulation of the non exchangeable mean field system studied in [22, 5] for the stochastic maximum principle formulation and in [14] for the derivation of the dynamic programming equation and the Bellman equation. The main issue in these formulations is the necessity to deal with an uncountable continuum of controlled state processes (Xu)u∈I for which joint measurability over space I × Ω
+
+is not guaranteed due to a collection of i.i.d. Brownian motions {W u : u ∈ I . Moreover, this formulation is not well suited for numerical experiments as one would need to discretize the number of processes (Xi,N )1≤i≤N to consider. Since we are working at the level of the marginal laws of the processes, we work under the label-state formulation which lacks of a pathwise interpretation but for which the equality of the laws is preserved (see [28]). In the sequel, we will define the necessary quantities to characterize an optimal control either in the stochastic maximum principle or in the Bellman equation but since the proofs are really similar to the ones presented in [22, 14], we will just give the main ideas of the proof and refer to the proofs therein for further details. 17 4.1.1 Stochastic maximum principle and FBSDE equation 
+
+For simplicity, we will look at t = 0 but the analysis could be extended to any time t. For the stochastic maximum principle, we define the real-valued Hamiltonian map H as 
+
+H(u, x, μ, a, y, z ) = b(u, x, μ, a ) · y + σ(u, x, μ, a ) : z + f (u, x, μ, a ), (4.5) where : refers to the inner product between two matrices, for any (u, x, μ, a, y, z ) ∈ I × Rd × M λ ×
+
+A×Rd ×Rd×n. This map will be used to derive necessary and sufficient conditions for the optimality of an admissible control. It will rely on the notions of derivative and convexity over the space Mλ
+
+introduced in Appendix A. In fact, under some regularity assumptions that will be precised on the map H and defining the process ˆα = (ˆ αt)0≤t≤T as 
+
+ˆαt = ˆ a(U, X t, P(U,X t), Y t, Z t) = inf  
+
+> a∈A
+
+H(U, X t, P(U,X t), Y t, Z t, a ),
+
+where (Xt, Y t, Z t)0≤t≤T is the solution to the following system of FBSDE 
+
+
+
+dX t = b(U, X t, P(U,X t), ˆαt)d t + σ(U, X t, P(U,X t), ˆαt)d Wt,dY t = −∂xH(U, X t, P(U,X t), P t, Z t, ˆαt)d t − ˜E∂˜x δδm H( ˜U , ˜Xt, P(U,X t), ˜Yt, ˜Zt, ˜ˆαt)( U, X t)dt
+
++ ZtdWt
+
+YT = ∂xg(U, X T , P(U,X T )) + ˜E
+
+h
+
+∂˜x δδm g( ˜U , ˜XT , P(U,X T ))( U, X T )
+
+i
+
+,
+
+(4.6) where ( ˜U , ˜Xt, ˜Yt, ˜Zt, ˜ˆαt) is an independant copy (U, X t, Y t, Z t, α t) defined on another probability space ( ˜Ω, ˜F, ˜P), we will show that ˆα yields an optimal control, i.e. a solution to (4.3). We now make the necessary assumptions on the regularity on the maps involved in the control problem to derive the stochastic maximum principle. 
+
+Assumption 4.5 
+
+(1) The maps (b, σ ) are differentiable with respect to (x, a ). Moreover, the maps ∂x(b, σ ) are assumed to be uniformly bounded. Finally, the maps (x, μ, a ) 7 → ∂x(b, σ, f )( u, x, μ, a ) and 
+
+(x, μ, a ) 7 → ∂a(b, σ, f ) are continuous for λ − a.e u ∈ I.(2) The maps (b, σ ) are assumed to have Fréchet differentiable linear functional derivatives ∂˜x δδm b
+
+and ∂˜x δδm σ satisfying the following properties 
+
+(|∂˜x δδm b(u, x, μ, a )(˜ u, ˜x) − ∂˜x δδm b(u, x ′, μ ′, a ′)(˜ u′, ˜x′)| ≤ L |x − x′| + |˜x − ˜x′| + W2(μ, μ ′),
+
+|∂˜x δδm σ(u, x, μ, a )(˜ u, ˜x) − ∂˜x δδm σ(u, x ′, μ ′, a ′)(˜ u′, ˜x′)| ≤ L |x − x′| + |˜x − ˜x′| + W2(μ, μ ′),
+
+for every u, ˜u ∈ I, x, x ′, ˜x, ˜x′ ∈ Rd and μ, μ ′ ∈ M λ and 
+
+∂˜x
+
+δδm b(u, 0, λ ⊗ δ0, a )| + |∂˜x
+
+δδm σ(u, 0, λ ⊗ δ0, a )| ≤ M  1 + |a|,
+
+for every u, ˜u ∈ I and a ∈ A.(3) The maps f and g are differentiable with respect to (x, a ). Moreover, ∂x(f, g ) and ∂af are assumed to be uniformly bounded λ(d u) − a.e. Finally, the maps (x, μ, a ) 7 → ∂xf (u, x, μ, a ),
+
+∂af (u, x, μ, a ) and (x, μ ) 7 → ∂xg(u, x, μ ) are continuous for λ − a.e u ∈ I.
+
+18 (4) The functions f and g admit Fréchet differentiable linear functional derivatives. Moreover, for any progressively measurable process X such that E sup 
+
+> 0≤t≤T
+
+|Xt|2 < ∞, the following quantities are uniformly bounded λ(d u) − a.e 
+
+˜E
+
+h
+
+|∂˜x
+
+δδm f (u, x, μ, a )( ˜U , ˜X)|2i
+
+, and ˜E
+
+h
+
+|∂˜x
+
+δδm g(u, x, μ )( ˜U , ˜X)|2i
+
+.
+
+Proposition 4.6 Let Assumptions 4.1, 4.3, 4.5 hold and assume furthermore that the Hamiltonian map H defined in (4.5) is a convex function in its last variable, i.e. the map 
+
+A ∋ a 7 → H(u, x, μ, y, z, a ),
+
+is convex for any (u, x, μ, y, z ) ∈ I × Rd × M λ × Rd × Rd×n. Let (αt)0≤t≤T be an optimal control and 
+
+(Xt, Y t, Z t)0≤t≤T the respectively associated controlled state processes and adjoint processes defined in (4.6) . Then the optimal control problem is a point-wise minimizer of H, i.e. for any a ∈ A.
+
+H(U, X t, P(U,X t), Y t, Z t, α t) ≤ H(U, X t, P(U,X t), Y t, Z t, a ) dt ⊗ dP − a.e . (4.7) 
+
+Proof. As the proof is fairly similar to the one presented in [22, 5], we present only the key steps in Appendix B.2. 
+
+Remark 4.7 Under the following stronger convexity assumptions, we can turn the necessary condition into a sufficient condition, namely we need to assume that (1) The map Rd × M λ ∋ (x, μ ) 7 → g(U, x, μ ) is convex P − a.s (2) The map Rd × M λ × A ∋ (x, μ, a ) 7 → H(U, x, μ, Y t, Z t, a ) is convex dt ⊗ dP − a.e. With this additional requirements and if α⋆ satisfies (4.7), then α⋆ yields an optimal control. At this point, we are able to identify a potential optimal control α in the form of a progressively measurable map of (U, X, Y, Z ) as a minimizer of the Hamiltonian map. However, plugging the potential optimal control obtained from (4.7) in the forward and adjoint equations leads to the study of a fully coupled FBSDE, namely (4.6), for which we need to prove existence and unicity. Motivated by the numerical applications, we will concentrate ourselves to the subclass of linear dynamics and quadratic cost functional for which we will prove existence and uniqueness in the following section. In the existing literature, existence and uniqueness of the resulting FBSDE system can be proven under linear dynamics but for a slightly broader class of cost functional. We refer to [22, 6] for full details. 
+
+4.1.2 Dynamic programming and HJB equation. 
+
+Solution to (4.4) can also be characterized by the dynamic programming method. We will restrict ourselves to give the main results that will be used to design algorithms. As we show for the case of the stochastic maximum principle, the proof relies on similar arguments and we refer to [14] for a rigourous analysis of the HJB equation (note that their HJB is stated on the space L2(I; P2(Rd)) 
+
+but the analysis can be easily extended to our setting to the space Mλ. This approach is based on a recursive argument after defining the decoupled value function V : I × [0 , T ] × Rd × M λ of problem which satisfies 
+
+V (t, U, X t, P(U,X t)) = inf 
+
+> α∈A
+
+E
+
+h Z t+ht
+
+f (U, X s, P(U,X s), α s)d s + V (t + h, X t+h, P(U,X t+h))|F t
+
+i
+
+,(4.8) 19 for any t ∈ [0 , T ) and h ∈ (0 , T − t]. and starting from the terminal condition V (T, u, x, μ ) = 
+
+g(u, x, μ ) for (u, x, μ ) ∈ I × Rd × M λ. Following the result in [14] which can be adapted to our current setting (in view of the Pontryagin’s Maximum principle) and assuming that for any 
+
+(u, t, x, μ, p, M ) ∈ I × [0 , T ] × Rd × M λ × Rd × Rd×d, there exists a minimizer 
+
+ˆa(u, x, μ, p, M ) ∈ arg min 
+
+> a∈A
+
+H( u, x, μ, p, M, a ) (4.9) where the Hamiltonian map H is defined as 
+
+H( u, x, μ, p, M, a ) := b(u, x, μ, a ) · p + 12 σσ ⊤(u, x, μ, a ) : M + f (u, x, μ, a ),
+
+one can show by sending formally h → 0 in (4.8) that 
+
+
+
+∂tV (t, u, x, μ ) + b u, x, μ, ˆa(u, x, U(u, t, x, μ ), ∂ xU(u, t, x, μ ) · ∂xV (u, t, x, μ )+ 12 σσ ⊤ u, x, μ, U(u, t, x, μ ), ∂ xU(t, u, x, μ ) : ∂2
+
+> x
+
+V (t, u, x, μ )+E(U,ξ )∼μ
+
+h
+
+b U, ξ, μ, ˆa(U, ξ, U(t, U, ξ, μ ), ∂ xU(t, U, ξ, μ ) · ∂˜x δδm V (t, u, x, μ )( U, ξ )+ 12 σσ ⊤(t, U, ξ, μ, ˆa(U, ξ, U(t, U, ξ, μ ), ∂ xU(t, U, ξ, μ ) : ∂2˜x δδm V (t, u, x, μ )( U, ξ )
+
+i
+
++f  u, x, μ, ˆa(u, t, x, U(t, u, x, μ ), ∂ xU(t, u, x, μ ) + 12 U2(t, u, x, μ ) = 0 
+
+V (T, u, x, μ ) = g(u, x, μ ),
+
+where the master field U : I × [0 , T ] × Rd × M λ is defined as 
+
+U(t, u, x, μ ) := ∂xV (t, u, x, μ ) + E(U,ξ )∼μ
+
+∂˜x
+
+δδm V (t, U, ξ, μ )( u, x )
+
+= ∂˜x
+
+δδm v(t, μ )( u, x ), with v(t, μ ) := E(U,ξ )∼μ
+
+V (t, U, ξ, μ ).If the optimal feedback control ˆa obtained in (4.9) is Lipschitz in all its variables, then we get from (4.1) an optimal feedback control given by 
+
+a⋆(t, u, x, μ ) = ˆ a u, x, μ, U(t, u, x, μ ), ∂ xU(t, u, x, μ ), (t, u, x, μ ) ∈ [0 , T ] × I × Rd × M λ.
+
+4.2 The class of linear quadratic control problem 
+
+For sake of simplicity, we will present the computations in the case of a constant volatility term σ
+
+but the whole analysis could be performed by relaxing this hypothesis. Given α ∈ A , and ξ an admissible initial condition and the set of controls A ⊂ Rm for m ∈ N⋆, we consider the controlled state process satisfying the SDE 
+
+
+
+dXt =
+
+h
+
+A(U ) + B(U )Xt + E( ˜U , ˜Xt)∼P(U,X t)
+
+GB (U, ˜U ) ˜Xt
+
+ + C(U )αt
+
+i
+
+dt + σ(U )d Wt,X0 = ξ, (4.10) where A ∈ L2(I; Rd), B ∈ L∞(I; Rd×d), C ∈ L∞(I; Rd×m), GB ∈ L2
+
+> sym
+
+(I × I; Rd×d) and σ ∈
+
+L2(I; Rd×n) where the spaces L2, L∞ and L2 
+
+> sym
+
+have been introduced in B.3. The cost functional J is given by 
+
+J(α) = E
+
+ Z T
+
+> 0
+
+
+
+Q(U ) Xt − ˜E ˜GQ(U, ˜U ) ˜Xt] · (Xt − ˜E ˜GQ(U, ˜U ) ˜Xt] + α⊤ 
+
+> t
+
+N (U )αt
+
+
+
+dt
+
++ H(U ) XT − ˜E[ ˜GH (U, ˜U ) ˜XT ] ·  XT − ˜E[ ˜GH (U, ˜U ) ˜XT ]
+
+, (4.11) 20 where Q, H ∈ L∞(I; Sd
+
+> +
+
+) where Sd 
+
+> +
+
+denotes the set of positive symmetric matices over Rd×d,
+
+˜GQ, ˜GH ∈ L2
+
+> sym
+
+(I × I; Rd×d) and N ∈ L∞(I; Sm>+) where Sm>+ denotes the set of positive definite symmetric matrices over Rm×m. Moreover, we suppose that there exists c > 0 such that 
+
+⟨N (U )y, y ⟩ ≥ c|y|2, P − a.s , ∀y ∈ Rm.
+
+We also suppose that the operators T ˜GQ and T ˜GH are positive symmetric operators (where the operator notations have been introduced in B.3). 
+
+Remark 4.8 Under the assumptions on the model coefficients, we notice that for any admissible initial condition ξ and any α ∈ A 
+
+J(t, ξ, α ) ≥ 0, ∀t ∈ [0 , T ]. (4.12) This assumption is required as it will help us to derive an a-priori estimate on the triangular Riccati system which will arise from this control problem. However, in the numerical examples, we may add cross-product terms between the state and the control namely terms in the form 2α⊤ 
+
+> t
+
+I(U )Xt
+
+and ˜E[α⊤ 
+
+> t
+
+GI (U, ˜U ) ˜Xt] where I ∈ L∞(I; Rm×d) and GI ∈ L2(I × I; Rm×d) even if we are not able to prove the existence and uniqueness of the associated Riccati equations in this setting. Recalling the FBSDE system in (4.6), and following Proposition 4.6, an optimal control α⋆
+
+should satisfy 
+
+α⋆t = − 12 N (U )−1C(U )⊤Yt,
+
+and following the notion of derivative introduced in (A.1), we end up with                                        
+
+> 
+> dXt=
+> 
+> A(U) + B(U)Xt+ ˜E
+> h
+> GB(U, ˜U) ˜Xt
+> i
+> −12C(U)N(U)−1C(U)⊤Yt
+> 
+> dt
+> +σ(U)d Wt
+> dYt=
+> 
+> CY(U)Yt+ 2 CX(U)Xt+ 2 ˜E
+> h
+> ΨX(U, ˜U) ˜Xt
+> i
+> + ˜E
+> h
+> ΨY(U, ˜U) ˜Yt
+> i
+> dt+ZtdWt,X0=ξ, YT= 2
+> 
+> H(U)XT+ ˜EGH(U, ˜U) ˜XT]
+> ,
+> (4.13)
+
+
+
+CY (u) = B(u)⊤,CXt (u) = Q(u),
+
+ΨXt (u, ˜u) = GQ(u, ˜u),
+
+ΨYt (u, ˜u) = G⋆B (u, ˜u) − G⋆I (u, ˜u)Nt(˜ u)−1Γt(˜ u),GQ(u, ˜u) = ( ˜GQ ◦ Q ◦ ˜GQ)( u, ˜u) −  Q(u) + Q(˜ u) ˜GQ(u, ˜u),GH (u, ˜u) = ( ˜GH ◦ H ◦ ˜GH )( u, ˜u) −  H(u) + H(˜ u) ˜GH (u, ˜u)
+
+where we introduced the notations (see Appendix B.3 for the ◦ and ⋆ notations). 
+
+Theorem 4.9 Under the assumptions on the model coefficients, the FBSDE (4.13) is uniquely solvable and the optimal control ˆα is then given as 
+
+ˆαt = − 12 N (U )−1C(U )⊤Yt, ∀t ∈ [0 , T ]. (4.14) 
+
+Moreover, we have the following form for the adjoint process Y = ( Yt)0≤t≤T
+
+Yt = Kt(U )Xt + ˜E( ˜U , ˜Xt)∼P(U,X t)
+
+ ¯Kt(U, ˜U ) ˜Xt
+
+ + Λ t(U ), (4.15) 21 where K ∈ C 1
+
+ [0 , T ]; L∞([0 , T ]; Sd
+
+> +
+
+) is the unique solution of the infinite dimensional Riccati equations ( ˙Kt(u) + Φ( u, K t(u)) − U (u, K t(u)) N (u)−1U (u, K t(u)) = 0 
+
+KT (u) = H(u) (4.16) 
+
+for λ(d u) − a.e and where we introduced the measurable maps Φ : I × Sd 
+
+> +
+
+→ Rd×d and U : I × Sd 
+
+> +
+
+→
+
+Rd×d as (Φ( u, κ ) := B(u)⊤κ + κ⊤B(u),U (u, κ ) := C(u)⊤κ. 
+
+Moreover, ¯K ∈ C 1
+
+ [0 , T ], L 2
+
+> sym
+
+(I × I, Rd×d) is the unique solution to the abstract Riccati equation on the Hilbert space L2(I × I; Rd×d)
+
+( ˙¯Kt + Ψ( t, K t, ¯Kt) − L(t, K t, ¯Kt) = 0 ,
+
+¯KT = GH , (4.17) 
+
+where we introduced the measurable map Ψ, L : [0 , T ]×L∞(I; Sd
+
+> +
+
+)×L2(I×I; Rd×d) → L2(I×I; Rd×d)
+
+and V : L2(I × I; Rd×d) → L2(I × I; Rd×d) defined as 
+
+
+
+Ψ( t, K t, ¯k)( u, v ) := Kt(u)GB (u, v ) + G⋆B (u, v )Kt(v) + B(u)⊤¯k(u, v ) + ¯k⋆(u, v )B(v)+ ¯k⋆ ◦ GA
+
+(u, v ) +  G⋆A ◦ ¯k)( u, v ) + GQ(u, v ),L(t, K t, ¯k)( u, v ) := U (u, K t(u)) N (u)−1V (u, v )( ¯k) − V (u, v )⋆(¯k)N (v)−1U (v, K t(v)) 
+
+− V ⋆ ◦ N ◦ V )( u, v ),V (u, v )( ¯k) := C(u)⊤¯k(u, v ),
+
+and where Λ ∈ C 1([0 , T ]; L2(I; Rd) is the unique solution to the linear equation on the Hilbert space 
+
+L2(I; Rd)
+
+( ˙Λt + F (t, Λt) − M (t, Λt) = 0 ,
+
+ΛT = 0 . (4.18) 
+
+where we introduced the measurable maps F, M : [0 , T ] × L2(I; Rd) → L2(I; Rd) defined as 
+
+(F (t, λ )( u) := B(u)⊤λ(u) + TG⋆A (λ)( u) + Kt(u)A(u) + T ¯Kt (A)( u),M (t, λ )( u) := U (u, K t(u)) ⊤N (u)−1C(u)⊤λ(u) + TV ⋆ (N C ⊤λ)( u).
+
+Proof. The proof of this result is discussed in Appendix B.4. 
+
+Remark 4.10 In fact, the Riccati for K (4.16) in Theorem 4.9 is standard as it can be solved u
+
+by u λ (d u)-a.e. Moreover, a known formula is known for scalar Riccati equations (see Equation (2.50) in [7]) and we will rely on this for the resolution of ¯K in (4.17). 
+
+4.3 Algorithms 
+
+We now illustrate the methodology introduced in the previous sections to solve this class of non exchangeable mean field control problems. We will, in the spirit of the methods developed in [30], develop two methods to solve the associated control problem. The first one will rely on a global learning method as in [19] which we will refer as Deep Graphon while the other one will take advantage of the FBSDE reformulation of the control problem which we will refer as Deep Graphon BSDE in line with [16]. Notice that even if we apply only two algorithms for the resolution, all kinds of algorithms developed in [30] can be used. Moreover, we give a Riccati solver for the abstract Riccati term ¯K over the Hilbert space L2(I × I; Rd×d).22 4.3.1 Riccati solver 
+
+The Riccati equations depend on the values taken by U and involve integration with respect to a random variable ˜U independent with respect to U and with the same law. To make the system solvable, we must assume that the interaction function and the coefficients Q and H are such that GQ(u, ˜u) and GH (u, ˜u) can be computed analytically. This restricts the class of admissible interaction functions and, for example, prevents us from using the function G2 in (3.1). We are then left to numerically integrate (4.16), (4.17), and (4.18) for (Ui)i∈J1,N K, a given set of samples drawn from U([0 , 1]) . Algorithm 1 provides the procedure used to solve the Riccati equations. Note that, to obtain a highly accurate reference solution, we use a very small time step, significantly smaller than the one for in the neural-network-based algorithm. 
+
+Algorithm 1 Riccati solver for the non exchangeable mean field terms 
+
+Input : (ui)i∈J1,N K samples from U([0 , 1]) , L number of time steps, ∆t the time step Initialize : for (i, j ) ∈ J1, N K2
+
+¯KL(ui, u j ) = GH (ui, u j ), KL(ui) = H(ui), ΛL(ui) = 0 .
+
+for l = L − 1, . . . , 0, do 
+
+Calculate K term: for i ∈ J1, N K
+
+Φ( ui) = B(ui)⊤Kl+1 (ui) + Kl+1 (ui)⊤B(ui),U (ui) = C(ui)⊤Kl+1 (ui),Kl(ui) = Kl+1 (ui) + ∆ t Φ( ui) − U (ui)N (ui)−1U (ui).
+
+Calculate Λ term: for i ∈ J1, N K
+
+F (ui) = B(ui)⊤Λl+1 (ui) + 1
+
+M
+
+> N
+
+X
+
+> m=1
+
+GA(um, u i)Λ l+1 (um) + Kl+1 (ui)A(ui) + 1
+
+M
+
+> N
+
+X
+
+> m=1
+
+¯Kl+1 (ui, u m)A(um),M (ui) = K⊤
+
+> l+1
+
+(ui)C(ui)N (ui)−1C(ui)⊤λl+1 (ui) + 1
+
+M
+
+> N
+
+X
+
+> m=1
+
+¯Kl+1 (um, u i)C(ui)N (um)C⊤(um)Λ l+1 (um),
+
+Λl(ui) =Λ l+1 (ui) + ∆ t F (ui) − M (ui).
+
+Calculate ¯K term: for (i, j ) ∈ J1, N K2
+
+Ψ( ui, u j ) = Kt(ui)GB (ui, u j ) + GB (uj , u i)Kt(uj ) + B(ui)⊤ ¯Kl+1 (ui, u j ) + ¯Kl+1 (uj , u i)B(uj )+ 1
+
+M
+
+> N
+
+X
+
+> m=1
+
+¯Kl+1 (um, u i)GA(um, u j ) + 1
+
+M
+
+> N
+
+X
+
+> m=1
+
+GA(um, u i) ¯Kl+1 (um, u j ) + GQ(ui, u j ),V (ui, u j ) = C(ui)⊤ ¯Kl+1 (ui, u j ),L(ui, u j ) = U (ui, K t(ui)) N (ui)−1V (ui, u j ) − V (uj , u i)N −1(uj )U (uj , K t(uj )) −
+
+1
+
+M
+
+> N
+
+X
+
+> m=1
+
+V (um, u i)N (um)V (um, u j ),
+
+¯Kl(ui, u j ) = ¯Kl+1 (ui, u j ) + ∆ t
+
+
+
+Ψ( ui, u j ) − L(ui, u j )
+
+
+
+.
+
+23 Remark 4.11 In the linear quadratic case treated below, the values for K and Λ can be known analytically in some special cases, therefore we are left to solve only (4.17) .
+
+Once Λl(ui), Kl(ui), ¯Kl(ui, u j ), (i, j ) ∈ J1, N K2 are computed for l ∈ J0, L K, we can recover an estimation of Xl∆t(ui) for i ∈ J1, N K solving the Euler scheme and we estimate Yl∆t:
+
+Yl∆(ui) ≃ Kl∆t(ui)Xl∆t(ui) + 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+¯Kl∆t(ui, u m)Xl∆t(um) + Λ l∆t(Ui), (4.19) and then recover the optimal control using (4.14). 
+
+4.3.2 Deep Graphon 
+
+The Deep Graphon algorithm allows us to compute the optimal control α associated with the optimization problem (4.10)-(4.11) for all X0 sampled from a probability space M. It uses two networks: T θ1 , parametrized by θ1, and Bθ2 , parametrized by θ2, both taking values in Rr×m, where 
+
+m denotes the dimension of the control. The first network T θ1 inputs (t, u, x ) ∈ [0 , T ] × [0 , 1] × Rd
+
+and the second ones inputs (t, y ) ∈ [0 , T ] × RJ where y represents the moment vector of the distribution. We note θ := ( θ1, θ 2).To simplify the notation, we assume in Algorithm 2 that at each iteration a single distribution is sampled to initialize X0. The batched version of the algorithm is straightforward. 
+
+Algorithm 2: Deep Graphon algorithm for non exchangeable mean-field algorithm 
+
+.
+
+Input : N batch size, L number of time steps, θ parameters of the networks, ρ learning rate 
+
+for each epoch e do 
+
+Sample (Un, X n) ∼ U ([0 , 1]) ⊗ μ, n ∈ J1, N K where μ is sampled in M.Initialize cost: ˆCn = 0 for n ∈ J1, N K, ∆t = TL .
+
+for l = 1 . . . , L do 
+
+Calculate ˜W = ( 1
+
+> N
+
+PNn=1 |Xn|j )j∈J1,J K,Calculate ˆW = Bθ2 (l∆t, ˜W ),Calculate Wn = T θ1 (l∆t, U n, X n) for n ∈ J1, N K,Estimate the control αn = Prk=1 Wn,r ˆWr for n ∈ J1, N K.Update cost : for n ∈ J1, N K,
+
+dn =Q(Un) Xn − 1
+
+N
+
+> N
+
+X
+
+> m=1
+
+˜GQ(Un, U m)Xm
+
+,en =( Xn − 1
+
+N
+
+> N
+
+X
+
+> m=1
+
+˜GQ(Un, U m)Xm
+
+,
+
+ˆCn = ˆCn + ∆ tdn · en
+
+ + α⊤ 
+
+> n
+
+N (Un)αn.
+
+Sample gn ∼ N (0 , I d) for n ∈ J1, N K.Estimate X drift : for n ∈ J1, N K,
+
+T Xn = A(Un) + B(Un)Xn + 1
+
+N
+
+> N
+
+X
+
+> m=1
+
+GB (Un, U m)Xm + C(Un)αn.
+
+Update the state : for n ∈ J1, N K, Xn = Xn + ∆ tT Xn + σ(Un)gn
+
+√∆t. 
+
+end 
+
+Add terminal cost : for n ∈ J1, N K,
+
+ˆCn = ˆCn + H(Un) Xn − 1
+
+N
+
+> N
+
+X
+
+> m=1
+
+˜GH (Un, U m)Xm
+
+ ·  Xn − 1
+
+N
+
+> N
+
+X
+
+> m=1
+
+˜GH (Un, U m)Xm
+
+.
+
+Cost function to minimize: J(θ) = 1
+
+> N
+
+PNn=1 ˆCn.
+
+θ = θ − ρ∇J(θ)
+
+end 
+
+24 4.3.3 Deep Graphon BSDE 
+
+The Deep Graphon BSDE Algorithm 2 allows us to calculate the optimal Z = ( Zt)0≤t≤T and the cost function Y0 for all X0 sampled in a probability space M by solving the FBSDE (4.13). It uses four different networks: 
+
+• Two networks to approximate Y0 : ϕζ1 with parameter ζ1 with input in I × Rd and output in 
+
+Rr×d, ψζ2 with parameter ζ2 with input in RJ and output in Rr×d. We note ζ = ( ζ1, ζ 2).
+
+• Two others neural network, T θ1 parametrized with θ1 and Bθ2 parametrized by θ2, both with output in Rr×d, are used to learn the Z term in the BSDE. The first T θ1 inputs (t, u, x ) ∈
+
+[0 , T ] × [0 , 1] × Rd and the second ones inputs (t, y ) ∈ [0 , T ] × RJ . We still note θ = ( θ1, θ 2).We present Algorithm 3. 
+
+Algorithm 3: Deep Graphon BSDE algorithm for non exchangeable mean-field algorithm 
+
+.
+
+Input : N the batch size, L number of time steps, ζ ,θ, ρ learning rate 
+
+for each epoch e do 
+
+Sample (Un, X n) ∼ U ([0 , 1]) ⊗ μ, n ∈ J1, N K where μ sampled in ¯M ,Calculate ˜W = ( 1
+
+> N
+
+PNn=1 |Xn|j )j∈J1,J K.Calculate ˆW = ψζ2 ( ˜W ).Calculate Wn = ϕζ1 (Un, X n) for n ∈ J1, N K.Initialize Yn = Prk=1 Wn,r ˆWr for n ∈ J1, N K , ∆t = TL .
+
+for l = 1 . . . , L do 
+
+Calculate ˜W = ( 1
+
+> N
+
+PNn=1 |Xn|j )j∈J1,J K.Calculate ˆW = Bθ2 (l∆t, ˜W ).Calculate Wn = T θ1 (l∆t, U n, X n) for n ∈ J1, N K.Estimate the control Zn = Prk=1 Wn,r ˆWr for n ∈ J1, N K.Estimate Y trend: for n ∈ J1, N K,T Yn = CY (Un)Yn + 2 CX (Un)Xn + 2
+
+N
+
+> N
+
+X
+
+> m=1
+
+ΨX (Un, U m)Xm + 1
+
+N
+
+> N
+
+X
+
+> m=1
+
+ΨY (Un, U m)Ym.
+
+Sample gn ∼ N (0 , I d) for n ∈ J1, N K.Update the value function : for n ∈ J1, N K, ˆYn = Yn + T Yn ∆t + Zngn
+
+√∆t.Estimate X drift : for n ∈ J1, N K,
+
+T Xn = A(Un) + B(Un)Xn + 1
+
+N
+
+> N
+
+X
+
+> m=1
+
+GB (Un, U m)) Xm − 12 C(Un)N (Un)−1C(Un)⊤Yn.
+
+Update the state : for n ∈ J1, N K, Xn = Xn + ∆ tT Xn + σ(Un)gn
+
+√∆t. 
+
+Store the value function Yn = ˆYn for n ∈ J1, N K.
+
+end 
+
+Calculate target: for n ∈ J1, N K, ˆTn = 2 
+
+
+
+H(Un)Xn + 1
+
+> N
+
+PNm=1 GH (Un, U m)Xm
+
+.
+
+Calculate the error J(ζ, θ ) = 1
+
+> N
+
+PNj=1 
+
+ ˆTn − Yn
+
+2
+
+.
+
+(ζ, θ ) = ( ζ, θ ) − ρ∇J(ζ, θ ).
+
+end 
+
+4.4 Numerical experiments 
+
+We present several numerical experiments illustrating the optimal control of non-exchangeable mean field systems. We first consider a linear–quadratic control problem arising in finance. We then turn to a more complex example, illustrating our approach in a non-toy, nonlinear and non-quadratic setting. In the sequel we assume that X0 is sampled from the space of distributions M, generated randomly as a mixture of three Gaussian laws. At each iteration of the gradient descent algorithm, 25 we sample for k ∈ J1, 3K, Wk ∼ U ([0 , 1]) and (μk, σ k) ∼ U ([0 , 1]) 2, and then for any n ∈ J1, N K we compute 
+
+X0,n = 1
+
+P3 
+
+> k=1
+
+Wk
+
+> 3
+
+X
+
+> k=1
+
+Wk Zk,n , with Zk,n ∼ N (μk, σ 2
+
+> k
+
+).
+
+All results are obtained using a classical feedforward neural network with 3 hidden layers of 10 neurons or the spline KAN with 2 hidden layers of 10 neurons with 5 grid meshes. We take the G1 interaction function. In all the tests, we take r = 10 for the DeepONet network. Since we must discretize both in time and with a high number of trajectories to accurately represent the distributions, GPU memory becomes the limiting factor. For all experiments we use the ADAM gradient descent algorithm with a learning rate of 0.001 ,running for 80 ,000 iterations. The networks are trained using N trajectories to sample distributions with Euler schemes discretized using L time steps. Then, for a given distribution μ ∈ M, we estimate the cost function 
+
+CAlg (μ) (depending on the resolution method) associated with the optimal control obtained (for example using the time-discretized version of (4.11) in the linear–quadratic case). This cost is estimated using a distribution sampled with the N trajectories generated from the samples of X0,
+
+U , and the Brownian motions discretized with L time steps. In the two examples tested below, we either have: 
+
+• an estimate of the optimal control and cost function Canal (μ) from the Riccati equation using the same samples of X0, U , and the Brownian motion, 
+
+• or an analytical control that allows us to estimate the cost function Canal (μ) with the same samples. Sampling 1000 distributions (μm)1≤m≤1000 , we obtain  CAlg (μm) 
+
+> m∈J1,1000 K
+
+and (Canal (μm)) m∈J1,1000 K,and we can report different error measures whenever Alg = DG (Deep Graphon) and Alg = BSDE 
+
+(Deep Graphon BSDE) 
+
+
+
+Eabs Alg := 11000 
+
+P1000  
+
+> m=1
+
+CAlg (μm) − Canal (μm) ,EL2 
+
+> Alg
+
+:= 11000 
+
+P1000  
+
+> m=1
+
+CAlg (μm) − Canal (μm) 2 ,ESup Alg := max m∈J1,1000 K CAlg (μm) − Canal (μm) .
+
+4.4.1 A systemic risk model 
+
+The following example is an extension of the mean-field systemic risk model introduced first in [10] to the case of heterogeneous banks. The following model representing the log monetary reserve of each bank u ∈ I as the process (Xt|U = u)0≤t≤T
+
+
+
+dXt =
+
+
+
+κ(U )( ˜E( ˜U , ˜Xt)
+
+ ˜Gκ(U, ˜U ) ˜Xt
+
+ − Xt) + αt
+
+
+
+dt + σ(U )d Wt,X0 = ξ, 
+
+where κ ∈ L∞(I; R−) acts like a mean reversion term, σ ∈ L2(I; R) measures the volatility of the bank reserve and ˜Gκ ∈ L2(I × I; R) is a graphon, i.e a measurable, bounded and symmetric map from I × I to R+ measuring the rate of borrowing between banks. Moreover, α = ( αt)0≤≤ T is the control rate of borrowing/ lending to a central bank that aims to minimize the functional cost 
+
+J(α) = E
+
+h Z T
+
+> 0
+
+f  U, X t, P(U,X t), α t
+
+dt + g U, X T , P(U,X T )
+
+i
+
+,
+
+26 where the running and terminal cost functions are given by 
+
+
+
+f (u, x, μ, a ) := η
+
+
+
+x − R
+
+> I×Rd
+
+  ˜Gη(u, v )˜ xμ(d v, d˜ x)
+
+2
+
++ a2 + qa  x − R 
+
+> I
+
+˜Gq(u, v )˜ xμ (d v, dx),g(u, x, μ ) := r
+
+
+
+x − R
+
+> I×Rd
+
+  ˜Gr(u, v )˜ xμ(d v, d˜ x)
+
+2
+
+,
+
+for some constants η ≥ 0, r ≥ 0 and q.This model falls in the setting developed in Section 4.2 and applying Theorem 4.9 (to its extended version, see Remark 4.8), the optimal control ˆα is given by 
+
+α⋆t = 12
+
+
+
+q(Xt − ˜E ˜Gq(U, ˜U ) ˜Xt
+
+) − Yt
+
+
+
+, ∀t ∈ [0 , T ].
+
+where Y is given by (4.19) and where K, ¯K, Λ are the solution to the associated Riccati equations. We now present some numerical examples which illustrate the algorithms developed and their accuracy in learning the optimal trajectory X⋆ associated to the optimal control α⋆ using N =10000 and L = 50 . We plot it by approximating the optimal trajectory with one and four moments and show the results. The results are very stable with the number of moments taken but taking four moments for this simple interaction case slightly degrades the results. 
+
+Optimal trajectory of (X⋆t )0≤t≤T Optimal trajectory of (X⋆t )0≤t≤T
+
+Optimal trajectory of (X⋆t )0≤t≤T Optimal trajectory of (X⋆t )0≤t≤T
+
+Figure 9: One moment approximation of the optimal feedback map a⋆ and associated optimal state trajectory X⋆ (with the feedforward network): 27 Optimal trajectory of (X⋆t )0≤t≤T Optimal trajectory of (X⋆t )0≤t≤T
+
+Optimal trajectory of (X⋆t )0≤t≤T Optimal trajectory of (X⋆t )0≤t≤T
+
+Figure 10: Four moments approximation of the optimal feedback map a⋆ (with the feedforward network) 28 We also give below two tables summarizing the results obtained sampling 1000 distributions. Criteria Eabs Alg EL2 
+
+> Alg
+
+Esup Alg time 
+
+DG 7.5e-4 1.8e-6 7.9e-3 14610 
+
+BSDE 3e-4 9.7e-7 1.5e-2 10660 Table 1: One moment Criteria Eabs Alg EL2 
+
+> Alg
+
+ESup Alg time 
+
+DG 1e-3 3.4e-6 1e-2 14650 
+
+BSDE 2.7e-4 5e-7 6e-3 10770 Table 2: two moments Criteria Eabs X EL2 
+
+> X
+
+ESup X time 
+
+DG 3e-4 3.5e-7 4.7e-3 14770 
+
+BSDE 2.5e-4 4.4e-7 9.7e-3 10870 Table 3: three moments Criteria Eabs X EL2 
+
+> X
+
+ESup X time 
+
+DG 9e-4 3.5e-6 1.3e-2 14900 
+
+BSDE 3e-4 2e-6 2.9e-2 11110 Table 4: four moments Table 5: Error with Riccati as reference depending on the number of moments J used as inputs of neural networks. Feedforward with tangent 3 layers of 10 neurons Criteria Eabs X EL2 
+
+> X
+
+ESup X time 
+
+DG 1e-4 3.8e-8 8e-4 17630 
+
+BSDE 4.5e-5 2.8e-8 2.7e-3 13180 Table 6: one moment Criteria Eabs X EL2 
+
+> X
+
+ESup X time 
+
+DG 2.8e-5 5.2e-9 8e-4 17690 
+
+BSDE 5.4e-5 2.2e-8 1.6e-3 12850 Table 7: two moments Criteria Eabs X EL2 
+
+> X
+
+ESup X time 
+
+DG 8.5e-5 2.1e-8 7.e-4 17400 
+
+BSDE 1.e-4 2e-7 6.6e-3 13060 Table 8: three moments Criteria Eabs X EL2 
+
+> X
+
+ESup X time 
+
+DG 2.7e-4 2.1e-5 1.4e-1 17740 
+
+BSDE 1.2e-4 6.9e-7 1.7e-2 13190 Table 9: four moments Table 10: Error with Riccati as reference depending on the number of moments J used as inputs of neural networks. Spline KAN with 2 layers of 10 neurons, 5 grid meshes. Results in Tables 5 , 10 show the accuracy of the method. The KAN network allow us to get more accurate results. The use of a high number of moments degrades the results. 
+
+4.4.2 A non linear quadratic example 
+
+As an illustration of the algorithm above, we consider a one-dimensional model with 
+
+
+
+b(t, u, x, μ, a ) = β(t, u, x, μ ) + a, f (t, u, x, μ, a ) = F (t, u, x, μ ) + a2 
+
+> 2
+
+,g(u, x, μ ) = E(U,ξ )∼μ
+
+w(x − G(u, U )ξ),
+
+where w is a map on C2(R), F is a map on I × Rd × M λ to be chosen later and G is a symmetric map over I × I. In our setting, we are looking for a value function to the Bellman equation in the form V (u, t, x, μ ) = eη(T −t)E(U,ξ )∼μ
+
+w(x − G(u, U )ξ) for a positive constant η ≥ 0 and by simple calculations, the master field map is given by 
+
+U(t, u, x, μ ) = eη(T −t)
+
+E(U,ξ )∼μ
+
+w′(x − G(u, U )ξ) − E(U,ξ )∼μ
+
+G(U, u )w′(ξ − G(U, u )x)
+
+i 
+
+.
+
+29 Taking w = cos and defining to alleviate notations the following quantities 
+
+
+
+A(u, μ ) := E(U,ξ )∼μ
+
+cos (G(u, U )ξ),B(u, μ ) := E(U,ξ )∼μ
+
+sin (G(u, U )ξ),k(u, v ) := η + σ2
+
+> 2
+
+ 1 + G2(u, v )
+
+C(u, x, μ ) := E(U,ξ )∼μ
+
+G(u, U )sin (ξ)cos (G(u, U )x)
+
+D(u, x, μ ) := E(U,ξ )∼μ
+
+G(u, U )cos (ξ)sin (G(u, U )x)
+
+Kcos (u, μ ) := E(U,ξ )∼μ
+
+k(u, U )cos (G(u, U )ξ),Ksin (u, μ ) := E(U,ξ )∼μ
+
+k(u, U )sin (G(u, U )ξ),Bcos (t, u, x, μ ) := E(U,ξ )∼μ
+
+h G(u, U )β(t, U, ξ, μ ) − β(t, u, x, μ )cos (G(u, U )ξ)
+
+i
+
+,Bsin (t, u, x, μ ) := E(U,ξ )∼μ
+
+h G(u, U )β(t, U, ξ, μ ) − β(t, u, x, μ )sin (G(u, U )ξ)
+
+i
+
+,Ucos (t, u, x, μ ) := E(U,ξ )∼μ
+
+h U(t, u, x, μ ) − G(u, U )U(t, U, ξ, μ )cos (G(u, U )ξ)
+
+i
+
+,Usin (t, u, x, μ ) := E(U,ξ )∼μ
+
+h U(t, u, x, μ ) − G(u, U )U(t, U, ξ, μ )sin (G(u, U )ξ)
+
+i
+
+,
+
+choosing the map F to be equal to 
+
+F (t, u, x, μ ) = eη(T −t)
+
+cos (x)α(t, u, x, μ ) + sin (x)γ(t, u, x, μ )
+
+
+
+− 12 e2η(T −t)Λ( u, x, μ )2,
+
+where we set 
+
+
+
+α(t, u, x, μ ) := Kcos (u, μ ) + Bsin (t, u, x, μ ) + Usin (t, u, x, μ ),γ(t, u, x, μ ) := Ksin (u, μ ) − Bcos (t, u, x, μ ) − Ucos (t, u, x, μ ),
+
+Λ( u, x, μ ) := −sin (x)A(u, μ ) + cos (x)B(u, μ ) + C(u, x, μ ) − D(u, x, μ ),
+
+the function V defined above satisfies the Bellman equation. Moreover, the optimal control a⋆ is defined as 
+
+a⋆(t, u, x, μ ) = −∂˜x
+
+δδm v(t, μ )( u, x ), with v(t, μ ) = E(U,ξ )∼μ
+
+V (t, U, ξ, μ ).
+
+We give below the results of the learning of the value function V using N = 6000 and L = 50 .We observe that the error is much important than in the LQ case. This error is independent of the number J of moment taken. Some numerical tries seem to indicate that the error is mainly due to the Euler scheme resolution and the use of KAN does not improve the results. NbMom Eabs  
+
+> Alg
+
+EL2 
+
+> Alg
+
+ESup  
+
+> Alg
+
+time 1 8.9e-3 1.2e-4 4.4e-2 42600 2 8.6e-3 1.1e-4 3.2e-2 42900 3 8.7e-3 1.1e-4 3.4e-2 42800 4 8.4e-3 1.2e-4 3.4e-2 42000 Table 11: Result on non LQ problem with interacting network with feed forward : 3 hidden layers with 10 neurons 
+
+# A Analysis tools over the space Mλ
+
+In this Appendix, we present the main analysis tools used to handle maps defined over the space 
+
+Mλ. It essentially relies on the notion of linear functional derivative and/or equivalently on the 30 Lion’s derivative for which we recall a nice introduction in [7] (Chapter 5). The notion of derivative and convexity we are going to introduce is fairly inspired from the works in [22, 14] where the maps were instead defined over the space L2(I; P2(Rd)) . In fact, both notions of derivatives are fairly similar but for sake of completeness, we reintroduce it in full generality. 
+
+A.1 A notion of derivative 
+
+Definition A.1 (Linear functional derivative on Mλ). 
+
+1. Given a function v : Mλ → R, we say that a measurable function 
+
+δδm v : Mλ × I × Rd ∋ (μ, u, x ) 7 → δδm v(μ)( u, x ) ∈ R,
+
+is the linear functional derivative (or flat derivative) of v
+
+(1) For every compact K ∈ M λ, there exists a compact CK > 0 such that 
+
+δδm v(μ)( u, x ) ≤ CK (1 + |x|2),
+
+for every u ∈ I, x ∈ Rd and μ ∈ K.(2) For every μ, ν ∈ M λ, we have 
+
+v(ν) − v(μ) = 
+
+Z 10
+
+Z
+
+> I×Rd
+
+δδm v((1 − θ)μ + θν )( u, x )d( ν − μ)( u, x )d θ, 
+
+=
+
+Z 10
+
+Z
+
+> I
+
+Z
+
+> Rd
+
+δδm v((1 − θ)μ + θν )( u, x )d( νu − μu)( x)λ(d u)d θ
+
+2. We say that the function v admits a continuously differentiable flat derivative if (1) v admits a flat derivative δδm v satisfying x 7 → δδm v(μ)( u, x ) is Fréchet differentiable with Fréchet derivative denoted by x 7 → ∂˜x δδm v(μ)( u, x ) for all (μ, u ) ∈ M λ × I
+
+(2) The map (μ, x ) 7 → ∂˜x δδm v(μ)( u, x ) is continuous from Mλ × I into Rd for λ − a.e u ∈ I.(3) For every compact set K ⊂ M λ, there exists a constant CK ≥ 0 such that 
+
+∂˜x
+
+δδm v(μ)( u, x ) ≤ CK
+
+ 1 + |x|,
+
+for every u ∈ I, x ∈ Rd and μ ∈ K.3. We say that v : [0 , T ] × M λ → R is of class ˜C1,2([0 , T ] × M λ) if (1) For every μ ∈ M λ, the map t 7 → v(t, μ ) is continuously differentiable on [0 , T ] and we denote by (t, μ ) 7 → ∂tv(t, μ ) its time derivative. (2) For every t ∈ [0 , T ], the derivative δδm v(t, μ )( u, x ) exists and its measurable in all its arguments. (3) δδm v(t, μ )( u, x ) is twice continuously differentiable on Rd, i.e for any (t, μ, u ) ∈ [0 , T ] ×Mλ × I, the map x 7 → δδm v(t, μ )( u, x ) and the gradient and the Hessian matrix 
+
+∂˜x
+
+δδm v : [0 , T ] × M λ × I × Rd → Rd, ∂2˜x
+
+δδm v : [0 , T ] × M λ × I × Rd → Rd×d
+
+satisfy the following growth conditions: There exists a positive constant C s.t 
+
+
+
+∂˜x δδm v(t, μ )( u, x ) ≤ C 1 + |x| + W(μ, m ⊗ δ0),
+
+∂2˜x δδm v(t, μ )( u, x ) ≤ C, 
+
+for every t ∈ [0 , T ], u ∈ I, x ∈ Rd and μ ∈ M λ.
+
+31 (4) The map [0 , T ] × M λ ∋ (t, μ ) 7 → ∂tv(t, μ ) is continuous. (5) For every u ∈ I and every compact set H ⊂ Rd, the functions ∂˜x δδm v(t, μ )( u, x ) and 
+
+∂2˜x δδm v(t, μ )( u, x ) are continuous functions of (t, μ ) ∈ [0 , T ] × M λ uniformly in x ∈ H.
+
+Remark A.2 
+
+• In the core of the paper, the map v will be mainly defined over the space I × Rd × M λ. In this setting, the flat derivative of v is defined as a measurable map 
+
+δδm v : I × Rd × M λ × I × Rd ∋ (u, x, μ, ˜u, ˜x) 7 → δδm v(u, x, μ )(˜ u, ˜x) ∈ R,
+
+and you can extend the previous points from Definition (A.1). 
+
+• Some example of standard type of functions for which we can compute the linear functional derivatives are discussed in [14, 22]. 
+
+A.2 A notion of convexity 
+
+Definition A.3 (Convexity on Mλ). 
+
+Given a function v : Mλ → R supposed to admit a continuously differentiable flat derivative in the sense of Definition A.1, we say that v is convex if for every μ, μ ′ ∈ M λ, we have 
+
+v(μ′) − v(μ) ≥ E
+
+h
+
+∂˜x
+
+δδm v(μ)( U, X ) · (X′ − X)
+
+i
+
+,
+
+where (U, X ) ∼ μ and (U, X ′) ∼ μ′.More generally, if v is now defined on I × Rd × M λ, we say that v is said to be convex if for every (x, μ ) ∈ Rd × M λ and (x′, μ ′) ∈ Rd × M λ and for λ(d u) − a.e , we have 
+
+v(u, x ′, μ ′) − v(u, x, μ ) ≥ ∂xv(u, x, μ ) · (x′ − x) + E
+
+h
+
+∂˜x
+
+δδm v(u, x, μ )( U, X ) · (X′ − X)
+
+i
+
+,
+
+where (U, X ) ∼ μ and (U, X ′) ∼ μ′.
+
+# B Optimal control related results 
+
+B.1 Proof of Theorem 4.2 
+
+The proof follows from a standard fixed point argument on the complete metric space (Mλ(I ×Cd 
+
+> [t,T ]
+
+); W2) and is a straightforward adaptation of the proof of Theorem 2.6 in [14]. Indeed, define the map Φ as 
+
+Mλ(I × C d 
+
+> [t,T ]
+
+) ∋ ν 7 → Φ( ν) = P(U,X ν ),
+
+where Xν denotes the solution to the standard SDE with Lipschitz coefficients 
+
+(dXνs = b(U, X νs , ν s, α s)d s + σ(U, X νs , ν s, α s)d Ws,Xνt = ξ, (B.1) and where νs = xs♯ν with xs : I × C d  
+
+> [t,T ]
+
+∋ (u, ω ) 7 → xs(u, ω ) = ( u, ω s) ∈ I × Rd denotes the projection map. Under Assumption 4.1, the SDE (B.1) admits a continuous F-adapted process and therefore P(U,X ν ) can be viewed as a probability measure on Pλ(I × C d 
+
+> [t,T ]
+
+). Moreover,under standard estimates it is easy to verify that E
+
+h
+
+sup 
+
+> 0≤t≤T
+
+|Xνt |2
+
+i
+
+< ∞ such that P(U,X ν ) ∈ M λ(I × C d 
+
+> [t,T ]
+
+)
+
+32 and therefore Φ : Mλ(I ×C d 
+
+> [t,T ]
+
+) → M λ(I ×C d 
+
+> [t,T ]
+
+) is well defined. Now, from standard estimates, we prove that Φ has a unique fixed point ¯ν in Mλ(I × C d 
+
+> [t,T ]
+
+). Indeed, we have (assuming for simplicity 
+
+b = 0 )
+
+E
+
+h
+
+sup 
+
+> t≤s≤r
+
+|Xνs − Xμs |2i
+
+≤ CE
+
+h Z rt
+
+|σ(U, X νs , ν s, α s) − σ(U, X μs , μ s, α s)|2ds
+
+i
+
+≤ CE
+
+h Z rt
+
+ E|Xνs − Xμs |2 + W2(νs, μ s)2ds
+
+≤ CE
+
+h Z rt
+
+ E sup 
+
+> t≤q≤s
+
+|Xνq − Xμq |2 + W2(νs, μ s)2ds, 
+
+where C is a positive constant which can change from line to line. From Grönwall’s lemma, we end up with 
+
+W2(Φ( ν), Φ( μ)) 2 ≤ E
+
+h
+
+sup 
+
+> t≤s≤T
+
+|Xνs − Xμs |2i
+
+≤ C(T − t)W2(ν, μ )2,
+
+and where we used W2(νs, μ s) ≤ W 2(ν, μ ) for any t ≤ s ≤ T . Now, from standard arguments we conclude that the sequence (ν(k))k∈N defined as 
+
+(ν(k+1) = Ψ( ν(k)),ν(0) arbitrary point in Mλ(I × C d 
+
+> [t,T ]
+
+).is a Cauchy sequence for W2 and converges on Mλ(I × C d 
+
+> [t,T ]
+
+) towards a unique fixed point ¯ν.Considering the associated process X ¯ν yields the unique solution to Theorem 4.2. 
+
+B.2 Proof of Proposition 4.6 
+
+The proof is essentially an adaption of the proof in [22] and therefore we just give the main ideas. 
+
+Step n °1 : Definition of the variation process. 
+
+Given an admissible control β = ( βt)0≤t≤T ∈ A , we define the control δ := β − α. We notice that δ ∈ A since A is a convex set. We now define the Rd-valued variation process V = ( Vt)0≤t≤T
+
+associated to the process X defined in (4.1) as the solution to the following SDE 
+
+
+
+dVt =
+
+
+
+γt · Vt + ˜E
+
+h
+
+∂˜x δδm b(U, X t, P(U,X t), α t)( ˜U , ˜Xt) ˜Vt
+
+i
+
++ ηt · δt
+
+
+
+dt
+
++
+
+
+
+ˆγt · Vt + ˜E
+
+h
+
+∂˜x δδm b(U, X t, P(U,X t), α t)( ˜U , ˜Xt) ˜Vt
+
+i
+
++ ˆ ηt · δt
+
+
+
+dWt,V0 = 0 ,
+
+and where we denoted for every t ∈ [0 , T ]
+
+(γt = ∂xb(U, X t, P(U,X t), α t), ηt = ∂ab(U, X t, P(U,X t), α t),
+
+ˆγt = ∂xσ(U, X t, P(U,X t), α t), ˆηt = ∂aσ(U, X t, P(U,X t), α t).
+
+We note that under the Assumptions 4.1-4.5 that (X, V ) is an SDE satisfying the Assumptions of Theorem 4.2 and hence, (X, V ) and hence V is uniquely defined. We now denote the family of admissible controls αϵ = α + ϵδ for ϵ ∈ [0 , 1] and by Xϵ := Xαϵ
+
+the associated controlled state process. Then, one can check under Assumptions 4.5. 
+
+E
+
+h
+
+sup 
+
+> 0≤t≤T
+
+| Xϵt − Xt
+
+ϵ − Vt|2i
+
+→ 
+
+> ϵ→0
+
+0. (B.2) 33 Step n °2 : Gâteaux derivative of J.
+
+Now, relying in (B.2), on Assumptions B.2 and on Definition of the adjoint process Y in (4.6), one can check after some straightforward computations that lim 
+
+> ϵ→0
+
+1
+
+ϵ
+
+
+
+J(α + ϵ(β − α)) − J(α)
+
+
+
+= E
+
+h Z T
+
+> 0
+
+∂aH(( U, X t, P(U,X t), Y t, Z t) · (βt − αt)d t
+
+i
+
+. (B.3) Now relying on the convexity assumption of the map a 7 → H(u, x, μ, y, z, a ) for any (u, x, μ, y, z ) ∈
+
+I × Rd × P λ 
+
+> 2
+
+(I × Rd) × Rd × Rd×n, one can derive the statement of Proposition 4.6 from the Gateaux derivatives of J in (B.3) 
+
+B.3 Additional notations for the linear quadratic case 
+
+We work under the complete Hilbert space L2(I × I; Rd×d) and L2(I; Rd) and we introduce the following notations 1. We say that a kernel K ∈ L2(I × I; Rd×d) is symmetric if the following holds 
+
+K(v, u )⊤ = K(u, v ), du ⊗ dv a.e. (B.4) We denote by L2
+
+> sym
+
+(I × I; Rd×d) the space of kernels K ∈ L2(I × I; Rd×d) satisfying (B.4). 2. Given a kernel K ∈ L2(I × I; Rd×d), its associated linear integral Hilbert-Schimdt operator 
+
+TK is defined as 
+
+L2(I; Rd) ∋ f 7 → TK (f )( ·) = 
+
+Z
+
+> I
+
+K(·, v )f (v)d v ∈ L2(I; Rd).
+
+We say that TK is a symmetric non-negative operator on L2(I; Rd) if its associated kernel satisfies (B.4) and ⟨f, T K f ⟩L2(I;Rd) ≥ 0 for every f ∈ L2(I; Rd).3. Given a kernel K ∈ L2(I × I; Rd×d), we define K∗ ∈ L2(I × I; Rd×d) as 
+
+K∗(u, v ) := K(v, u )⊤.
+
+When K ∈ L2
+
+> sym
+
+(I × I; Rd×d), we have K∗ = K. We also notice that TK∗ = ( TK )∗ where 
+
+(TK )∗ denotes the adjoint operator of TK .4. Given two kernels K, W ∈ L2(I × I; Rd×d), it is easy to check that the operator TK ◦ TW is associated with the kernel  K ◦ W  defined by 
+
+ K ◦ W (u, v ) := 
+
+Z
+
+> I
+
+K(u, w )W (w, v )d w, 
+
+5. Given L ∈ L∞(I; Rd×d), we define the multiplicative operator associated to L as the linear operator on L2(I; Rd) defined by 
+
+L2(I; Rd) ∋ f 7 →
+
+
+
+I ∋ w 7 → ML(f )( w) = Lwf (w) ∈ Rd
+
+∈ L2(I; Rd).
+
+Given K, W ∈ L2(I × I; Rd×d) and L ∈ L∞(I; Rd×d), the operator TK ◦ ML ◦ TW is associated with the kernel  K ◦ L ◦ W  defined by 
+
+ K ◦ L ◦ W (u, v ) =
+
+Z
+
+> I
+
+K(u, w )L(w)W (w, v )d w. 
+
+34 Given (E, d ) a Polish metric space (e.g. Rd, P2(Rd)) endowed with its natural Borel σ-algebra., we also introduce the following spaces. (1) 
+
+(L2(I; E) := φ : I ∋ u 7 → φ(u) measurable and R 
+
+> I
+
+d(φ(u), e )2du < +∞ ,L2(I × I; E)) := φ : I × I ∋ (u, v ) 7 → φ(u, v ) measurable and R 
+
+> I×I
+
+d( ϕ(u, v ), e )2du < +∞ .
+
+Moreover, if E is a normed metric space with norm (∥·∥ ) ( e.g Rd), we introduce (2) 
+
+
+
+L∞(I; E) := φ : I ∋ u 7 → φ(u) measurable and ess sup 
+
+> u∈I
+
+∥φ(u)∥E < +∞. ,L∞(I × I; E) := φ : I × I ∋ (u, v ) 7 → φ(u, v ) measurable and ess sup 
+
+> u,v ∈I
+
+∥φ(u, v )∥E < +∞.
+
+B.4 Proof of Theorem 4.9 
+
+The proof is essentially a combination of the proofs in [22, 13] and therefore we just give the main ideas of the proofs in the current setting. 
+
+Step n °1 : Ansatz form for Y .
+
+Motivated by the standard empirical link between the value function and the adjoint process Y in the stochastic maximum principle and the linear-quadratic parametrization, we are looking for a solution to the FBSDE (4.13) by guessing 
+
+Yt = Kt(U )Xt + ˜E ¯Kt(U, ˜U ) ˜Xt
+
+ + Λ t, 0 ≤ t ≤ T, (B.5) where K ∈ C 1 [0 , T ]; L∞(I; Sd
+
+> +
+
+), ¯K ∈ C 1([0 , T ]; L2
+
+> sym
+
+ I × I; Rd × Rd) and Λ ∈ C 1([0 , T ]; L2(I; Rd)
+
+are to be determined through Riccati equations. Plugging the ansatz (B.5) into the dynamics of X
+
+and after some tedious but straightforward computations, we obtain the Riccati equations stated in Theorem 4.9. 
+
+Step n °2 : Solvability of the Riccati equations 
+
+The solvability of (K, ¯K, Λ) , i.e., the proof of their existence and unicity over respectively the spaces C1 [0 , T ]; L∞(I; Sd
+
+> +
+
+), C1 [0 , T ]; L2
+
+> sym
+
+(I × I; Rd×d) and C1([0 , T ]; L2(I; Rd) is done in [13] (see [15] for an extension to the common noise setting). Essentially, the Riccati on K is standard and can be solved by standard theory. However, the Riccati equation for ¯K is of a new type due to the heterogenous structure of interactions and its solvability requires explicitly the assumptions on the model coefficients resulting in the positivity of J (see (4.12)). Indeed, we get a fundamental relation (see Proposition 3.1 in [13]) and we are able to bound the operator norm of T ¯Kt uniformly in time which gives us an a-priori estimate on the solution and helps us to go backward in time and get global existence and uniqueness over [0 , T ]. Finally, Λ is a linear ODE on the Hilbert space 
+
+L2(I; Rd) and can be solved froms standard theory on infinite dimensional spaces. Therefore, we identified a solution (X, Y, Z ) to the FBSDE. This solution is in fact unique and the unicity is proved in [22] so we refer to the references therein for a full proof of this result. 35 References 
+
+[1] G.A. Alvarez, E. Bayraktar, and I. Ekren. Contracting a crowd of heterogeneous agents. arXiv preprint arXiv:2507.09415 , 2025. [2] E. Bayraktar, S. Chakraborty, and R. Wu. Graphon mean field systems. The Annals of Applied Probability , 33(5):3587–3619, 2023. [3] A. Bensoussan, J. Frehse, and S.P. Yam. Mean field games and mean field type control theory . Briefs in Mathematics. Springer, 2013. [4] P. E. Caines and M. Huang. Graphon mean field games and their equations. SIAM Journal on Control and Optimization , 59(6):4373–4399, 2021. [5] Z. Cao and M. Laurière. Probabilistic analysis of graphon mean field control. arXiv preprint arXiv:2505.19664 , 2025. [6] R. Carmona and F. Delarue. Forward–backward stochastic differential equations and controlled mckean–vlasov dynamics. The Annals of Probability , 43(5):2647–2700, 2015. [7] R. Carmona and F. Delarue. Probabilistic Theory of Mean Field Games with Applications I: Mean Field FBSDEs, Control, and Games , volume 83 of Probability Theory and Stochastic Modelling . Springer, Cham, 2018. [8] R. Carmona and F. Delarue. Probabilistic Theory of Mean Field Games with Applications II: Mean Field Games with Common Noise and Master Equations , volume 84 of Probability Theory and Stochastic Modelling . Springer, Cham, 2018. [9] R. Carmona and M. Laurière. Convergence analysis of machine learning algorithms for the numerical solution of mean-field control and games II-the finite horizon case. Annals of Applied Probability , 32(6), 2022. [10] R. A. Carmona, J-P Fouque, and L-H Sun. Mean field games and systemic risk. Communications in Mathematical Sciences , 13(4):911–933, 2015. [11] F. Coppini, A. De Crescenzo, and H. Pham. Nonlinear graphon mean-field systems. Stochastic Processes and thier Applications , 190, 2025. [12] C. Cuchiero, M. Larsson, and S. Svaluto-Ferro. Probability measure-valued polynomials. Electronic Journal of Probability , 24:1–32, 2019. [13] A. De Crescenzo, F. de Feo, and H. Pham. Linear-quadratic optimal control for non-exchangeable mean-field sdes and applications to systemic risk. ESAIM COCV , 2026. [14] A. De Crescenzo, M. Fuhrman, I. Kharroubi, and H. Pham. Mean-field control of non exchangeable systems. ESAIM COCV , 32(3), 2025. [15] F. de Feo and S. Mekkaoui. Optimal control of heterogeneous mean-field stochastic differential equations with common noise and applications to financial models. arXiv preprint arXiv:2511.18636 , 2025. [16] W. E, J. Han, and A. Jentzen. Deep learning-based numerical methods for high-dimensional parabolic partial differential equations and backward stochastic differential equations. Communications in Mathematics and Statistics , 5(4):349–380, 2017. [17] M. Germain, M. Laurière, H. Pham, and X. Warin. DeepSets and their derivative networks for solving symmetric pdes. Journal of Scientific Computing , 91, 2022. [18] X. Guo, H. Pham, and X. Wei. Itô formula for flows of measures on semimartingales. Stochastic Processes and their Applications , 159:350–390, 2023. [19] J. Han and W. E. Deep learning approximation for stochastic control problems. NIPS , 2016. [20] P.-E. Jabin, D. Poyato, and J. Soler. Mean-field limit of non-exchangeable systems. Communications on Pure and Applied Mathematics , 78(4):651–741, 2025. 
+
+36 [21] O. Kallenberg. Foundations of Modern Probability . Springer, 2 edition, 2002. [22] I. Kharroubi, S. Mekkaoui, and H. Pham. Stochastic maximum principle for optimal control problem of non exchangeable mean field systems, 2025. [23] D. Lacker and A. Soret. A label-state formulation of stochastic graphon games and approximate equilibria on large networks. Mathematics of Operations Research , 48(4):1987–2018, 2023. [24] S. Lanthaler, S. Mishra, and G. Karniadakis. Error estimates for deeponets: A deep learning framework in infinite dimensions. Transactions of Mathematics and its Applications , 6(1):tnac001, 2022. [25] Z. Li, N. Kovachki, K. Azizzadenesheli, B. Liu, K. Bhattacharya, A. Sturat, and A. Anandkumar. Fourier neural operator for parametric partial differential equations. arXiv:2003.03485 , 2020. [26] Ziming Liu, Yixuan Wang, Sachin Vaidya, Fabian Ruehle, James Halverson, Marin Soljačić, Thomas Y Hou, and Max Tegmark. KAN: Kolmogorov-Arnold networks. arXiv preprint arXiv:2404.19756 , 2024. [27] L. Lu, P. Jin, G. Pang, Z. Zhang, and G. E. Karniadakis. Learning nonlinear operators via deeponet based on the universal approximation theorem of operators. Nature machine intelligence , 3(3):218–229, 2021. [28] S. Mekkaoui and H. Pham. Analysis of non-exchangeable mean field markov decision processes with common noise: From Bellman equation to quantitative propagation of chaos. Hal-0550160 , 2026. [29] H. Pham and X. Warin. Mean-field neural networks: learning mappings on Wasserstein space. Neural Networks , 168:380–393, 2023. [30] H. Pham and X. Warin. Mean-field neural networks-based algorithms for McKean-Vlasov control problems. Journal of Machine Learning , 3:176–214, 2024. [31] C. Reisinger, W. Stockinger, and Y. Zhang. A fast iterative PDE-based algorithm for feedback controls of nonsmooth mean-field control problems. SIAM Journal of Scientific Computing , 46(4), 2024. [32] L. Ruthotto, S. Osher, L. Nurbekyan, and S. Fung. A machine learning framework for solving high-dimensional mean field game and mean field control problems. Proceedings of the National Academy of Sciences , pages 9183–9193, 2020. [33] Xavier Warin. P1-Kan: an effective Kolmogorov-Arnold network with application to hydraulic valley optimization. arXiv preprint arXiv:2410.03801 , 2024. [34] M. Zaheer, S. Kottur, S. Ravanbakhsh, B. Poczos, R. Salakhutdinov, and A. Smola. FDeepSets. 
+
+Advances in Neural Information Processing , 2017. 
+
+37
