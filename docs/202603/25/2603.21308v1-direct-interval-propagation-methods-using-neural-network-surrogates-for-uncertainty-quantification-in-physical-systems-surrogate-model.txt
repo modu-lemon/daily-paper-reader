@@ -1,0 +1,1093 @@
+Title: Direct Interval Propagation Methods using Neural-Network Surrogates for Uncertainty Quantification in Physical Systems Surrogate Model
+
+URL Source: https://arxiv.org/pdf/2603.21308v1
+
+Published Time: Tue, 24 Mar 2026 02:06:44 GMT
+
+Number of Pages: 31
+
+Markdown Content:
+# Highlights 
+
+Direct Interval Propagation Methods using Neural-Network Surrogates for Uncertainty Quantification in Phys-ical Systems Surrogate Model 
+
+Ghifari Adam Faza, Jolan Wauters, Fabio Cuzzolin, Hans Hallez, David Moens 
+
+• We provide a comprehensive evaluation of direct interval uncertainty propagation strategies in neural network surrogate models, benchmarking them against optimisation-based propagation. Specifically, we compare naive interval propagation, bound propagation, and interval neural networks with interval-valued weights, highlight-ing their respective strengths and limitations. 
+
+• We introduce a modified DeepONet architecture capable of directly handling interval-valued variables. This extension enables operator-learning-based surrogates to propagate interval uncertainties across the input and output spaces, making them applicable to full-field problems commonly encountered in computational mechan-ics. 
+
+• We propose a data augmentation strategy that allows direct interval propagation models to be trained when only pointwise datasets are available. This approach alleviates the scarcity of interval-valued training data, which are often expensive or impractical to obtain, and broadens the applicability of interval UQ in real-world engineering scenarios. 
+
+• We analyse the di ffi culties that arise when training operator-learning models with augmented interval datasets and propose a practical workaround to mitigate these issues. 
+
+> arXiv:2603.21308v1 [cs.LG] 22 Mar 2026
+
+# Direct Interval Propagation Methods using Neural-Network Surrogates for Uncertainty Quantification in Physical Systems Surrogate Model 
+
+Ghifari Adam Faza a,e , Jolan Wauters b, Fabio Cuzzolin d, Hans Hallez c, David Moens a,e 
+
+> aLMSD, Department of Mechanical Engineering, KU Leuven, Heverlee, 3001, Belgium
+> bRAM, Department of Mechanical Engineering, KU Leuven, Brugge, 8200, Belgium
+> cDistriNet, Department of Computer Science, KU Leuven, Brugge, 8200, Belgium
+> dVisual Artificial Intelligence Laboratory, Oxford Brookes University, Oxford, UK
+> eFlandersMake@KU Leuven, Belgium
+
+Abstract 
+
+In engineering applications, uncertainty propagation refers to the systematic characterisation of a system output under uncertain inputs. Specifically for interval uncertainty, the objective is to determine the lower and upper bounds of the output, given interval-valued inputs. Such uncertainty propagation plays a crucial role in engineering tasks, including robust design optimisation and reliability analysis, where accurate characterisation of uncertainty is essential for safe and reliable decision-making. However, standard interval propagation requires solving optimisation problems that can be computationally expensive, particularly when dealing with complex physical systems. To address this challenge, surrogate models have been developed to enable e ffi cient interval propagation. Although surrogate models are computationally more e ffi cient, standard surrogate-based approaches typically only replace the evaluator function within the optimisation loop, which still requires a large number of inference calls. Therefore, we propose to directly estimate the output interval by reframing the problem as an interval-valued regression task. In this work, we present a comprehensive study of strategies for direct interval propagation using NN-based surrogate models, including standard multilayer perceptrons (MLPs) and deep operator networks (DeepONet). We investigate and compare three distinct approaches: (i) naive interval propagation through standard architectures, (ii) bound propagation techniques such as Interval Bound Propagation (IBP) and CROWN, and (iii) interval neural networks (INNs) with interval weights. Our results demonstrate that these methods are significantly more e ffi cient compared to traditional optimisation-based interval propagation and are able to provide accurate interval estimates. We also discuss the limitations and open challenges associated with implementing interval-based propagation in practice. 
+
+Keywords: operator learning, interval propagation, uncertainty quantification, interval regression 
+
+1. Introduction 
+
+In engineering applications, uncertainty propagation refers to the systematic characterisation of how input un-certainties a ff ect system outputs. Following [1, 2], we distinguish uncertainty propagation, which transforms known input uncertainties through a model, from uncertainty prediction, which estimates output confidence or variability without explicit input uncertainty. Classical approaches in propagation, such as Monte Carlo (MC) and quasi-Monte Carlo (qMC) simulations [3, 4], provide probabilistic estimates of output variability by repeatedly sampling the in-put space. While these methods are conceptually straightforward, they are computationally expensive, particularly for high-fidelity simulations such as finite element or computational fluid dynamics models, where a single run can require hours on high-performance computing resources. To alleviate this burden, surrogate models such as Gaussian processes [5, 6, 7], polynomial chaos expansion [8, 9], and neural networks [10, 11] are increasingly employed to ap-proximate the input-output mapping, enabling e ffi cient uncertainty propagation without the need for repeated costly simulations. This work focuses on interval uncertainty propagation, where uncertainty is represented by lower and upper bounds rather than full distributions. Interval methods are advantageous when data are scarce or probabilistic as-sumptions are unreliable. For instance, in structural design, material properties may vary due to manufacturing, but  
+
+> Preprint submitted to Knowledge-Based Systems March 24, 2026
+
+only a few tests may be available; representing these properties as intervals provides a robust description of uncer-tainty. Our goal is to propagate these input intervals (e.g., material properties) through the model to predict output intervals (e.g., stresses or displacements), which can then inform safety assessment, reliability analysis, or design optimisation. Standard interval propagation methods, described in Section 2, require solving two optimisation problems per point to determine the interval bounds. Surrogate models can reduce the cost of evaluating the underlying simulator, but they still function as emulators that must be queried repeatedly, which can remain expensive. This ine ffi ciency is amplified in complex problems requiring full-field solutions, where intervals must be propagated across every mesh point. Directly designing the surrogate to output interval estimates can bypass repeated evaluations and substantially improve e ffi ciency. In this work, we investigate strategies for directly propagating input uncertainties through to the output space using neural network-based surrogate models. Specifically, we compare three distinct approaches: (i) naive inter-val propagation through a standard neural network architecture [12], (ii) bound propagation using the IBP [13] and CROWN [14] algorithm, and (iii) interval neural networks with interval-valued weights [15, 16, 17], and compare them with the optimisation-based propagation baseline. To assess their performance, we consider two scenarios. In the first, we assume full access to an interval-valued dataset (i.e., paired interval inputs and outputs). Since such datasets are rare and costly to obtain, we also evaluate the methods when only pointwise data are available for training and evaluate the model on actual interval data. For each scenario, we conduct both a simple one-dimensional regression test, serving as a proof of concept, and some more challenging full-field partial di ff erential equations (PDEs) surrogate modelling tasks, which is particularly well suited to operator-learning architectures such as deep operator networks (DeepONet) [18]. To summarise, the following are the main contributions of this paper: 1. We provide a comprehensive evaluation of direct interval uncertainty propagation strategies in neural network surrogate models, benchmarking them against optimisation-based propagation. Specifically, we compare naive interval propagation, bound propagation, and interval neural networks with interval-valued weights, highlight-ing their respective strengths and limitations. 2. We introduce a modified DeepONet architecture capable of directly handling interval-valued variables. This extension enables operator-learning-based surrogates to propagate interval uncertainties across the input and output spaces, making them applicable to full-field problems commonly encountered in computational mechan-ics. 3. We propose a data augmentation strategy that allows direct interval propagation models to be trained when only pointwise datasets are available. This approach alleviates the scarcity of interval-valued training data, which are often expensive or impractical to obtain, and broadens the applicability of interval UQ in real-world engineering scenarios. 4. We analyse the di ffi culties that arise when training operator-learning models with augmented interval datasets and propose a practical workaround to mitigate these issues. The remainder of this paper is organised as follows: Section 2 introduces the fundamentals of interval propagation methods and highlights their key challenges. Section 3 presents the formulation of three direct interval propagation approaches. The experimental setup is described in Section 4, with Section 4.1 focusing on experiments under ideal assumptions and Section 4.2 addressing the case where only pointwise training data are available. Finally, Section 5 concludes the paper with a discussion of the results and the future works. 
+
+2. Classical interval propagation methods 
+
+Consider a generic deterministic model M used in an engineering system, which takes an input parameter vector 
+
+x and produces an output quantity of interest (QoI), denoted as y. The model M may represent, for instance, a finite element model, a boundary element method, a deterministic analytical function, or any other deterministic modelling approach. This mapping can be formally expressed as: 
+
+M : x 7 → y. (1) 2When the input parameters are subject to interval uncertainty, they are represented by an interval vector x† =
+
+[xL, xU ] = hxint 1 , xint 2 , . . . , xint 
+
+> r
+
+iT
+
+, where xint  
+
+> i
+
+= [xLi , xUi ], i = 1, 2, . . . , r denotes the interval for the i-th variable, and xL
+
+and xU are the vectors of lower and upper bounds for all input variables. Given this interval-valued input, the corresponding bounds on the QoI can be computed by solving the following optimisation problems: 
+
+yL = min  
+
+> xL≤x≤xU
+
+M(x), yU = max  
+
+> xL≤x≤xU
+
+M(x). (2) These expressions yield the minimum and maximum values of the system response over all possible evaluations within the input interval vector x†, assuming that each uncertain parameter varies independently within its respective bounds. It is important to note that, due to the potential non-monotonic behaviour of the model M, these optimisation prob-lems generally cannot be solved analytically and must be evaluated numerically. Consequently, obtaining tight output bounds requires exploring a high-dimensional input space, which makes interval propagation computationally expen-sive, especially when the number of uncertain parameters is large or the model is highly nonlinear. This motivates the use of surrogate models to enable more e ffi cient interval propagation. To mitigate the high computational cost of interval propagation on complex models, surrogate modelling tech-niques are commonly employed as an emulator. A surrogate model ˆf serves as a computationally e ffi cient approx-imation of the original system, trained to replicate its input-output behaviour with significantly reduced evaluation time. This allows for faster uncertainty propagation while maintaining a reasonable level of accuracy. Among the various surrogate modelling approaches, neural network-based models, such as standard multilayer perceptrons (MLPs) [10, 19, 20] and operator learning [18, 21] architectures, have shown considerable promise due to their ex-pressiveness and scalability. Therefore, the optimisation problems in equation 2 can be reformulated as: 
+
+yL = min  
+
+> xL≤x≤xU
+
+ˆf (x), yU = max  
+
+> xL≤x≤xU
+
+ˆf (x). (3) As alternatives to classical optimisation-based approaches for non-monotonic interval propagation, Cicirello et al. [22] reformulate the problem using Bayesian optimisation. Although the underlying objective remains unchanged, this reformulation o ff ers advantages such as faster convergence, reduced evaluations of the expensive model, and improved accuracy compared to optimisation over a full surrogate model. In a di ff erent approach, Callens et al. [23] propose a multilevel quasi-Monte Carlo method for interval analysis, where intervals are modelled using Cauchy random variables to enable probabilistic sampling. This method demonstrates a significant reduction in computational cost. Given that the test cases in this study are inexpensive to evaluate, we adopt direct optimisation for interval propagation as the baseline for the benchmarking study. Nonetheless, the double optimisation approach with surrogate models still requires numerous inference calls to the surrogate ˆ f . This problem limits the scalability of the method, particularly for high-dimensional input spaces or when a full-field solution is required. In such cases, the optimisation must be performed for every discretisation point in the computational mesh, leading to a significant increase in computational cost. Denoting that Nmesh the number of discretisation points, Nsamp the number of interval-valued instances, Niter the number of optimisation iterations, and 
+
+Cpred the computational cost of a single surrogate inference, the total computational cost is Ctotal = 2 × Nmesh × Nsamp ×
+
+Niter × Cpred . To address this issue, we propose to directly estimate the output interval by reframing the problem as an interval-valued regression task. This approach allows us to learn a direct mapping from interval-valued inputs to interval-valued outputs, eliminating the need for repeated surrogate evaluations during the optimisation process. 
+
+3. Direct interval propagation 
+
+Direct Interval Propagation (DIP) is a term we use to describe the direct estimation of output intervals from input intervals using machine learning (ML) techniques. Unlike conventional approaches, where ML models serve as surrogates to emulate expensive optimisation procedures, DIP aims to learn a direct mapping from interval-valued inputs to interval-valued outputs: ˆf : [ xL, xU ] 7 → [yL, yU ]. (4) This task falls under the broader category of regression with interval-valued variables. In the context of linear models, several methods have already been proposed in the literature [24, 25]. For more complex engineering applications, 3Faza et al. [26] introduced an interval surrogate model based on interval proper orthogonal decomposition and poly-nomial chaos expansion. Similarly, Liu et al. [27] employ reduced-order models with interval-valued variables. In this work, however, we focus exclusively on direct interval propagation using neural network-based archi-tectures, namely standard multilayer perceptrons (MLPs) as a proof of concept and deep operator networks (Deep-ONet) [18] for full-field problems. In this section, we present three direct interval propagation strategies: (i) naive direct interval propagation, (ii) bound propagation methods (including IBP and CROWN), and (iii) interval neural networks. We also provide schematic illustrations of how these approaches can be applied within the DeepONet framework. Finally, we discuss the conceptual connection between interval propagation and interval estimation. 
+
+3.1. Naive direct interval propagation 3.1.1. Standard implementation 
+
+The term naive DIP refers to any neural network architecture that retains a standard structure but extends the in-put and output layers to explicitly represent the lower bounds (LB) and upper bounds (UB) of the input and output variables. These models do not incorporate interval arithmetic or interval-valued weights within the network. Several modelling paradigms exist for naive DIP. Some approaches represent intervals using the centre and range formula-tion [28, 29], while others directly model the lower and upper bounds [30, 12]. To prevent crossing between the predicted bounds, Roque et al. [28] constrain the connection weights in the half-range regression to be non-negative. In contrast, Yang et al. [12] introduce a soft regularisation term in the loss function to penalise bound violations. The general architecture of the Naive approach, following the regularised artificial neural network (RANN) [12], is illustrated in Figure 1. 𝑋 !
+
+> "
+
+𝑋 !
+
+> #
+
+𝑋 $
+
+> "
+
+𝑋 $
+
+> #
+
+# ⋯
+
+𝑧 !
+
+𝑧 %
+
+𝑧 &
+
+# ⋯
+
+𝑌 $"
+
+𝑌 $#
+
+1 1
+
+𝒘 (()
+
+𝒃 (()
+
+𝑏 "
+
+> (*)
+
+𝑏 #
+
+> (*)
+
+𝒘 # 
+
+> (*)
+
+𝒘 "
+
+> (*)
+> Figure 1: Regularised artificial neural network (RANN) architecture for naive direct interval propagation.
+
+In a simple regression setting, the interval-valued data ( X†, Y†) consist of d-dimensional predictors and one re-sponse. All of the data is in lower-upper form {[X1,L, X1,U ], . . . , [Xd,L, Xd,U ]} and {YL, YU }. Assume that the model has 3 layers consisting of 2 d input nodes, J nodes in the hidden layers, and 2 output nodes. The model output is written as: ˆyL = σ(o)
+
+
+
+> J
+
+X
+
+> j=1
+
+z jw(o) 
+
+> j,L
+
++ b(o)
+
+> L
+
+ and ˆ yU = σ(o)
+
+
+
+> J
+
+X
+
+> j=1
+
+z jw(o) 
+
+> j,U
+
++ b(o)
+
+> U
+
+ , (5) where w(o) 
+
+> j,L
+
+and w(o) 
+
+> j,U
+
+are the weight between the hidden layer nodes and the lower and upper output nodes, respectively. The variable b(o) 
+
+> L
+
+and b(o) 
+
+> U
+
+are the bias terms of the output. The activation function of the outputs is represented as σ(o)
+
+and variable z j denotes the output of the jth hidden layer node, defined as: 
+
+z j = σ(h)
+
+
+
+> 2d
+
+X
+
+> k=1
+
+Xkw(h)  
+
+> k,j
+
++ b(h)
+
+> j
+
+ . (6) The superscript ( h) denotes that the activation function σ(h), weight w(h) 
+
+> k,j
+
+, and bias b(h) 
+
+> j
+
+belong to the hidden layer nodes. 4To train such neural network model, we typically minimise the mean squared error (MSE) loss function through the gradient descent method. However, in interval-valued data, we have to be consistent with the mathematical definition of the interval, such that ˆ YU ≥ ˆYL. Therefore, Yang et al. [12] introduce a non-crossing regulariser to meet the requirements. Given N training data, the loss function is formulated as: 
+
+L = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+(yi,L − ˆyi,L)2 + 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+(yi,U − ˆyi,U )2 + λ
+
+N
+
+> N
+
+X
+
+> i=1
+
+ max {0, ˆyi,L − ˆyi,U }2 , (7) where λ ≥ 0 is the parameter for controlling the regularisation strength. When λ is 0, the regularisation terms collapse to zero and the regularised model becomes identical with the model proposed by Maia et al. [30]. When λ is large, then the regularisation term will dominate the loss function and the model will approximate the behaviour of the one proposed by Roque [28]. When λ is moderate, then the model provide a flexible choice of a more realistic model that prevents most of the interval crossing with small negative e ff ects to the prediction accuracy. 
+
+3.1.2. Naive direct interval propagation DeepONet implementation 
+
+This framework can also be applied to operator learning, a setting where modelling problems in engineering and the physical sciences often rely on computationally expensive simulations or resource-intensive experiments for solving complex systems of partial di ff erential equations (PDEs). These costs severely constrain the number of fea-sible simulations or measurements, limiting downstream tasks such as reliability analysis, design optimisation, and inverse problem solving. To overcome these bottlenecks, faster and more scalable alternatives are essential. While ad-vances in hardware acceleration have improved the e ffi ciency of numerical PDE solvers [31, 32], surrogate modelling techniques, such as the “ learning to simulate ” with Graph Neural Networks (GNN) [33], Deep Operator Networks (DeepONet) [18], Neural Operators (NO) [21], and the Universal Physics Transformer (UPT) [34], are rapidly gaining popularity as promising substitutes. Let D ⊂ Rd be a bounded, open domain, and let U = U(D; Rdu ), G = G(D; Rdg ) denote separable Banach spaces of functions defined on D, taking values in Rdu and Rdg , respectively. We consider a (typically nonlinear) operator 
+
+G† : U → G which maps an input function u(·) ∈ U to an output function g(·) = G†(u) ∈ G. Such operator mappings arise naturally in forward models of PDEs, where u represents coe ffi cients, forcing terms, or boundary conditions, and 
+
+g denotes the corresponding solution field. Suppose that we have a set of N observations {u(i), g(i)}Ni=1, the goal is to build an approximation of G⋆ by constructing: 
+
+Gθ : U → G, θ ∈ Rp, (8) then optimising paratemer θ ∈ Rp, where p is the dimensionality of the parameter, so that Gθ⋆ ≈ G ⋆.In this paper, we employ DeepONet [18] as our operator learning model due to its simple architecture. Based on the universal approximation theorem of operators [35], the DeepONet architecture is comprised of two sub-networks: a trunk net, and a branch net. The trunk net is responsible for extracting the latent representation of the space-time location of the PDE y = [t, x], where t is time, and x and y are spatial location. Meanwhile, the branch net is responsible for handling the input functions u = [u(x1), . . . , u(xm)] in the form of discretised m-points. Assuming that the latent representations of both trunk net τ ∈ Rq and branch net β ∈ Rq are q-dimensional, where τ = [τ1, . . . , τ q]and β = [β1, . . . , β q]. The solution operators G of a function u evaluated at x, is expressed as: 
+
+G(u)( x) ≈
+
+> q
+
+X
+
+> i=1
+
+βi(u) · τi(x). (9) In contrast to other neural network-based PDE solvers that rely on specialized architectural components, such as graph layers in GNNs [33], integral kernel layers in Neural Operators (NOs) [21], or transformer layers in Universal Physics Transformers (UPTs) [34], the DeepONet architecture employs a more straightforward design. Its trunk and branch networks can be implemented using standard fully connected neural networks (FNN), making the model structurally simpler and easier to manipulate. This simplicity facilitates rapid prototyping and allows for seamless adaptation to interval-valued data. The DeepONet architecture illustration is given in Figure 2a. In this study, we assume that only the input function u is the interval-valued input, simply because in a real-world setting, the space-time location of the PDE is usually known. Therefore, we only replace the branch net with the naive 5𝑢 (𝑥 !)
+
+> 𝑢 (𝑥 ")
+> ⋮
+> 𝑢 (𝑥 #)
+> 𝒚
+> 𝜷 (𝒖 )
+> 𝝉 (𝒚 )
+> 𝒢 (𝒖 )(𝒚 )
+> Branch Net
+> Trunk Net
+> FNN
+> FNN (a)
+
+𝒖 !(𝒙 )
+
+𝒖 "(𝒙 )
+
+𝒚 𝝉 (𝒚 )
+
+𝜷 !(𝒖 )
+
+𝜷 "(𝒖 )
+
+Branch Net 
+
+Trunk Net 
+
+𝒢 !(𝒖 )(𝒚 )
+
+𝒢 "(𝒖 )(𝒚 )FNN  
+
+> Naïve
+> DIP (b)
+> Figure 2: Architecture illustration for (a) Standard DeepONet architecture. (b) Modified DeepONet architecture with interval-valued branch net. The standard architecture use standard feedforward neural network (FNN) on both branches, meanwhile the modified network replance FNN with the Naive interval architecture.
+
+DIP. The illustration of the modified architecture is given in Figure 2b. The latent representation of the branch net is now 2 q-dimensonal, given by β† = [β1,L, β 1,U , . . . , β q,L, β q,U ]. Since we now have τ ∈ Rq and β ∈ R2q, we combine the two latent representations by using two multiplications: 
+
+zL =
+
+> q
+
+X
+
+> i=1
+
+βi,L(u) · τi(x),
+
+zU =
+
+> q
+
+X
+
+> i=1
+
+βi,U (u) · τi(x).
+
+(10) The results from the two multiplications are then concatenated, z† = [z1,L, z1,U , . . . , zq,L, zq,U ], and passed through a dense layer to produce output GL(u)( x) and GU (u)( x). 
+
+3.2. Bound propagation method 
+
+Rooted in the fields of neural network verification and certified adversarial defense, bound propagation methods aim to train deep neural networks that are provably robust to bounded input perturbations [13]. Prominent techniques in this category include interval bound propagation (IBP) [13], DeepPoly [36], and CROWN along with its various extensions [14, 37, 38]. Although these methods di ff er in their underlying formulations, they share a common objec-tive: to propagate interval-valued inputs through the network in order to obtain certified bounds on the output, thereby enhancing model robustness. Inspired by this line of research, we adapt bound propagation techniques to address interval uncertainty in physical models, employing neural networks as surrogate models. For our experiments, we use the Auto_LiRPA Python pack-age [39], which provides a flexible interface for applying bound propagation to standard neural network architectures. Among the available methods, we focus on the standard implementations of IBP and CROWN. IBP is selected for its simplicity and memory e ffi ciency, making it suitable for large-scale problems, while CROWN is chosen for its abil-ity to produce tighter output bounds [37]. However, we observed that the Auto_LiRPA implementation of CROWN requires substantially more memory than IBP. 
+
+3.2.1. IBP 
+
+Stemming from neural network verification, interval bound propagation (IBP) [13] provide a simple bounding technique that propagates the perturbation in the input space to produce bounded outputs. Consider a standard feed-forward neural network defined as a composition of layer-wise transformations: ˆf (x) = zM ◦ zM−1 ◦ · · · ◦ z1(x), (11) 6where each layer zl, l = 1, . . . , M is given by: 
+
+zl = σ(ˆ zl), with ˆzl = Wlzl−1 + bl, (12) with Wl ∈ Rdl×dl−1 denoting the weight matrix, bl ∈ Rdl the bias vector, and σ(·) an element-wise activation function. For clarity and without loss of generality, we assume the ReLU activation, σ(z) = max(0 , z). In this paper, we use the notation ˆ zl to represent the pre-activation values of the l-th layer and zl to represent the post-activation values. In IBP, we are interested in verifying that a NN satisfies specifications that for all inputs in some set X(x0) around 
+
+x0, the network output satisfies a linear relationship 
+
+c⊺zl + d ≤ 0 ∀z0 ∈ X (x0), (13) where c and d are a vector and a scalar that may depend on the nominal input x0 and label ytrue . Specifically, in IBP we focus on the robustness to adversarial perturbation within ℓ∞ norm-bounded ball around input x0. We can verify the specification by searching counter-example that violates the specification constraint: max  
+
+> z0∈X (x0)
+
+c⊺zl + d
+
+s.t. zl = σ(Wlzl−1 + bl), l = 1, . . . , L.
+
+(14) If the optimal value of the optimisation problem is less than 0, then the specification is satisfied. The goal of IBP is to find the upper bound on the optimal value on problem 14. The simplest approach is to bound the activation of each layer zl with an axis-aligned bounding box. Given ei is the standard ith basis vector and ϵ is the perturbation radius, for ℓ∞ perturbation of size ϵ, we have for each coordinate zl,i of zl:
+
+zLl,i (ϵ) = min    
+
+> zLl−1(ϵ)≤zl−1≤zUl−1(ϵ)
+
+e⊺ 
+
+> i
+
+σ(Wlzl−1 + bl),
+
+zUl,i (ϵ) = max    
+
+> zLl−1(ϵ)≤zl−1≤zUl−1(ϵ)
+
+e⊺ 
+
+> i
+
+σ(Wlzl−1 + bl), (15) where subscript L and U denotes the lower and upper bound of z. In the input layer the pertubation is defined as 
+
+zL0 = x0 − ϵ1 and zU0 = x0 + ϵ1. The computation in a ffi ne layers, such as fully-connected layers and convolutions can be done e ff ectively with: 
+
+μl−1 = zUl−1 + zLl−1
+
+2
+
+rl−1 = zUl−1 − zLl−1
+
+2
+
+μl =Wlμl−1 + bl
+
+rl =|Wl|rl−1
+
+zLl =σ(μl − rl)
+
+zUl =σ(μl + rl),
+
+(16) where | · | is the element-wise absolute value operation, and propagating bounds through any element-wise monotonic function such as ReLU, sigmoid, and tanh is trivial. In contrast to the original paper [13], the problem that are discussed in this paper are regression. Therefore, we define our loss function given in section 3.2.3. 
+
+3.2.2. CROWN 
+
+Neural networks are inherently nonlinear due to the presence of activation functions, such as the Rectified Linear Unit (ReLU), applied at each layer. This nonlinearity presents a major challenge in computing certified output bounds for neural networks under input perturbations. To address this, the CROWN method introduces a linear relaxation framework that propagates bounds through the network in a layer-wise fashion [14], enabling tractable and certified bound estimation for adversarial robustness and uncertainty quantification. Let us recall the same neural network notation in equations 11 and 12. To certify the output under input perturba-tions x ∈ X , where X = {x ∈ Rd0 | x0,L ≤ x ≤ x0,U }, CROWN propagates linear upper and lower bounds through the 7network. At each layer, given a lower and upper pre-activation bound ˆ zl,L ≤ ˆzl ≤ ˆzl,U , the ReLU activation is relaxed using two linear constraints: a linear upper bound 
+
+zl ≤ ˆzl,U
+
+ˆzl,U − ˆzl,L
+
+ ˆzl − ˆzl,L
+
+ , (17) and a linear lower bound 
+
+zl ≥ αl ˆzl, (0 ≤ αl ≤ 1) , (18) where αl define the slope of the linear lower bound on the ReLU function over the interval [ˆ zl,L, ˆzl,U ]. These linear bounds allow one to propagate the convex outer approximations of the activation functions through the entire network. Given the piecewise linearity, the output of the network can now be bounded by solving a pair of linear programs (LPs) corresponding to the lower and upper bounds: 
+
+f L(x) ≤ ˆf (x) ≤ f U (x), ∀x ∈ X , (19) where fL(·) and fU (·) are a ffi ne functions of the input x, recursively defined by the linear relaxation parameters of the activations at each layer. Moreover, the relaxation can also be applied to other activation functions, making CROWN adaptable to many neural network architectures. Adapting the CROWN algorithm for interval bound propagation within the DeepONet architecture is relatively straightforward, as it does not require modifications to the original network design. Leveraging the Auto_LiRPA li-brary [39], bound propagation in DeepONet can be implemented directly by using the standard DeepONet architecture (as illustrated in Figure 2a) in combination with the bound propagation wrapper provided by the library. Suppose we are given a dataset consisting of n pairs of interval-valued input-output functions arising from a PDE system:  u1,L, u1,U
+
+ , . . . , un,L, un,U
+
+ , nh g1,L, g1,U
+
+i , . . . , hgn,L, gn,U
+
+io ,
+
+where ui,L and ui,U denote the lower and upper bounds of the i-th input function, and likewise for the output functions. To interface with Auto_LiRPA , each interval-valued input is transformed into its center and perturbation form: 
+
+uc = uU + uL
+
+2 ,
+
+up = uU − uL
+
+2 ,
+
+(20) where uc represents the nominal input (center) and up the element-wise perturbation radius. 
+
+3.2.3. Bound propagation DeepONet implementation 
+
+The standard DeepONet model is extended to handle interval-valued data through a bound propagation framework. During training, the wrapped model operates within a conventional optimisation loop, receiving as input the pair of branch and trunk encodings, denoted by [ uc, up]. The model is trained to predict interval bounds [ ˆ gL, ˆgU ] that approximate the ground-truth output intervals [ gL, gU ]. A natural baseline for this setting is the bound-based loss ,defined as the sum of mean squared errors (MSE) between the predicted and true lower and upper bounds, together with a non-crossing regularisation term: 
+
+Lbound = MSE( gL, ˆgL) + MSE( gU , ˆgU ) + λ max(0 , ˆgL − ˆgU )2 , (21) where λ is a regularisation coe ffi cient that enforces the non-crossing constraint between the predicted lower and upper bounds. This formulation explicitly penalises errors in both interval endpoints and serves as a direct extension of classical regression objectives to interval-valued targets. However, in certain scenarios, this bound-based approach can be overly restrictive, particularly when the true interval labels are noisy or when the model has limited expressive capacity. Explicitly fitting both upper and lower bounds may cause the model to overfit uncertain boundaries instead of capturing the underlying functional relation-ship. To address this limitation, we introduce an alternative objective, referred to as the midpoint-based loss . This 8formulation focuses on the midpoint of the interval rather than its individual bounds, allowing the model to learn the central trend of the data while still maintaining the non-crossing constraint: 
+
+gM = 12 (gL + gU ), ˆgM = 12 ( ˆ gL + ˆgU ), (22) 
+
+Lmid = MSE( gM , ˆgM ) + λ max(0 , ˆgU − ˆgL)2 . (23) The midpoint-based formulation relaxes the constraints imposed by direct bound matching, which can improve training stability and reduce sensitivity to interval width or asymmetry. This flexibility is advantageous in practical engineering problems where the uncertainty bounds are estimated or partially known rather than measured precisely. In this study, both loss functions in Eqs. (21) and (23) are systematically compared to assess their respective trade-off s between conservativeness, stability, and accuracy. The bound-based loss emphasises tight interval fitting, while the midpoint-based loss emphasises capturing the central tendency of the target distribution. Furthermore, for applications where conservative predictions are desired, such as in aerospace design where un-derpredicting aerodynamic loads or thermal stresses can compromise safety margins and result in catastrophic system damage, an asymmetric loss function can be employed to replace MSE in Eq. 21. One suitable choice is the linear-exponential (Linex) loss [40, 41], defined as Linex( y, ˆy) = exp( a(y − ˆy)) − a(y − ˆy) − 1, (24) where a is an asymmetry parameter. Larger values of a increase the penalty for underestimation relative to overes-timation, thereby promoting conservative predictions. Replacing the MSE term in either Eq. (21) or Eq. (23) with the Linex loss allows the model to learn tighter yet safety-oriented intervals. This loss formulation is applicable not only to the bound propagation method but also to naive direct interval propagation (DIP) schemes and interval neural network architectures. 
+
+3.3. Interval neural-network method 3.3.1. INN standard implementation 
+
+In contrast to the naive approach introduced in section 3.1, the interval neural network (INN) term here refers to a neural network model which network weights and biases are interval-valued [42, 15, 16, 17, 43]. Therefore, the model is able to handle interval-valued input and produce interval-valued output. A forward propagation in the l-th layer in the INN is expressed as: [zL, zU ]l = σ ([ WL, WU ]l ⊙ [zL, zU ]l−1 ⊕ [bL, bU ]l) , (25) where ⊙, ⊕, and ⊖ are interval multiplication, addition and subtraction, defined as: [aL, aU ] ⊕ [aL, aU ] =[aL + aL, aU + aU ][aL, aU ] ⊖ [aL, aU ] =[aL − aU , aU − aL][aL, aU ] ⊙ [aL, aU ] =[min( aL · aL, aL · aU , aU · aL, aU · aU ),
+
+max( aL · aL, aL · aU , aU · aL, aU · aU )] .
+
+(26) By using some reformulation tricks, the smoothness of equation 25 can be guaranteed. By analysing the inter-val multiplication under various conditions (including negative value) of zL, zU , WL, and WU , the multiplication in equation 25, denoted as [ cL, cU ] : = [WL, WU ] ⊙ [zL, zU ] can be rewritten as: 
+
+cL = min {WU , 0} min {zU , 0} + max {WU , 0} max {zU , 0}
+
++ min {max {WU , 0} min {zL, 0} − min {WL, 0} max {zU , 0}, 0}
+
++ min {WL, 0} max {zU , 0},
+
+cU = min {WU , 0} max {zL, 0} + max {WL, 0} min {zU , 0}
+
++ max {min {WL, 0} min {zL, 0} − max {WU , 0} max {zU , 0}, 0}
+
++ max {WU , 0} max {zU , 0}.
+
+(27) 9Although the operations in equation 27 are not strictly di ff erentiable at zeros, it can be observed that the min and max operations are continuous. Thus, the smoothness of the forward propagation ensures that the parameter updates via backpropagation through automatic di ff erentiation as a standard neural network is attainable [15]. In case of using non-negative activation function such as the ReLU activation, the forward propagation in equation 25 is simplified as: 
+
+zl,L = σl
+
+
+
+min {Wl,L, 0}al−1,U + max {Wl,L, 0}al−1,L + bl,L
+
+
+
+zl,U = σl
+
+
+
+max {Wl,U , 0}al−1,U + min {Wl,U , 0}al−1,L + bl,U
+
+ (28) To integrate an Interval Neural Network (INN) into the DeepONet architecture, we adopt a strategy analogous to the one used for naive Direct Interval Propagation (naive DIP), as described in Section 3.1. Assuming that only the branch input is interval-valued, we modify the standard DeepONet (illustrated in Figure 2a) by replacing the fully connected neural network (FNN) in the branch net with an INN. This substitution enables the network to handle interval-valued inputs in a mathematically principled manner. 
+
+3.3.2. INN DeepONet implementation 
+
+In contrast to the DeepONet with naive DIP, we introduce an interval multiplication layer to combine the outputs of the branch and trunk nets. This layer performs element-wise interval multiplication, as defined in Equation 26, and is designed to propagate interval uncertainty through the network. While we assume interval inputs only in the branch net, this formulation also opens the possibility for the trunk net to be interval-valued, o ff ering greater modelling flexibility. The output of the interval multiplication layer is subsequently passed through an interval dense layer , which performs standard interval forward propagation (as defined in Equation 25) using a linear activation function. The model is trained using a loss function defined as the sum of mean squared errors (MSE) between the predicted and ground-truth lower and upper output bounds, as given in Equation 21. This loss encourages the network to produce interval predictions that tightly enclose the true target function. The overall architecture of DeepONet with INN is depicted in Figure 3. 𝒖 !(𝒙 )
+
+𝒖 "(𝒙 )
+
+𝒚 𝝉 (𝒚 )
+
+𝜷 !(𝒖 )
+
+𝜷 "(𝒖 )
+
+Branch Net 
+
+Trunk Net 
+
+𝒢 !(𝒖 )(𝒚 )
+
+𝒢 "(𝒖 )(𝒚 )FNN 
+
+> INN
+> Int.
+> Dens e
+> Int.
+> Mult.
+> Figure 3: Interval neural network (INN) with DeepONet architecture.
+
+3.4. Connection to interval estimation methods 
+
+Interval prediction /estimation methods aim to quantify predictive uncertainty by providing interval-valued outputs that capture a range of plausible outcomes. Following [1, 2], we distinguish between uncertainty prediction and un-certainty propagation. Common interval prediction approaches include quantile regression [44, 45, 46] and conformal prediction [47, 48]. These methods typically estimate prediction intervals based on statistical properties of the data, 10 rather than explicitly propagating input uncertainty through a deterministic model. Consequently, they primarily focus on achieving desirable statistical properties, such as coverage probability and interval e ffi ciency, instead of modelling the propagation of interval-valued inputs. This represents a fundamental di ff erence in objective compared to the in-terval propagation methods considered in this paper. Quantile regression, for example, aims to achieve probabilistic coverage of the target variable by directly estimating specified quantiles of the conditional output distribution. To this end, it is trained using the quantile (pinball) loss function: 
+
+Lquantile =
+
+> n
+
+X
+
+> i=1
+
+τ · max(0 , yi − ˆyi) + (1 − τ) · max(0 , ˆyi − yi) , (29) where τ ∈ (0 , 1) denotes the target quantile level (e.g., τ = 0.05 corresponds to the 5th percentile). Conformal prediction is often applied as a model-agnostic post-processing procedure that calibrates prediction intervals to achieve a user-specified coverage probability under mild distributional assumptions. Unlike quantile regression, conformal methods do not directly model the conditional distribution, but instead adjust interval widths using calibration data to provide finite-sample coverage guarantees. In contrast, interval propagation methods focus on the deterministic transformation of input intervals through a system or model to obtain output intervals that reflect propagated uncertainty. The associated loss functions, such as those defined in Equations 21, are formulated to minimise the discrepancy between predicted and reference interval bound rather than achieving a prescribed statistical coverage. In certain safety-critical applications, conservative pre-dictions may be preferred. For example, in aerospace design, underpredicting aerodynamic loads or thermal stresses can compromise safety margins and lead to severe system failure. In such cases, asymmetric loss functions, such as the Linex loss defined in Equation 24, can be employed to penalise underestimation more strongly than overestimation, thereby encouraging conservative interval predictions. Despite their conceptual di ff erences, interval estimation and interval propagation methods can be complementary. Interval propagation may provide deterministic bounds that can subsequently be refined using statistical calibration techniques to improve coverage and e ffi ciency. Conversely, interval estimation methods can o ff er insights into the statistical characteristics of the data that may inform the design of interval propagation models. Although both ap-proaches produce interval-valued predictions, they address distinct objectives and rely on di ff erent methodological frameworks. The integration of interval estimation and interval propagation techniques is reserved for future work. Nevertheless, evaluating coverage metrics remains informative when assessing interval propagation methods, par-ticularly when the reference interval labels are noisy or indirectly estimated. Therefore, in this paper we also provide the interval coverage metrics such as predicted interval normalized average width (PINAW), predicted interval cover-age probability (PICP), and the coverage width-based criterion (CWC) defined as: PINAW = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+(ˆ yU − ˆyL)(yU − yL) , (30) PICP = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+1 (ˆ yL ≤ yi ≤ ˆyU ) , (31) CWC = PINAW 1 + eγ max(0 ,(1 −δ)−PICP)  , (32) where 1(·) is a count function that returns one if event A occurs and zero otherwise, δ in CWC represent the desired error-rate, and γ is a user-defined parameters that balances the trade-o ff between two objectives. In our case we use 
+
+δ = 0 since we would like to the predicted interval covers all the actual interval, and γ = 5 to produce reasonable value between the objectives. However, since we want to evaluate the prediction with respect to the actual interval bound, we modify the PICP to use the continuous overlap-based coverage: PICP = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+max(0 , min(ˆ yU , yU ) − max(ˆ yL, yL)) (yU − yL) . (33) 11 4. Experiments 
+
+To evaluate and compare the performance of the three proposed methods, we design two types of experimental setups: one using ideal interval-valued data and the other using pointwise (precise) data. The first experiment assumes access to ground-truth interval-valued inputs and outputs, which represent the ideal scenario for interval learning. However, such datasets are rarely available in practice, as most engineering computational simulations typically pro-duce pointwise data. That is, for a given input configuration, the simulation or experiment yields a single deterministic output. To address this limitation, our second experiment utilises an augmented pointwise dataset. Specifically, we con-struct synthetic interval-valued data by augmenting the original pointwise samples with controlled perturbations. This allows us to assess the robustness and generalisability of the models under uncertainty, even in the absence of true interval labels. The details of the augmentation strategy used to generate the interval dataset from pointwise data are provided in a dedicated subsection later in this paper. In this numerical study, we compare seven methods, including the optimisation-based interval propagation baseline (Opt-Prop). The evaluated approaches comprise the naive direct interval propagation and interval neural networks (INN), described in Sections 3.1 and 3.3, respectively. We further include bound-propagation techniques, namely IBP and CROWN, as introduced in Sections 3.2.1 and 3.2.2. In addition, midpoint variants of IBP and CROWN are considered using the loss formulation defined in equation 23. Direct comparison with the Opt-Prop baseline is not always feasible, particularly for PDE-based test cases, due to its prohibitive computational cost. Nevertheless, its computational complexity can be approximately inferred by extrapolating the scaling behaviour observed in simpler benchmark problems. Training hyperparameters, including the regularisation coe ffi cient λ, learning rate, and number of training epochs, are tuned separately for each model and test case to achieve a balance between predictive performance and training effi ciency. To ensure a consistent and fair comparison of computational cost, the neural network architecture is fixed to 16 nodes with 3 hidden layers in the one-dimensional regression problem, 64 nodes with 4 hidden layers for both trunk- and branch-net in the one-dimensional PDE problem, 128 nodes with 2 hidden layers for trunk-net and 128 nodes with 1 hidden layer for branch-net in the two-dimensional PDE problem. Training time is reported by measuring the elapsed time up to a predefined epoch count. Specifically, the timer is evaluated at 2000 epochs for the one-dimensional regression problem, 1000 epochs for the one-dimensional PDE problem, and 150 epochs for the two-dimensional PDE problem. 
+
+4.1. Experiments with ideal interval data 
+
+In this experimental setting, we assume full access to ground-truth interval-valued inputs and outputs, making it an ideal case for evaluating the methods under controlled conditions. As a preliminary validation, we first apply all three methods to a simple one-dimensional regression task, serving as a basic verification to ensure that each model is capable of propagating interval uncertainty correctly in a regression problem. Following this, we evaluate the methods on a basic one-dimensional PDE problem using the DeepONet framework. Finally, we extend the assessment to a more complex two-dimensional PDE problem to examine the scalability and e ff ectiveness of the methods in higher-dimensional settings. 
+
+4.1.1. 1-dimensional regression 
+
+Consider a simple one-dimensional regression problem: 
+
+y = sin(2 x)e−x + 1 + ε, x ∈ [0 , π ], (34) where ε is a normally distributed aleatoric noise with mean μ = 0 and standard deviation σ = 0.025. We create interval inputs with varying interval widths across the sample space. Since the actual function is cheap to evaluate, we propagate the inputs by evaluating on the actual function. Obtaining an interval dataset, illustrated in Figure 4. We evaluate each method across multiple training set sizes to examine its robustness under varying data avail-ability. Since the problem is relatively simple, the neural network architecture is not expected to play a major role. Nevertheless, we include a brief hyperparameter study in Table A.16 for the two best-performing methods for com-pleteness. For each configuration, the experiments are repeated ten times with di ff erent random seeds to account for 12 0.0 0.2 0.4 0.6 0.8 1.0
+
+x   
+
+> 0.60.81.01.21.41.6
+> f(x)
+> f(x) Interval test data Interval train data Figure 4: Ideal interval dataset for a one-dimensional regression problem. Single rectangle represent a single pair of interval-valued xand y.
+
+stochastic variations in model initialisation and optimisation. The direct interval method is then compared to the base-line, denoted as Opt-Prop, which applies the optimisation-based interval propagation method using a surrogate model for comparison. The Opt-Prop method constructs a standard surrogate model on pointwise data, and then for each xi
+
+interval we solve the optimisation problem defined in equation 2. In this setting, we use COBYLA optimiser provided in scipy library. In the ideal interval data setting, the surrogate model in Opt-Prop method is trained on the center points of the interval data. In interval regression tasks, prediction errors are commonly decomposed into lower- and upper-bound components to assess how well models capture the uncertainty range. As shown in Table 1, with su ffi cient training data (25 sam-ples), all methods except mid-IBP outperform the Opt-Prop baseline in terms of RMSE. Coverage metrics results in Table 2 indicate that Opt-Prop consistently under-covers the true bounds, leading to low PICP values. This behaviour is expected, as Opt-Prop relies on a surrogate that predicts only the mean response and neglects aleatoric noise. In contrast, direct interval propagation methods more e ff ectively capture the true bounds by directly modelling interval-valued data. To address the fairness of this comparison, we further consider a more realistic setting in Section 4.2.2, where only pointwise training data are available. Computational costs, reported as inference times in Table 3, show that even the slowest direct interval propagation method (INN) is approximately three orders of magnitude faster than Opt-Prop. This substantial speedup underscores the scalability advantages of direct interval propagation, particularly for large-scale or time-sensitive applications. 
+
+> Table 1: Ideal 1-dimensional regression RMSE comparison across methods and training set sizes.
+
+ntrain Metric Naive IBP CROWN INN Mid-CROWN Mid-IBP Opt-Prop 
+
+10 RMSE L 0.076 ± 0.047 0.079 ± 0.031 0.107 ± 0.067 0.085 ± 0.051 0.049 ± 0.017 0.323 ± 0.086 0.053 ± 0.010 RMSE U 0.136 ± 0.102 0.087 ± 0.057 0.109 ± 0.057 0.125 ± 0.177 0.059 ± 0.022 0.332 ± 0.113 0.063 ± 0.027 25 RMSE L 0.025 ± 0.008 0.035 ± 0.006 0.066 ± 0.030 0.035 ± 0.030 0.040 ± 0.002 0.291 ± 0.084 0.054 ± 0.006 RMSE U 0.038 ± 0.027 0.033 ± 0.006 0.059 ± 0.013 0.037 ± 0.035 0.041 ± 0.002 0.295 ± 0.083 0.045 ± 0.004 50 RMSE L 0.023 ± 0.005 0.029 ± 0.004 0.033 ± 0.005 0.019 ± 0.004 0.040 ± 0.004 0.297 ± 0.044 0.043 ± 0.007 RMSE U 0.026 ± 0.006 0.027 ± 0.002 0.049 ± 0.009 0.019 ± 0.003 0.040 ± 0.004 0.299 ± 0.045 0.053 ± 0.006 100 RMSE L 0.020 ± 0.004 0.030 ± 0.004 0.034 ± 0.005 0.018 ± 0.003 0.041 ± 0.005 0.190 ± 0.039 0.055 ± 0.006 RMSE U 0.021 ± 0.005 0.031 ± 0.003 0.041 ± 0.004 0.019 ± 0.005 0.040 ± 0.004 0.191 ± 0.036 0.046 ± 0.005 
+
+13 Table 2: Ideal 1-dimensional regression performance comparison across methods and training set sizes on three di ff erent metrics: predicted interval normalized average width (PINAW), predictied interval coverage probability (PICP), and the coverage width-based criterion (CWC). 
+
+ntrain Metric Naive IBP CROWN INN Mid-CROWN Mid-IBP Opt-Prop 
+
+10 PINAW 0.999 ± 0.241 1.069 ± 0.198 1.064 ± 0.196 1.186 ± 0.756 0.620 ± 0.057 3.316 ± 0.215 0.477 ± 0.013 PICP 0.742 ± 0.117 0.758 ± 0.060 0.657 ± 0.091 0.758 ± 0.144 0.558 ± 0.040 0.982 ± 0.012 0.431 ± 0.057 CWC 5.287 ± 3.442 4.774 ± 1.349 7.571 ± 3.560 5.241 ± 2.532 6.395 ± 1.366 6.942 ± 0.395 9.066 ± 3.031 25 PINAW 1.060 ± 0.082 1.000 ± 0.043 0.932 ± 0.142 1.074 ± 0.110 0.567 ± 0.021 2.843 ± 0.949 0.475 ± 0.011 PICP 0.889 ± 0.045 0.842 ± 0.023 0.706 ± 0.032 0.886 ± 0.084 0.553 ± 0.017 0.991 ± 0.006 0.465 ± 0.008 CWC 2.981 ± 0.689 3.214 ± 0.201 4.946 ± 0.468 3.280 ± 1.768 5.862 ± 0.254 5.792 ± 1.848 7.385 ± 0.158 50 PINAW 1.045 ± 0.034 0.943 ± 0.044 0.819 ± 0.070 1.046 ± 0.031 0.569 ± 0.010 3.669 ± 0.307 0.468 ± 0.007 PICP 0.909 ± 0.029 0.834 ± 0.017 0.707 ± 0.025 0.932 ± 0.026 0.558 ± 0.007 0.997 ± 0.002 0.463 ± 0.007 CWC 2.704 ± 0.208 3.109 ± 0.054 4.362 ± 0.272 2.523 ± 0.164 5.754 ± 0.095 7.386 ± 0.629 7.320 ± 0.173 100 PINAW 1.006 ± 0.102 0.930 ± 0.021 0.729 ± 0.048 1.036 ± 0.050 0.562 ± 0.014 2.872 ± 0.433 0.454 ± 0.008 PICP 0.905 ± 0.055 0.814 ± 0.015 0.670 ± 0.031 0.928 ± 0.036 0.554 ± 0.012 0.998 ± 0.002 0.450 ± 0.011 CWC 2.639 ± 0.228 3.291 ± 0.153 4.529 ± 0.316 2.532 ± 0.173 5.783 ± 0.183 5.771 ± 0.845 7.559 ± 0.302                                                                                                                                                                                          
+
+> Table 3: Ideal 1-dimensional regression time comparison in seconds (s). The IBP and CROWN-based methods are implemented using PyTorch
+> and Auto_LiRPA library, meanwhile the Naive, INN, and Opt-Prop methods are implemented using TensorFlow .Therefore the training and inference time between the two groups are not directly comparable. All experiments were conducted on MacBook Pro with Apple M1 Pro chip.
+> ntrain Process Naive IBP CROWN INN Mid-CROWN Mid-IBP Opt-Prop
+> 10 Training 16.504 ±0.594 3.433 ±0.105 24.448 ±0.897 67.159 ±1.609 23.467 ±0.685 3.190 ±0.122 12.353 ±0.623 Inference 0.078 ±0.025 0.001 ±0.001 0.023 ±0.001 0.213 ±0.146 0.023 ±0.001 0.001 ±0.001 217.283 ±4.548 25 Training 16.134 ±1.021 3.394 ±0.127 25.425 ±0.661 67.958 ±0.213 26.134 ±1.349 3.316 ±0.129 12.832 ±0.947 Inference 0.075 ±0.028 0.001 ±0.001 0.024 ±0.001 0.202 ±0.156 0.023 ±0.002 0.001 ±0.001 218.125 ±3.775 50 Training 30.813 ±2.057 6.222 ±0.222 49.373 ±2.017 126.532 ±7.255 51.897 ±1.070 6.216 ±0.032 22.484 ±1.201 Inference 0.088 ±0.066 0.001 ±0.001 0.022 ±0.001 0.283 ±0.278 0.023 ±0.001 0.001 ±0.001 213.077 ±7.404 100 Training 57.159 ±2.719 11.849 ±0.374 100.206 ±2.447 244.754 ±5.408 107.701 ±0.465 11.764 ±0.101 42.209 ±2.166 Inference 0.078 ±0.039 0.001 ±0.001 0.022 ±0.002 0.190 ±0.149 0.022 ±0.001 0.001 ±0.001 217.300 ±8.076
+
+4.1.2. 1-dimensional PDE 
+
+We consider the second-order steady-state stochastic Poisson equation in one dimension as our first test case. The stochastic di ff erential equation (SDE) is formulated as: 
+
+d2g(x)
+
+dx 2 = 20 u(x), x ∈ [0 , 1] ,
+
+g(x = 0) = g(x = 1) = 0,
+
+u(x) ∼ GP (m(x), k(x, x′)) ,
+
+(35) where u(x) is the spatially random forcing function, modelled as a Gaussian process ( GP ) with mean m(x) set to be 0, and the radial basis function kernel k(x, x′) = exp −(x − x′)2/(2 l2) where the kernel length scale of the GP is set to be l = 0.1. The HF dataset is generated using a grid size ∆x = 0.01, while the LF dataset grid size is ∆x = 0.1. In this problem, we consider 2000 input-output pairs, where the input u(x) and the output g(x) are discretised over 100 uniformly spaced points in the spatial domain x. The dataset is partitioned into 900 test samples, 100 validation samples, and 1000 samples reserved for training. The training set is further randomised to generate subsets with varying sizes of ntrain .To construct input intervals u(x), we first sample a random interval length li ∼ U (lmin , lmax ) for each instance i.Each ui(x) is then assigned a fixed interval length li across its 100 discretisation points, ensuring uniformity within each input but variability across instances. The corresponding interval-valued outputs g(x) are obtained by propagating these inputs through the true function. Propagating intervals through the optimisation in equation 2 is computationally expensive for PDE problems, as both gL(x) and gU (x) must be solved at each discretisation point for all samples, resulting in ngrid × nsample × 214 optimisation problems. For simplicity, we consider a test case where the lower and upper input bounds uL(x) and 
+
+uU (x) consistently yield gL(x) and gU (x), respectively. This assumption, however, does not generally hold for PDEs with non-monotonic behaviour. An example of a single interval-valued input-output pair for the 1D PDE case is illustrated in Figure 5. 0.0 0.2 0.4 0.6 0.8 1.0 
+
+> x
+> −2
+> −1012
+> u(x)
+> −0.4
+> −0.2
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> 1.2
+> g(x)
+> u(x)g(x)
+> 1D Stochastic PDE - Input
+> Figure 5: Illustration of an ideal interval dataset for a one-dimensional PDE. The red curve denotes the input function with its interval uncertainty (dashed lines), while the blue curve denotes the corresponding PDE solution with its propagated interval uncertainty.
+
+To construct the DeepONet training dataset, each realisation of the stochastic forcing function u(x) is treated as a single functional input sample paired with its corresponding PDE solution g(x). The input function u(x) is discretised at m sensor locations {xi}mi=1, forming a vector representation u = [u(x1), . . . , u(xm)]. The output function g(x) is evaluated at p spatial coordinates {x j}pj=1, where each coordinate x j serves as a query location for the solution field. During training, the branch network receives the discretised forcing function u, while the trunk network receives the spatial coordinate x j. The DeepONet then predicts the solution value g(x j) through the inner product of the latent representations produced by the branch and trunk networks. The training data are constructed by pairing each functional input u with all spatial query points {x j}pj=1. Conse-quently, one functional realisation generates multiple training tuples ( u, x j, g(x j)). The full training dataset is obtained by aggregating these tuples across all sampled GP realisations. During training, mini-batches are formed by randomly sampling these tuples from the aggregated dataset. The network parameters are trained by minimising the mean squared error between the predicted and reference solution values over all sampled tuples. The typical DeepONet architecture for this type of problem consists of relatively shallow fully connected neural networks, usually with 2-4 hidden layers and 32-64 neurons per layer. To select an appropriate architecture, we conduct a brief hyperparameter study focusing on the two best-performing methods. The results are summarised in Table A.17. We eventually chose 4 hidden layers with 64 neurons for our backbone architecture to be applied to all methods. Analogous to standard regression, the prediction error is decomposed into contributions from the lower and upper bounds. In many engineering applications, conservative prediction intervals are preferred over overly optimistic estimates, as underestimating bounds may lead to unsafe designs or system violations. To reflect this preference, we employ the Linex loss (Eq. 24) with a = 3, which penalises excessively narrow predictions more strongly. We emphasise that the PDE test case itself does not require conservative interval estimation; rather, the asymmetric loss is introduced to emulate scenarios where conservative predictions are desirable and to evaluate the behaviour of the proposed methods under such assumptions. The baseline optimisation-based interval propagation method (Opt-Prop) is not considered in this PDE experiment due to the prohibitive computational cost associated with solving an optimisation problem at each discretisation point for every sample. Instead, this study focuses on comparing direct interval propagation approaches. The results presented in Table 4 and Table 5 show that the CROWN method achieves the lowest Linex error among all evaluated methods, whereas the INN approach exhibits slightly improved coverage performance, as reflected by the CWC metric. This observation suggests that, although INNs provide better interval coverage, they do not capture the shape of the true solution bounds as accurately as the CROWN method. 15 The relatively poor Linex error observed for the IBP method at training data sizes of 50 and 100 is likely at-tributable to overly narrow interval predictions compared to the ground-truth bounds, which is consistent with the PINAW values below unity reported in Table 5. In contrast, both the Mid-CROWN and Mid-IBP methods consistently generate overly conservative interval estimates, as indicated by their elevated PINAW values, which consequently re-sults in suboptimal Linex error performance. These results highlight the importance of evaluating both coverage-based and error-based metrics when assessing interval prediction methods. A method may achieve low prediction error while providing insu ffi cient coverage, or conversely, attain satisfactory coverage at the expense of accurately capturing the shape of the true bounds, thereby leading to higher error values. The computational costs of the methods reported in Table 6 are comparable, with the slowest method requiring approximately one second to evaluate the entire test set. The IBP and CROWN-based implementations are not directly comparable to the Naive and INN approaches, as the former are implemented in PyTorch whereas the latter are imple-mented in TensorFlow . Although the Opt-Prop method is not explicitly implemented, results from Table 3 indicate that it is approximately three orders of magnitude slower for a single evaluation. When extended to the PDE set-ting, where interval propagation must be performed across 100 discretisation points, the computational cost increases proportionally. Consequently, the proposed direct interval prediction methods are estimated to be approximately five orders of magnitude faster than the Opt-Prop baseline. 
+
+> Table 4: Ideal 1-dimensional PDE linear-exponential (Linex) error comparison across methods and training set sizes.
+
+ntrain Metric Naive IBP CROWN INN Mid-CROWN Mid-IBP 
+
+50 Linex L 0.370 ± 0.125 1529.564 ± 665.146 0.672 ± 0.690 8.059 ± 10.303 4.807 ± 4.204 27.859 ± 18.670 Linex U 0.348 ± 0.062 237.603 ± 101.801 9.624 ± 18.677 9.730 ± 7.674 4.863 ± 4.338 27.847 ± 18.382 100 Linex L 0.193 ± 0.054 1493.405 ± 345.786 0.264 ± 0.213 0.728 ± 1.420 2.834 ± 2.297 27.860 ± 18.211 Linex U 0.199 ± 0.060 247.058 ± 57.860 0.268 ± 0.222 0.842 ± 1.519 2.834 ± 2.298 27.842 ± 17.782 250 Linex L 0.077 ± 0.017 0.681 ± 1.673 0.034 ± 0.010 0.216 ± 0.295 1.127 ± 1.044 17.795 ± 11.973 Linex U 0.078 ± 0.017 0.657 ± 1.782 0.032 ± 0.007 0.444 ± 0.542 1.121 ± 1.044 17.796 ± 11.975 500 Linex L 0.042 ± 0.022 0.683 ± 1.806 0.012 ± 0.005 0.029 ± 0.050 0.749 ± 0.300 9.433 ± 7.054 Linex U 0.043 ± 0.022 0.648 ± 1.781 0.013 ± 0.006 0.032 ± 0.057 0.749 ± 0.300 9.403 ± 7.054 
+
+> Table 5: Ideal 1-dimensional PDE performance comparison across methods and training set sizes on three di ff erent metrics: predicted interval normalized average width (PINAW), predictied interval coverage probability (PICP), and the coverage width-based criterion (CWC).
+
+ntrain Metric Naive IBP CROWN INN Mid-CROWN Mid-IBP 
+
+50 PINAW 1.247 ± 1.004 0.801 ± 0.299 1.516 ± 0.810 5.947 ± 8.095 4.452 ± 3.606 44 .056 ± 6.963 PICP 0.583 ± 0.224 0.151 ± 0.203 0.568 ± 0.274 0.724 ± 0.260 0.908 ± 0.171 0.996 ± 0.042 CWC 13 .097 ± 18 .295 69 .769 ± 44 .149 25 .230 ± 29 .304 61 .983 ± 236 .542 11 .717 ± 10 .837 90 .025 ± 27 .421 100 PINAW 1.135 ± 0.502 0.782 ± 0.306 1.069 ± 0.123 1.155 ± 0.525 2.383 ± 1.224 55 .671 ± 7.481 PICP 0.730 ± 0.163 0.148 ± 0.201 0.674 ± 0.200 0.813 ± 0.156 0.912 ± 0.144 1.000 ± 0.007 CWC 7.081 ± 8.472 68 .333 ± 43 .949 10 .313 ± 12 .772 6.474 ± 19 .586 6.406 ± 4.013 111 .421 ± 14 .785 250 PINAW 1.071 ± 0.175 1.022 ± 0.052 1.091 ± 0.074 1.132 ± 0.323 2.447 ± 1.204 31 .895 ± 3.396 PICP 0.807 ± 0.113 0.517 ± 0.234 0.811 ± 0.151 0.851 ± 0.117 0.933 ± 0.117 1.000 ± 0.002 CWC 4.728 ± 4.836 23 .607 ± 28 .606 5.015 ± 4.800 4.246 ± 4.517 5.921 ± 2.650 63 .795 ± 6.771 500 PINAW 1.020 ± 0.070 2.065 ± 0.127 1.079 ± 0.038 1.021 ± 0.119 2.171 ± 0.930 12 .548 ± 1.274 PICP 0.885 ± 0.080 0.686 ± 0.246 0.902 ± 0.093 0.931 ± 0.064 0.965 ± 0.070 1.000 ± 0.002 CWC 3.035 ± 1.289 25 .836 ± 39 .067 3.074 ± 1.395 2.586 ± 1.316 4.704 ± 1.705 25 .104 ± 2.534 
+
+4.1.3. 2-dimensional PDE 
+
+To evaluate the proposed method on a more complex physical system, we consider a two-dimensional partial di ff erential equation (PDE) test case based on the Darcy flow. The Darcy equation describes fluid motion through porous media and is widely used in geotechnical and civil engineering. Following [49], we study this problem in a 2D 16 Table 6: Ideal 1-dimensional PDE time comparison in seconds (s). The IBP and CROWN methods are implemented using AutoLiRPA library in PyTorch framework. Naive and INN methods are impelented in TensorFlow framework due to the availability of existing codebases. The Opt-Prop method were not included in the time comparison due to its infeasibly high computational cost. All experiments were conducted on MacBook Pro with Apple M1 Pro chip.                                                                                                                                                            
+
+> ntrain Process Naive IBP CROWN INN Mid-CROWN Mid-IBP
+> 50 Training 127 .201 ±2.375 27 .907 ±0.573 236 .503 ±1.294 257 .835 ±5.166 235 .662 ±0.981 27 .865 ±0.446 Inference 0.972 ±0.125 0.051 ±0.002 0.502 ±0.006 0.458 ±0.030 0.506 ±0.010 0.052 ±0.001 100 Training 174 .037 ±8.729 28 .411 ±0.194 251 .899 ±1.708 442 .901 ±1.381 252 .166 ±2.666 28 .886 ±0.761 Inference 0.974 ±0.103 0.050 ±0.001 0.490 ±0.005 0.457 ±0.008 0.499 ±0.005 0.072 ±0.059 250 Training 276 .729 ±10 .871 47 .077 ±0.177 508 .158 ±2.961 755 .305 ±18 .820 517 .749 ±7.738 47 .476 ±0.804 Inference 1.059 ±0.144 0.053 ±0.002 0.527 ±0.068 0.438 ±0.010 0.499 ±0.011 0.052 ±0.001 500 Training 459 .397 ±8.322 84 .156 ±0.422 1001 .194 ±6.547 1406 .230 ±37 .269 1015 .253 ±10 .145 83 .775 ±1.742 Inference 1.092 ±0.097 0.052 ±0.001 0.494 ±0.008 0.475 ±0.038 0.497 ±0.006 0.051 ±0.001
+
+triangular domain with a notch. The governing equation is given by: 
+
+−∇ · (a(x, y)∇u(x, y)) = f (x, y), (x, y) ∈ [0 , 1] 2,
+
+u(x, y) ∂D ∼ GP  0, K (x, y), (x′, y′) , (36) where a(x, y) ∈ R denotes the permeability field, u(x, y) ∈ R the pressure field, and f (x, y) ∈ R the source term. Synthetic training and testing datasets are generated by numerically solving (36) under varying boundary condi-tions. The boundary values u(x, y) ∂D are sampled from a zero-mean Gaussian process with a radial basis function (RBF) kernel: 
+
+K (x, y), (x′, y′) = exp 
+
+− (x − x′)2
+
+2l2
+
+> x
+
+− (y − y′)2
+
+2l2
+
+> y
+
+ , (37) where the length-scale parameters are set to lx = ly = 0.2. The permeability and source fields are constant with 
+
+a(x, y) = 0.1 and f (x, y) = −1, respectively. To construct the interval dataset, we follow a similar procedure from section 4.1.2, where for each input instance 
+
+ui(x) in the input set u(x), a fixed interval length li is used across its discretisation points. The corresponding interval outputs gi(x) are obtained by propagating the interval-valued inputs through the true function. Although in this case, similar to section 4.1.2, we choose PDE with monotonic behaviour such that the lower and upper input bounds uL(x)and uU (x) consistently yield gL(x) and gU (x), for convenience. An example plot for a single instance is illustrated in Figure 6. Similar to the one-dimensional PDE case presented in Section 4.1.2, the PDE considered in this test case is steady-state, and therefore the data exhibit no temporal structure. Consequently, the training procedure is identical to that used for the one-dimensional PDE problem. The key di ff erence is that, for the two-dimensional setting, all values defined on the two-dimensional spatial discretisation are flattened before being used as model inputs and outputs. The DeepOnet architecture that is used in this experiment follows the setting used in [49] The experimental results in Table 7 indicate that, given su ffi cient training data, all methods achieve Linex errors of comparable magnitude. However, the coverage metrics reported in Table 8 reveal notable di ff erences in reliability. In particular, INN struggles to adequately cover the true bounds despite producing relatively wide intervals. In contrast, both Mid-CROWN and Mid-IBP achieve improved CWC performance, even though their Linex errors are slightly higher than that of INN at ntrain = 750. The midpoint-based methods produce larger PINAW values than standard IBP and CROWN because they are not explicitly constrained to learn the interval bounds. Instead, they relax the training objective to approximate only the interval midpoint, which leads to more conservative interval predictions. The inference time in Table 9 shows that this test case requires more prediction time, although it becomes more apparent that di ff erent framework results in di ff erent inference time. 
+
+4.2. Experiments with pointwise data 
+
+Access to ground-truth interval-valued inputs and outputs is typically unavailable in practical settings; most real-world datasets consist only of pointwise (precise) observations. Therefore, in this experimental setting, we evaluate 17 0.0 0.5 1.0 
+
+> X
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> Y
+
+Input_lower   
+
+> 0.0 0.5 1.0
+> X
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> Y
+
+Input_upper   
+
+> 0.0 0.5 1.0
+> X
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> Y
+
+Output_lower   
+
+> 0.0 0.5 1.0
+> X
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> Y
+
+Output_upper 
+
+> 1.5
+> 1.0
+> 0.5
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+
+Interval 2D Darcy Flow Figure 6: A single input-output pair of an ideal interval dataset for a one-dimensional PDE. Table 7: Ideal 2-dimensional PDE linear-exponential (Linex) error comparison across methods and training set sizes. 
+
+ntrain Metric Naive IBP CROWN INN Mid-CROWN Mid-IBP 
+
+150 Linex L 0.148 ± 0.948 0.070 ± 0.248 0.056 ± 0.121 1.447 ± 22 .186 0.127 ± 0.165 0.165 ± 0.213 Linex U 0.141 ± 1.184 0.068 ± 0.238 0.054 ± 0.128 1.387 ± 28 .283 0.126 ± 0.178 0.167 ± 0.217 250 Linex L 0.062 ± 0.630 0.059 ± 0.162 0.044 ± 0.105 0.924 ± 11 .532 0.114 ± 0.144 0.124 ± 0.158 Linex U 0.061 ± 0.687 0.058 ± 0.157 0.045 ± 0.104 0.786 ± 6.351 0.113 ± 0.150 0.121 ± 0.177 500 Linex L 0.027 ± 0.398 0.043 ± 0.102 0.034 ± 0.057 0.099 ± 0.489 0.088 ± 0.113 0.079 ± 0.098 Linex U 0.027 ± 0.288 0.042 ± 0.092 0.034 ± 0.057 0.095 ± 0.527 0.085 ± 0.110 0.080 ± 0.099 750 Linex L 0.017 ± 0.197 0.040 ± 0.079 0.031 ± 0.049 0.039 ± 0.320 0.071 ± 0.092 0.069 ± 0.085 Linex U 0.016 ± 0.135 0.040 ± 0.075 0.031 ± 0.050 0.039 ± 0.293 0.071 ± 0.091 0.069 ± 0.087 
+
+the robustness and generalisation capability of the models when trained without access to true interval labels, and later evaluated on the actual interval bounds. Consistent with the experiments presented in Section 4.1, we perform eval-uations on three representative problems: one-dimensional regression, one-dimensional PDE, and two-dimensional PDE. 
+
+4.2.1. Augmentation methods 
+
+The augmentation procedure aims to transform a pointwise dataset into an interval-valued dataset by leveraging local proximity in the input space x ∈ Rd. For each proximity-based group, interval bounds are constructed by computing the component-wise minimum and maximum values across both the input vectors x and their associated output targets y. This process e ff ectively approximates a local envelope of the input–output mapping. To improve the robustness and generalisation capability of the learned interval model, the grouping procedure is repeated using mul-tiple proximity thresholds. Consequently, the resulting training dataset contains interval samples with heterogeneous widths, representing varying levels of local variability and uncertainty present in the original pointwise data. To operationalise this strategy, we introduce a grid-based proximity grouping algorithm. The input domain is partitioned into a structured grid along each dimension, where the resolution of the partition is controlled by user-defined grid size parameters. Samples whose input coordinates fall within the same multi-dimensional grid cell are 18 Table 8: Ideal 2-dimensional PDE performance comparison across methods and training set sizes on three di ff erent metrics: predicted interval normalized average width (PINAW), predictied interval coverage probability (PICP), and the coverage width-based criterion (CWC). 
+
+ntrain Metric Naive IBP CROWN INN Mid-CROWN Mid-IBP 
+
+150 PINAW 1.123 ± 0.272 1.706 ± 0.086 1.652 ± 0.137 2.908 ± 3.238 2.126 ± 0.216 2.459 ± 0.121 PICP 0.518 ± 0.151 0.857 ± 0.130 0.842 ± 0.159 0.357 ± 0.310 0.949 ± 0.070 0.972 ± 0.033 CWC 17 .398 ± 14 .332 6.389 ± 5.329 7.212 ± 8.503 114 .530 ± 176 .641 5.073 ± 1.778 5.326 ± 0.591 250 PINAW 1.060 ± 0.172 1.679 ± 0.081 1.574 ± 0.120 1.833 ± 1.617 2.087 ± 0.196 2.221 ± 0.109 PICP 0.655 ± 0.133 0.873 ± 0.121 0.903 ± 0.109 0.413 ± 0.292 0.972 ± 0.037 0.970 ± 0.043 CWC 8.684 ± 7.436 5.772 ± 4.255 4.710 ± 3.159 63 .371 ± 102 .673 4.523 ± 0.576 4.874 ± 0.866 500 PINAW 1.016 ± 0.124 1.597 ± 0.076 1.569 ± 0.105 1.156 ± 0.643 1.961 ± 0.155 1.918 ± 0.088 PICP 0.735 ± 0.127 0.922 ± 0.080 0.946 ± 0.056 0.589 ± 0.283 0.980 ± 0.021 0.982 ± 0.020 CWC 5.824 ± 4.896 4.227 ± 1.806 3.707 ± 0.783 22 .953 ± 48 .993 4.134 ± 0.336 4.028 ± 0.298 750 PINAW 1.044 ± 0.108 1.555 ± 0.073 1.522 ± 0.100 1.105 ± 0.428 1.849 ± 0.151 1.847 ± 0.084 PICP 0.802 ± 0.095 0.926 ± 0.075 0.941 ± 0.063 0.716 ± 0.231 0.977 ± 0.029 0.974 ± 0.026 CWC 4.261 ± 2.492 4.031 ± 1.574 3.688 ± 0.956 11 .458 ± 30 .428 3.935 ± 0.380 3.965 ± 0.343                                                                                                                                                                  
+
+> Table 9: Ideal 2-dimensional PDE time comparison in seconds (s). The IBP and CROWN methods are implemented using AutoLiRPA library in PyTorch framework. Naive and INN methods are impelented in TensorFlow framework due to the availability of existing codebases. The Opt-Prop method were not included in the time comparison due to its infeasibly high computational cost. All experiments were conducted on NVidia P100 GPU.
+> ntrain Process Naive IBP CROWN INN Mid-CROWN Mid-IBP
+> 150 Training 427 .811 ±5.657 157 .825 ±1.704 955 .687 ±21 .946 194 .951 ±5.366 192 .697 ±3.074 159 .386 ±1.152 Inference 59 .407 ±2.461 3.972 ±0.033 4.966 ±0.167 62 .753 ±2.568 5.086 ±0.090 3.938 ±0.027 250 Training 654 .959 ±8.532 226 .241 ±4.122 275 .351 ±8.590 328 .865 ±3.390 277 .282 ±5.960 234 .361 ±5.051 Inference 49 .773 ±0.890 3.944 ±0.026 5.216 ±0.383 55 .475 ±2.059 5.326 ±0.432 4.025 ±0.085 500 Training 1048 .473 ±44 .902 401 .825 ±9.772 469 .127 ±18 .255 665 .211 ±14 .863 462 .445 ±13 .094 410 .800 ±8.188 Inference 53 .315 ±9.790 3.996 ±0.047 4.859 ±0.162 62 .299 ±8.123 4.868 ±0.137 3.930 ±0.026 750 Training 1562 .362 ±75 .031 562 .669 ±22 .700 651 .881 ±14 .370 996 .430 ±31 .490 654 .771 ±15 .089 558 .609 ±16 .218 Inference 45 .779 ±3.146 3.854 ±0.161 4.856 ±0.162 56 .099 ±1.927 4.791 ±0.163 4.043 ±0.195
+
+grouped together, and their interval bounds are constructed by computing component-wise extrema over both inputs and outputs within the cell. By performing this grouping procedure across multiple grid resolutions, the algorithm generates interval samples that capture spatial variability at di ff erent scales. Coarser grids tend to produce wider intervals that represent broader uncertainty regions, while finer grids generate narrower intervals that capture more localised variations. The full procedure is described in Algorithm 1. In high-dimensional settings, grid-based grouping becomes increasingly ine ff ective due to the curse of dimen-sionality. For example, even a relatively simple one-dimensional PDE problem discretised over 100 spatial points yields an input space x ∈ R100 . When the available dataset contains only a few hundred samples (e.g., on the order of 500 samples), the sampling density in such a high-dimensional space is extremely low, as the volume of the domain grows exponentially with increasing dimensionality. Under these conditions, uniform grid partitioning produces a large number of cells, most of which remain empty or contain only a small number of samples. As a result, grid-based grouping often fails to produce statistically meaningful interval estimates, since reliable interval construction requires su ffi cient local sample density to capture input–output variability. To overcome this limitation, we introduce a clustering-based grouping algorithm that adapts to the intrinsic ge-ometry of the data distribution rather than relying on a predefined spatial partition. In this work, we employ the k-means clustering algorithm [50, 51] to partition the dataset into groups of samples with similar input characteristics. Unlike grid-based partitioning, clustering methods identify groups based on the proximity between samples in the feature space, allowing the grouping structure to naturally conform to the data manifold. Each cluster is then treated as a local neighbourhood from which interval-valued samples are generated by computing component-wise extrema across the inputs and corresponding outputs of samples belonging to the same cluster. The full procedure is detailed in Algorithm 2. 19 Algorithm 1: Grid-based Interval Construction 
+
+Input: Training data X, Y; Grid resolutions R
+
+Output: Interval datasets Xintervals , Yintervals  
+
+> 1
+
+Xintervals ← [∅], Yintervals ← [∅] ; # Initialize output  
+
+> 2
+
+foreach resolution r ∈ R do  
+
+> # Group data points using grid
+> 3
+
+Groups ← GridGroup( X, r) ; # Partition data into grid cells  
+
+> 4
+
+foreach group G in Groups do  
+
+> # Create intervals from group bounds
+> 5
+
+Xinterval ← [min( X[G]) , max( X[G])] ; # Append input interval  
+
+> 6
+
+Yinterval ← [min( Y[G]) , max( Y[G])] ; # Append output interval  
+
+> 7
+
+end  
+
+> 8
+
+end  
+
+> 9
+
+return Xintervals , Y intervals 
+
+Algorithm 2: Clustering-based Interval Construction 
+
+Input: Training data X, Y; Number of clusters K
+
+Output: Interval datasets Xintervals , Yintervals  
+
+> 1
+
+Xintervals ← ∅ , Yintervals ← ∅ ; # Initialize output  
+
+> 2
+
+foreach cluster count k ∈ K do  
+
+> # Cluster data points
+> 3
+
+Labels ← KMeans( X, k) ; # Apply k-means clustering  
+
+> 4
+
+foreach cluster c in {0, 1, ..., k − 1} do  
+
+> 5
+
+Find all points P with Labels [P] = c ; # Get points in cluster # Create intervals from cluster bounds  
+
+> 6
+
+Xinterval ← [min( X[P]) , max( X[P])] ; # Append input interval  
+
+> 7
+
+Yinterval ← [min( Y[P]) , max( Y[P])] ; # Append output interval  
+
+> 8
+
+end  
+
+> 9
+
+end  
+
+> 10
+
+return Xintervals , Y intervals 
+
+4.2.2. 1-dimensional regression 
+
+Following the setup described in Section 4.1.1, we consider the same analytical problem defined in Equation 34 to evaluate the e ff ectiveness of data augmentation for interval regression. In this setting, rather than having access to a ground-truth interval-valued training set, we assume only pointwise training data is available, while the test set remains interval-valued, as illustrated in Figure 7a. Given the simplicity of the problem, we adopt the grid-based grouping approach for generating the augmented interval training data. Figure 7b illustrates the resulting interval-valued training dataset. The figure shows that the augmentation proce-dure produces intervals of varying widths, resulting from the use of multiple grid resolutions. This variation enables the model to learn from di ff erent levels of uncertainty, thereby enhancing its generalisation capability to unseen interval-valued inputs. In this experiment, we construct the interval grouping by using 9 grid resolutions from 0.05 to 0.35, resulting in approximately 150 interval training data. In this experiment, we vary the training set size by randomly sampling from the 150 augmented interval training instances and repeat each configuration ten times with di ff erent random seeds to account for stochastic variability. Similar to the ideal interval setting, the direct interval propagation method is compared to the optimisation-based propagation denoted as Opt-Prop. The error metrics, summarised in Table 10, indicate that most methods, except IBP and Mid-IBP, achieve accuracy comparable to the Opt-Prop baseline. A closer examination of the interval coverage metrics in Table 13 reveals that most direct interval propagation methods outperform the baseline in terms of coverage quality. Notably, the Mid-IBP method produces significantly larger interval widths, reflected by its elevated PINAW values. Since the employed 20 0.0 0.2 0.4 0.6 0.8 1.0      
+
+> x
+> 0.60.81.01.21.41.6
+> f(x)
+> f(x) training data Interval test data (a) 0.00.20.40.60.81.0
+> x
+> 0.60.81.01.21.41.6
+> f(x)
+> f(x) training data Interval training data (b)
+
+Figure 7: Illustration on (a) Pointwise training dataset with interval test data. (b) Augmented interval training data generated from grid-based interval augmentation. 
+
+methods are identical to those used in the ideal interval setting, their training and inference time complexity remains unchanged. The only additional computational overhead arises from the data augmentation step performed prior to training, which is negligible compared to the overall training and inference cost. 
+
+Table 10: Augmented 1-dimensional regression RMSE comparison across methods and training set sizes. 
+
+ntrain Metric Naive IBP CROWN INN Mid-CROWN Mid-IBP Opt-Prop 
+
+10 RMSE L 0.197 ± 0.140 0.147 ± 0.075 0.118 ± 0.053 0.167 ± 0.075 0.125 ± 0.095 0.458 ± 0.166 0.118 ± 0.170 RMSE U 0.321 ± 0.195 0.170 ± 0.077 0.137 ± 0.060 0.125 ± 0.055 0.149 ± 0.095 0.362 ± 0.122 0.115 ± 0.141 25 RMSE L 0.065 ± 0.018 0.087 ± 0.017 0.064 ± 0.011 0.062 ± 0.014 0.059 ± 0.016 0.356 ± 0.115 0.052 ± 0.007 RMSE U 0.082 ± 0.038 0.117 ± 0.025 0.087 ± 0.035 0.067 ± 0.025 0.067 ± 0.033 0.339 ± 0.115 0.047 ± 0.006 50 RMSE L 0.043 ± 0.009 0.091 ± 0.016 0.055 ± 0.009 0.055 ± 0.009 0.047 ± 0.009 0.326 ± 0.058 0.045 ± 0.007 RMSE U 0.058 ± 0.015 0.119 ± 0.019 0.060 ± 0.010 0.075 ± 0.038 0.044 ± 0.011 0.328 ± 0.063 0.050 ± 0.006 100 RMSE L 0.050 ± 0.007 0.085 ± 0.005 0.055 ± 0.009 0.053 ± 0.016 0.046 ± 0.006 0.214 ± 0.025 0.050 ± 0.005 RMSE U 0.049 ± 0.009 0.102 ± 0.011 0.063 ± 0.009 0.057 ± 0.012 0.045 ± 0.005 0.225 ± 0.033 0.048 ± 0.005 
+
+Table 11: Augmented 1-dimensional regression performance comparison across methods and training set sizes on three di ff erent metrics: predicted interval normalized average width (PINAW), predictied interval coverage probability (PICP), and the coverage width-based criterion (CWC). 
+
+ntrain Metric Naive IBP CROWN INN Mid-CROWN Mid-IBP Opt-Prop 
+
+10 PINAW 0.144 ± 0.940 0.539 ± 0.071 0.467 ± 0.037 0.511 ± 0.624 0.535 ± 0.061 4.598 ± 1.417 0.478 ± 0.102 PICP 0.399 ± 0.086 0.385 ± 0.077 0.396 ± 0.031 0.437 ± 0.134 0.418 ± 0.101 0.937 ± 0.042 0.399 ± 0.053 CWC 3.241 ± 23 .543 12 .694 ± 3.873 10 .088 ± 1.088 5.557 ± 17 .497 11 .573 ± 5.795 10 .820 ± 2.684 10 .827 ± 5.546 25 PINAW 0.604 ± 0.223 0.498 ± 0.032 0.421 ± 0.025 0.635 ± 0.138 0.523 ± 0.041 4.450 ± 1.332 0.462 ± 0.018 PICP 0.527 ± 0.081 0.348 ± 0.062 0.400 ± 0.030 0.540 ± 0.077 0.481 ± 0.064 0.988 ± 0.014 0.453 ± 0.016 CWC 6.665 ± 1.226 14 .043 ± 3.788 8.878 ± 0.776 6.973 ± 1.361 7.785 ± 2.276 9.138 ± 2.606 7.573 ± 0.367 50 PINAW 0.569 ± 0.055 0.497 ± 0.033 0.434 ± 0.012 0.516 ± 0.173 0.546 ± 0.013 4.236 ± 0.657 0.468 ± 0.015 PICP 0.525 ± 0.030 0.322 ± 0.025 0.422 ± 0.015 0.526 ± 0.070 0.528 ± 0.021 0.999 ± 0.001 0.463 ± 0.010 CWC 6.744 ± 0.945 15 .364 ± 1.963 8.250 ± 0.423 5.814 ± 1.527 6.345 ± 0.489 8.496 ± 1.310 7.334 ± 0.130 100 PINAW 0.560 ± 0.077 0.473 ± 0.007 0.427 ± 0.011 0.541 ± 0.067 0.541 ± 0.027 3.180 ± 0.307 0.446 ± 0.015 PICP 0.546 ± 0.057 0.335 ± 0.028 0.413 ± 0.014 0.522 ± 0.066 0.524 ± 0.025 0.998 ± 0.002 0.444 ± 0.013 CWC 6.002 ± 0.709 13 .703 ± 1.724 8.444 ± 0.352 6.531 ± 1.180 6.391 ± 0.450 6.400 ± 0.620 7.627 ± 0.228 
+
+21 4.2.3. 1-dimensional PDE 
+
+The augmentation of PDE datasets presents unique challenges due to the high dimensionality and spatial corre-lations inherent in their solutions. As a test case, we consider the one-dimensional second-order stochastic Poisson equation defined in equation 35. The PDE is discretised over 100 spatial points, producing an input space x ∈ R100 .To construct interval-valued data, we employ the clustering-based augmentation strategy described in Algorithm 2. Specifically, we generate clusters with sizes varying from 5 to 300, and within each cluster, the minimum and maxi-mum values at each discretization point are used to define interval bounds. This procedure yields approximately 800 interval samples. For the experimental evaluation, we vary the training set size by randomly sampling from these 800 intervals and repeat all experiments 10 times with di ff erent random seeds to account for variability. 0.0 0.2 0.4 0.6 0.8 1.0        
+
+> x
+> −2
+> 0
+> 2
+> u(x)
+> Augmented input Pointwise input
+> (a) 0.00.20.40.60.81.0
+> x
+> −3
+> −2
+> −1
+> 0
+> 1
+> g(x)
+> Augmented Output Pointwise Output (b)
+> Figure 8: Augmentation result example of a single cluster. (a) Augmented input function. (b) Augmented output function.
+
+The interval augmentation results, shown in Figure 8, illustrate the constructed input and output intervals. A key challenge lies in the accuracy of these augmented intervals. Specifically, when the augmented input intervals are propagated through a PDE solver, discrepancies arise between the solver’s output and the augmented output solved directly from pointwise data (see Figure 9). While one might consider generating output intervals directly from the PDE solver to avoid such inconsistencies, this would undermine the purpose of employing a surrogate model, as it would still require evaluating a large number of training samples. Consequently, the augmentation process inherently introduces a bias into the model. Nevertheless, the objective is not to perfectly replicate the solver-based intervals but rather to construct interval datasets of su ffi cient quality to enable e ff ective training of interval-aware models. 0.0 0.2 0.4 0.6 0.8 1.0     
+
+> x
+> −3
+> −2
+> −10123
+> u(x)
+> Augmented interval Pointwise input
+> 0.00.20.40.60.81.0
+> x
+> −6
+> −4
+> −202
+> g(x)
+> Actual output interval Augmented output interval Pointwise output
+> Figure 9: Augmented input function (left) and comparison between the augmented output and the ground truth output propagated through PDE solver.
+
+The experimental setup follows the same structure as the ideal interval case described in Section 4.1.2, but the models are trained using augmented interval inputs and outputs. All models are evaluated against the true interval-valued outputs as ground truth. As shown in Table 12, the overall performance decreases relative to the ideal scenario in Table 4, which is expected given the additional uncertainty introduced by data augmentation. The results presented in Tables 12 and 13 indicate that Mid-CROWN provides the most balanced performance 22 among the evaluated methods. It achieves low Linex error while maintaining high PICP with relatively tight interval widths, resulting in favourable CWC values. In contrast, the INN and IBP-based methods exhibit comparatively weaker performance, and in several cases the training process fails to converge. We attribute this behaviour to the 
+
+interval dependency problem inherent in interval arithmetic [52, 53], which can cause excessive overestimation of propagated bounds and lead to optimisation instability. Improving the practical performance of these methods would likely require modifications to the loss formulation or hyperparameter tuning to mitigate bound overestimation. As this study focuses on comparing baseline configurations of each method, such refinements are left for future work.   
+
+> Table 12: Linear-exponential (Linex) error of augmented 1D PDE experiments across methods and training sizes. For INN and IBP, the asterisk ( ∗)denotes cases where some runs failed to converge or produced NaN values; results are averaged over successful runs only.
+
+ntrain Metric Naive IBP ∗ CROWN INN ∗ Mid-CROWN Mid-IBP 
+
+50 Linex L 1.559 ± 0.495 2137.172 ± 1059.331 20.695 ± 48.603 89.456 ± 92.321 0.341 ± 0.083 82.23 ± 85.715 Linex U 1.610 ± 0.653 898.399 ± 442.959 40.634 ± 106.411 260.384 ± 299.820 0.390 ± 0.090 42.949 ± 39.487 100 Linex L 1.191 ± 0.210 2082.647 ± 914.356 3.815 ± 1.002 22.755 ± 15.753 0.282 ± 0.075 82.573 ± 98.971 Linex U 1.354 ± 0.424 856.115 ± 345.489 3.285 ± 1.435 34.114 ± 31.953 0.469 ± 0.554 25.470 ± 22.488 250 Linex L 0.925 ± 0.149 2139.45 ± 560.089 3.496 ± 0.764 5.860 ± 2.474 0.162 ± 0.043 29.698 ± 22.862 Linex U 1.125 ± 0.198 745.528 ± 184.611 3.486 ± 0.685 8.732 ± 3.769 0.168 ± 0.067 10.974 ± 2.447 500 Linex L 1.024 ± 0.097 11.153 ± 13.783 3.223 ± 0.897 33.282 ± 39.640 0.094 ± 0.015 46.682 ± 58.594 Linex U 1.007 ± 0.160 8.742 ± 12.194 2.580 ± 0.728 23.928 ± 13.581 0.108 ± 0.031 9.555 ± 58.555   
+
+> Table 13: Augmented 1-dimensional PDE performance comparison across methods and training set sizes on three di ff erent metrics: predicted interval normalized average width (PINAW), predictied interval coverage probability (PICP), and the coverage width-based criterion (CWC). For INN and IBP, the asterisk ( ∗) denotes cases where some runs failed to converge or produced NaN values; results are averaged over successful runs only.
+
+ntrain Metric Naive IBP ∗ CROWN INN ∗ Mid-CROWN Mid-IBP 
+
+50 PINAW 1.231 ± 0.947 0.362 ± 0.034 0.762 ± 0.024 1121 .507 ± 3416 .796 1.380 ± 0.266 3.647 ± 1.540 PICP 0.390 ± 0.193 0.069 ± 0.089 0.086 ± 0.076 1.000 ± 0.000 0.708 ± 0.279 0.649 ± 0.407 CWC 37 .297 ± 46 .336 41 .290 ± 13 .860 78 .941 ± 24 .501 2243 .015 ± 6833 .591 18 .418 ± 32 .571 67 .272 ± 89 .325 100 PINAW 1.081 ± 0.924 0.365 ± 0.018 0.702 ± 0.025 110 .540 ± 1580 .054 1.378 ± 0.156 3.646 ± 1.484 PICP 0.378 ± 0.234 0.069 ± 0.087 0.257 ± 0.179 0.707 ± 0.292 0.808 ± 0.227 0.668 ± 0.410 CWC 39 .501 ± 67 .005 41 .766 ± 13 .637 41 .301 ± 30 .647 318 .042 ± 3165 .910 10 .119 ± 19 .879 65 .564 ± 93 .063 250 PINAW 1.184 ± 1.203 0.349 ± 0.013 0.785 ± 0.019 18 .882 ± 23 .188 1.135 ± 0.094 8.522 ± 2.472 PICP 0.372 ± 0.259 0.068 ± 0.090 0.255 ± 0.169 0.816 ± 0.201 0.789 ± 0.201 0.835 ± 0.308 CWC 48 .386 ± 87 .066 40 .263 ± 13 .449 45 .347 ± 32 .783 141 .921 ± 541 .130 7.556 ± 12 .817 66 .500 ± 116 .931 500 PINAW 0.626 ± 0.560 0.609 ± 0.025 0.640 ± 0.006 106 .835 ± 1394 .963 1.191 ± 0.098 5.189 ± 1.604 PICP 0.286 ± 0.189 0.230 ± 0.162 0.249 ± 0.195 0.863 ± 0.290 0.856 ± 0.159 0.797 ± 0.338 CWC 25 .232 ± 31 .493 38 .272 ± 25 .563 41 .634 ± 32 .278 328 .899 ± 2852 .497 5.087 ± 7.984 50 .497 ± 84 .956 
+
+4.2.4. 2-dimensional PDE 
+
+In this section, we consider a two-dimensional Darcy flow PDE with only precise observations available, necessi-tating interval augmentation. Similar to the one-dimensional case discussed in Section 4.2.3, we apply the clustering-based augmentation strategy outlined in Algorithm 2. Due to the higher dimensionality of the problem, 51 × 51 grid points resulting in 2601 dimensions, we construct clusters of varying sizes, ranging from 5 to 300. This procedure yields approximately 860 augmented interval samples in total. The results presented in Tables 14 and 15 indicate that Mid-IBP achieves the best overall performance, as reflected by both the Linex error and interval coverage metrics. This observation di ff ers from the augmented one-dimensional PDE test case in Section 4.2.3, where Mid-IBP showed less competitive performance. While the precise reason for this discrepancy is unclear, it suggests that the relative performance of the interval propagation methods may depend on characteristics of the underlying PDE and data distribution rather than dimensionality alone. For instance, 23 the two-dimensional Darcy flow problem may present structural properties that are more amenable to learning by midpoint-based approaches, although further investigation would be required to confirm this hypothesis. The INN method remains the lowest-performing approach in this test case. However, its performance shows improvement compared to the one-dimensional PDE results. 
+
+> Table 14: Augmented 2-dimensional PDE linear-exponential (Linex) error comparison across methods and training set sizes.
+
+ntrain Metric Naive IBP CROWN INN Mid-CROWN Mid-IBP 
+
+150 Linex L 0.224 ± 1.946 0.207 ± 0.590 0.140 ± 0.857 12.876 ± 1.171 0.086 ± 0.018 0.075 ± 0.021 Linex U 0.212 ± 1.076 0.192 ± 0.526 0.131 ± 0.616 9.832 ± 0.868 0.089 ± 0.032 0.081 ± 0.011 250 Linex L 0.119 ± 0.063 0.175 ± 0.049 0.102 ± 0.016 14.413 ± 1.214 0.074 ± 0.003 0.060 ± 0.005 Linex U 0.111 ± 0.078 0.166 ± 0.048 0.086 ± 0.010 9.022 ± 1.201 0.078 ± 0.008 0.059 ± 0.005 500 Linex L 0.066 ± 0.003 0.103 ± 0.021 0.067 ± 0.007 1.728 ± 0.651 0.065 ± 0.007 0.042 ± 0.003 Linex U 0.064 ± 0.003 0.100 ± 0.022 0.060 ± 0.006 1.317 ± 0.661 0.069 ± 0.005 0.044 ± 0.003 750 Linex L 0.047 ± 0.002 0.095 ± 0.015 0.062 ± 0.006 0.310 ± 0.100 0.060 ± 0.003 0.037 ± 0.065 Linex U 0.047 ± 0.002 0.092 ± 0.015 0.055 ± 0.003 0.289 ± 0.104 0.066 ± 0.002 0.041 ± 0.007 
+
+> Table 15: Augmented 2-dimensional PDE performance comparison across methods and training set sizes on three di ff erent metrics: predicted interval normalized average width (PINAW), predictied interval coverage probability (PICP), and the coverage width-based criterion (CWC).
+
+ntrain Metric Naive IBP CROWN INN Mid-CROWN Mid-IBP 
+
+150 PINAW 1.671 ± 0.563 1.488 ± 0.072 1.536 ± 0.130 3.604 ± 3.465 1.911 ± 0.194 1.793 ± 0.090 PICP 0.612 ± 0.177 0.734 ± 0.161 0.737 ± 0.206 0.285 ± 0.192 0.911 ± 0.105 0.909 ± 0.091 CWC 20 .748 ± 26 .414 9.886 ± 10 .313 11 .946 ± 14 .837 134 .387 ± 116 .458 5.429 ± 2.913 5.024 ± 2.248 250 PINAW 1.558 ± 0.430 1.519 ± 0.073 1.511 ± 0.095 3.157 ± 2.823 1.879 ± 0.199 1.733 ± 0.083 PICP 0.710 ± 0.157 0.636 ± 0.197 0.818 ± 0.159 0.266 ± 0.180 0.907 ± 0.110 0.911 ± 0.105 CWC 11 .877 ± 14 .653 17 .284 ± 19 .516 7.037 ± 7.087 133 .544 ± 108 .901 5.510 ± 3.513 5.116 ± 4.350 500 PINAW 1.364 ± 0.309 1.459 ± 0.068 1.473 ± 0.081 1.712 ± 1.793 1.777 ± 0.179 1.659 ± 0.078 PICP 0.750 ± 0.167 0.839 ± 0.126 0.845 ± 0.152 0.261 ± 0.206 0.936 ± 0.080 0.949 ± 0.055 CWC 9.307 ± 15 .618 5.717 ± 4.596 6.145 ± 6.185 92 .086 ± 122 .810 4.453 ± 1.483 3.899 ± 0.826 750 PINAW 1.411 ± 0.279 1.505 ± 0.073 1.461 ± 0.078 1.450 ± 1.779 1.826 ± 0.194 1.642 ± 0.077 PICP 0.820 ± 0.127 0.770 ± 0.160 0.845 ± 0.151 0.368 ± 0.258 0.930 ± 0.082 0.950 ± 0.055 CWC 6.093 ± 6.228 8.631 ± 9.119 6.052 ± 6.264 67 .788 ± 111 .043 4.659 ± 1.556 3.852 ± 0.868 
+
+5. Discussion 
+
+In this work, we conducted a comprehensive investigation of interval uncertainty propagation in neural network-based surrogate models, focusing on both multilayer perceptrons (MLPs) and Deep Operator Networks (DeepONets). We examined three classes of approaches: (i) a naive interval propagation method, (ii) bound propagation techniques including IBP and CROWN, and (iii) interval neural networks (INNs) employing interval-valued weights. The meth-ods were evaluated under two training scenarios. The first assumes access to interval-valued datasets containing paired interval inputs and outputs, which are often scarce and costly to obtain. The second considers the more practical set-ting where only pointwise training data are available. The evaluation was performed on three representative test cases: a one-dimensional regression problem as a proof of concept, a one-dimensional PDE, and a two-dimensional PDE. We further compared the direct interval propagation approaches against the standard optimisation-based propaga-tion baseline (Opt-Prop). In the one-dimensional regression experiments, under both idealised and pointwise training conditions, several direct interval propagation methods achieved comparable or superior performance in terms of ac-curacy and interval coverage metrics. Moreover, the inference cost of direct interval propagation was substantially lower, showing improvements of approximately three orders of magnitude relative to Opt-Prop. The optimisation-based approach also becomes impractical for full-field PDE problems due to the need to solve optimisation problems 24 at each discretisation point. These results suggest that direct interval propagation provides a more computationally effi cient and scalable alternative for interval propagation of full-field simulations. Under ideal interval training conditions, the results indicate that simple architectures, such as the naive approach, can perform remarkably well. Although INNs and bound propagation methods, including IBP, CROWN, and their midpoint variants, outperform the naive approach in certain metrics and test cases, the naive method demonstrates consistently strong overall performance. During training, the lower and upper output nodes in the naive architecture remain coupled through shared hidden layers, allowing flexible modelling of dependencies between interval bounds. This structural flexibility enables the naive approach to e ff ectively exploit the availability of ideal interval-valued training data. Since ideal interval-valued datasets are rarely available in practice, a more realistic setting is to train interval mod-els using standard pointwise data. To facilitate this, we employ interval augmentation techniques, specifically the grid-based and clustering-based strategies described in Algorithms 1 and 2. The results for the augmented one-dimensional regression problem indicate that transforming pointwise data into interval form is e ff ective: strictly constrained models exhibit only a modest performance degradation relative to the ideal interval setting. In contrast, interval augmentation for PDE problems is substantially more challenging. First, each discretisation point contributes to the overall input dimensionality, such that a PDE discretised on 100 grid points corresponds to a 100-dimensional input space. Second, the augmented intervals do not necessarily represent accurate bounds of the true solution. As illustrated in Figure 9, noticeable discrepancies arise between the augmented intervals and the reference bounds obtained via interval propagation through the PDE solver, particularly in the one-dimensional PDE case. As a consequence, Table 12 shows that models trained using direct bound matching on augmented 1D PDE data experience a significant degradation in performance compared to the ideal interval scenario. In the augmented PDE experiments, the Mid-CROWN model consistently outperforms the naive approach. CROWN-based methods approximate nonlinear activation functions using upper and lower a ffi ne relaxations. This linearisation introduces an approximation error, which can reduce prediction accuracy compared with the naive method, particu-larly when trained on ideal interval-valued data where strict bound matching is possible. Nevertheless, CROWN-based methods demonstrate strong generalisation capability, which explains their consistently competitive performance across all test cases. When training is performed using augmented interval data derived from pointwise observations, directly fitting the augmented bounds can degrade performance, since the augmented intervals do not necessarily represent accurate solution bounds. Relaxing this constraint by training on interval midpoints, while allowing the model to infer appropriate bound widths, appears to improve robustness, which explains the strong performance of Mid-CROWN in the augmented PDE setting. In contrast, the performance of INN and IBP-based methods exhibits higher variability across experiments. These approaches rely heavily on interval arithmetic and are therefore susceptible to the interval dependency and wrapping eff ects [52, 53]. These phenomena can lead to bound overestimation and increased optimisation di ffi culty during training, resulting in inconsistent performance across test cases. However, in certain scenarios, both methods achieve competitive or superior results, indicating their potential e ff ectiveness when appropriately configured in certain cases. Additionally, we conduct a brief hyperparameter study on the neural network architecture, as presented in Ta-bles A.16 and A.17. The results confirm that the architectural choice influences the prediction performance. However, the variability induced by di ff erent architectures is considerably smaller than the variability resulting from the choice of interval propagation strategy. 
+
+6. Summary and Future Works 
+
+In summary, we have demonstrated that direct interval propagation o ff ers a more e ff ective and computationally effi cient alternative to standard optimisation-based interval propagation, particularly for full-field problems such as PDE problems. By reformulating interval uncertainty propagation as an interval-valued regression task, the proposed approaches eliminate the need for repeated surrogate evaluations within inner optimisation loops, leading to substan-tial computational savings and improved scalability. This enhanced scalability enables more e ffi cient downstream analyses that explicitly account for uncertainty, such as robust and reliability-based optimisation. Moreover, direct interval propagation facilitates the use of full-field PDE surrogate models in interval-based uncertainty analysis, al-lowing engineers to obtain spatially resolved uncertainty information rather than relying solely on scalar summary quantities. 25 Through extensive numerical experiments across regression, one-dimensional PDE, and two-dimensional PDE test cases, we showed that direct interval propagation methods can achieve accuracy and interval coverage comparable to, and in some cases exceeding, optimisation-based propagation, while being several orders of magnitude faster at inference time. Among the methods studied, simple architectures such as the naive approach performed remarkably well under ideal interval training conditions, whereas bound propagation techniques, particularly midpoint-based variants such as Mid-CROWN, exhibited improved robustness when trained on augmented interval data derived from pointwise observations. Our results also highlight important trade-o ff s among di ff erent interval propagation strategies. While INN and IBP-based methods can o ff er strong coverage in certain settings, their performance is more sensitive to interval dependency and wrapping e ff ects inherent to interval arithmetic, leading to greater variability across test cases. Several directions for future research emerge from this work. A natural extension is the application of direct interval propagation to realistic test cases such as optimisation problems [54, 55] or identification problems [56], where both computational e ffi ciency and accurate uncertainty representation are critical. Such studies would further demonstrate the practical advantages of direct interval propagation in engineering decision-making tasks. Another promising direction is the integration of statistical calibration techniques to improve interval coverage and e ffi ciency. The present study primarily relies on deterministic surrogate models, which themselves may introduce modelling uncertainty. Incorporating statistical post-processing methods, such as conformal prediction, could provide calibrated interval estimates with improved reliability guarantees. Combining deterministic interval propagation with statistical calibration may therefore enhance the robustness and trustworthiness of interval predictions in practical applications. 
+
+Data Availability 
+
+The data and code are available at: https://github.com/fazaghifari/IntervalOperatorLearning . Al-though, the provided example in the repository are not the exact experiments presented in this paper, they illustrate the implementation of di ff erent interval propagation methods discussed herein. 
+
+Acknowledgments 
+
+This work was supported by the granted H2020 FETOPEN-2018-2019-2020-01 European project, Epistemic AI 
+
+under grant agreement No. 964505 (E-pi). The authors acknowledge the use of AI tools, such as ChatGPT and Grammarly, to assist with grammar refinement and improve the clarity of wording in the manuscript. All substantive content, analysis, and conclusions are the original work of the authors. 26 Appendix A. Hyperparameter Study 
+
+Table A.16: Brief hyperparameter study of neural network for the 1D regression, focusing on the two best-performing methods in each experimental setting on ntrain = 50. The configuration “2L-8” notation denotes that both the branch and trunk networks consist of 2 hidden layers with 8 neurons per layer. 
+
+Configuration Metric Ideal Augmented Naive INN Naive Mid-CROWN 
+
+2L-8 RMSE L 0.050 ± 0.057 0.043 ± 0.041 0.065 ± 0.023 0.087 ± 0.028 RMSE U 0.058 ± 0.062 0.040 ± 0.044 0.067 ± 0.032 0.104 ± 0.043 2L-16 RMSE L 0.034 ± 0.041 0.043 ± 0.039 0.062 ± 0.036 0.069 ± 0.017 RMSE U 0.047 ± 0.053 0.034 ± 0.035 0.075 ± 0.040 0.077 ± 0.030 2L-32 RMSE L 0.021 ± 0.006 0.031 ± 0.019 0.046 ± 0.005 0.063 ± 0.007 RMSE U 0.031 ± 0.015 0.030 ± 0.021 0.058 ± 0.023 0.054 ± 0.009 3L-8 RMSE L 0.022 ± 0.004 0.035 ± 0.042 0.056 ± 0.017 0.047 ± 0.008 RMSE U 0.025 ± 0.011 0.041 ± 0.043 0.061 ± 0.030 0.053 ± 0.010 3L-16 RMSE L 0.023 ± 0.005 0.019 ± 0.004 0.043 ± 0.009 0.047 ± 0.009 RMSE U 0.026 ± 0.006 0.019 ± 0.003 0.058 ± 0.015 0.044 ± 0.011 3L-32 RMSE L 0.019 ± 0.002 0.024 ± 0.008 0.045 ± 0.005 0.043 ± 0.008 RMSE U 0.020 ± 0.004 0.021 ± 0.005 0.052 ± 0.014 0.045 ± 0.008 
+
+Table A.17: Brief hyperparameter study of DeepONet for the 1D PDE, focusing on the two best-performing methods in each experimental setting on ntrain = 500. The configuration “2L-32” notation denotes that both the branch and trunk networks consist of 2 hidden layers with 32 neurons per layer. 
+
+Configuration Metric Ideal Augmented Naive CROWN Naive Mid-CROWN 
+
+2L-32 Linex L 0.108 ± 0.045 0.019 ± 0.005 0.912 ± 0.056 1.749 ± 0.235 Linex U 0.107 ± 0.045 0.019 ± 0.004 0.798 ± 0.069 1.704 ± 0.243 2L-64 Linex L 0.152 ± 0.072 0.012 ± 0.005 0.904 ± 0.070 1.223 ± 0.194 Linex U 0.154 ± 0.073 0.011 ± 0.005 0.839 ± 0.095 1.179 ± 0.228 2L-128 Linex L 0.173 ± 0.082 0.009 ± 0.002 0.946 ± 0.098 0.713 ± 0.099 Linex U 0.173 ± 0.082 0.009 ± 0.002 0.931 ± 0.116 0.684 ± 0.155 4L-32 Linex L 0.045 ± 0.022 0.023 ± 0.011 0.970 ± 0.090 0.114 ± 0.057 Linex U 0.045 ± 0.023 0.022 ± 0.008 0.915 ± 0.071 0.118 ± 0.055 4L-64 Linex L 0.042 ± 0.022 0.012 ± 0.005 1.024 ± 0.097 0.094 ± 0.015 Linex U 0.043 ± 0.022 0.013 ± 0.006 1.007 ± 0.160 0.108 ± 0.031 4L-128 Linex L 0.023 ± 0.015 0.033 ± 0.024 0.699 ± 0.083 0.073 ± 0.014 Linex U 0.023 ± 0.015 0.034 ± 0.023 0.849 ± 0.122 0.072 ± 0.017 
+
+References 
+
+[1] K. Abdi, B. Celse, K. McAuley, Propagating input uncertainties into parameter uncertainties and model prediction uncertainties: A review, The Canadian Journal of Chemical Engineering 102 (1) (2023) 254–273. doi:10.1002/cjce.25015 .URL http://dx.doi.org/10.1002/cjce.25015 
+
+[2] J. Dai, S. Adhikari, M. Wen, Uncertainty quantification and propagation in atomistic machine learning (2024). doi:10.48550/ARXIV. 2405.02461 .URL https://arxiv.org/abs/2405.02461 
+
+27 [3] J. Dick, F. Y. Kuo, I. H. Sloan, High-dimensional integration: The quasi-monte carlo way, Acta Numerica 22 (2013) 133–288. doi: 10.1017/s0962492913000044 .URL http://dx.doi.org/10.1017/S0962492913000044 
+
+[4] C. Lemieux, Monte Carlo and Quasi-Monte Carlo Sampling, Springer New York, 2009. doi:10.1007/978-0-387-78165-5 .URL http://dx.doi.org/10.1007/978-0-387-78165-5 
+
+[5] C. E. Rasmussen, C. K. I. Williams, Gaussian processes for machine learning, Adaptive Computation and Machine Learning series, MIT Press, London, England, 2005. [6] I. Bilionis, N. Zabaras, Multi-output local gaussian process regression: Applications to uncertainty quantification, Journal of Computational Physics 231 (17) (2012) 5718–5746. doi:10.1016/j.jcp.2012.04.047 .URL http://dx.doi.org/10.1016/j.jcp.2012.04.047 
+
+[7] L. R. Zuhal, G. A. Faza, P. S. Palar, R. P. Liem, Performance assessment of kriging with partial least squares for high-dimensional uncertainty and sensitivity analysis, Structural and Multidisciplinary Optimization 66 (5) (Apr. 2023). doi:10.1007/s00158-023-03547-3 .URL http://dx.doi.org/10.1007/s00158-023-03547-3 
+
+[8] R. Ghanem, P. D. Spanos, Polynomial chaos in stochastic finite elements, Journal of Applied Mechanics 57 (1) (1990) 197–202. doi: 10.1115/1.2888303 .URL https://doi.org/10.1115/1.2888303 
+
+[9] B. Sudret, Global sensitivity analysis using polynomial chaos expansions, Reliability Engineering and System Safety 93 (7) (2008) 964–979. 
+
+doi:10.1016/j.ress.2007.04.002 .URL http://dx.doi.org/10.1016/j.ress.2007.04.002 
+
+[10] R. K. Tripathy, I. Bilionis, Deep uq: Learning deep neural network surrogate models for high dimensional uncertainty quantification, Journal of computational physics 375 (2018) 565–588. [11] G. Sun, S. Wang, A review of the artificial neural network surrogate modeling in aerodynamic design, Proceedings of the Institution of Mechanical Engineers, Part G: Journal of Aerospace Engineering 233 (16) (2019) 5863–5872. [12] Z. Yang, D. K. Lin, A. Zhang, Interval-valued data prediction via regularized artificial neural network, Neurocomputing 331 (2019) 336–345. 
+
+doi:10.1016/j.neucom.2018.11.063 .URL http://dx.doi.org/10.1016/j.neucom.2018.11.063 
+
+[13] S. Gowal, K. Dvijotham, R. Stanforth, R. Bunel, C. Qin, J. Uesato, R. Arandjelovic, T. Mann, P. Kohli, On the e ff ectiveness of interval bound propagation for training verifiably robust models (2019). arXiv:1810.12715 .URL https://arxiv.org/abs/1810.12715 
+
+[14] H. Zhang, T.-W. Weng, P.-Y. Chen, C.-J. Hsieh, L. Daniel, E ffi cient neural network robustness certification with general activation functions (2018). arXiv:1811.00866 .URL https://arxiv.org/abs/1811.00866 
+
+[15] L. Oala, C. Heiss, J. Macdonald, M. Marz, G. Kutyniok, W. Samek, Detecting failure modes in image reconstructions with inter-val neural network uncertainty, International Journal of Computer Assisted Radiology and Surgery 16 (12) (2021) 2089–2097. doi: 10.1007/s11548-021-02482-2 .URL http://dx.doi.org/10.1007/s11548-021-02482-2 
+
+[16] D. Betancourt, R. L. Muhanna, Interval deep learning for computational mechanics problems under input uncertainty, Probabilistic Engineer-ing Mechanics 70 (2022) 103370. doi:10.1016/j.probengmech.2022.103370 .URL http://dx.doi.org/10.1016/j.probengmech.2022.103370 
+
+[17] K. Tretiak, G. Schollmeyer, S. Ferson, Neural network model for imprecise regression with interval dependent variables, Neural Networks 161 (2023) 550–564. doi:10.1016/j.neunet.2023.02.005 .URL http://dx.doi.org/10.1016/j.neunet.2023.02.005 
+
+[18] L. Lu, P. Jin, G. Pang, Z. Zhang, G. E. Karniadakis, Learning nonlinear operators via deeponet based on the universal approximation theorem of operators, Nature Machine Intelligence 3 (3) (2021) 218–229. doi:10.1038/s42256-021-00302-5 .URL http://dx.doi.org/10.1038/s42256-021-00302-5 
+
+[19] D. A. White, W. J. Arrighi, J. Kudo, S. E. Watts, Multiscale topology optimization using neural network surrogate models, Computer Methods in Applied Mechanics and Engineering 346 (2019) 1118–1135. doi:10.1016/j.cma.2018.09.007 .URL http://dx.doi.org/10.1016/j.cma.2018.09.007 
+
+[20] X. Zhang, F. Xie, T. Ji, Z. Zhu, Y. Zheng, Multi-fidelity deep neural network surrogate model for aerodynamic shape optimization, Computer Methods in Applied Mechanics and Engineering 373 (2021) 113485. doi:10.1016/j.cma.2020.113485 .URL http://dx.doi.org/10.1016/j.cma.2020.113485 
+
+[21] N. Kovachki, Z. Li, B. Liu, K. Azizzadenesheli, K. Bhattacharya, A. Stuart, A. Anandkumar, Neural operator: Learning maps between function spaces (2021). doi:10.48550/ARXIV.2108.08481 .URL https://arxiv.org/abs/2108.08481 
+
+[22] A. Cicirello, F. Giunta, Machine learning based optimization for interval uncertainty propagation, Mechanical Systems and Signal Processing 170 (2022) 108619. doi:10.1016/j.ymssp.2021.108619 .URL http://dx.doi.org/10.1016/j.ymssp.2021.108619 
+
+[23] R. R. Callens, M. G. Faess, D. Moens, Multilevel quasi-monte carlo for interval analysis, International Journal for Uncertainty Quantification 12 (4) (2022) 1–19. doi:10.1615/int.j.uncertaintyquantification.2022039245 .URL http://dx.doi.org/10.1615/Int.J.UncertaintyQuantification.2022039245 
+
+[24] L. Billard, E. Diday, Regression analysis for interval-valued data, in: Studies in Classification, Data Analysis, and Knowledge Organization, Springer Berlin Heidelberg, 2000, pp. 369–374. doi:10.1007/978-3-642-59789-3_58 .URL https://doi.org/10.1007/978-3-642-59789-3_58 
+
+[25] E. de A. Lima Neto, F. de A.T. de Carvalho, Constrained linear regression models for symbolic interval-valued variables, Computational Statistics and Data Analysis 54 (2) (2010) 333–347. doi:10.1016/j.csda.2009.08.010 .
+
+28 URL https://doi.org/10.1016/j.csda.2009.08.010 
+
+[26] G. A. Faza, K. Shariatmadar, H. Hallez, D. Moens, Interval reduced order surrogate modelling framework for uncertainty quantification, in: AIAA SCITECH 2024 Forum, American Institute of Aeronautics and Astronautics, 2024, p. 0. doi:10.2514/6.2024-0387 .URL http://dx.doi.org/10.2514/6.2024-0387 
+
+[27] Y. Liu, L. Wang, X. Zhou, Z. Li, Y. Wang, A novel study on hybrid physics-data-driven reduced-order modeling for aerodynamic load inversion under structural field uncertainties, Computer Methods in Applied Mechanics and Engineering 448 (2026) 118504. doi:10.1016/ j.cma.2025.118504 .URL http://dx.doi.org/10.1016/j.cma.2025.118504 
+
+[28] A. M. S. Roque, C. Mate, J. Arroyo, A. Sarabia, imlp: Applying multi-layer perceptrons to interval-valued data, Neural Processing Letters 25 (2) (2007) 157–169. doi:10.1007/s11063-007-9035-z .URL http://dx.doi.org/10.1007/s11063-007-9035-z 
+
+[29] A. L. S. Maia, F. d. A. de Carvalho, T. B. Ludermir, Forecasting models for interval-valued time series, Neurocomputing 71 (16-18) (2008) 3344–3352. doi:10.1016/j.neucom.2008.02.022 .URL http://dx.doi.org/10.1016/j.neucom.2008.02.022 
+
+[30] A. L. S. Maia, F. d. A. de Carvalho, Holt’s exponential smoothing and neural network models for forecasting interval-valued time series, International Journal of Forecasting 27 (3) (2011) 740–759. doi:10.1016/j.ijforecast.2010.02.012 .URL http://dx.doi.org/10.1016/j.ijforecast.2010.02.012 
+
+[31] P. Huthwaite, Accelerated finite element elastodynamic simulations using the gpu, Journal of Computational Physics 257 (2014) 687–707. 
+
+doi:10.1016/j.jcp.2013.10.017 .URL http://dx.doi.org/10.1016/j.jcp.2013.10.017 
+
+[32] M. Bernardini, D. Modesti, F. Salvadore, S. Pirozzoli, Streams: A high-fidelity accelerated solver for direct numerical simulation of com-pressible turbulent flows, Computer Physics Communications 263 (2021) 107906. doi:10.1016/j.cpc.2021.107906 .URL http://dx.doi.org/10.1016/j.cpc.2021.107906 
+
+[33] A. Sanchez-Gonzalez, J. Godwin, T. Pfa ff , R. Ying, J. Leskovec, P. W. Battaglia, Learning to simulate complex physics with graph networks (2020). arXiv:2002.09405 .URL https://arxiv.org/abs/2002.09405 
+
+[34] B. Alkin, A. FÃ¼rst, S. Schmid, L. Gruber, M. Holzleitner, J. Brandstetter, Universal physics transformers: A framework for e ffi ciently scaling neural operators (2025). arXiv:2402.12365 .URL https://arxiv.org/abs/2402.12365 
+
+[35] T. Chen, H. Chen, Universal approximation to nonlinear operators by neural networks with arbitrary activation functions and its application to dynamical systems, IEEE Transactions on Neural Networks 6 (4) (1995) 911–917. doi:10.1109/72.392253 .[36] G. Singh, T. Gehr, M. Püschel, M. Vechev, An abstract domain for certifying neural networks, Proceedings of the ACM on Programming Languages 3 (POPL) (2019) 1–30. doi:10.1145/3290354 .URL http://dx.doi.org/10.1145/3290354 
+
+[37] H. Zhang, H. Chen, C. Xiao, S. Gowal, R. Stanforth, B. Li, D. Boning, C.-J. Hsieh, Towards stable and e ffi cient training of verifiably robust neural networks (2019). arXiv:1906.06316 .URL https://arxiv.org/abs/1906.06316 
+
+[38] S. Wang, H. Zhang, K. Xu, X. Lin, S. Jana, C.-J. Hsieh, J. Z. Kolter, Beta-CROWN: E ffi cient bound propagation with per-neuron split constraints for complete and incomplete neural network verification, Advances in Neural Information Processing Systems 34 (2021). [39] K. Xu, Z. Shi, H. Zhang, Y. Wang, K.-W. Chang, M. Huang, B. Kailkhura, X. Lin, C.-J. Hsieh, Automatic perturbation analysis for scalable certified robustness and beyond (2020). arXiv:2002.12920 .URL https://arxiv.org/abs/2002.12920 
+
+[40] H. R. Varian, A bayesian approach to real estate assessment, Studies in Bayesian Econometrics and Statistics in Honor of Leonard J. Savage (1975). URL https://cir.nii.ac.jp/crid/1572824500518986496 
+
+[41] S. Fu, D. Su, S. Li, S. Sun, Y. Tian, Linear-exponential loss incorporated deep learning for imbalanced classification, ISA Transactions 140 (2023) 279–292. doi:10.1016/j.isatra.2023.06.016 .URL http://dx.doi.org/10.1016/j.isatra.2023.06.016 
+
+[42] H. Ishibuchi, H. Tanaka, H. Okada, An architecture of neural networks with interval weights and its application to fuzzy regression analysis, Fuzzy Sets and Systems 57 (1) (1993) 27–39. doi:10.1016/0165-0114(93)90118-2 .URL http://dx.doi.org/10.1016/0165-0114(93)90118-2 
+
+[43] K. Wang, K. Shariatmadar, S. K. Manchingal, F. Cuzzolin, D. Moens, H. Hallez, Creinns: Credal-set interval neural networks for uncertainty estimation in classification tasks, Neural Networks 185 (2025) 107198. doi:10.1016/j.neunet.2025.107198 .URL http://dx.doi.org/10.1016/j.neunet.2025.107198 
+
+[44] R. Koenker, G. Bassett, Regression quantiles, Econometrica 46 (1) (1978) 33. doi:10.2307/1913643 .URL http://dx.doi.org/10.2307/1913643 
+
+[45] I. Steinwart, A. Christmann, Estimating conditional quantiles with the help of the pinball loss, Bernoulli 17 (1) (Feb. 2011). doi:10.3150/ 10-bej267 .URL http://dx.doi.org/10.3150/10-BEJ267 
+
+[46] T. Pouplin, A. Je ff ares, N. Seedat, M. van der Schaar, Relaxed quantile regression: Prediction intervals for asymmetric noise (2025). arXiv: 2406.03258 .URL https://arxiv.org/abs/2406.03258 
+
+[47] A. Gammerman, G. Shafer, V. Vovk, Algorithmic learning in a random world, Springer Science +Business Media, 2005. [48] H. Papadopoulos, K. Proedrou, V. Vovk, A. Gammerman, Inductive Confidence Machines for Regression, Springer Berlin Heidelberg, 2002, Ch. 1, pp. 345–356. doi:10.1007/3-540-36755-1_29 .
+
+29 URL http://dx.doi.org/10.1007/3-540-36755-1_29 
+
+[49] L. Lu, X. Meng, S. Cai, Z. Mao, S. Goswami, Z. Zhang, G. E. Karniadakis, A comprehensive and fair comparison of two neural operators (with practical extensions) based on fair data, Computer Methods in Applied Mechanics and Engineering 393 (2022) 114778. doi:10. 1016/j.cma.2022.114778 .URL http://dx.doi.org/10.1016/j.cma.2022.114778 
+
+[50] J. MacQueen, Multivariate observations, in: Proceedings ofthe 5th Berkeley Symposium on Mathematical Statisticsand Probability, Vol. 1, 1967, pp. 281–297. [51] S. Lloyd, Least squares quantization in pcm, IEEE transactions on information theory 28 (2) (1982) 129–137. [52] A. Neumaier, The Wrapping E ff ect, Ellipsoid Arithmetic, Stability and Confidence Regions, Springer Vienna, 1993, Ch. 0, pp. 175–190. 
+
+doi:10.1007/978-3-7091-6918-6_14 .URL http://dx.doi.org/10.1007/978-3-7091-6918-6_14 
+
+[53] N. Revol, A ffi ne iterations and wrapping e ff ect: Various approaches (2022). arXiv:2201.00513 .URL https://arxiv.org/abs/2201.00513 
+
+[54] Y. Ma, Z. Li, R. Liu, B. Liu, S. S. Yu, X. Liao, P. Shi, Data-driven interval robust optimization method of vpp bidding strategy in spot market under multiple uncertainties, Applied Energy 384 (2025) 125366. doi:10.1016/j.apenergy.2025.125366 .URL http://dx.doi.org/10.1016/j.apenergy.2025.125366 
+
+[55] X. Zhao, L. Wang, Double-scale time-dependent reliable topology optimization based on the first-passage failure and interval process theories, Computer Methods in Applied Mechanics and Engineering 443 (2025) 118088. doi:10.1016/j.cma.2025.118088 .URL http://dx.doi.org/10.1016/j.cma.2025.118088 
+
+[56] H. Zhang, L. Wang, Interval-updated inverse identification framework for transient coupling of loads and heat fluxes via force-thermal modal decomposition and adaptive surrogate modeling, International Communications in Heat and Mass Transfer 166 (2025) 109223. doi: 10.1016/j.icheatmasstransfer.2025.109223 .URL http://dx.doi.org/10.1016/j.icheatmasstransfer.2025.109223 
+
+30
