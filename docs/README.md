@@ -6,73 +6,53 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-25
-- 运行时间：2026-03-25 20:28:34 UTC
+- 最新运行日期：2026-03-26
+- 运行时间：2026-03-26 20:15:55 UTC
 - 运行状态：成功
-- 本次总论文数：17
-- 精读区：8
-- 速读区：9
+- 本次总论文数：11
+- 精读区：6
+- 速读区：5
 
 ### 今日简报（AI）
-今日深挖 17 篇 AI+Science 前沿论文，重点聚焦统一神经算子学习与 PINNs 坐标编码优化。
-满分佳作 UniFluids 与线性网格编码技术通过流匹配与结构创新，显著提升了流体模拟与物理建模的精度。
-建议优先研读两篇 10 分论文，掌握物理信息神经网络在复杂动力学系统中的最新突破。
-- 详情：[/202603/25/README](/202603/25/README)
+今日精选 11 篇前沿成果，重点聚焦 PINN 在高维计算与流体力学中的满分突破
+- 详情：[/202603/26/README](/202603/26/README)
 
 ### 精读区论文标签
-1. [UniFluids: Unified Neural Operator Learning with Conditional Flow-matching](/202603/25/2603.22309v1-unifluids-unified-neural-operator-learning-with-conditional-flow-matching)  
+1. [Stochastic Dimension-Free Zeroth-Order Estimator for High-Dimensional and High-Order PINNs](/202603/26/2603.24002v1-stochastic-dimension-free-zeroth-order-estimator-for-high-dimensional-and-high-order-pinns)  
    标签：评分：10.0/10、query:pinn
-   evidence：针对多种PDE的统一神经算子学习
-2. [Coordinate Encoding on Linear Grids for Physics-Informed Neural Networks](/202603/25/2603.22700v1-coordinate-encoding-on-linear-grids-for-physics-informed-neural-networks)  
+   evidence：用于高维高阶PINN的零阶估计器
+2. [Bridging Computational Fluid Dynamics Algorithm and Physics-Informed Learning: SIMPLE-PINN for Incompressible Navier-Stokes Equations](/202603/26/2603.24013v1-bridging-computational-fluid-dynamics-algorithm-and-physics-informed-learning-simple-pinn-for-incompressible-navier-stokes-equations)  
    标签：评分：10.0/10、query:pinn
-   evidence：物理信息神经网络的坐标编码层
-3. [A Residual-Attention Physics-Informed Neural Network for Irregular Interfaces and Multi-Peak Transport Fields](/202603/25/2603.22803v1-a-residual-attention-physics-informed-neural-network-for-irregular-interfaces-and-multi-peak-transport-fields)  
+   evidence：针对不可压缩N-S方程提出SIMPLE-PINN以提高稳定性和收敛性
+3. [FFV-PINN: A Fast Physics-Informed Neural Network with Simplified Finite Volume Discretization and Residual Correction](/202603/26/2603.24114v1-ffv-pinn-a-fast-physics-informed-neural-network-with-simplified-finite-volume-discretization-and-residual-correction)  
    标签：评分：10.0/10、query:pinn
-   evidence：用于多物理场的残差注意力PINN
-4. [Generalization Bounds for Physics-Informed Neural Networks for the Incompressible Navier-Stokes Equations](/202603/25/2603.23072v1-generalization-bounds-for-physics-informed-neural-networks-for-the-incompressible-navier-stokes-equations)  
+   evidence：集成有限体积离散化和残差修正的快速PINN框架
+4. [Linear-Nonlinear Fusion Neural Operator for Partial Differential Equations](/202603/26/2603.24143v1-linear-nonlinear-fusion-neural-operator-for-partial-differential-equations)  
    标签：评分：10.0/10、query:pinn
-   evidence：求解不可压缩纳维-斯托克斯方程的PINN泛化误差界
-5. [Physics-Infused Neural MPC of a DC-DC Boost Converter with Adaptive Transient Recovery and Enhanced Dynamic Stability](/202603/25/2603.21128v1-physics-infused-neural-mpc-of-a-dc-dc-boost-converter-with-adaptive-transient-recovery-and-enhanced-dynamic-stability)  
+   evidence：提出了一种通过解耦线性和非线性效应来求解偏微分方程的新型神经算子结构
+5. [Project and Generate: Divergence-Free Neural Operators for Incompressible Flows](/202603/26/2603.24500v1-project-and-generate-divergence-free-neural-operators-for-incompressible-flows)  
+   标签：评分：10.0/10、query:pinn
+   evidence：用于不可压缩流体动力学的无散度神经算子
+6. [Residual Attention Physics-Informed Neural Networks for Robust Multiphysics Simulation of Steady-State Electrothermal Energy Systems](/202603/26/2603.23578v1-residual-attention-physics-informed-neural-networks-for-robust-multiphysics-simulation-of-steady-state-electrothermal-energy-systems)  
    标签：评分：9.0/10、query:pinn
-   evidence：用于升压转换器的混合物理信息神经网络
-6. [Solving Functional Renormalization Group Equations with Neural Networks](/202603/25/2603.21151v1-solving-functional-renormalization-group-equations-with-neural-networks)  
-   标签：评分：9.0/10、query:pinn
-   evidence：将流动方程嵌入神经网络的损失函数中
-7. [Adversarial Vulnerabilities in Neural Operator Digital Twins: Gradient-Free Attacks on Nuclear Thermal-Hydraulic Surrogates](/202603/25/2603.22525v1-adversarial-vulnerabilities-in-neural-operator-digital-twins-gradient-free-attacks-on-nuclear-thermal-hydraulic-surrogates)  
-   标签：评分：9.0/10、query:pinn
-   evidence：神经算子架构中的对抗脆弱性
-8. [Double Coupling Architecture and Training Method for Optimization Problems of Differential Algebraic Equations with Parameters](/202603/25/2603.22724v1-double-coupling-architecture-and-training-method-for-optimization-problems-of-differential-algebraic-equations-with-parameters)  
-   标签：评分：9.0/10、query:pinn
-   evidence：用于微分代数方程的双PINN架构
+   evidence：用于电热系统多物理场模拟的残差注意力PINN
 
 ### 速读区论文标签
-1. [Weak Adversarial Neural Pushforward Method for the McKean-Vlasov / Mean-Field Fokker-Planck Equation](/202603/25/2603.16186v2-weak-adversarial-neural-pushforward-method-for-the-mckean-vlasov--mean-field-fokker-planck-equation)  
+1. [Deep Kinetic JKO schemes for Vlasov-Fokker-Planck Equations](/202603/26/2603.23901v1-deep-kinetic-jko-schemes-for-vlasov-fokker-planck-equations)  
    标签：评分：8.0/10、query:pinn
-   evidence：用于Fokker-Planck偏微分方程的神经推断方法
-2. [Sparsely-Supervised Data Assimilation via Physics-Informed Schrödinger Bridge](/202603/25/2603.22319v1-sparsely-supervised-data-assimilation-via-physics-informed-schrdinger-bridge)  
-   标签：评分：8.0/10、query:pinn
-   evidence：用于PDE数据同化的物理信息生成模型
-3. [Weak-PDE-Net: Discovering Open-Form PDEs via Differentiable Symbolic Networks and Weak Formulation](/202603/25/2603.22951v1-weak-pde-net-discovering-open-form-pdes-via-differentiable-symbolic-networks-and-weak-formulation)  
-   标签：评分：8.0/10、query:pinn
-   evidence：通过可微符号网络发现偏微分方程
-4. [Sparse Weak-Form Discovery of Stochastic Generators](/202603/25/2603.20904v2-sparse-weak-form-discovery-of-stochastic-generators)  
+   evidence：基于深度神经网络的动力学Fokker Planck方程数值求解方法
+2. [Many-body mobility edges in one dimension revealed by efficient and interpretable feature-based learning with Kolmogorov-Arnold Networks](/202603/26/2603.21807v1-many-body-mobility-edges-in-one-dimension-revealed-by-efficient-and-interpretable-feature-based-learning-with-kolmogorov-arnold-networks)  
    标签：评分：7.0/10、query:pinn
-   evidence：随机微分方程的弱形式发现
-5. [Symbolic Graph Networks for Robust PDE Discovery from Noisy Sparse Data](/202603/25/2603.22380v1-symbolic-graph-networks-for-robust-pde-discovery-from-noisy-sparse-data)  
+   evidence：相互作用费米子系统的物理信息机器学习
+3. [Symbolic--KAN: Kolmogorov-Arnold Networks with Discrete Symbolic Structure for Interpretable Learning](/202603/26/2603.23854v1-symbolic--kan-kolmogorov-arnold-networks-with-discrete-symbolic-structure-for-interpretable-learning)  
    标签：评分：7.0/10、query:pinn
-   evidence：用于 PDE 发现的符号图网络
-6. [Generalizing Dynamics Modeling More Easily from Representation Perspective](/202603/25/2603.22655v1-generalizing-dynamics-modeling-more-easily-from-representation-perspective)  
+   evidence：用于科学机器学习中发现控制方程的符号Kolmogorov-Arnold网络
+4. [An Invariant Compiler for Neural ODEs in AI-Accelerated Scientific Simulation](/202603/26/2603.23861v1-an-invariant-compiler-for-neural-odes-in-ai-accelerated-scientific-simulation)  
    标签：评分：7.0/10、query:pinn
-   evidence：使用神经常微分方程进行动力学建模
-7. [GasNiTROM: Model Reduction via Non-Intrusive Optimization of Oblique Projection Operators and Guaranteed-Stable Latent-Space Dynamics](/202603/25/2603.21254v1-gasnitrom-model-reduction-via-non-intrusive-optimization-of-oblique-projection-operators-and-guaranteed-stable-latent-space-dynamics)  
-   标签：评分：6.0/10、query:pinn
-   evidence：潜空间动力学的非侵入式降阶建模
-8. [Direct Interval Propagation Methods using Neural-Network Surrogates for Uncertainty Quantification in Physical Systems Surrogate Model](/202603/25/2603.21308v1-direct-interval-propagation-methods-using-neural-network-surrogates-for-uncertainty-quantification-in-physical-systems-surrogate-model)  
-   标签：评分：6.0/10、query:pinn
-   evidence：物理系统的神经网络代理模型
-9. [PhysSkin: Real-Time and Generalizable Physics-Based Animation via Self-Supervised Neural Skinning](/202603/25/2603.23194v1-physskin-real-time-and-generalizable-physics-based-animation-via-self-supervised-neural-skinning)  
-   标签：评分：6.0/10、query:pinn
-   evidence：用于无网格且物理一致蒙皮场的物理信息框架
+   evidence：在科学模拟的神经微分方程中强制执行不变性
+5. [Quantum Neural Physics: Solving Partial Differential Equations on Quantum Simulators using Quantum Convolutional Neural Networks](/202603/26/2603.24196v1-quantum-neural-physics-solving-partial-differential-equations-on-quantum-simulators-using-quantum-convolutional-neural-networks)  
+   标签：评分：7.0/10、query:pinn
+   evidence：用于PDE的混合量子-经典CNN求解器
 
 
 <div class="dpr-home-promo-card">
