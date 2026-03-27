@@ -1,0 +1,873 @@
+Title: WarPGNN: A Parametric Thermal Warpage Analysis Framework with Physics-aware Graph Neural Network
+
+URL Source: https://arxiv.org/pdf/2603.18581v1
+
+Published Time: Fri, 20 Mar 2026 00:46:53 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# WarPGNN: A Parametric Thermal Warpage Analysis Framework with Physics-aware Graph Neural Network 
+
+## Haotian Lu, Jincong Lu, Sachin Sachdeva and Sheldon X.-D. Tan 
+
+Department of Electrical and Computer Engineering, University of California at Riverside Riverside, CA, USA hlu123@ucr.edu,stan@ece.ucr.edu 
+
+## ABSTRACT 
+
+With the advent of system-in-package (SiP) chiplet-based design and heterogeneous 2.5D/3D integration, thermal-induced warpage has become a critical reliability concern. While conventional numerical approaches can deliver highly accurate results, they often incur prohib-itively high computational costs, limiting their scalability for complex chiplet-package systems. In this paper, we present WarPGNN , an ef-ficient and accurate parametric thermal warpage analysis framework powered by Graph Neural Networks (GNNs). By operating directly on graphs constructed from the floorplans, WarPGNN enables fast warpage-aware floorplan exploration and exhibits strong transfer-ability across diverse package configurations. Our method first en-codes multi-die floorplans into reduced Transitive Closure Graphs (rTCGs), then a Graph Convolution Network (GCN)-based encoder extracts hierarchical structural features, followed by a U-Net inspired decoder that reconstructs warpage maps from graph feature embed-dings. Furthermore, to address the long-tailed pattern of warpage data distribution, we developed a physics-informed loss and revised a message-passing encoder based on Graph Isomorphic Network (GIN) that further enhance learning performance for extreme cases and expressiveness of graph embeddings. Numerical results show that 
+
+WarPGNN achieves more than 205.91 × speedup compared with the 2-D efficient FEM-based method and over 119766.64 × acceleration with 3-D FEM method COMSOL, respectively, while maintaining comparable accuracy at only 1.26% full-scale normalized RMSE and 2.21% warpage value error. Compared with recent DeepONet-based model, our method achieved comparable prediction accuracy and in-ference speedup with 3.4 × lower training time. In addition, WarPGNN 
+
+demonstrates remarkable transferability on unseen datasets with up to 3.69% normalized RMSE and similar runtime. 
+
+## 1 INTRODUCTION 
+
+Due to the increasing demand for high-performance computing, 2.5D and 3D chiplet-based integration that packs various components fab-ricated with different technologies becomes a promising technique for beyond-Moore computing paradigm due to its modular designs, multiple functionalities, low cost and few manufacturing defects [ 1 ]. However, the integration of heterogeneous components and packages incurs emerging reliability concerns. Among them, thermal warpage has become a more critical issue at the package level, where both homogeneous and heterogeneous integrations are prone to deforma-tion caused by the Coefficient of Thermal Expansion (CTE) mismatch between various materials under thermal load [ 2 , 3]. An illustration of the warpage formation is shown in Fig. 1(a). An efficient while accurate thermal warpage analysis is critical to optimize the floorplan design of chiplet-based systems to improve re-liability [ 4 –6]. Many analytical as well as numerical solvers have been proposed to simulate thermal warpage problem. Suhir’s 1D model and its revisions [ 7– 9 ] utilized physics-based closed-form analyti-cal solution to calculate deformation value and curvature at specific positions with relatively high accuracy. However, such analytical Temperature Difference     
+
+> CTE Mismatch
+> Substrate
+> Die Die Underfill Die
+> (a) Substrate
+> Hetero.
+> Die +
+> Underfill
+> 𝑪 𝒉
+> 𝑪 𝒗 (b)
+
+Figure 1: (a) Illustration of thermal warpage formation. (b) TCG rep-resentation for a 6-die floorplan. Closure edges have been eliminated. 
+
+models are always over-simplified, being applicable only to one-dimensional analyses with fixed layer (two layers) and unsuitable for higher-dimensional cases with complex structures with multiple layers. Commercial solvers such as ANSYS [ 10 ] and COMSOL [ 11 ], and other Finite Element Method (FEM) based solvers [ 12 – 15 ] can accurately capture displacement for complex structures, but demand high computation overhead. To further improve computational effi-ciency, Lo et al. [ 16 ] proposed a more efficient FEM-based solver that first transforms three-dimensional structure to a 2-D plane, and solves it based on 2-D FEM formulation leveraging an efficient Discrete Kirch-hoff Triangle (DKT) theory [ 17 ] for flip-chip package based designs. This method still suffers from FEM-related high computational cost. Recently, [ 18 ] addressed this challenge using a DeepONet [ 19 ]-based surrogate for advanced-package warpage prediction, demonstrating that learning-based approaches can significantly reduce FEM cost while preserving high accuracy, albeit with heavy training overhead. On the other hand, recent breakthroughs in deep learning for cog-nitive tasks based on deep neural networks (DNNs) [ 20 ] have opened up new opportunities for various applications in electronic design au-tomation (EDA). Among them, Graph Neural Networks (GNNs) have emerged as a key architecture that leverages graph representations to perform various learning tasks [ 21 – 26 ]. Specifically, EMGraph [ 23 ]encoded multi-segment interconnect structures into graph represen-tations and trained a GNN based on GraphSAGE [ 27 ] to predict stress distributions, with order-of-magnitude of speedup and marginal ac-curacy loss. ThermGCN [24 ] based on Graph Convolution Network (GCN) [ 28 ] is proposed to predict full-chip thermal maps for chiplet-based 2.5D systems, achieving remarkable speedup compared to con-ventional numerical methods and demonstrated strong knowledge transferability. Guo et al. [ 26 ] proposed a graph-based IRGNN that integrates a numerical solver and point clouds while exploiting power-grid topology for efficient IR-drop analysis. These studies collectively demonstrate the exceptional capability and generalizability of GNNs in performing high-fidelity graph-to-field prediction. In this work, to mitigate the high computing costs in FEM while preserving sufficient accuracy in thermal warpage simulation, we propose a data-driven physics-aware parametric framework termed 
+
+WarPGNN for efficient thermal warpage prediction of flip-chip pack-ages, leveraging GNN’s inherent capability in processing graph data and strong transferability. We employ the widely-accepted encoder-decoder architecture [ 29 ] with a GCN-based encoder for graph feature 
+
+> arXiv:2603.18581v1 [cs.AR] 19 Mar 2026
+
+embedding and a decoder inspired by U-Net [ 30 ] for deformation re-construction. Our major contributions in this work are as follows: 
+
+• We propose the first GNN-based parametric framework to per-form efficient and accurate thermal warpage analysis for multi-die floorplans, leveraging a lightweight reduced Transitive Closure Graph (rTCG) format to represent multi-die placement as shown in Fig. 1(b). The resulting WarPGNN enables fast parametric design-space exploration for warpage-aware floorplan optimization. 
+
+• We formulate the thermal warpage simulation problem as a graph-to-field prediction task. Our backbone model contains an encoder based on MLP-structured GCN that takes rTCG as input, and a decoder with U-Net architecture is cascaded to remap node embed-dings to out-of-plane deformation map. 
+
+• We further investigate the Partial Differential Equation (PDE)-governed characteristics of warpage data, and design a physics-informed loss that accounts for the long-tailed data distribution and field smoothness for accuracy enhancement, especially on ex-treme cases. Additionally, a GIN-based message-passing encoder with higher expressive capability for graph embeddings is devel-oped to further enhance the overall prediction accuracy. 
+
+• Numerical results show that WarPGNN achieves a computational speedup of over 119766.64 × compared to FEM-based COMSOL [ 11 ], and a 205.91 × acceleration over the efficient 2-D FEM solver [ 16 ], with only 1.26% full-scale normalized RMSE and 2.21% warpage error compared to COMSOL. Additionally, WarPGNN reaches sim-ilar performance with 3.4 × lower training time compared with DeepONet-based method [ 18 ]. Furthermore, our method demon-strates strong transferability on four unseen datasets, achieving normalized RMSE of up to 3.69% in deformation map prediction. 
+
+## 2 PRELIMINARIES 2.1 Thermal Warpage Problem for Package Design 
+
+The thermal warpage in a typical flip-chip package of die-underfill-substrate assembly considered in this work is defined as the defor-mation from its original shape. Package warpage refers to the value difference between the maximum and the minimum deformations along the z-axis, shown below in Eq. (1) [16],         
+
+> 𝑊 =max
+> (𝑥,𝑦 ) ∈ Ω𝑤 (𝑥, 𝑦 ) − min
+> (𝑥,𝑦 ) ∈ Ω𝑤 (𝑥, 𝑦 )(1)
+
+here 𝑤 (𝑥, 𝑦 ) marks out-of-plane deformation of the z-axis, 𝑥 and 𝑦 
+
+represent the geometrical coordinates on deformation surface and Ω
+
+denotes the domain of package. 
+
+## 2.2 3-D FEM Numerical Analysis Method 
+
+For warpage analysis, several simplified analytical models based on one-dimensional beam theory have been proposed [ 9]. However, as package architectures become more heterogeneous and multi-physics interactions intensify, these analytical formulations exhibit increasing discrepancies compared to high-fidelity thermo-mechanical simula-tions. Consequently, FEM solvers remain the predominant approach for accurate warpage prediction, albeit at the expense of substantial computational cost. For 3-D warpage analysis, the FEM formulation is shown below [31]       
+
+> [𝐾 ] { 𝑑 }={𝐹 th }(2)
+
+where 𝑑 is the displacement, and the stiffness matrix [𝐾 ] and thermal load vector 𝐹 th are assembled from the element level stiffness matrix and thermal load vector defined in Eq. (3), 
+
+[𝐾 𝑒 ] =
+
+∫
+
+> Ω𝑒
+
+[𝐵 ]𝑇 [𝐶 ] [ 𝐵 ] 𝑑 Ω; {𝐹 th  
+
+> 𝑒
+
+} =
+
+∫
+
+> Ω𝑒
+
+[𝐵 ]𝑇 [𝐶 ] { 𝜀 th } 𝑑 Ω. (3) here 𝜀 th is the strain due to thermal load. The matrix 𝐶 represents the strain to stress relation due to the the mismatched coefficient of thermal expansion (CTE) of adjacent layers at the element level. matrix 
+
+[𝐾 ] in Eq. (2) typically is singular due to rigid-body issue. Rigid-body motion is prevented by minimal constraints (one node fixed in all directions, two additional nodes fixed selectively). After solving this equation, the warpage is just the displacement in 𝑧 direction. 
+
+## 2.3 2-D FEM analysis based on laminate theory 
+
+To achieve a better trade-off between efficiency and analysis accu-racy, [ 16 ] employs Classical Laminate Theory (CLT) [ 32 ] for multi-layer package warpage analysis as thickness of package layers are much smaller than package dimension [ 33 ]. The idea is to integrate the thickness and forming "resultants" – forces and their moments in the formulation. The resulting energy minimization equation is shown in Eq. (4),       
+
+> Π=
+> ∬
+> Ω
+> 12
+> 𝜺
+> k
+> 𝑇 ABBD
+>   𝜺
+> k
+> 
+> −
+> N𝑡
+> M𝑡
+> 𝑇 𝜺
+> k
+> 
+> 𝑑𝑥 𝑑𝑦, (4)
+
+where the in-plane strain 𝜀 (𝑥, 𝑦 ) and curvature vectors k(𝑥, 𝑦 ) are defined as Eq. (5),                   
+
+> 𝜺 (𝑥, 𝑦 )=
+> 
+> 𝜕𝑢 (𝑥,𝑦 )
+> 𝜕𝑥 𝜕𝑣 (𝑥,𝑦 )
+> 𝜕𝑦 𝜕𝑢 (𝑥,𝑦 )
+> 𝜕𝑦 +𝜕𝑣 (𝑥,𝑦 )
+> 𝜕𝑥
+> 
+> ,k(𝑥, 𝑦 )=
+> 
+> −𝜕 2𝑤 (𝑥,𝑦 )
+> 𝜕𝑥 2
+> −𝜕 2𝑤 (𝑥,𝑦 )
+> 𝜕𝑦 2
+> −2𝜕 2𝑤 (𝑥,𝑦 )
+> 𝜕𝑥 𝜕𝑦
+> 
+> ,(5)
+
+where 𝑢 (𝑥, 𝑦 ), 𝑣 (𝑥, 𝑦 ), and 𝑤 (𝑥, 𝑦 ) denote the displacements of the laminate reference plane in the 𝑥 , 𝑦 , and 𝑧 directions, respectively. 𝐴 ,
+
+𝐵 and 𝐷 are the extensional, coupling, and bending stiffness matrices served as a connection between the applied thermal loads and the strains in the laminate. By assuming in-plane strain 𝜀 (𝑥, 𝑦 ) = 0 [34 ], the governing equation can be derived by minimizing revised energy function shown in Eq. (6),              
+
+> Π∗=
+> ∬
+> Ω
+> 12k(x,y)𝑇 𝐷 ∗(𝑥, 𝑦 )k(x,y) − M∗
+> 𝑡 (𝑥, 𝑦 )𝑇 k(x,y)
+> 
+> 𝑑𝑥 𝑑𝑦, (6)
+
+where 𝐷 ∗ (𝑥, 𝑦 ) denotes the reduced bending stiffness matrix obtained from the CLT parameters, and M∗ 
+
+> 𝑡
+
+(𝑥, 𝑦 ) represents the effective ther-mal moment (loads). The 2-D FEM indeed leads to significant speedup over the 3-D FEM method; however, this method still requires mesh generation and matrix solving for each new design, as it is still a conventional FEM solver suffering from computational inefficiency. 
+
+## 3 PROPOSED WARPGNN FOR PARAMETRIC THERMAL WARPAGE ANALYSIS 3.1 Graph Encoding for Multi-die Placement 
+
+We formulate the thermal warpage analysis problem as graph-to-field regression task, as multi-die floorplans with various die assign-ments can be naturally viewed as graphs. In this work, we adopt the Transitive Closure Graph (TCG) representation for graph encoding, which has been widely used to represent multi-die flip-chip floor-plans [ 4, 35 , 36 ]. TCG consists of an acyclic horizontal TCG 𝐶 ℎ and an acyclic vertical TCG 𝐶 𝑣 , modeling the geometric relations between all dies as shown in Fig. 1(b). To improve the computational efficiency during GNN training, we employ a reduced Transitive Closure Graph (rTCG) generation flow as shown in Algo. 1 adapted from [ 37 ], which removes redundant edges while strictly preserving all geometric adjacency relations among dies. The procedure first invokes InsertPrecedeEdge to examine each die pair (𝑖, 𝑗 ) and determine their horizontal or vertical precedence based on their relative positions, inserting the corresponding directed edges into 𝐶 raw  
+
+> ℎ
+
+or 𝐶 raw  
+
+> 𝑣
+
+. Then Closure (·) performs a transitive closure to obtain the complete spatial reachability graph, and Reduce (·) applies a transitive reduction to prune all redundant relations, resulting in the minimal but equivalent backbone of the rTCG [37]. 
+
+Algorithm 1 rTCG Construction for Multi-Die Floorplan 
+
+Input: Multi-die floorplan D = {𝑑 𝑖 }𝑁 𝑖 =1 with die sizes (𝑤 𝑖 , ℎ 𝑖 ), CTE 𝛼 𝑖 and bottom-left corner position (𝑥 𝑜,𝑖 , 𝑦 𝑜,𝑖 ); material parameters (𝐸 die , 𝑡 die ),
+
+(𝐸 fill , 𝛼 fill , 𝑡 fill ), (𝐸 sub , 𝛼 sub , 𝑡 sub ); package size ( 𝑊 pkg , 𝐻 pkg ). 
+
+Output: Attributed graph 𝑟𝑇𝐶𝐺 = (𝑉 , 𝐸 ) for GNN training.  
+
+> 1:
+
+(𝐶 raw  
+
+> ℎ
+
+, 𝐶 raw  
+
+> 𝑣
+
+) ← InsertPrecedeEdge (𝑖, 𝑗 ) for all 1 ≤ 𝑖 < 𝑗 ≤ 𝑁  
+
+> 2:
+
+(𝐶 red  
+
+> ℎ
+
+, 𝐶 red  
+
+> 𝑣
+
+) ← Reduce (Closure (𝐶 raw  
+
+> ℎ
+
+, 𝐶 raw  
+
+> 𝑣
+
+) )  
+
+> 3:
+
+𝑉 ← { 1, . . . , 𝑁 }, 𝐸 ← { ( 𝑢, 𝑣 ) | ( 𝑢, 𝑣 ) ∈ 𝐶 red  
+
+> ℎ
+
+∪ 𝐶 red  
+
+> 𝑣
+
+} 
+
+> 4:
+
+for 𝑣 ∈ 𝑉 do ⊲ Node feature  
+
+> 5:
+
+˜𝑤 𝑣 , ˜ℎ𝑣 , ˜𝑥 𝑐,𝑣 , ˜𝑦 𝑐,𝑣 = 𝑤 𝑣  
+
+> 𝑊 pkg
+
+, ℎ𝑣  
+
+> 𝐻 pkg
+
+, 𝑥 𝑜,𝑣 +0.5·𝑤 𝑣  
+
+> 𝑊 pkg
+
+, 𝑦 𝑜,𝑣 +0.5·ℎ𝑣  
+
+> 𝐻 pkg
+> 6:
+
+𝛼 eff  
+
+> 𝑣
+
+, Δ𝛼 𝑣 ← 𝑓 eff (𝐸 die , 𝑡 die , 𝐸 fill , 𝛼 fill , 𝑡 fill , 𝛼 𝑣 ), 𝛼 eff  
+
+> 𝑣
+
+− 𝛼 sub  
+
+> 7:
+
+x𝑣 ← concat ( ˜𝑤 𝑣 , ˜ℎ𝑣 , ˜𝑥 𝑐,𝑣 , ˜𝑦 𝑐,𝑣 , 𝛼 𝑣 , 𝛼 eff  
+
+> 𝑣
+
+, Δ𝛼 𝑣 ) 
+
+> 8:
+
+for each (𝑢, 𝑣 ) ∈ 𝐸 do ⊲ Edge feature  
+
+> 9:
+
+𝜏 𝑢𝑣 ← type (𝑢, 𝑣 ) ∈ { H, V} 
+
+> 10:
+
+Δ𝑥 𝑢𝑣 , Δ𝑦 𝑢𝑣 , 𝜌 𝑢𝑣 = ˜𝑥 𝑐,𝑣 − ˜𝑥 𝑐,𝑢 , ˜𝑦 𝑐,𝑣 − ˜𝑦 𝑐,𝑢 , max 
+
+ 0, 𝑥 L  
+
+> 𝑣 −𝑥 R
+> 𝑢
+
+ 
+
+> 𝑊 pkg
+> 11:
+
+𝜹 𝑢𝑣 , Δ𝛼 𝑢𝑣 ← ( Δ𝑥 𝑢𝑣 , Δ𝑦 𝑢𝑣 , 𝜌 𝑢𝑣 ), 𝛼 eff  
+
+> 𝑢
+
+− 𝛼 eff  
+
+> 𝑣
+> 12:
+
+Δ𝑤 𝑢𝑣 , Δℎ𝑢𝑣 ← ( ˜𝑤 𝑢 − ˜𝑤 𝑣 ), ( ˜ℎ𝑢 − ˜ℎ𝑣 ) 
+
+> 13:
+
+e𝑢𝑣 ← concat (𝜏 𝑢𝑣 , 𝜹 𝑢𝑣 , Δ𝛼 𝑢𝑣 , Δ𝑤 𝑢𝑣 , Δℎ𝑢𝑣 ) 
+
+> 14:
+
+return 𝑟𝑇𝐶𝐺 (𝑉 , 𝐸 ) ← { x𝑣 }𝑁 , {e𝑢𝑣 }(𝑢,𝑣 ) ∈ 𝐸 
+
+Each node feature x𝑣 encodes both geometric and material proper-ties of die 𝑣 , including its normalized width, height, centroid location, the bare-die CTE, the effective CTE of the die–underfill composite, obtained through the thickness-weighted mixing function 𝑓 eff , and the CTE mismatch between the composite and the substrate. This provides a compact representation of multi-level thermo-mechanical coupling at the die scale. Meanwhile, each edge feature e𝑢𝑣 captures the relative spatial relationship and material contrast between neigh-boring dies (𝑢, 𝑣 ), including their horizontal/vertical adjacency type, normalized relative displacements, gap and overlap metrics, and the effective CTE difference, which jointly characterize local geometry and thermal interactions. 
+
+## 3.2 GCN-based WarPGNN Architecture for Parametric Thermal Warpage Prediction 
+
+In this section, we present WarPGNN , a parametric framework de-signed for zero-shot warpage prediction under multi-physics coupling. The framework takes the reduced TCG 𝑟𝑇𝐶𝐺 (𝑉 , 𝐸 ) with floorplan features as input, and outputs both a deformation map and warpage value defined in Eq. (1) . WarPGNN model consists of two main com-ponents, an 𝐿 -layer GCN-based encoder that extracts hierarchical graph embeddings, and a U-Net–inspired decoder that reconstructs the pixel-level deformation field from graph features. Fig. 2 illustrates the node update of a single GCN layer, where all MLPs are learnable. For each edge feature e𝑢𝑣 connecting nodes (𝑢, 𝑣 ) ∈ E in the 𝑙 -th layer, we calculate the edge weight 𝑔 𝑢𝑣 using a 2-layer MLP expressed by Eq. (7), 
+
+𝑔 (𝑙 ) 
+
+> 𝑢𝑣
+
+= 𝜎 
+
+
+
+(w(𝑙 ) 
+
+> 2
+
+)⊤ ReLU (W(𝑙 ) 
+
+> 1
+
+· e𝑢𝑣 + b(𝑙 ) 
+
+> 1
+
+) + b(𝑙 )
+
+> 2
+
+
+
+∈ ( 0, 1) (7) 
+
+where 𝜎 denotes the activation function, (w(𝑙 ) 
+
+> 2
+
+)⊤, W(𝑙 ) 
+
+> 1
+
+, b(𝑙 ) 
+
+> 1
+
+, b(𝑙 ) 
+
+> 2
+
+are learnable parameters, ReLU (·) is an activation function. !!             
+
+> (#)
+> !%
+> (#)
+> !&
+> (#)
+> "'!(!
+> "'"("
+> "'#(#
+> #'!(!
+> (#)
+> #'"("
+> (#)
+> #'#(|#|
+> (#)
+> ℎ!
+> (#)!)
+> !(
+> (#)!)
+> ℎ&
+> (#)!)
+> All !'
+> (#)
+> !∈#(%)
+> &∈((*)
+> 2-layer
+> MLP
+> 1-layer MLP
+> All '!"
+> ($)
+> ("
+> ($)
+> 2-layer
+> MLP
+> )"
+> ($)
+> 1
+> +
+> -"
+> ($)
+> (."
+> ($)
+> !!
+> ReLU
+> +
+> Norm
+> /"
+> ($)0&
+> ($)
+
+Figure 2: Illustration of node embedding update within a single 𝑙 -th layer of our proposed GCN-based encoder. h (𝑙 ) 
+
+> 𝑖
+
+are node embeddings. 
+
+The message m(𝑙 ) 
+
+> 𝑣
+
+passing in the 𝑙 -th layer can be calculated by Eq. (8) with a trainable layer-specific parameter W(𝑙 ) ,
+
+m(𝑙 ) 
+
+> 𝑣
+
+=∑︁  
+
+> 𝑢 ∈N ( 𝑣 )
+
+𝑔 (𝑙 ) 
+
+> 𝑢𝑣
+
+· W(𝑙 ) h(𝑙 ) 
+
+> 𝑢
+
+(8) 
+
+where N ( 𝑣 ) are the neighboring set of node 𝑣 and h(𝑙 ) 
+
+> 𝑢
+
+denotes the embedding of node 𝑢 ∈ N ( 𝑣 ) obtained from the previous layer. Here we define h(1) 
+
+> 𝑣
+
+= x𝑣 , 𝑣 ∈ 𝑉 . To stabilize training and incorporate global context into each GCN layer, we apply Eq. (9) to jointly aggregate localized and global representations through skip connections. 
+
+˜m(𝑙 ) 
+
+> 𝑣
+
+= (1 + 𝛾 (𝑙 ) 
+
+> 𝑣
+
+) ⊙ m(𝑙 ) 
+
+> 𝑣
+
++ 𝛽 (𝑙 ) 
+
+> 𝑣
+
+(9) 
+
+here ⊙ denotes channel-wise multiplication, terms 𝛾 (𝑙 ) 
+
+> 𝑣
+
+, 𝛽 (𝑙 ) 
+
+> 𝑣
+
+are learn-able parameters given by Eq. (10), 
+
+[𝛾 (𝑙 ) 
+
+> 𝑣
+
+, 𝛽 (𝑙 ) 
+
+> 𝑣
+
+] = W2 𝜙 (W1s𝑣 + b1 ) + b2 (10) 
+
+in which s𝑣 denotes the broadcasted global packaging context such as thermal load and substrate properties serving as skip information, and 𝜙 (·) represents non-linear activation function. This operation represents a Multi-layer Perceptron (MLP) network for Feature-wise modulation [ 38 ]. Furthermore, we apply a residual connection and layer normalization [ 39 ] on the derived message ˜m(𝑙 ) 
+
+> 𝑣
+
+, as shown in Eq. (11), 
+
+h(𝑙 +1) 
+
+> 𝑣
+
+= LayerNorm (ReLU ( ˜m(𝑙 ) 
+
+> 𝑣
+
++ r(𝑙 ) 
+
+> 𝑣
+
+) ) . (11) 
+
+with the introduced residual term r(𝑙 ) 
+
+> 𝑣
+
+= W(𝑙 ) 
+
+> 𝑟
+
+h(𝑙 ) 
+
+> 𝑣
+
+and W(𝑙 ) 
+
+> 𝑟
+
+as a layer-specific trainable parameter. After the final 𝐿 -th layer of GCN-based encoder, the node embed-ding h(𝐿 +1) 
+
+> 𝑣
+
+of each node 𝑣 ∈ 𝑉 encodes both its local attributes and its global structural context. To enable convolutional decoding, these die-level embeddings must be translated into a spatial representation. Therefore, we construct a fixed-resolution H × W grid covering the entire package and project each die embedding onto the grid region corresponding to its normalized physical positions. For each point (x,y) on the H ×W grid, we locate the die whose normalized footprint covers that position. Each grid point falling inside die 𝑣 ∈ 𝑉 is as-signed the node embedding h(𝐿 +1) 
+
+> 𝑣
+
+, while grid points outside all dies are set to zero to indicate substrate. This operation yields a spatial feature tensor F ∈ R𝑑 ℎ ×𝐻 ×𝑊 that is piecewise constant over each die region and preserves the floorplan geometry, where 𝑑 ℎ denotes the dimensionality of the node embeddings h(𝐿 +1) 
+
+> 𝑣
+
+.The feature field F is then passed to a U-Net based decoder D𝜃 (·) ,which employs a lightweight multi-scale convolutional architecture with symmetric skip connections, enabling effective capture of both local and global warpage patterns, to reconstruct the deformation 
+
+ˆ𝑤 𝐻 ×𝑊 as shown in Eq. (12), 
+
+ˆ𝑤 𝐻 ×𝑊 = D𝜃 (F) (12) 3.3 Physics-aware Loss and Graph Representation Enhancement for Learning Improvement 
+
+We observe that, owing to the PDE-governed nature of the warpage formulation, the deformation values exhibit a highly non-uniform numerical distribution, resembling the hyperbolic-shape solution de-scribed in [ 9]. As shown in Fig. 3(a), most normalized warpage values fall within the interval [-2, 2], with a small number of outliers form a distinct long-tailed behavior that hinder the model’s ability to learn extreme cases effectively. Fig. 3(b) further illustrates this effect. When trained with a vanilla MSE loss, the GNN exhibits large prediction errors in the top-left region of the package. These high-error zones coincide with the outlier deformation values in the long-tailed distri-bution, confirming the model’s difficulty in capturing extreme cases, which is precisely the most critical regime for warpage analysis. 18.47          
+
+> 34.77
+> 30.43
+> 12.63
+> 3.38
+> 0.33
+> 0.054
+> 0.085
+> 0.126
+> 0.194 0.19
+> 0.328
+> 0.041
+> 0.067
+> 0.097
+> 0.146 0.144
+> 0.253
+> 0
+> 0.05
+> 0.1
+> 0.15
+> 0.2
+> 0.25
+> 0.3
+> 0.35
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> 30
+> 35
+> 40
+> [1,2] [0,1] [-1,0] [-2,-1] [-3,-2] [-inf,-3]
+> Loss Value
+> Proportion (%)
+> Normalized Bin Range
+> RMSE MAE
+> (a) Error Map
+> 𝜇𝑚
+> 𝜇𝑚
+> 𝜇𝑚
+> 𝜇𝑚
+> Peak -error hotspot
+> Elevated error (b)
+
+Figure 3: (a) Distribution statistics and model performance on normal-ized ground-truth results. (b) An example of the error map between GCN-based WarPGNN prediction and ground-truth deformation map. 
+
+To mitigate the data-scarcity issue and improve learning perfor-mance, we further developed a Physics-informed loss function by in-troducing penalty terms to confine the optimization space of WarPGNN 
+
+model. We employ two additional terms in the loss function based on our observations in warpage data statistics to perform training.  
+
+> 1
+
+Tail-aware reweighting strategy . Because a vanilla MSE loss indiscriminately averages over all grid cells, the model tends to favor the dominant low-magnitude regions and underfit the sparse yet critical tail cases. To alleviate this imbalance, we introduce a tail-selection mask 𝑚 = 1 ·  |𝑤 | > 𝜎 t
+
+ based on a prescribed threshold 𝜎 t
+
+to screen high-magnitude deformation regions, where 𝑤 is the ground-truth value. The resulting penalty term is defined as in Eq. (13), 
+
+Ltail = 1
+
+𝑁 
+
+> 𝑁
+
+∑︁ 
+
+> 𝑖
+
+𝑚 𝑖 ∥ ˆ𝑤 𝑖 − 𝑤 𝑖 ∥2 (13)  
+
+> 2
+
+Physics-aware gradient matching . To enhance the model’s ability to capture local curvature and high-gradient variations in the deformation field, we employ the Sobel operator [ 40 ] to estimate spatial gradients on the discretized deformation map. Gradients ∇𝑤 =
+
+[∇ 𝑥 𝑤, ∇𝑦 𝑤 ]𝑇 are computed via ∇𝑥 𝑤 = 𝑆 𝑥 ∗ 𝑤, ∇𝑦 𝑤 = 𝑆 𝑦 ∗ 𝑤 , where 
+
+𝑆 𝑥 and 𝑆 𝑦 denote the horizontal and vertical Sobel kernels and ∗ is convolution. The predicted and ground-truth gradients are enforced to match through the following penalty term shown in Eq. (14), 
+
+Lgrad = ∥ ∇ 𝑥 ˆ𝑤 − ∇ 𝑥 𝑤 ∥22 + ∇𝑦 ˆ𝑤 − ∇ 𝑦 𝑤 22 (14) 
+
+The enhanced PI-loss function LPI is defined in Eq. (15), 
+
+LPI = LMSE + 𝛼 · L tail + 𝜆 · L grad (15) 
+
+where LMSE is the vanilla MSE loss, 𝛼 and 𝜆 denote coefficients that balance the learning performance between MSE and PI penalty terms. To enhance the expressive capability of the graph encoder and better capture the coupling between multi-physics and geometry of multi-die floorplans, we adopt a GIN-based encoder that replaces the message-passing in Eq. (8) with an injective neighborhood aggregation scheme. The revised encoder leverages the Graph Isomorphism Net-work (GIN) [ 41 ] formulation, which alleviates the over-smoothness in GCN prediction tasks and thus becomes suitable for WarPGNN .Given the input graph 𝑟𝑇𝐶𝐺 (𝑉 , 𝐸 ) from Algo. 1 and initial node features h(1) 
+
+> 𝑣
+
+for each node 𝑣 ∈ 𝑉 , a GIN encoder with 𝐿 layers gener-ates a hierarchy of node embeddings h(2) 
+
+> 𝑣
+
+, . . . , h(𝐿 +1) 
+
+> 𝑣
+
+, each enriching the local representation with broader structural context. For a node 𝑣 ∈ 𝑉 in the 𝑙 -th layer, information is aggregated from its neighbors N ( 𝑣 ) using a learnable scalar 𝜖 (𝑙 ) as shown in Eq. (16), 
+
+a(𝑙 ) 
+
+> 𝑣
+
+= (1 + 𝜖 (𝑙 ) ) h(𝑙 ) 
+
+> 𝑣
+
++∑︁  
+
+> 𝑢 ∈N ( 𝑣 )
+
+h(𝑙 ) 
+
+> 𝑢
+
+, 𝑙 ∈ [ 1, 𝐿 ] (16) 
+
+The aggregated feature a(𝑙 ) 
+
+> 𝑣
+
+is then transformed through a MLP with residual connection to ensure injective mapping and enhance the learning performance of deeper layers, 
+
+˜h(𝑙 ) 
+
+> 𝑣
+
+= ReLU 
+
+
+
+𝑊 (𝑙 ) 
+
+> 2
+
+ReLU (𝑊 (𝑙 ) 
+
+> 1
+
+a(𝑙 ) 
+
+> 𝑣
+
+)
+
+
+
++ 𝑊 (𝑙 ) 
+
+> res
+
+a(𝑙 ) 
+
+> 𝑣
+
+, (17) 
+
+where 𝑊 (𝑙 ) 
+
+> res
+
+= 𝐼 if the input and output dimensions match. To stabilize the activation statistics across graphs of varying sizes, the intermediate representation is normalized by LayerNorm and then activated by ReLU, 
+
+h(𝑙 +1) 
+
+> 𝑣
+
+= ReLU 
+
+
+
+LayerNorm 
+
+ ˜h(𝑙 )
+
+> 𝑣
+
+ 
+
+(18) 
+
+The final-layer node embeddings {h(𝐿 +1) 
+
+> 𝑣
+
+}𝑣 ∈𝑉 will then be pro-cessed as in Sec. 3.2. Our GIN-based WarPGNN inherits the effi-ciency from GCN-based model and has improved learning ability by the revised data aggregation. 
+
+## 3.4 Overall Training Framework of WarPGNN 
+
+The overall training workflow is illustrated in Fig.4. For each multi-die floorplan, ground-truth warpage are generated using 3-D FEM solvers (e.g., COMSOL). In parallel, the same floorplans are converted into their rTCG format following in Algo. 1, which serve as inputs to our WarPGNN model. Prior to full-scale training, a small subset of training data is used to identify the optimal hyperparameters { 𝛼 ∗, 𝜆 ∗}that minimize the converged PI-loss and balance the contributions from data and physics-consistency. In this study we sweep 𝛼, 𝜆 from 0 to 0.1 and select { 𝛼 ∗, 𝜆 ∗}={0.05, 0.02}. Once these hyperparameters are fixed, the model is trained end-to-end using the PI-loss to accurately learn the deformation across diverse multi-die configurations. 
+
+## 4 EXPERIMENTAL RESULTS 4.1 Experimental Setup 
+
+Model : The proposed WarPGNN framework is fully developed using Python/PyTorch and DGL library. The training and test procedures are conducted on a Linux server equipped with two Intel 22-core E5-2699 CPUs and an Nvidia TITAN RTX GPU. Properties of materials and geometry of assembly used in this section are consistent with [ 9 , 16 ]and listed in Tab. 1. Temperature load Δ𝑇 is fixed at -115K to mimic the drop from fabrication temperature 200 𝑜 C to peak working temperature 85 𝑜 C. Our proposed GCN-based and GIN-based WarPGNN have 4 and 3 layers, respectively, and were trained for 53 and 57 epochs. 
+
+Evaluation Metrics : We employ normalized root-mean-square-error (RMSE) and mean-absolute-error (MAE) calculated per-sample as performance metrics to evaluate the difference between deforma-tion map prediction and ground-truth results obtained from COMSOL. Error of warpage value is evaluated using absolute error. Furthermore, training and inference time (runtime) is utilized to demonstrate the computational efficiency and speedup of our proposed method. Multi -die Floorplan                    
+
+> 3-D FEM Solver (COMSOL)
+> Ground -truth Results
+> GNN Encoder for graph
+> feature extraction
+> (GCN -based/GIN -based)
+> U-Net -structured
+> Decoder
+> WarPGNN Framework
+> Predicted Deformation
+> ℒ!" =ℒ#$% +𝛼 ∗⋅ℒ'()* +𝜆 ∗⋅ℒ+,(-
+> Physics -informed Loss
+> Reduced TCG
+> Feature Embed.
+> Node :𝒙 ).
+> Edge :{𝒆 /0 }
+> 𝒉 𝒊
+> 𝑳 𝑵
+> rTCG Construction
+> 𝑥 !
+> 𝑥 "
+> 𝑥 #
+> 𝑥 $𝑒 !$
+> 𝑒 !"
+> Training Update
+> 𝑒 "#
+> 𝑒 $"
+> 𝑒 !# 𝑒 $#
+
+Figure 4: The overall framework of our proposed WarPGNN for efficient and accurate thermal warpage analysis 
+
+Table 1: Material and geometric parameters of the simulated assembly for warpage analysis                      
+
+> Object Material Property Geometry CTE ( 𝜇 K−1)𝜈 E (Gpa) Thickness (mm) Length (mm) Die 3∼11 0.28 169 0.875 25 Underfill 29 0.32 7.6 0.06 25 Substrate 13.2 0.42 20 1.81 200
+
+Data Normalization : In our work, input graphs are preprocessed using parameter-wise Min-Max Normalization. Ground-truth defor-mation maps are normalized using Z-score Standardization [ 42 ] with dataset-level mean 𝜇 and standard deviation 𝜎 . After obtained the prediction maps from WarPGNN model, we perform denormalization with 𝜇 and 𝜎 to derive real deformation map. 
+
+## 4.2 Dataset Generation 
+
+To construct training and test datasets, we employ 3-D FEM-based COMSOL [ 11 ] to produce accurate thermal warpage simulation serv-ing as ground-truth results for model training following [ 4, 16 ]. To diversify spatial and material configurations for training, we employ an assignment algorithm that jointly samples position and CTE for each die. The chip area is divided into 4 × 4 uniform sub-regions each with 50 × 50 mm 2, and one die is randomly placed within each region, with its CTE value uniformly sampled from 3–11 𝜇 K−1 to emulate realistic material heterogeneity. We fix the output deformation map as 64 ×64 for simplicity. Our synthesized dataset contains 200 multi-die floorplans each with 40 CTE assignments. The total 8000 datapoints are randomly split into training and test set with 85% and 15%. To demonstrate the transferability of our proposed WarPGNN , we fur-ther generated four extended datasets each contains 1200 random designs. Tab. 2 shows the specifications of extended datasets. 
+
+Table 2: Details of the four types of extended datasets with correspond-ing change of parameter 
+
+Case Change of Parameters Parameter Space 
+
+① CTE of dies: 𝛼 die [3, 11 ] → [ 2, 13 ] 𝜇 K−1
+
+② Size of dies: 𝐿 die , 𝑊 die 25 → [ 20 , 45 ] mm 
+
+③ Size of chip: 𝐿 chip =𝑊 chip 200 → [ 160 , 240 ] mm 
+
+④ Number of Die 16 → { 15 , 20 }
+
+## 4.3 Ablation Study: Performance of the Proposed GCN-based WarPGNN on Seen Datasets 
+
+To evaluate the performance of the proposed GCN-based WarPGNN 
+
+and the effect of the PI-loss, we conduct an ablation study by training the model with and without the PI constraint under identical configu-rations. Tab. 3 summarizes the comparison against COMSOL [11]. For the GCN-based model trained solely with the vanilla MSE loss, the network attains an average RMSE of 74.18 𝜇 m on the test 
+
+Table 3: Performance comparison between COMSOL and the proposed GCN-based WarPGNN model trained with different loss.                   
+
+> Method Warpage Error Avg. RMSE Runtime (s) Speedup COMSOL [11] --174.50 1×
+> GCN-based
+> WarPGNN w/o PI-loss 4.54% 3.46% 3.22 ×10 −354192.55 ×
+> GCN-based
+> WarPGNN w/ PI-loss 2.33% 1.89% 3.18 ×10 −354874.21 ×
+
+set, corresponding to a 3.46% error rate over the full deformation range of 2144.10 𝜇 m. The resulting warpage value prediction exhibits an average deviation of 67.18 𝜇 m, equivalent to a 4.54% relative er-ror. In terms of computational efficiency, the proposed GCN-based 
+
+WarPGNN achieves an average inference time of 3.22 ms, offering over 54192 × acceleration compared with COMSOL which requires 174.50 seconds per simulation. These evaluations validate that the proposed model can serve as a high-fidelity and efficient surrogate for thermal warpage analysis. Furthermore, by incorporating the pro-posed PI-loss, the model achieves remarkable gain in accuracy, re-ducing the average warpage error to 2.33% and the RMSE to 1.89%, respectively, while maintaining over 54874 × speedup over COMSOL. 
+
+## 4.4 Overall Performance of the proposed GIN-based WarPGNN 
+
+To demonstrate the accuracy and inference speedup of the proposed method, we apply the GIN-based WarPGNN , GCN-based WarPGNN 
+
+trained with the PI-loss to capture deformation of the test set with 1200 samples. The comparison of our proposed WarPGNN warpage simulator with COMSOL [ 11 ], 2-D FEM solver [ 16 ] and DeepONet-based solver [ 18 ] are shown in Tab. 4. Here we directly adopted the reported metrics of the most similar benchmark from [ 16 ], as the implementation is not publicly available, for comparative refer-ence. However, as our test cases incorporate a more sophisticated 
+
+die–underfill–substrate stack and more on-chip dies, the quoted met-rics represent a conservative reference for comparative evaluation. DeepONet is re-implemented to match the same die–underfill–substrate stack configuration and trained on the same training and test sets without data augmentation for fair numerical comparison. Results show that our proposed GIN-based WarPGNN further enhances prediction fidelity with supreme computational efficiency. The average warpage error decreases to 35.16 𝜇 m, corresponding to a relative error of 2.21%, while the average RMSE is reduced to 26.94 𝜇 m, equivalent to 1.26% error rate. Furthermore, WarPGNN achieves an average inference time of only 1.46 ms, yielding a 119766.64 × speedup over the 3-D FEM COMSOL [ 11 ] and a 205.91 × acceleration over the 2-D efficient FEM method [ 16 ]. Compared with [ 18 ], our GIN-based method achieve similar prediction accuracy and speedup on inference, while reduce the training time by 70.4%. Table 4: Comparisons of the performance between our proposed GCN- and GIN-based WarPGNN and 3-D FEM solver COMSOL [ 11 ], 2-D efficient FEM solver [16] and DeepONet-based solver [18]. Notation † means data directly quoted from [16] for reference.                                                                        
+
+> Method Avg. Warpage Error ↓Max RMSE ↓Min RMSE ↓Avg. NRMSE ↓Avg. NMAE ↓Training (min) ↓Inf. Runtime (s) ↓Speedup ↑
+> 3-D FEM COMSOL [11] ------174.50 1×
+> 2-D FEM Solver [16] ≥1% †N.A. N.A. N.A. N.A. -≥0.30 †581.7 ×to [11] DeepONet-based [18] 3.06% 99.09 𝜇 m62.26 𝜇 m6.12% 5.82% 110.78 1.29 ×10 −3135271.32 ×to [11] 232.56 ×to [16] Our GCN-based WarPGNN 2.33% 106.84 𝜇 m15.58 𝜇 m1.89% 1.30% 47.29 3.18 ×10 −354874.21 ×to [11] 94.34 ×to [16] Our GIN-based WarPGNN 2.21% 69.02 𝜇 m8.64 𝜇 m1.26% 0.97% 32.82 1.46 ×10 −3119766.64 ×to [11] 205.91 ×to [16]
+
+Ground 
+
+-truth 
+
+Design 1 Design 3 Design 2 
+
+Ours 
+
+Error 
+
+Figure 5: Comparison of the predicted deformation map obtained from our GIN-based WarPGNN and COMSOL. All values are in 𝜇 m. 
+
+Fig. 5 provides visual comparisons between the predicted and ground-truth deformation maps, where white squares denotes die and underfill. As shown in Fig. 5, Design 1 resembles the same floorplan depicted in Fig. 3(b), the GIN-based WarPGNN achieves improved prediction accuracy and noticeably alleviates prediction errors in high-deformation areas with data scarcity. Our results indicate that the proposed model can predict defor-mation and warpage value with high fidelity and superior efficiency across diverse multi-die floorplans featuring various material proper-ties in advanced packaging systems. 
+
+## 4.5 Transferability of the proposed WarPGNN 
+
+Tab. 5 summarizes the transferability performance of the proposed GIN-based WarPGNN model in comparison with COMSOL on four extended datasets ① to ④. The numerical ranges of the average de-formation field obtained from four extended datasets are 2083.18 𝜇 m, 2614.64 𝜇 m, 2093.09 𝜇 m and 2182.96 𝜇 m, respectively. Across different cases, our model achieves an average RMSE of 46.73 𝜇 m, correspond-ing to a 2.32% error rate in case ①, and a maximum RMSE of 80.56 𝜇 mtranslating to 3.69% error in cases ②–④.
+
+Table 5: Results of the proposed GIN-based WarPGNN on extended datasets ①∼④                    
+
+> Case Max RMSE Min RMSE Avg. NRMSE Avg. NMAE
+> ①104.17 𝜇 m14.27 𝜇 m2.32% 1.78%
+> ②262.33 𝜇 m18.34 𝜇 m2.62% 1.86%
+> ③154.18 𝜇 m20.83 𝜇 m3.01% 2.31%
+> ④354.87 𝜇 m20.44 𝜇 m3.69% 2.68%
+
+The results demonstrate that the proposed model remains robust under parameter shifts and retains transferability. Although the ac-curacy on extended cases degrades by up to 2.94 × relative to the original test set, it is still sufficient for early-stage warpage-aware floorplan optimization [ 4 ]. Even under such distribution shifts, the achieved error levels are still well within the range required for re-liable warpage analysis and utilizable for practical warpage-aware floorplan optimization. Ground -Truth WarPGNN Error Map 
+
+Case 
+
+②
+
+Case 
+
+④
+
+Figure 6: Results of our WarPGNN framework on extended datasets. 
+
+Fig. 6 shows examples of the predicted deformation obtained from 
+
+WarPGNN on the extended datasets, where the unit is 𝜇 m. Results from our model align closely with the ground-truth values, suggesting the transferability of our proposed method under extended cases. 
+
+## 5 CONCLUSION 
+
+In this paper, we present a novel machine learning-based paramet-ric framework, termed WarPGNN , to efficiently simulate thermal warpage effects. In our framework, multi-die floorplans are encoded using rTCG and processed through a GCN-based encoder and U-Net decoder, enabling efficient graph-to-field learning. Moreover, a Physics-aware loss and GIN encoder that leverages enhanced data aggregation between dies are developed for improving learning perfor-mance on both difficult long-tailed cases and graph representation of general die coupling. Numerical results show that our proposed GIN-based WarPGNN achieves more than 205.91 × and 119767 × runtime speedup compared to 2-D FEM solver and COMSOL, with only 1.26% full-map normalized RMSE and 2.21% warpage value error. Compared with DeepONet, WarPGNN improves training efficiency by reducing training time by 70.4% while maintaining comparable accuracy and inference time. Furthermore, WarPGNN demonstrates transferability on four extended datasets, with at most 3.69% normalized RMSE and similar inference speed. REFERENCES 
+
+[1] Samuel Naffziger, Kevin Lepak, Milam Paraschou, and Mahesh Subramony. 2.2 amd chiplet architecture for high-performance server and desktop products. In IEEE International Solid-State Circuits Conference (ISSCC) , pages 44–45, 2020. [2] John H. Lau, Ming Li, Lei Yang, Margie Li, Iris Xu, Tony Chen, Sandy Chen, Qing Xi-ang Yong, Janardhanan Pillai Madhukumar, Wu Kai, Nelson Fan, Eric Kuah, Zhang Li, Kim Hwee Tan, Winsons Bao, Sze Pei Lim, Rozalia Beica, Cheng-Ta Ko, and Cao Xi. Warpage measurements and characterizations of fan-out wafer-level packaging with large chips and multiple redistributed layers. IEEE Transactions on Components, Packaging and Manufacturing Technology (TCPMT) , 8(10):1729–1737, 2018. [3] John H. Lau. Recent advances and trends in advanced packaging. IEEE Transactions on Components, Packaging and Manufacturing Technology (TCPMT) , 12(2):228–252, 2022. [4] Yang Hsu, Min-Hsuan Chung, Yao-Wen Chang, and Ci-Hong Lin. Transitive closure graph-based warpage-aware floorplanning for package designs. In Proc. Int. Conf. on Computer Aided Design (ICCAD) , pages 1–7, 2022. [5] Zhen Zhuang, Bei Yu, Kai-Yuan Chao, and Tsung-Yi Ho. Multi-package co-design for chiplet integration. In Proc. Int. Conf. on Computer Aided Design (ICCAD) , 2022. [6] Shixin Chen, Shanyi Li, Zhen Zhuang, Su Zheng, Zheng Liang, Tsung-Yi Ho, Bei Yu, and Alberto L. Sangiovanni-Vincentelli. Floorplet: Performance-aware floor-plan framework for chiplet integration. IEEE Trans. on Computer-Aided Design of Integrated Circuits and Systems , 43(6):1638–1649, 2024. [7] Victor Mishkevich and Ephraim Suhir. Simplified engineering approach for the evaluation of thermally induced stresses in bi-material microelectronic structures. 
+
+Structural analysis in microelectronics and fiber optics , pages 563–572, 1993. [8] M. Y. Tsai, C. H. Hsu, and C. N. Han. A note on suhir’s solution of thermal stresses for a die-substrate assembly. Journal of Electronic Packaging , 126(1):115–119, 2004. [9] Ming-Yi Tsai and Yu-Wen Wang. A theoretical solution for thermal warpage of flip-chip packages. IEEE Transactions on Components, Packaging and Manufacturing Technology (TCPMT) , 10(1):72–78, 2020. [10] ANSYS. ANSYS ® Mechanical, Release 2024 R1. 2024. [11] C. Multiphysics. Heat transfer module user’s guide. COMSOL version, vol. 4 , 2014. [12] Yuci Shen, Leilei Zhang, Weihang Zhu, Jiang Zhou, and Xuejun Fan. Finite-element analysis and experimental test for a capped-die flip-chip package design. IEEE Transactions on Components, Packaging and Manufacturing Technology (TCPMT) ,6:1–9, 08 2016. [13] Scott McCann, Vanessa Smet, Venky Sundaram, Rao Tummala, and Suresh Sitaraman. Experimental and theoretical assessment of thin glass substrate for low warpage. 
+
+IEEE Transactions on Components, Packaging and Manufacturing Technology (TCPMT) ,PP:1–8, 01 2017. [14] Masaki Kanemoto, Masaaki Aoki, Akihiro Mochizuki, Yoshio Murakami, Mutsuharu Tsunoda, and Nobuhiko Nakano. Warpage and thermal stress under thermal cycling test in sic and si power device structures using direct chip-bonding with ag sintered layer on cu plate. In IEEE 68th Electronic Components and Technology Conference (ECTC) , pages 273–278, 2018. [15] Sida Hao, Weishen Chu, Paul S. Ho, Joonsik Sohn Lee, and Rui Huang. Analytical and finite element study on warpage and stress of 2.5d chip-package structures. In IEEE International Symposium on the Physical and Failure Analysis of Integrated Circuits (IPFA) , pages 1–8, 2021. [16] Shao-Yu Lo, MaoZe Liu, and Yao-Wen Chang. Efficient high-fidelity two-dimensional warpage modeling for advanced packaging analysis. In Proc. Int. Conf. on Computer Aided Design (ICCAD) , pages 1–9, 2024. [17] Pichayen Bhothikhun and Pramote Dechaumphai. Development of dkt finite element formulation for thermal bending of thin plate. Journal of Thermal Stresses , 38(7):775– 791. [18] Shao-Yu Lo, Che-Ming Chang, and Yao-Wen Chang. Advanced packaging warpage modeling with deeponet-based operator learning. In Proc. Int. Conf. on Computer Aided Design (ICCAD) , pages 1–9, 2025. [19] Lu Lu, Pengzhan Jin, Guofei Pang, Zhongqiang Zhang, and George Em Karniadakis. Learning nonlinear operators via deeponet based on the universal approximation theorem of operators. Nature Machine Intelligence , 3:218 – 229, 2019. [20] Yann LeCun, Yoshua Bengio, and Geoffrey Hinton. Deep learning. Nature , 521:436– 444, May 2015. [21] Yi-Chen Lu, Sai Surya Kiran Pentapati, Lingjun Zhu, Kambiz Samadi, and Sung Kyu Lim. Tp-gnn: A graph neural network framework for tier partitioning in monolithic 3d ics. In 2020 57th ACM/IEEE Design Automation Conference (DAC) , pages 1–6, 2020. [22] Haoxing Ren, George F. Kokai, Walker J. Turner, and Ting-Sheng Ku. Paragraph: Layout parasitics and device parameter prediction using graph neural networks. In 
+
+Proc. Design Automation Conf. (DAC) , pages 1–6, 2020. [23] Wentian Jin, Liang Chen, Sheriff Sadiqbatcha, Shaoyi Peng, and Sheldon X.-D. Tan. Emgraph: Fast learning-based electromigration analysis for multi-segment intercon-nect using graph convolution networks. In 2021 58th ACM/IEEE Design Automation Conference (DAC) , pages 919–924, 2021. [24] Liang Chen, Wentian Jin, and Sheldon X.-D. Tan. Fast thermal analysis for chiplet design based on graph convolution networks. In 2022 27th Asia and South Pacific Design Automation Conference (ASP-DAC) , pages 485–492, 2022. [25] Yunfan Zuo, Yuyang Ye, Hongchao Zhang, Tinghuan Chen, Hao Yan, and Longxing Shi. A graph-learning-driven prediction method for combined electromigration and thermomigration stress on multi-segment interconnects. In Proc. Design, Automation and Test In Europe Conf. (DATE) , pages 1–6, 2024. [26] Feng Guo, Yueyue Xi, Jianwang Zhai, Jingyu Jia, Jiawei Liu, Kang Zhao, and Chuan Shi. Irgnn: A graph-based framework integrating numerical solution and point cloud for static ir drop prediction. In Proc. Design Automation Conf. (DAC) , pages 1–7, 2025. [27] William L. Hamilton, Rex Ying, and Jure Leskovec. Inductive representation learn-ing on large graphs. In Proceedings of the 31st International Conference on Neural Information Processing Systems , page 1025–1035, 2017. [28] Thomas N. Kipf and Max Welling. Semi-supervised classification with graph convo-lutional networks. In International Conference on Learning Representations (ICLR) ,2017. [29] G. E. Hinton and R. R. Salakhutdinov. Reducing the dimensionality of data with neural networks. Science , 313(5786):504–507, 2006. [30] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net: Convolutional networks for biomedical image segmentation. In International Conference on Medical image computing and computer-assisted intervention , pages 234–241, 2015. [31] K. J. Bathe. Finite Element Procedures . Prentice Hall, Upper Saddle River, NJ, USA, 2nd edition, 2006. [32] Junuthula Narasimha Reddy. Mechanics of laminated composite plates and shells: theory and analysis . CRC press, 2003. [33] P. K. Huang, C. Y. Lu, W. H. Wei, Christine Chiu, K. C. Ting, Clark Hu, C.H. Tsai, S. Y. Hou, W. C. Chiou, C. T. Wang, and Douglas Yu. Wafer level system integration of the fifth generation cowos ®-s with high performance si interposer at 2500 mm2. In 
+
+IEEE 71st Electronic Components and Technology Conference (ECTC) , pages 101–104, 2021. [34] Zhangming Wu, Hao Li, and Michael I. Friswell. Advanced nonlinear dynamic modelling of bi-stable composite plates. Composite Structures , 201:582–596, 2018. [35] Jai-Ming Lin and Yao-Wen Chang. Tcg: a transitive closure graph-based represen-tation for non-slicing floorplans. In Proc. Design Automation Conf. (DAC) , pages 764–769, 2001. [36] JM Lin and YW Chang. Tcg-s: Orthogonal coupling of p*-admissible representation with worst case linear-time packing scheme. IEEE Trans. on Computer-Aided Design of Integrated Circuits and Systems , 23(6):968–980, 2004. [37] Jai-Ming Lin and Yao-Wen Chang. Tcg: a transitive closure graph-based representa-tion for general floorplans. IEEE Trans. on Very Large Scale Integration (VLSI) Systems ,13(2):288–292, 2005. [38] Ethan Perez, Florian Strub, Harm de Vries, Vincent Dumoulin, and Aaron Courville. Film: Visual reasoning with a general conditioning layer. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) , pages 4470–4479, 2018. [39] Jimmy Lei Ba, Jamie Ryan Kiros, and Geoffrey E. Hinton. Layer normalization, 2016. [40] Rafael C. Gonzalez and Richard E. Woods. Digital Image Processing (3rd Edition) .Prentice-Hall, Inc., 2006. [41] Keyulu Xu, Weihua Hu, Jure Leskovec, and Stefanie Jegelka. How powerful are graph neural networks? In International Conference on Learning Representations (ICLR) , 2019. [42] Christopher M. Bishop. Pattern Recognition and Machine Learning . Springer, 2006.

@@ -6,53 +6,67 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-26
-- 运行时间：2026-03-26 20:15:55 UTC
+- 最新运行日期：2026-03-27
+- 运行时间：2026-03-27 19:53:56 UTC
 - 运行状态：成功
-- 本次总论文数：11
+- 本次总论文数：15
 - 精读区：6
-- 速读区：5
+- 速读区：9
 
 ### 今日简报（AI）
-今日精选 11 篇前沿成果，重点聚焦 PINN 在高维计算与流体力学中的满分突破
-- 详情：[/202603/26/README](/202603/26/README)
+今日深挖15篇AI+Science前沿，重点攻克守恒定律与电磁逆散射中的物理信息神经网络难题。
+满分论文揭示了弱形式PINN与神经算子在处理复杂物理方程时的卓越精度，是物理驱动学习的最新范式。
+建议优先研读关于弱形式约束与逆散射问题的两篇满分佳作，掌握高精度物理建模的核心演进。
+- 详情：[/202603/27/README](/202603/27/README)
 
 ### 精读区论文标签
-1. [Stochastic Dimension-Free Zeroth-Order Estimator for High-Dimensional and High-Order PINNs](/202603/26/2603.24002v1-stochastic-dimension-free-zeroth-order-estimator-for-high-dimensional-and-high-order-pinns)  
+1. [Weak and entropy physics-informed neural networks for conservation laws](/202603/27/2603.24819v1-weak-and-entropy-physics-informed-neural-networks-for-conservation-laws)  
    标签：评分：10.0/10、query:pinn
-   evidence：用于高维高阶PINN的零阶估计器
-2. [Bridging Computational Fluid Dynamics Algorithm and Physics-Informed Learning: SIMPLE-PINN for Incompressible Navier-Stokes Equations](/202603/26/2603.24013v1-bridging-computational-fluid-dynamics-algorithm-and-physics-informed-learning-simple-pinn-for-incompressible-navier-stokes-equations)  
+   evidence：弱形式与熵物理信息神经网络
+2. [Physics-Informed Neural Operator for Electromagnetic Inverse Scattering Problems](/202603/27/2603.25404v1-physics-informed-neural-operator-for-electromagnetic-inverse-scattering-problems)  
    标签：评分：10.0/10、query:pinn
-   evidence：针对不可压缩N-S方程提出SIMPLE-PINN以提高稳定性和收敛性
-3. [FFV-PINN: A Fast Physics-Informed Neural Network with Simplified Finite Volume Discretization and Residual Correction](/202603/26/2603.24114v1-ffv-pinn-a-fast-physics-informed-neural-network-with-simplified-finite-volume-discretization-and-residual-correction)  
-   标签：评分：10.0/10、query:pinn
-   evidence：集成有限体积离散化和残差修正的快速PINN框架
-4. [Linear-Nonlinear Fusion Neural Operator for Partial Differential Equations](/202603/26/2603.24143v1-linear-nonlinear-fusion-neural-operator-for-partial-differential-equations)  
-   标签：评分：10.0/10、query:pinn
-   evidence：提出了一种通过解耦线性和非线性效应来求解偏微分方程的新型神经算子结构
-5. [Project and Generate: Divergence-Free Neural Operators for Incompressible Flows](/202603/26/2603.24500v1-project-and-generate-divergence-free-neural-operators-for-incompressible-flows)  
-   标签：评分：10.0/10、query:pinn
-   evidence：用于不可压缩流体动力学的无散度神经算子
-6. [Residual Attention Physics-Informed Neural Networks for Robust Multiphysics Simulation of Steady-State Electrothermal Energy Systems](/202603/26/2603.23578v1-residual-attention-physics-informed-neural-networks-for-robust-multiphysics-simulation-of-steady-state-electrothermal-energy-systems)  
+   evidence：使用傅里叶神经算子的物理信息神经算子 (PINO)
+3. [Physics-Informed Neural Network Digital Twin for Dynamic Tray-Wise Modeling of Distillation Columns under Transient Operating Conditions](/202603/27/2603.24644v1-physics-informed-neural-network-digital-twin-for-dynamic-tray-wise-modeling-of-distillation-columns-under-transient-operating-conditions)  
    标签：评分：9.0/10、query:pinn
-   evidence：用于电热系统多物理场模拟的残差注意力PINN
+   evidence：用于精馏塔建模的PINN数字孪生
+4. [Neural Operator Quantum State: A Foundation Model for Quantum Dynamics](/202603/27/2603.25066v1-neural-operator-quantum-state-a-foundation-model-for-quantum-dynamics)  
+   标签：评分：9.0/10、query:pinn
+   evidence：用于量子动力学的神经算子基础模型
+5. [Incorporating Continuous Dependence Qualifies Physics-Informed Neural Networks for Operator Learning](/202603/27/2603.25122v1-incorporating-continuous-dependence-qualifies-physics-informed-neural-networks-for-operator-learning)  
+   标签：评分：9.0/10、query:pinn
+   evidence：通过连续依赖性将PINN扩展到算子学习
+6. [Learning Mesh-Free Discrete Differential Operators with Self-Supervised Graph Neural Networks](/202603/27/2603.24641v1-learning-mesh-free-discrete-differential-operators-with-self-supervised-graph-neural-networks)  
+   标签：评分：8.0/10、query:pinn
+   evidence：利用图神经网络学习无网格离散微分算子
 
 ### 速读区论文标签
-1. [Deep Kinetic JKO schemes for Vlasov-Fokker-Planck Equations](/202603/26/2603.23901v1-deep-kinetic-jko-schemes-for-vlasov-fokker-planck-equations)  
-   标签：评分：8.0/10、query:pinn
-   evidence：基于深度神经网络的动力学Fokker Planck方程数值求解方法
-2. [Many-body mobility edges in one dimension revealed by efficient and interpretable feature-based learning with Kolmogorov-Arnold Networks](/202603/26/2603.21807v1-many-body-mobility-edges-in-one-dimension-revealed-by-efficient-and-interpretable-feature-based-learning-with-kolmogorov-arnold-networks)  
+1. [WarPGNN: A Parametric Thermal Warpage Analysis Framework with Physics-aware Graph Neural Network](/202603/27/2603.18581v1-warpgnn-a-parametric-thermal-warpage-analysis-framework-with-physics-aware-graph-neural-network)  
    标签：评分：7.0/10、query:pinn
-   evidence：相互作用费米子系统的物理信息机器学习
-3. [Symbolic--KAN: Kolmogorov-Arnold Networks with Discrete Symbolic Structure for Interpretable Learning](/202603/26/2603.23854v1-symbolic--kan-kolmogorov-arnold-networks-with-discrete-symbolic-structure-for-interpretable-learning)  
+   evidence：用于热分析的物理感知图神经网络
+2. [Sparse Weak-Form Discovery of Stochastic Generators](/202603/27/2603.20904v3-sparse-weak-form-discovery-of-stochastic-generators)  
    标签：评分：7.0/10、query:pinn
-   evidence：用于科学机器学习中发现控制方程的符号Kolmogorov-Arnold网络
-4. [An Invariant Compiler for Neural ODEs in AI-Accelerated Scientific Simulation](/202603/26/2603.23861v1-an-invariant-compiler-for-neural-odes-in-ai-accelerated-scientific-simulation)  
+   evidence：随机微分方程的弱形式发现
+3. [Latent representation learning based model correction and uncertainty quantification for PDEs](/202603/27/2603.24948v1-latent-representation-learning-based-model-correction-and-uncertainty-quantification-for-pdes)  
    标签：评分：7.0/10、query:pinn
-   evidence：在科学模拟的神经微分方程中强制执行不变性
-5. [Quantum Neural Physics: Solving Partial Differential Equations on Quantum Simulators using Quantum Convolutional Neural Networks](/202603/26/2603.24196v1-quantum-neural-physics-solving-partial-differential-equations-on-quantum-simulators-using-quantum-convolutional-neural-networks)  
+   evidence：不确定性感知的PDE学习与模型修正
+4. [System-Anchored Knee Estimation for Low-Cost Context Window Selection in PDE Forecasting](/202603/27/2603.25025v1-system-anchored-knee-estimation-for-low-cost-context-window-selection-in-pde-forecasting)  
    标签：评分：7.0/10、query:pinn
-   evidence：用于PDE的混合量子-经典CNN求解器
+   evidence：神经PDE模拟器的上下文窗口选择
+5. [Physics-informed structured learning of a class of recurrent neural networks with guaranteed properties](/202603/27/2603.25574v1-physics-informed-structured-learning-of-a-class-of-recurrent-neural-networks-with-guaranteed-properties)  
+   标签：评分：7.0/10、query:pinn
+   evidence：循环神经网络的物理信息学习框架
+6. [Unveiling the Mechanism of Continuous Representation Full-Waveform Inversion: A Wave Based Neural Tangent Kernel Framework](/202603/27/2603.22362v1-unveiling-the-mechanism-of-continuous-representation-full-waveform-inversion-a-wave-based-neural-tangent-kernel-framework)  
+   标签：评分：6.0/10、query:pinn
+   evidence：波动方程的连续表示与基于坐标的神经网络
+7. [Local learning for stable backpropagation-free neural network training towards physical learning](/202603/27/2603.24790v1-local-learning-for-stable-backpropagation-free-neural-network-training-towards-physical-learning)  
+   标签：评分：6.0/10、query:pinn
+   evidence：物理神经网络的正向学习
+8. [Subject-Specific Low-Field MRI Synthesis via a Neural Operator](/202603/27/2603.24968v1-subject-specific-low-field-mri-synthesis-via-a-neural-operator)  
+   标签：评分：6.0/10、query:pinn
+   evidence：用于图像退化建模的神经算子
+9. [Layer-Specific Lipschitz Modulation for Fault-Tolerant Multimodal Representation Learning](/202603/27/2603.25103v1-layer-specific-lipschitz-modulation-for-fault-tolerant-multimodal-representation-learning)  
+   标签：评分：6.0/10、query:pinn
+   evidence：神经算子容错性的理论分析
 
 
 <div class="dpr-home-promo-card">

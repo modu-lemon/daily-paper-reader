@@ -1,0 +1,587 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-27T19:51:32.616035+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 6,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 9,
+    "quick_skim_target": 11,
+    "quick_selected": 9
+  },
+  "deep_dive": [
+    {
+      "id": "2603.24819v1",
+      "title": "Weak and entropy physics-informed neural networks for conservation laws",
+      "abstract": "We propose Weak and Entropy PINNs (WE-PINNs) for the approximation of entropy solutions to nonlinear hyperbolic conservation laws. Standard physics-informed neural networks enforce governing equations in strong differential form, an approach that becomes structurally inconsistent in the presence of discontinuities due to the divergence of strong-form residuals near shocks. The proposed method replaces pointwise residual minimization with a space--time weak formulation derived from the divergence theorem. Conservation is enforced through boundary flux integrals over dynamically sampled space--time control volumes, yielding a mesh-free control-volume framework that remains well-defined for discontinuous solutions. Entropy admissibility is incorporated in integral form to ensure uniqueness and physical consistency of the weak solution. The resulting loss functional combines space--time flux balance and entropy inequalities, without resorting to dual-norm saddle-point formulations, auxiliary potential networks, or fixed discretization meshes. This makes the proposed method remarkably easy to implement, requiring only a simple standard neural network architecture. We establish a rigorous convergence analysis linking the network's loss function to the $L^1$ error towards the entropy solution, providing the first explicit $L^1$ convergence rate for a mesh-free control-volume PINN formulation via the Bouchut-Perthame framework for scalar conservation laws. Numerical experiments on the Burgers equation, the shallow water equations, and the compressible Euler equations demonstrate accurate shock resolution and robust performance in both smooth and shock-dominated regimes.",
+      "authors": [
+        "Ismail Oubarka",
+        "Imad Kissami",
+        "Mohamed Boubekeur",
+        "Fayssal Benkhaldoun",
+        "Aziz Madrane",
+        "Zakaria Saadi"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-25T20:55:15+00:00",
+      "link": "https://arxiv.org/pdf/2603.24819v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Weak and entropy physics-informed neural networks",
+      "llm_evidence_cn": "弱形式与熵物理信息神经网络",
+      "llm_evidence": "弱形式与熵物理信息神经网络",
+      "canonical_evidence": "弱形式与熵物理信息神经网络",
+      "llm_tldr_en": "Introduces WE-PINNs using weak formulations to solve nonlinear hyperbolic conservation laws with discontinuities.",
+      "llm_tldr_cn": "引入WE-PINNs，利用弱形式表述解决具有不连续解的非线性双曲守恒律问题。",
+      "llm_tldr": "引入WE-PINNs，利用弱形式表述解决具有不连续解的非线性双曲守恒律问题。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Physics-informed neural networks for partial differential equations",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.25404v1",
+      "title": "Physics-Informed Neural Operator for Electromagnetic Inverse Scattering Problems",
+      "abstract": "This paper proposes a physics-informed neural operator (PINO) framework for solving inverse scattering problems, enabling rapid and accurate reconstructions under diverse measurement conditions. In the proposed approach, the dielectric property is represented as a learnable tensor, while a neural operator is employed to predict the induced current distribution. A hybrid loss function, consisting of the state loss, data loss and total-variation (TV) regularization, is constructed to establish a fully differentiable formulation for a joint optimization of network parameters and dielectric property. To demonstrate the framework's generality and flexibility, PINO is implemented using three representative neural operators, i.e., the Fourier Neural Operator (FNO), the enhanced Fourier Neural Operator (U-FNO) and the Factorized Fourier Neural Operator (F-FNO). Compared with conventional approaches, the proposed framework offers a simpler formulation and universal modeling capability, making it readily applicable to various measurement scenarios, including multi-frequency and phaseless inversion. Numerical simulations demonstrate that the proposed PINO achieves high accuracy and robust reconstruction across samples with and without phase information, under single-frequency and multi-frequency settings in the presence of noise. The results demonstrate that PINO consistently outperforms conventional contrast-source inversion (CSI) methods and provides an efficient, unified solution to complex electromagnetic inverse-scattering problems.",
+      "authors": [
+        "Q. C. Dong",
+        "Zi-Xuan Su",
+        "Qing Huo Liu",
+        "Wen Chen",
+        "Zhizhang",
+        "Chen"
+      ],
+      "primary_category": "physics.comp-ph",
+      "categories": [
+        "physics.comp-ph"
+      ],
+      "published": "2026-03-26T12:53:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.25404v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Physics-informed neural operator (PINO) using Fourier Neural Operator",
+      "llm_evidence_cn": "使用傅里叶神经算子的物理信息神经算子 (PINO)",
+      "llm_evidence": "使用傅里叶神经算子的物理信息神经算子 (PINO)",
+      "canonical_evidence": "使用傅里叶神经算子的物理信息神经算子 (PINO)",
+      "llm_tldr_en": "Introduces a PINO framework combining physics constraints with neural operators for inverse scattering problems.",
+      "llm_tldr_cn": "引入了一个结合物理约束与神经算子的PINO框架，用于解决逆散射问题。",
+      "llm_tldr": "引入了一个结合物理约束与神经算子的PINO框架，用于解决逆散射问题。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Recent advances in physics informed neural networks and neural operators",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.24644v1",
+      "title": "Physics-Informed Neural Network Digital Twin for Dynamic Tray-Wise Modeling of Distillation Columns under Transient Operating Conditions",
+      "abstract": "Digital twin technology, when combined with physics-informed machine learning with simulation results of Aspen, offers transformative capabilities for industrial process monitoring, control, and optimization. In this work, the proposed model presents a Physics-Informed Neural Network (PINN) digital twin framework for the dynamic, tray-wise modeling of binary distillation columns operating under transient conditions. The architecture of the proposed model embeds fundamental thermodynamic constraints, including vapor-liquid equilibrium (VLE) described by modified Raoult's law, tray-level mass and energy balances, and the McCabe-Thiele graphical methodology directly into the neural network loss function via physics residual terms. The model is trained and evaluated on a high-fidelity synthetic dataset of 961 timestamped measurements spanning 8 hours of transient operation, generated in Aspen HYSYS for a binary HX/TX distillation system comprising 16 sensor streams. An adaptive loss-weighting scheme balances the data fidelity and physics consistency objectives during training. Compared to five data-driven baselines (LSTM, vanilla MLP, GRU, Transformer, DeepONet), the proposed PINN achieves an RMSE of 0.00143 for HX mole fraction prediction (R^2 = 0.9887), representing a 44.6% reduction over the best data-only baseline, while strictly satisfying thermodynamic constraints. Tray-wise temperature and composition profiles predicted under transient perturbations demonstrate that the digital twin accurately captures column dynamics including feed tray responses, reflux ratio variations, and pressure transients. These results establish the proposed PINN digital twin as a robust foundation for real-time soft sensing, model-predictive control, and anomaly detection in industrial distillation processes.",
+      "authors": [
+        "Debadutta Patra",
+        "Ayush Bardhan Tripathy",
+        "Soumya Ranjan Sahu",
+        "Sucheta Panda"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-25T14:45:35+00:00",
+      "link": "https://arxiv.org/pdf/2603.24644v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "PINN digital twin for modeling distillation columns",
+      "llm_evidence_cn": "用于精馏塔建模的PINN数字孪生",
+      "llm_evidence": "用于精馏塔建模的PINN数字孪生",
+      "canonical_evidence": "用于精馏塔建模的PINN数字孪生",
+      "llm_tldr_en": "Applies PINNs to industrial distillation column modeling by embedding thermodynamic constraints into the network.",
+      "llm_tldr_cn": "通过将热力学约束嵌入网络，将PINN应用于工业精馏塔建模。",
+      "llm_tldr": "通过将热力学约束嵌入网络，将PINN应用于工业精馏塔建模。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Physics-informed neural networks for partial differential equations",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.25066v1",
+      "title": "Neural Operator Quantum State: A Foundation Model for Quantum Dynamics",
+      "abstract": "Capturing the dynamics of quantum many-body systems under time-dependent driving protocols is a central challenge for numerical simulations. Existing methods such as tensor networks and time-dependent neural quantum states, however, must be re-run for every protocol. In this work, we introduce the Neural Operator Quantum State (NOQS) as a foundation model for quantum dynamics. Rather than solving the Schrödinger equation for individual trajectories, our approach aims to \\emph{learn the solution operator} that maps entire driving protocols to time-evolved quantum states. Once trained, the NOQS predicts time evolution under unseen protocols in a single forward pass, requiring no additional optimization. We validate NOQS on the two-dimensional Ising model with time-dependent longitudinal and transverse fields, demonstrating accurate prediction not only for unseen in-distribution protocols, but also for qualitatively different, out-of-distribution functional forms of driving. Further, a single NOQS model can be transferred between different temporal resolutions, and can be efficiently fine-tuned with sparse experimental measurements to improve predictions across all observables at negligible cost. Our work introduces a new paradigm for quantum dynamics simulation and provides a practical computational-experimental interface for driven quantum systems.",
+      "authors": [
+        "Zihao Qi",
+        "Christopher Earls",
+        "Yang Peng"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "cond-mat.quant-gas",
+        "cond-mat.stat-mech",
+        "cond-mat.str-el"
+      ],
+      "published": "2026-03-26T06:10:14+00:00",
+      "link": "https://arxiv.org/pdf/2603.25066v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Neural Operator foundation model for quantum dynamics",
+      "llm_evidence_cn": "用于量子动力学的神经算子基础模型",
+      "llm_evidence": "用于量子动力学的神经算子基础模型",
+      "canonical_evidence": "用于量子动力学的神经算子基础模型",
+      "llm_tldr_en": "Introduces Neural Operator Quantum State (NOQS) to learn solution operators for quantum many-body dynamics.",
+      "llm_tldr_cn": "引入神经算子量子态（NOQS）来学习量子多体动力学的解算子。",
+      "llm_tldr": "引入神经算子量子态（NOQS）来学习量子多体动力学的解算子。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Neural operator methods for solving PDEs",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.25122v1",
+      "title": "Incorporating Continuous Dependence Qualifies Physics-Informed Neural Networks for Operator Learning",
+      "abstract": "Physics-informed neural networks (PINNs) have been proven as a promising way for solving various partial differential equations, especially high-dimensional ones and those with irregular boundaries. However, their capabilities in real applications are highly restricted by their poor generalization performance. Inspired by the rigorous mathematical statements on the well-posedness of PDEs, we develop a novel extension of PINNs by incorporating the additional information on the continuous dependence of PDE solutions with respect to parameters and initial/boundary values (abbreviated as cd-PINN). Extensive numerical experiments demonstrate that, with limited labeled data, cd-PINN achieves 1-3 orders of magnitude lower in test MSE than DeepONet and FNO. Therefore, incorporating the continuous dependence of PDE solutions provides a simple way for qualifying PINNs for operator learning.",
+      "authors": [
+        "Guojie Li",
+        "Wuyue Yang",
+        "Liu Hong"
+      ],
+      "primary_category": "math.DS",
+      "categories": [
+        "math.DS",
+        "math.NA"
+      ],
+      "published": "2026-03-26T07:46:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.25122v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "extending PINNs for operator learning via continuous dependence",
+      "llm_evidence_cn": "通过连续依赖性将PINN扩展到算子学习",
+      "llm_evidence": "通过连续依赖性将PINN扩展到算子学习",
+      "canonical_evidence": "通过连续依赖性将PINN扩展到算子学习",
+      "llm_tldr_en": "Proposes cd-PINN to improve generalization by incorporating continuous dependence, bridging PINNs and operator learning.",
+      "llm_tldr_cn": "提出cd-PINN，通过结合连续依赖性提高泛化能力，连接了PINN与算子学习。",
+      "llm_tldr": "提出cd-PINN，通过结合连续依赖性提高泛化能力，连接了PINN与算子学习。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Comparison between PINNs and neural operators for PDE solving",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.24641v1",
+      "title": "Learning Mesh-Free Discrete Differential Operators with Self-Supervised Graph Neural Networks",
+      "abstract": "Mesh-free numerical methods provide flexible discretisations for complex geometries; however, classical meshless discrete differential operators typically trade low computational cost for limited accuracy or high accuracy for substantial per-stencil computation. We introduce a parametrised framework for learning mesh-free discrete differential operators using a graph neural network trained via polynomial moment constraints derived from truncated Taylor expansions. The model maps local stencils relative positions directly to discrete operator weights. The current work demonstrates that neural networks can learn classical polynomial consistency while retaining robustness to irregular neighbourhood geometry. The learned operators depend only on local geometry, are resolution-agnostic, and can be reused across particle configurations and governing equations. We evaluate the framework using standard numerical analysis diagnostics, showing improved accuracy over Smoothed Particle Hydrodynamics, and a favourable accuracy-cost trade-off relative to a representative high-order consistent mesh-free method in the moderate-accuracy regime. Applicability is demonstrated by solving the weakly compressible Navier-Stokes equations using the learned operators.",
+      "authors": [
+        "Lucas Gerken Starepravo",
+        "Georgios Fourtakas",
+        "Steven Lind",
+        "Ajay B. Harish",
+        "Tianning Tang",
+        "Jack R. C. King"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "math.NA",
+        "physics.flu-dyn"
+      ],
+      "published": "2026-03-25T12:13:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.24641v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "learning mesh-free discrete differential operators with GNNs",
+      "llm_evidence_cn": "利用图神经网络学习无网格离散微分算子",
+      "llm_evidence": "利用图神经网络学习无网格离散微分算子",
+      "canonical_evidence": "利用图神经网络学习无网格离散微分算子",
+      "llm_tldr_en": "Learns mesh-free discrete differential operators using GNNs trained via polynomial moment constraints.",
+      "llm_tldr_cn": "利用通过多项式矩约束训练的图神经网络学习无网格离散微分算子。",
+      "llm_tldr": "利用通过多项式矩约束训练的图神经网络学习无网格离散微分算子。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Neural operator methods for solving PDEs",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.18581v1",
+      "title": "WarPGNN: A Parametric Thermal Warpage Analysis Framework with Physics-aware Graph Neural Network",
+      "abstract": "With the advent of system-in-package (SiP) chiplet-based design and heterogeneous 2.5D/3D integration, thermal-induced warpage has become a critical reliability concern. While conventional numerical approaches can deliver highly accurate results, they often incur prohib- itively high computational costs, limiting their scalability for complex chiplet-package systems. In this paper, we present WarPGNN, an ef- ficient and accurate parametric thermal warpage analysis framework powered by Graph Neural Networks (GNNs). By operating directly on graphs constructed from the floorplans, WarPGNN enables fast warpage-aware floorplan exploration and exhibits strong transfer- ability across diverse package configurations. Our method first en- codes multi-die floorplans into reduced Transitive Closure Graphs (rTCGs), then a Graph Convolution Network (GCN)-based encoder extracts hierarchical structural features, followed by a U-Net inspired decoder that reconstructs warpage maps from graph feature embed- dings. Furthermore, to address the long-tailed pattern of warpage data distribution, we developed a physics-informed loss and revised a message-passing encoder based on Graph Isomorphic Network (GIN) that further enhance learning performance for extreme cases and expressiveness of graph embeddings. Numerical results show that WarPGNN achieves more than 205.91x speedup compared with the 2-D efficient FEM-based method and over 119766.64x acceleration with 3-D FEM method COMSOL, respectively, while maintaining comparable accuracy at only 1.26% full-scale normalized RMSE and 2.21% warpage value error. Compared with recent DeepONet-based model, our method achieved comparable prediction accuracy and in- ference speedup with 3.4x lower training time. In addition, WarPGNN demonstrates remarkable transferability on unseen datasets with up to 3.69% normalized RMSE and similar runtime.",
+      "authors": [
+        "Haotian Lu",
+        "Jincong Lu",
+        "Sachin Sachdeva",
+        "Sheldon X. -D. Tan"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR",
+        "cs.LG",
+        "eess.SY"
+      ],
+      "published": "2026-03-19T07:40:57+00:00",
+      "link": "https://arxiv.org/pdf/2603.18581v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Physics-aware Graph Neural Network for thermal analysis",
+      "llm_evidence_cn": "用于热分析的物理感知图神经网络",
+      "llm_evidence": "用于热分析的物理感知图神经网络",
+      "canonical_evidence": "用于热分析的物理感知图神经网络",
+      "llm_tldr_en": "Uses physics-aware GNNs as efficient surrogates for parametric thermal warpage analysis in chip design.",
+      "llm_tldr_cn": "利用物理感知图神经网络作为芯片设计中参数化热翘曲分析的高效代理模型。",
+      "llm_tldr": "利用物理感知图神经网络作为芯片设计中参数化热翘曲分析的高效代理模型。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.22362v1",
+      "title": "Unveiling the Mechanism of Continuous Representation Full-Waveform Inversion: A Wave Based Neural Tangent Kernel Framework",
+      "abstract": "Full-waveform inversion (FWI) estimates physical parameters in the wave equation from limited measurements and has been widely applied in geophysical exploration, medical imaging, and non-destructive testing. Conventional FWI methods are limited by their notorious sensitivity to the accuracy of the initial models. Recent progress in continuous representation FWI (CR-FWI) demonstrates that representing parameter models with a coordinate-based neural network, such as implicit neural representation (INR), can mitigate the dependence on initial models. However, its underlying mechanism remains unclear, and INR-based FWI shows slower high-frequency convergence. In this work, we investigate the general CR-FWI framework and develop a unified theoretical understanding by extending the neural tangent kernel (NTK) for FWI to establish a wave-based NTK framework. Unlike standard NTK, our analysis reveals that wave-based NTK is not constant, both at initialization and during training, due to the inherent nonlinearity of FWI. We further show that the eigenvalue decay behavior of the wave-based NTK can explain why CR-FWI alleviates the dependency on initial models and shows slower high-frequency convergence. Building on these insights, we propose several CR-FWI methods with tailored eigenvalue decay properties for FWI, including a novel hybrid representation combining INR and multi-resolution grid (termed IG-FWI) that achieves a more balanced trade-off between robustness and high-frequency convergence rate. Applications in geophysical exploration on Marmousi, 2D SEG/EAGE Salt and Overthrust, 2004 BP model, and the more realistic 2014 Chevron models show the superior performance of our proposed methods compared to conventional FWI and existing INR-based FWI methods.",
+      "authors": [
+        "Ruihua Chen",
+        "Yisi Luo",
+        "Bangyu Wu",
+        "Deyu Meng"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "physics.geo-ph"
+      ],
+      "published": "2026-03-23T03:22:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.22362v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Continuous representation and coordinate-based neural networks for wave equations",
+      "llm_evidence_cn": "波动方程的连续表示与基于坐标的神经网络",
+      "llm_evidence": "波动方程的连续表示与基于坐标的神经网络",
+      "canonical_evidence": "波动方程的连续表示与基于坐标的神经网络",
+      "llm_tldr_en": "Analyzes the mechanism of neural representation in full-waveform inversion for wave equation parameters.",
+      "llm_tldr_cn": "分析了全波形反演中神经表示在波动方程参数估计中的作用机制。",
+      "llm_tldr": "分析了全波形反演中神经表示在波动方程参数估计中的作用机制。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.20904v3",
+      "title": "Sparse Weak-Form Discovery of Stochastic Generators",
+      "abstract": "The proposed algorithm seeks to provide a novel data-driven framework for the discovery of stochastic differential equations (SDEs) by application of the Weak-formulation to stochastic SINDy. This Weak formulation of the algorithm provides a noise-robust methodology that avoids traditional noisy derivative computation using finite differences. An additional novelty is the adoption of spatial Gaussian test functions in place of temporal test functions, wherein the use of the kernel weight $K_j(X_{t_n})$ guarantees unbiasedness in expectation and prevents the structural regression bias that is otherwise pertinent with temporal test functions. The proposed framework converts the SDE identification problem into two SINDy based linear sparse identification problems. We validate the algorithm on three SDEs, for which we recover all active non-linear terms with coefficient errors below 4%, stationary-density total-variation distances below 0.01, and autocorrelation functions that reproduce true relaxation timescales across all three benchmarks faithfully.",
+      "authors": [
+        "Eshwar R A",
+        "Gajanan V. Honnavar"
+      ],
+      "primary_category": "stat.ME",
+      "categories": [
+        "stat.ME",
+        "math-ph",
+        "math.DS",
+        "nlin.CD",
+        "physics.data-an",
+        "stat.ML"
+      ],
+      "published": "2026-03-21T18:28:10+00:00",
+      "link": "https://arxiv.org/pdf/2603.20904v3",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Weak-form discovery of stochastic differential equations",
+      "llm_evidence_cn": "随机微分方程的弱形式发现",
+      "llm_evidence": "随机微分方程的弱形式发现",
+      "canonical_evidence": "随机微分方程的弱形式发现",
+      "llm_tldr_en": "Presents a noise-robust weak-formulation framework for identifying stochastic differential equations from data.",
+      "llm_tldr_cn": "提出了一种鲁棒的弱形式框架，用于从数据中识别随机微分方程。",
+      "llm_tldr": "提出了一种鲁棒的弱形式框架，用于从数据中识别随机微分方程。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.24790v1",
+      "title": "Local learning for stable backpropagation-free neural network training towards physical learning",
+      "abstract": "While backpropagation and automatic differentiation have driven deep learning's success, the physical limits of chip manufacturing and rising environmental costs of deep learning motivate alternative learning paradigms such as physical neural networks. However, most existing physical neural networks still rely on digital computing for training, largely because backpropagation and automatic differentiation are difficult to realize in physical systems. We introduce FFzero, a forward-only learning framework enabling stable neural network training without backpropagation or automatic differentiation. FFzero combines layer-wise local learning, prototype-based representations, and directional-derivative-based optimization through forward evaluations only. We show that local learning is effective under forward-only optimization, where backpropagation fails. FFzero generalizes to multilayer perceptron and convolutional neural networks across classification and regression. Using a simulated photonic neural network as an example, we demonstrate that FFzero provides a viable path toward backpropagation-free in-situ physical learning.",
+      "authors": [
+        "Yaqi Guo",
+        "Fabian Braun",
+        "Bastiaan Ketelaar",
+        "Stephanie Tan",
+        "Richard Norte",
+        "Siddhant Kumar"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CE"
+      ],
+      "published": "2026-03-25T20:06:09+00:00",
+      "link": "https://arxiv.org/pdf/2603.24790v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "forward-only learning for physical neural networks",
+      "llm_evidence_cn": "物理神经网络的正向学习",
+      "llm_evidence": "物理神经网络的正向学习",
+      "canonical_evidence": "物理神经网络的正向学习",
+      "llm_tldr_en": "Introduces FFzero, a backpropagation-free training framework for physical neural networks.",
+      "llm_tldr_cn": "引入FFzero，一种用于物理神经网络的无反向传播训练框架。",
+      "llm_tldr": "引入FFzero，一种用于物理神经网络的无反向传播训练框架。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.24948v1",
+      "title": "Latent representation learning based model correction and uncertainty quantification for PDEs",
+      "abstract": "Model correction is essential for reliable PDE learning when the governing physics is misspecified due to simplified assumptions or limited observations. In the machine learning literature, existing correction methods typically operate in parameter space, where uncertainty is often quantified via sampling or ensemble-based methods, which can be prohibitive and motivates more efficient representation-level alternatives. To this end, we develop a latent-space model-correction framework by extending our previously proposed LVM-GP solver, which couples latent-variable model with Gaussian processes (GPs) for uncertainty-aware PDE learning. Our architecture employs a shared confidence-aware encoder and two probabilistic decoders, with the solution decoder predicting the solution distribution and the correction decoder inferring a discrepancy term to compensate for model-form errors. The encoder constructs a stochastic latent representation by balancing deterministic features with a GP prior through a learnable confidence function. Conditioned on this shared latent representation, the two decoders jointly quantify uncertainty in both the solution and the correction under soft physics constraints with noisy data. An auxiliary latent-space regularization is introduced to control the learned representation and enhance robustness. This design enables joint uncertainty quantification of both the solution and the correction within a single training procedure, without parameter sampling or repeated retraining. Numerical experiments show accuracy comparable to Ensemble PINNs and B-PINNs, with improved computational efficiency and robustness to misspecified physics.",
+      "authors": [
+        "Wenwen Zhou",
+        "Xiaodong Feng",
+        "Ling Guo",
+        "Hao Wu"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-26T02:32:04+00:00",
+      "link": "https://arxiv.org/pdf/2603.24948v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Uncertainty-aware PDE learning and model correction",
+      "llm_evidence_cn": "不确定性感知的PDE学习与模型修正",
+      "llm_evidence": "不确定性感知的PDE学习与模型修正",
+      "canonical_evidence": "不确定性感知的PDE学习与模型修正",
+      "llm_tldr_en": "A latent-space framework for model correction and uncertainty quantification in PDE learning.",
+      "llm_tldr_cn": "一种用于PDE学习中模型修正和不确定性量化的潜空间框架。",
+      "llm_tldr": "一种用于PDE学习中模型修正和不确定性量化的潜空间框架。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.24968v1",
+      "title": "Subject-Specific Low-Field MRI Synthesis via a Neural Operator",
+      "abstract": "Low-field (LF) magnetic resonance imaging (MRI) improves accessibility and reduces costs but generally has lower signal-to-noise ratios and degraded contrast compared to high field (HF) MRI, limiting its clinical utility. Simulating LF MRI from HF MRI enables virtual evaluation of novel imaging devices and development of LF algorithms. Existing low field simulators rely on noise injection and smoothing, which fail to capture the contrast degradation seen in LF acquisitions. To this end, we introduce an end-to-end LF-MRI synthesis framework that learns HF to LF image degradation directly from a small number of paired HF-LF MRIs. Specifically, we introduce a novel HF to LF coordinate-image decoupled neural operator (H2LO) to model the underlying degradation process, and tailor it to capture high-frequency noise textures and image structure. Experimental results in T1w and T2w MRI demonstrate that H2LO produces more faithful simulated low-field images than existing parameterized noise synthesis models and popular image-to-image translation models. Furthermore, it improves performance in downstream image enhancement tasks, showcasing its potential to enhance LF MRI diagnostic capabilities.",
+      "authors": [
+        "Ziqi Gao",
+        "Nicha Dvornek",
+        "Xiaoran Zhang",
+        "Gigi Galiana",
+        "Hemant Tagare",
+        "Todd Constable"
+      ],
+      "primary_category": "eess.IV",
+      "categories": [
+        "eess.IV",
+        "cs.AI"
+      ],
+      "published": "2026-03-26T03:01:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.24968v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "neural operator for image degradation modeling",
+      "llm_evidence_cn": "用于图像退化建模的神经算子",
+      "llm_evidence": "用于图像退化建模的神经算子",
+      "canonical_evidence": "用于图像退化建模的神经算子",
+      "llm_tldr_en": "Uses a coordinate-image decoupled neural operator to model MRI image degradation processes.",
+      "llm_tldr_cn": "使用坐标-图像解耦神经算子来模拟MRI图像退化过程。",
+      "llm_tldr": "使用坐标-图像解耦神经算子来模拟MRI图像退化过程。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Neural operator methods for solving PDEs",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25025v1",
+      "title": "System-Anchored Knee Estimation for Low-Cost Context Window Selection in PDE Forecasting",
+      "abstract": "Autoregressive neural PDE simulators predict the evolution of physical fields one step at a time from a finite history, but low-cost context-window selection for such simulators remains an unformalized problem. Existing approaches to context-window selection in time-series forecasting include exhaustive validation, direct low-cost search, and system-theoretic memory estimation, but they are either expensive, brittle, or not directly aligned with downstream rollout performance. We formalize explicit context-window selection for fixed-window autoregressive neural PDE simulators as an independent low-cost algorithmic problem, and propose \\textbf{System-Anchored Knee Estimation (SAKE)}, a two-stage method that first identifies a small structured candidate set from physically interpretable system anchors and then performs knee-aware downstream selection within it. Across all eight PDEBench families evaluated under the shared \\(L\\in\\{1,\\dots,16\\}\\) protocol, SAKE is the strongest overall matched-budget low-cost selector among the evaluated methods, achieving 67.8\\% Exact, 91.7\\% Within-1, 6.1\\% mean regret@knee, and a cost ratio of 0.051 (94.9\\% normalized search-cost savings).",
+      "authors": [
+        "Wenshuo Wang",
+        "Fan Zhang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-26T04:42:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.25025v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Context window selection for neural PDE simulators",
+      "llm_evidence_cn": "神经PDE模拟器的上下文窗口选择",
+      "llm_evidence": "神经PDE模拟器的上下文窗口选择",
+      "canonical_evidence": "神经PDE模拟器的上下文窗口选择",
+      "llm_tldr_en": "Formalizes context-window selection for autoregressive neural PDE simulators to optimize forecasting performance.",
+      "llm_tldr_cn": "形式化了自回归神经PDE模拟器的上下文窗口选择问题，以优化预测性能。",
+      "llm_tldr": "形式化了自回归神经PDE模拟器的上下文窗口选择问题，以优化预测性能。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.25103v1",
+      "title": "Layer-Specific Lipschitz Modulation for Fault-Tolerant Multimodal Representation Learning",
+      "abstract": "Modern multimodal systems deployed in industrial and safety-critical environments must remain reliable under partial sensor failures, signal degradation, or cross-modal inconsistencies. This work introduces a mathematically grounded framework for fault-tolerant multimodal representation learning that unifies self-supervised anomaly detection and error correction within a single architecture. Building upon a theoretical analysis of perturbation propagation, we derive Lipschitz- and Jacobian-based criteria that determine whether a neural operator amplifies or attenuates localized faults. Guided by this theory, we propose a two-stage self-supervised training scheme: pre-training a multimodal convolutional autoencoder on clean data to preserve localized anomaly signals in the latent space, and expanding it with a learnable compute block composed of dense layers for correction and contrastive objectives for anomaly identification. Furthermore, we introduce layer-specific Lipschitz modulation and gradient clipping as principled mechanisms to control sensitivity across detection and correction modules. Experimental results on multimodal fault datasets demonstrate that the proposed approach improves both anomaly detection accuracy and reconstruction under sensor corruption. Overall, this framework bridges the gap between analytical robustness guarantees and practical fault-tolerant multimodal learning.",
+      "authors": [
+        "Diyar Altinses",
+        "Andreas Schwung"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-26T07:22:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.25103v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Theoretical analysis of neural operator fault tolerance",
+      "llm_evidence_cn": "神经算子容错性的理论分析",
+      "llm_evidence": "神经算子容错性的理论分析",
+      "canonical_evidence": "神经算子容错性的理论分析",
+      "llm_tldr_en": "Proposes a Lipschitz-based framework for fault-tolerant multimodal representation learning in neural operators.",
+      "llm_tldr_cn": "提出了一种基于Lipschitz的神经算子容错多模态表示学习框架。",
+      "llm_tldr": "提出了一种基于Lipschitz的神经算子容错多模态表示学习框架。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Neural operator methods for solving PDEs",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25574v1",
+      "title": "Physics-informed structured learning of a class of recurrent neural networks with guaranteed properties",
+      "abstract": "This paper proposes a physics-informed learning framework for a class of recurrent neural networks tailored to large-scale and networked systems. The approach aims to learn control-oriented models that preserve the structural and stability properties of the plant. The learning algorithm is formulated as a convex optimisation problem, allowing the inclusion of linear matrix inequality constraints to enforce desired system features. Furthermore, when the plant exhibits structural modularity, the resulting optimisation problem can be parallelised, requiring communication only among neighbouring subsystems. Simulation results show the effectiveness of the proposed approach.",
+      "authors": [
+        "Daniele Ravasio",
+        "Claudia Sbardi",
+        "Marcello Farina",
+        "Andrea Ballarino"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-26T15:48:16+00:00",
+      "link": "https://arxiv.org/pdf/2603.25574v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Physics-informed learning framework for recurrent neural networks",
+      "llm_evidence_cn": "循环神经网络的物理信息学习框架",
+      "llm_evidence": "循环神经网络的物理信息学习框架",
+      "canonical_evidence": "循环神经网络的物理信息学习框架",
+      "llm_tldr_en": "Develops a physics-informed RNN framework for large-scale systems with guaranteed stability properties.",
+      "llm_tldr_cn": "为具有稳定性保证的大规模系统开发了一种物理信息循环神经网络框架。",
+      "llm_tldr": "为具有稳定性保证的大规模系统开发了一种物理信息循环神经网络框架。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
