@@ -6,67 +6,41 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-27
-- 运行时间：2026-03-27 19:53:56 UTC
+- 最新运行日期：2026-03-28
+- 运行时间：2026-03-28 20:00:33 UTC
 - 运行状态：成功
-- 本次总论文数：15
-- 精读区：6
-- 速读区：9
+- 本次总论文数：7
+- 精读区：1
+- 速读区：6
 
 ### 今日简报（AI）
-今日深挖15篇AI+Science前沿，重点攻克守恒定律与电磁逆散射中的物理信息神经网络难题。
-满分论文揭示了弱形式PINN与神经算子在处理复杂物理方程时的卓越精度，是物理驱动学习的最新范式。
-建议优先研读关于弱形式约束与逆散射问题的两篇满分佳作，掌握高精度物理建模的核心演进。
-- 详情：[/202603/27/README](/202603/27/README)
+今日聚焦算子学习在多相流实时控制中的突破，涵盖非线性降阶与不规则时序预测等 7
+- 详情：[/202603/28/README](/202603/28/README)
 
 ### 精读区论文标签
-1. [Weak and entropy physics-informed neural networks for conservation laws](/202603/27/2603.24819v1-weak-and-entropy-physics-informed-neural-networks-for-conservation-laws)  
-   标签：评分：10.0/10、query:pinn
-   evidence：弱形式与熵物理信息神经网络
-2. [Physics-Informed Neural Operator for Electromagnetic Inverse Scattering Problems](/202603/27/2603.25404v1-physics-informed-neural-operator-for-electromagnetic-inverse-scattering-problems)  
-   标签：评分：10.0/10、query:pinn
-   evidence：使用傅里叶神经算子的物理信息神经算子 (PINO)
-3. [Physics-Informed Neural Network Digital Twin for Dynamic Tray-Wise Modeling of Distillation Columns under Transient Operating Conditions](/202603/27/2603.24644v1-physics-informed-neural-network-digital-twin-for-dynamic-tray-wise-modeling-of-distillation-columns-under-transient-operating-conditions)  
+1. [Real-time control of multiphase processes with learned operators](/202603/28/2603.25308v1-real-time-control-of-multiphase-processes-with-learned-operators)  
    标签：评分：9.0/10、query:pinn
-   evidence：用于精馏塔建模的PINN数字孪生
-4. [Neural Operator Quantum State: A Foundation Model for Quantum Dynamics](/202603/27/2603.25066v1-neural-operator-quantum-state-a-foundation-model-for-quantum-dynamics)  
-   标签：评分：9.0/10、query:pinn
-   evidence：用于量子动力学的神经算子基础模型
-5. [Incorporating Continuous Dependence Qualifies Physics-Informed Neural Networks for Operator Learning](/202603/27/2603.25122v1-incorporating-continuous-dependence-qualifies-physics-informed-neural-networks-for-operator-learning)  
-   标签：评分：9.0/10、query:pinn
-   evidence：通过连续依赖性将PINN扩展到算子学习
-6. [Learning Mesh-Free Discrete Differential Operators with Self-Supervised Graph Neural Networks](/202603/27/2603.24641v1-learning-mesh-free-discrete-differential-operators-with-self-supervised-graph-neural-networks)  
-   标签：评分：8.0/10、query:pinn
-   evidence：利用图神经网络学习无网格离散微分算子
+   evidence：学习算子用于多相流的实时控制
 
 ### 速读区论文标签
-1. [WarPGNN: A Parametric Thermal Warpage Analysis Framework with Physics-aware Graph Neural Network](/202603/27/2603.18581v1-warpgnn-a-parametric-thermal-warpage-analysis-framework-with-physics-aware-graph-neural-network)  
+1. [Nonlinear Model Order Reduction on Quadratic Manifolds via Greedy Algorithms with Dimension-Dependent Regularization](/202603/28/2603.24962v1-nonlinear-model-order-reduction-on-quadratic-manifolds-via-greedy-algorithms-with-dimension-dependent-regularization)  
    标签：评分：7.0/10、query:pinn
-   evidence：用于热分析的物理感知图神经网络
-2. [Sparse Weak-Form Discovery of Stochastic Generators](/202603/27/2603.20904v3-sparse-weak-form-discovery-of-stochastic-generators)  
+   evidence：参数化偏微分方程的数据驱动模型降阶
+2. [Spatiotemporal System Forecasting with Irregular Time Steps via Masked Autoencoder](/202603/28/2603.25597v1-spatiotemporal-system-forecasting-with-irregular-time-steps-via-masked-autoencoder)  
    标签：评分：7.0/10、query:pinn
-   evidence：随机微分方程的弱形式发现
-3. [Latent representation learning based model correction and uncertainty quantification for PDEs](/202603/27/2603.24948v1-latent-representation-learning-based-model-correction-and-uncertainty-quantification-for-pdes)  
-   标签：评分：7.0/10、query:pinn
-   evidence：不确定性感知的PDE学习与模型修正
-4. [System-Anchored Knee Estimation for Low-Cost Context Window Selection in PDE Forecasting](/202603/27/2603.25025v1-system-anchored-knee-estimation-for-low-cost-context-window-selection-in-pde-forecasting)  
-   标签：评分：7.0/10、query:pinn
-   evidence：神经PDE模拟器的上下文窗口选择
-5. [Physics-informed structured learning of a class of recurrent neural networks with guaranteed properties](/202603/27/2603.25574v1-physics-informed-structured-learning-of-a-class-of-recurrent-neural-networks-with-guaranteed-properties)  
-   标签：评分：7.0/10、query:pinn
-   evidence：循环神经网络的物理信息学习框架
-6. [Unveiling the Mechanism of Continuous Representation Full-Waveform Inversion: A Wave Based Neural Tangent Kernel Framework](/202603/27/2603.22362v1-unveiling-the-mechanism-of-continuous-representation-full-waveform-inversion-a-wave-based-neural-tangent-kernel-framework)  
+   evidence：用于动力系统的物理时空掩码自编码器
+3. [Enhancing Future Prediction of Linear and Nonlinear Reduced-Order Models for Transport-Dominated Problems Using Lagrangian Data](/202603/28/2603.19702v1-enhancing-future-prediction-of-linear-and-nonlinear-reduced-order-models-for-transport-dominated-problems-using-lagrangian-data)  
    标签：评分：6.0/10、query:pinn
-   evidence：波动方程的连续表示与基于坐标的神经网络
-7. [Local learning for stable backpropagation-free neural network training towards physical learning](/202603/27/2603.24790v1-local-learning-for-stable-backpropagation-free-neural-network-training-towards-physical-learning)  
+   evidence：针对输运主导问题的自编码器非线性降阶模型
+4. [A unified machine learning framework for ab initio multiscale modeling of liquids](/202603/28/2603.20493v1-a-unified-machine-learning-framework-for-ab-initio-multiscale-modeling-of-liquids)  
    标签：评分：6.0/10、query:pinn
-   evidence：物理神经网络的正向学习
-8. [Subject-Specific Low-Field MRI Synthesis via a Neural Operator](/202603/27/2603.24968v1-subject-specific-low-field-mri-synthesis-via-a-neural-operator)  
+   evidence：用于多尺度建模的神经经典密度泛函理论
+5. [A Distribution-to-Distribution Neural Probabilistic Forecasting Framework for Dynamical Systems](/202603/28/2603.25370v1-a-distribution-to-distribution-neural-probabilistic-forecasting-framework-for-dynamical-systems)  
    标签：评分：6.0/10、query:pinn
-   evidence：用于图像退化建模的神经算子
-9. [Layer-Specific Lipschitz Modulation for Fault-Tolerant Multimodal Representation Learning](/202603/27/2603.25103v1-layer-specific-lipschitz-modulation-for-fault-tolerant-multimodal-representation-learning)  
+   evidence：动力系统的神经概率预测
+6. [Fast and Accurate CP-HIFI Tensor Decompositions: Exploiting Kronecker Structure](/202603/28/2603.25691v1-fast-and-accurate-cp-hifi-tensor-decompositions-exploiting-kronecker-structure)  
    标签：评分：6.0/10、query:pinn
-   evidence：神经算子容错性的理论分析
+   evidence：使用张量分解进行参数化偏微分方程的代理建模
 
 
 <div class="dpr-home-promo-card">

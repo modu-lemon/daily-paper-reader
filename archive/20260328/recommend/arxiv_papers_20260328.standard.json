@@ -1,0 +1,277 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-28T19:59:20.224028+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 6,
+    "quick_skim_target": 11,
+    "quick_selected": 6
+  },
+  "deep_dive": [
+    {
+      "id": "2603.25308v1",
+      "title": "Real-time control of multiphase processes with learned operators",
+      "abstract": "Multiphase flows frequently occur naturally and in manufactured devices. Controlling such phenomena is extremely challenging due to the strongly non-linear dynamics, rapid phase transitions, and the limited spatial and temporal resolution of available sensors, which can lead to significant inaccuracies in predicting and managing these flows. In most cases, numerical models are the only way to access high spatial and temporal resolution data to an extent that allows for fine control. While embedding numerical models in control algorithms could enable fine control of multiphase processes, the significant computational burden currently limits their practical application. This work proposes a surrogate-assisted model predictive control (MPC) framework for regulating multiphase processes using learned operators. A Fourier Neural Operator (FNO) is trained to forecast the spatiotemporal evolution of a phase-indicator field (the volume fraction) over a finite horizon from a short history of recent states and a candidate actuation signal. The neural operator surrogate is then iteratively called during the optimisation process to identify the optimal control variable. To illustrate the approach, we solve an optimal control problem (OCP) on a two-phase Eulerian bubble column. Here, the controller tracks piecewise-constant liquid level setpoints by adjusting the gas flow rate introduced into the system. The results we obtained indicate that field-level forecasting with FNOs are well suited for closed-loop optimization since they have relatively low evaluation cost. The latter provide a practical route toward MPC for fast multiphase unit operations and a foundation for future extensions to partial observability and physics-informed operator learning.",
+      "authors": [
+        "Paolo Guida",
+        "Didier Barradas-Bautista"
+      ],
+      "primary_category": "physics.flu-dyn",
+      "categories": [
+        "physics.flu-dyn",
+        "eess.SY"
+      ],
+      "published": "2026-03-26T10:55:47+00:00",
+      "link": "https://arxiv.org/pdf/2603.25308v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Learned operators for real-time control of multiphase flows",
+      "llm_evidence_cn": "学习算子用于多相流的实时控制",
+      "llm_evidence": "学习算子用于多相流的实时控制",
+      "canonical_evidence": "学习算子用于多相流的实时控制",
+      "llm_tldr_en": "Uses learned operators as surrogates for real-time control and optimization of complex multiphase fluid processes.",
+      "llm_tldr_cn": "利用学习到的算子作为代理模型，实现复杂多相流过程的实时控制与优化。",
+      "llm_tldr": "利用学习到的算子作为代理模型，实现复杂多相流过程的实时控制与优化。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Applications of neural operators in computational fluid dynamics",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.24962v1",
+      "title": "Nonlinear Model Order Reduction on Quadratic Manifolds via Greedy Algorithms with Dimension-Dependent Regularization",
+      "abstract": "Traditional projection-based reduced-order modeling approximates the full-order model by projecting it onto a linear subspace. With a fast-decaying Kolmogorov $n$-width of the solution manifold, the resulting reduced-order model (ROM) can be an efficient and accurate emulator. However, for parametric partial differential equations with slowly decaying Kolmogorov $n$-width, the dimension of the linear subspace required for a reasonable accuracy becomes very large, which undermines computational efficiency. To address this limitation, quadratic manifold methods have recently been proposed. These data-driven methods first identify a quadratic mapping by minimizing the linear projection error over a large set of snapshots, often with the aid of regularization techniques to solve the associated minimization problem, and then use this mapping to construct ROMs.   In this paper, we propose and test a novel enhancement to this quadratic manifold approach by introducing a first-of-its-kind double-greedy algorithm on the regularization parameters coupled with a standard greedy algorithm on the physical parameter. Our approach balances the trade-off between the accuracy of the quadratic mapping and the stability of the resulting nonlinear ROM, leading to a highly efficient and data-sparse algorithm. Numerical experiments conducted on equations such as linear transport, acoustic wave, advection-diffusion, and Burgers' demonstrate the accuracy, efficiency, and stability of the proposed algorithm.",
+      "authors": [
+        "Lijie Ji",
+        "Sabrina Rashid",
+        "Yanlai Chen",
+        "Zhu Wang"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-26T02:58:00+00:00",
+      "link": "https://arxiv.org/pdf/2603.24962v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Data-driven model order reduction for parametric PDEs",
+      "llm_evidence_cn": "参数化偏微分方程的数据驱动模型降阶",
+      "llm_evidence": "参数化偏微分方程的数据驱动模型降阶",
+      "canonical_evidence": "参数化偏微分方程的数据驱动模型降阶",
+      "llm_tldr_en": "Introduces quadratic manifold methods for efficient model order reduction of parametric PDEs.",
+      "llm_tldr_cn": "引入了二次流形方法，用于参数化偏微分方程的高效模型降阶。",
+      "llm_tldr": "引入了二次流形方法，用于参数化偏微分方程的高效模型降阶。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.19702v1",
+      "title": "Enhancing Future Prediction of Linear and Nonlinear Reduced-Order Models for Transport-Dominated Problems Using Lagrangian Data",
+      "abstract": "Designing effective reduced-order models (ROMs) for parametrized transport-dominated problems remains challenging because of the well-known Kolmogorov barrier. Autoencoder-based nonlinear ROMs have been developed to improve the compression ability for such systems. However, despite their stronger compression ability, autoencoder-based ROMs constructed in the Eulerian frame may fail to accurately predict future solutions, due to the poor coherence between historical and future solutions in the Eulerian frame.   In contrast, we show that representing transport-dominated dynamics in the Lagrangian frame can lead to a significantly faster decay of the Kolmogorov n-width and improve coherence between historical and future solutions. Building on these insights, we develop two non-intrusive ROMs leveraging Lagrangian data: a Lagrangian autoencoder-based ROM and a Lagrangian parametric dynamic mode decomposition. Numerical experiments demonstrate that these Lagrangian ROMs achieve more accurate and stable future predictions than their Eulerian counterparts.",
+      "authors": [
+        "Meng Li",
+        "Yang Xiang",
+        "Zhichao Peng"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-20T07:13:15+00:00",
+      "link": "https://arxiv.org/pdf/2603.19702v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "autoencoder-based nonlinear ROMs for transport-dominated problems",
+      "llm_evidence_cn": "针对输运主导问题的自编码器非线性降阶模型",
+      "llm_evidence": "针对输运主导问题的自编码器非线性降阶模型",
+      "canonical_evidence": "针对输运主导问题的自编码器非线性降阶模型",
+      "llm_tldr_en": "Enhances reduced-order models for transport-dominated PDEs using Lagrangian data and autoencoders.",
+      "llm_tldr_cn": "利用拉格朗日数据和自编码器增强了输运主导偏微分方程的降阶模型。",
+      "llm_tldr": "利用拉格朗日数据和自编码器增强了输运主导偏微分方程的降阶模型。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25597v1",
+      "title": "Spatiotemporal System Forecasting with Irregular Time Steps via Masked Autoencoder",
+      "abstract": "Predicting high-dimensional dynamical systems with irregular time steps presents significant challenges for current data-driven algorithms. These irregularities arise from missing data, sparse observations, or adaptive computational techniques, reducing prediction accuracy. To address these limitations, we propose a novel method: a Physics-Spatiotemporal Masked Autoencoder. This method integrates convolutional autoencoders for spatial feature extraction with masked autoencoders optimised for irregular time series, leveraging attention mechanisms to reconstruct the entire physical sequence in a single prediction pass. The model avoids the need for data imputation while preserving physical integrity of the system. Here, 'physics' refers to high-dimensional fields generated by underlying dynamical systems, rather than the enforcement of explicit physical constraints or PDE residuals. We evaluate this approach on multiple simulated datasets and real-world ocean temperature data. The results demonstrate that our method achieves significant improvements in prediction accuracy, robustness to nonlinearities, and computational efficiency over traditional convolutional and recurrent network methods. The model shows potential for capturing complex spatiotemporal patterns without requiring domain-specific knowledge, with applications in climate modelling, fluid dynamics, ocean forecasting, environmental monitoring, and scientific computing.",
+      "authors": [
+        "Kewei Zhu",
+        "Yanze Xin",
+        "Jinwei Hu",
+        "Xiaoyuan Cheng",
+        "Yiming Yang",
+        "Sibo Cheng"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "nlin.AO"
+      ],
+      "published": "2026-03-26T16:14:11+00:00",
+      "link": "https://arxiv.org/pdf/2603.25597v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Physics-spatiotemporal masked autoencoder for dynamical systems",
+      "llm_evidence_cn": "用于动力系统的物理时空掩码自编码器",
+      "llm_evidence": "用于动力系统的物理时空掩码自编码器",
+      "canonical_evidence": "用于动力系统的物理时空掩码自编码器",
+      "llm_tldr_en": "Integrates physics constraints into a masked autoencoder for irregular spatiotemporal forecasting.",
+      "llm_tldr_cn": "将物理约束集成到掩码自编码器中，用于不规则时空序列预测。",
+      "llm_tldr": "将物理约束集成到掩码自编码器中，用于不规则时空序列预测。",
+      "llm_tags": [
+        "query:pinn:composite"
+      ],
+      "matched_query_tag": "query:pinn:composite",
+      "matched_query_text": "Papers central to 物理信息神经网络与神经算子求解偏微分方程论文检索, especially work that connects or combines: p; Physics-informed neural networks for partial differential equations; Neural operator methods for solving PDEs; Deep operator networks for differential equations; Fourier Neural Operator for scientific computing; Deep learning based partial differential equation solvers; Recent advances in physics informed neural networks and neural operators; Comparison between PINNs and neural operators for PDE solving; Applications of neural operators in computational fluid dynamics; Hybrid physics informed machine learning for differential equations.",
+      "matched_requirement_id": "req-composite-pinn",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.20493v1",
+      "title": "A unified machine learning framework for ab initio multiscale modeling of liquids",
+      "abstract": "Understanding and predicting the behavior of liquid matter across length scales, using only the microscopic interactions encoded in the Schrödinger equation, remains a central challenge in the physical sciences. Achieving this goal requires not only an accurate and efficient description of intermolecular forces but also a consistent framework that bridges the micro-, meso-, and macroscales. Here, by combining machine-learned interatomic potentials (MLIPs) with neural classical density functional theory (neural cDFT), we present such a framework. The underlying idea is simple: MLIPs trained on quantum-mechanical energies and forces are used to generate inhomogeneous microscopic density profiles, which in turn serve as the training data for neural cDFT. The resulting ab initio neural cDFT is not only significantly more computationally efficient than molecular simulations, but also provides a conceptually transparent route to the thermodynamics of both homogeneous and inhomogeneous systems. We demonstrate the approach for both water and carbon dioxide using several exchange-correlation functionals. Beyond accurately reproducing bulk equations of state and liquid-vapor phase diagrams, ab initio neural cDFT predicts, from first principles, how confinement modifies liquid-vapor coexistence in water. It also captures complex behavior in supercritical carbon dioxide such as the Fisher-Widom and Widom lines. Ab initio neural cDFT establishes a general first-principles route to multiscale modeling of fluids within a single unified conceptual framework.",
+      "authors": [
+        "Anna T. Bui",
+        "Stephen J. Cox"
+      ],
+      "primary_category": "physics.chem-ph",
+      "categories": [
+        "physics.chem-ph",
+        "cond-mat.mtrl-sci",
+        "cond-mat.other",
+        "cond-mat.stat-mech",
+        "physics.comp-ph"
+      ],
+      "published": "2026-03-20T20:46:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.20493v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Neural classical density functional theory for multiscale modeling",
+      "llm_evidence_cn": "用于多尺度建模的神经经典密度泛函理论",
+      "llm_evidence": "用于多尺度建模的神经经典密度泛函理论",
+      "canonical_evidence": "用于多尺度建模的神经经典密度泛函理论",
+      "llm_tldr_en": "Combines machine learning potentials with neural cDFT to bridge scales in liquid matter modeling.",
+      "llm_tldr_cn": "结合机器学习势能与神经cDFT，实现了液体建模中的跨尺度连接。",
+      "llm_tldr": "结合机器学习势能与神经cDFT，实现了液体建模中的跨尺度连接。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25370v1",
+      "title": "A Distribution-to-Distribution Neural Probabilistic Forecasting Framework for Dynamical Systems",
+      "abstract": "Probabilistic forecasting provides a principled framework for uncertainty quantification in dynamical systems by representing predictions as probability distributions rather than deterministic trajectories. However, existing forecasting approaches, whether physics-based or neural-network-based, remain fundamentally trajectory-oriented: predictive distributions are usually accessed through ensembles or sampling, rather than evolved directly as dynamical objects. A distribution-to-distribution (D2D) neural probabilistic forecasting framework is developed to operate directly on predictive distributions. The framework introduces a distributional encoding and decoding structure around a replaceable neural forecasting module, using kernel mean embeddings to represent input distributions and mixture density networks to parameterise output predictive distributions. This design enables recursive propagation of predictive uncertainty within a unified end-to-end neural architecture, with model training and evaluation carried out directly in terms of probabilistic forecast skill. The framework is demonstrated on the Lorenz63 chaotic dynamical system. Results show that the D2D model captures nontrivial distributional evolution under nonlinear dynamics, produces skillful probabilistic forecasts without explicit ensemble simulation, and remains competitive with, and in some cases outperforms, a simplified perfect model benchmark. These findings point to a new paradigm for probabilistic forecasting, in which predictive distributions are learned and evolved directly rather than reconstructed indirectly through ensemble-based uncertainty propagation.",
+      "authors": [
+        "Tianlin Yang",
+        "Hailiang Du",
+        "Louis Aslett"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG"
+      ],
+      "published": "2026-03-26T12:19:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.25370v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Neural probabilistic forecasting for dynamical systems",
+      "llm_evidence_cn": "动力系统的神经概率预测",
+      "llm_evidence": "动力系统的神经概率预测",
+      "canonical_evidence": "动力系统的神经概率预测",
+      "llm_tldr_en": "Develops a distribution-to-distribution framework for direct evolution of predictive distributions.",
+      "llm_tldr_cn": "开发了一种分布到分布的框架，用于直接演化动力系统的预测分布。",
+      "llm_tldr": "开发了一种分布到分布的框架，用于直接演化动力系统的预测分布。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25691v1",
+      "title": "Fast and Accurate CP-HIFI Tensor Decompositions: Exploiting Kronecker Structure",
+      "abstract": "Tensor decompositions are a fundamental tool in scientific computing and data analysis. In many applications -- such as simulation data on irregular grids, surrogate modeling for parameterized PDEs, or spectroscopic measurements -- the data has both discrete and continuous structure, and may only be observed at scattered sample points. The CP-HIFI (hybrid infinite-finite) decomposition generalizes the Canonical Polyadic (CP) tensor decomposition to settings where some factors are finite-dimensional vectors and others are functions drawn from infinite-dimensional spaces. The decomposition can be applied to a fully observed tensor (aligned) or, when only scattered observations are available, to a sparsely sampled tensor (unaligned). Current methods compute CP-HIFI factors by solving a sequence of dense linear systems arising from regularized least-squares problems to fit reproducing Kernel Hilbert space (RKHS) representations to the data, but these direct solves become computationally prohibitive as problem size grows. We propose new algorithms that achieve the same accuracy while being orders of magnitude faster. For aligned tensors, we exploit the Kronecker structure of the system to efficiently compute its eigendecomposition without ever forming the full system, reducing the solve to independent scalar equations. For unaligned tensors, we introduce a preconditioned conjugate gradient method, exploiting the problem's structure for fast matrix-vector products and efficient preconditioning. In our experiments, the proposed methods speed up the solution up to 500x compared to the prior naive direct methods, in line with the reduction in the theoretical computational complexity.",
+      "authors": [
+        "Johannes J. Brust",
+        "Tamara G. Kolda"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-26T17:39:38+00:00",
+      "link": "https://arxiv.org/pdf/2603.25691v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "surrogate modeling for parameterized PDEs using tensor decompositions",
+      "llm_evidence_cn": "使用张量分解进行参数化偏微分方程的代理建模",
+      "llm_evidence": "使用张量分解进行参数化偏微分方程的代理建模",
+      "canonical_evidence": "使用张量分解进行参数化偏微分方程的代理建模",
+      "llm_tldr_en": "Introduces CP-HIFI tensor decompositions for scientific computing and surrogate modeling of parameterized PDEs.",
+      "llm_tldr_cn": "引入CP-HIFI张量分解，用于科学计算和参数化偏微分方程的代理建模。",
+      "llm_tldr": "引入CP-HIFI张量分解，用于科学计算和参数化偏微分方程的代理建模。",
+      "llm_tags": [
+        "query:pinn:composite"
+      ],
+      "matched_query_tag": "query:pinn:composite",
+      "matched_query_text": "Papers central to 物理信息神经网络与神经算子求解偏微分方程论文检索, especially work that connects or combines: p; Physics-informed neural networks for partial differential equations; Neural operator methods for solving PDEs; Deep operator networks for differential equations; Fourier Neural Operator for scientific computing; Deep learning based partial differential equation solvers; Recent advances in physics informed neural networks and neural operators; Comparison between PINNs and neural operators for PDE solving; Applications of neural operators in computational fluid dynamics; Hybrid physics informed machine learning for differential equations.",
+      "matched_requirement_id": "req-composite-pinn",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
