@@ -1,0 +1,251 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-29T19:31:56.556512+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 5,
+    "quick_skim_target": 11,
+    "quick_selected": 5
+  },
+  "deep_dive": [
+    {
+      "id": "2603.20541v1",
+      "title": "Watch an AI Weather Model Learn (and Unlearn) Tropical Cyclones",
+      "abstract": "In a changing climate, artificial intelligence (AI) weather models have the potential to provide cheaper, faster, and more accurate forecasts of high-impact weather events. To realize this potential and gauge trustworthiness, there is a need for more research on how models learn extreme events and how that learning might be improved. Here, we investigate how a Spherical Fourier Neural Operator (SFNO) learns tropical cyclones (TCs) by saving every checkpoint from training and analyzing storm specific metrics. We find evidence that for some storms the SFNO learns information about TC intensity that it loses later in training. This unlearning pattern is associated with anomalously moist environments and may be due to the model unlearning the relationship between moisture and TC intensity. This work provides a first example of leveraging task-specific training dynamics to further our understanding of how AI weather models learn extreme events.",
+      "authors": [
+        "Rebecca Baiman",
+        "Ankur Mahesh",
+        "Elizabeth A. Barnes"
+      ],
+      "primary_category": "physics.ao-ph",
+      "categories": [
+        "physics.ao-ph"
+      ],
+      "published": "2026-03-20T22:23:55+00:00",
+      "link": "https://arxiv.org/pdf/2603.20541v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Analysis of Spherical Fourier Neural Operator for weather forecasting",
+      "llm_evidence_cn": "用于天气预报的球面傅里叶神经算子分析",
+      "llm_evidence": "用于天气预报的球面傅里叶神经算子分析",
+      "canonical_evidence": "用于天气预报的球面傅里叶神经算子分析",
+      "llm_tldr_en": "Investigates how Spherical Fourier Neural Operators learn and unlearn tropical cyclone features.",
+      "llm_tldr_cn": "研究球面傅里叶神经算子（SFNO）在学习热带气旋特征过程中的学习与遗忘模式。",
+      "llm_tldr": "研究球面傅里叶神经算子（SFNO）在学习热带气旋特征过程中的学习与遗忘模式。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Fourier Neural Operator for scientific computing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.20467v1",
+      "title": "Goal-oriented learning of stochastic dynamical systems using error bounds on path-space observables",
+      "abstract": "The governing equations of stochastic dynamical systems often become cost-prohibitive for numerical simulation at large scales. Surrogate models of the governing equations, learned from data of the high-fidelity system, are routinely used to predict key observables with greater efficiency. However, standard choices of loss function for learning the surrogate model fail to provide error guarantees in path-dependent observables, such as reaction rates of molecular dynamical systems. This paper introduces an error bound for path-space observables and employs it as a novel variational loss for the goal-oriented learning of a stochastic dynamical system. We show the error bound holds for a broad class of observables, including mean first hitting times on unbounded time domains. We derive an analytical gradient of the goal-oriented loss function by leveraging the formula for Frechet derivatives of expected path functionals, which remains tractable for implementation in stochastic gradient descent schemes. We demonstrate that surrogate models of overdamped Langevin systems developed via goal-oriented learning achieve improved accuracy in predicting the statistics of a first hitting time observable and robustness to distributional shift in the data.",
+      "authors": [
+        "Joanna Zou",
+        "Han Cheng Lie",
+        "Youssef Marzouk"
+      ],
+      "primary_category": "stat.ME",
+      "categories": [
+        "stat.ME",
+        "cs.LG",
+        "math.DS"
+      ],
+      "published": "2026-03-20T19:52:47+00:00",
+      "link": "https://arxiv.org/pdf/2603.20467v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Learning surrogate models of governing equations for dynamical systems",
+      "llm_evidence_cn": "学习动力系统控制方程的代理模型",
+      "llm_evidence": "学习动力系统控制方程的代理模型",
+      "canonical_evidence": "学习动力系统控制方程的代理模型",
+      "llm_tldr_en": "Introduces a variational loss for goal-oriented learning of stochastic dynamical system surrogates.",
+      "llm_tldr_cn": "引入一种变分损失函数，用于随机动力系统代理模型的面向目标学习。",
+      "llm_tldr": "引入一种变分损失函数，用于随机动力系统代理模型的面向目标学习。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.23173v1",
+      "title": "A Schrödinger Eigenfunction Method for Long-Horizon Stochastic Optimal Control",
+      "abstract": "High-dimensional stochastic optimal control (SOC) becomes harder with longer planning horizons: existing methods scale linearly in the horizon $T$, with performance often deteriorating exponentially. We overcome these limitations for a subclass of linearly-solvable SOC problems-those whose uncontrolled drift is the gradient of a potential. In this setting, the Hamilton-Jacobi-Bellman equation reduces to a linear PDE governed by an operator $\\mathcal{L}$. We prove that, under the gradient drift assumption, $\\mathcal{L}$ is unitarily equivalent to a Schrödinger operator $\\mathcal{S} = -Δ+ \\mathcal{V}$ with purely discrete spectrum, allowing the long-horizon control to be efficiently described via the eigensystem of $\\mathcal{L}$. This connection provides two key results: first, for a symmetric linear-quadratic regulator (LQR), $\\mathcal{S}$ matches the Hamiltonian of a quantum harmonic oscillator, whose closed-form eigensystem yields an analytic solution to the symmetric LQR with \\emph{arbitrary} terminal cost. Second, in a more general setting, we learn the eigensystem of $\\mathcal{L}$ using neural networks. We identify implicit reweighting issues with existing eigenfunction learning losses that degrade performance in control tasks, and propose a novel loss function to mitigate this. We evaluate our method on several long-horizon benchmarks, achieving an order-of-magnitude improvement in control accuracy compared to state-of-the-art methods, while reducing memory usage and runtime complexity from $\\mathcal{O}(Td)$ to $\\mathcal{O}(d)$.",
+      "authors": [
+        "Louis Claeys",
+        "Artur Goldman",
+        "Zebang Shen",
+        "Niao He"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "math.OC"
+      ],
+      "published": "2026-03-24T13:15:48+00:00",
+      "link": "https://arxiv.org/pdf/2603.23173v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "linear PDE governed by an operator",
+      "llm_evidence_cn": "由算子控制的线性偏微分方程",
+      "llm_evidence": "由算子控制的线性偏微分方程",
+      "canonical_evidence": "由算子控制的线性偏微分方程",
+      "llm_tldr_en": "Solves high-dimensional stochastic optimal control by reducing the HJB equation to a linear PDE via operator theory.",
+      "llm_tldr_cn": "通过算子理论将HJB方程简化为线性偏微分方程，解决高维随机最优控制问题。",
+      "llm_tldr": "通过算子理论将HJB方程简化为线性偏微分方程，解决高维随机最优控制问题。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.23245v1",
+      "title": "Neural ODE and SDE Models for Adaptation and Planning in Model-Based Reinforcement Learning",
+      "abstract": "We investigate neural ordinary and stochastic differential equations (neural ODEs and SDEs) to model stochastic dynamics in fully and partially observed environments within a model-based reinforcement learning (RL) framework. Through a sequence of simulations, we show that neural SDEs more effectively capture the inherent stochasticity of transition dynamics, enabling high-performing policies with improved sample efficiency in challenging scenarios. We leverage neural ODEs and SDEs for efficient policy adaptation to changes in environment dynamics via inverse models, requiring only limited interactions with the new environment. To address partial observability, we introduce a latent SDE model that combines an ODE with a GAN-trained stochastic component in latent space. Policies derived from this model provide a strong baseline, outperforming or matching general model-based and model-free approaches across stochastic continuous-control benchmarks. This work demonstrates the applicability of action-conditional latent SDEs for RL planning in environments with stochastic transitions. Our code is available at: https://github.com/ChaoHan-UoS/NeuralRL",
+      "authors": [
+        "Chao Han",
+        "Stefanos Ioannou",
+        "Luca Manneschi",
+        "T. J. Hayward",
+        "Michael Mangan",
+        "Aditya Gilra",
+        "Eleni Vasilaki"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-24T14:12:41+00:00",
+      "link": "https://arxiv.org/pdf/2603.23245v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "neural ordinary and stochastic differential equations",
+      "llm_evidence_cn": "神经常微分和随机微分方程",
+      "llm_evidence": "神经常微分和随机微分方程",
+      "canonical_evidence": "神经常微分和随机微分方程",
+      "llm_tldr_en": "Uses neural ODEs and SDEs to model stochastic dynamics for reinforcement learning and policy adaptation.",
+      "llm_tldr_cn": "利用神经ODE和SDE为强化学习和策略自适应建模随机动力学。",
+      "llm_tldr": "利用神经ODE和SDE为强化学习和策略自适应建模随机动力学。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.24638v1",
+      "title": "How unconstrained machine-learning models learn physical symmetries",
+      "abstract": "The requirement of generating predictions that exactly fulfill the fundamental symmetry of the corresponding physical quantities has profoundly shaped the development of machine-learning models for physical simulations. In many cases, models are built using constrained mathematical forms that ensure that symmetries are enforced exactly. However, unconstrained models that do not obey rotational symmetries are often found to have competitive performance, and to be able to \\emph{learn} to a high level of accuracy an approximate equivariant behavior with a simple data augmentation strategy. In this paper, we introduce rigorous metrics to measure the symmetry content of the learned representations in such models, and assess the accuracy by which the outputs fulfill the equivariant condition. We apply these metrics to two unconstrained, transformer-based models operating on decorated point clouds (a graph neural network for atomistic simulations and a PointNet-style architecture for particle physics) to investigate how symmetry information is processed across architectural layers and is learned during training. Based on these insights, we establish a rigorous framework for diagnosing spectral failure modes in ML models. Enabled by this analysis, we demonstrate that one can achieve superior stability and accuracy by strategically injecting the minimum required inductive biases, preserving the high expressivity and scalability of unconstrained architectures while guaranteeing physical fidelity.",
+      "authors": [
+        "Michelangelo Domina",
+        "Joseph William Abbott",
+        "Paolo Pegolo",
+        "Filippo Bigi",
+        "Michele Ceriotti"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cond-mat.mtrl-sci",
+        "physics.chem-ph",
+        "physics.comp-ph",
+        "stat.ML"
+      ],
+      "published": "2026-03-25T11:39:48+00:00",
+      "link": "https://arxiv.org/pdf/2603.24638v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "machine-learning models for physical simulations",
+      "llm_evidence_cn": "物理模拟的机器学习模型",
+      "llm_evidence": "物理模拟的机器学习模型",
+      "canonical_evidence": "物理模拟的机器学习模型",
+      "llm_tldr_en": "Analyzes how unconstrained ML models learn physical symmetries in simulations.",
+      "llm_tldr_cn": "分析了无约束机器学习模型在物理模拟中如何学习物理对称性。",
+      "llm_tldr": "分析了无约束机器学习模型在物理模拟中如何学习物理对称性。",
+      "llm_tags": [
+        "query:pinn:composite"
+      ],
+      "matched_query_tag": "query:pinn:composite",
+      "matched_query_text": "Papers central to 物理信息神经网络与神经算子求解偏微分方程论文检索, especially work that connects or combines: p; Physics-informed neural networks for partial differential equations; Neural operator methods for solving PDEs; Deep operator networks for differential equations; Fourier Neural Operator for scientific computing; Deep learning based partial differential equation solvers; Recent advances in physics informed neural networks and neural operators; Comparison between PINNs and neural operators for PDE solving; Applications of neural operators in computational fluid dynamics; Hybrid physics informed machine learning for differential equations.",
+      "matched_requirement_id": "req-composite-pinn",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25093v1",
+      "title": "Process-Aware AI for Rainfall-Runoff Modeling: A Mass-Conserving Neural Framework with Hydrological Process Constraints",
+      "abstract": "Machine learning models can achieve high predictive accuracy in hydrological applications but often lack physical interpretability. The Mass-Conserving Perceptron (MCP) provides a physics-aware artificial intelligence (AI) framework that enforces conservation principles while allowing hydrological process relationships to be learned from data. In this study, we investigate how progressively embedding physically meaningful representations of hydrological processes within a single MCP storage unit improves predictive skill and interpretability in rainfall-runoff modeling. Starting from a minimal MCP formulation, we sequentially introduce bounded soil storage, state-dependent conductivity, variable porosity, infiltration capacity, surface ponding, vertical drainage, and nonlinear water-table dynamics. The resulting hierarchy of process-aware MCP models is evaluated across 15 catchments spanning five hydroclimatic regions of the continental United States using daily streamflow prediction as the target. Results show that progressively augmenting the internal physical structure of the MCP unit generally improves predictive performance. The influence of these process representations is strongly hydroclimate dependent: vertical drainage substantially improves model skill in arid and snow-dominated basins but reduces performance in rainfall-dominated regions, while surface ponding has comparatively small effects. The best-performing MCP configurations approach the predictive skill of a Long Short-Term Memory benchmark while maintaining explicit physical interpretability. These results demonstrate that embedding hydrological process constraints within AI architectures provides a promising pathway toward interpretable and process-aware rainfall-runoff modeling.",
+      "authors": [
+        "Mohammad A. Farmani",
+        "Hoshin V. Gupta",
+        "Ali Behrangi",
+        "Muhammad Jawad",
+        "Sadaf Moghisi",
+        "Guo-Yue Niu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-26T06:58:31+00:00",
+      "link": "https://arxiv.org/pdf/2603.25093v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Mass-conserving neural framework with hydrological constraints",
+      "llm_evidence_cn": "具有水文约束的质量守恒神经网络框架",
+      "llm_evidence": "具有水文约束的质量守恒神经网络框架",
+      "canonical_evidence": "具有水文约束的质量守恒神经网络框架",
+      "llm_tldr_en": "Introduces a mass-conserving neural framework that embeds physical hydrological process constraints.",
+      "llm_tldr_cn": "引入了一种嵌入物理水文过程约束的质量守恒神经网络框架。",
+      "llm_tldr": "引入了一种嵌入物理水文过程约束的质量守恒神经网络框架。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

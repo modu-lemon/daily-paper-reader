@@ -6,41 +6,39 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-28
-- 运行时间：2026-03-28 20:00:33 UTC
+- 最新运行日期：2026-03-29
+- 运行时间：2026-03-29 19:33:06 UTC
 - 运行状态：成功
-- 本次总论文数：7
+- 本次总论文数：6
 - 精读区：1
-- 速读区：6
+- 速读区：5
 
 ### 今日简报（AI）
-今日聚焦算子学习在多相流实时控制中的突破，涵盖非线性降阶与不规则时序预测等 7
-- 详情：[/202603/28/README](/202603/28/README)
+今日深度复盘 AI 气象模型对热带气旋的认知演变，并同步探索物理约束下的动力系统建模。
+重点揭示了 AI 学习与“遗忘”气旋规律的动态过程，以及质量守恒约束在水文预测中的关键作用
+- 详情：[/202603/29/README](/202603/29/README)
 
 ### 精读区论文标签
-1. [Real-time control of multiphase processes with learned operators](/202603/28/2603.25308v1-real-time-control-of-multiphase-processes-with-learned-operators)  
-   标签：评分：9.0/10、query:pinn
-   evidence：学习算子用于多相流的实时控制
+1. [Watch an AI Weather Model Learn (and Unlearn) Tropical Cyclones](/202603/29/2603.20541v1-watch-an-ai-weather-model-learn-and-unlearn-tropical-cyclones)  
+   标签：评分：10.0/10、query:pinn
+   evidence：用于天气预报的球面傅里叶神经算子分析
 
 ### 速读区论文标签
-1. [Nonlinear Model Order Reduction on Quadratic Manifolds via Greedy Algorithms with Dimension-Dependent Regularization](/202603/28/2603.24962v1-nonlinear-model-order-reduction-on-quadratic-manifolds-via-greedy-algorithms-with-dimension-dependent-regularization)  
+1. [Goal-oriented learning of stochastic dynamical systems using error bounds on path-space observables](/202603/29/2603.20467v1-goal-oriented-learning-of-stochastic-dynamical-systems-using-error-bounds-on-path-space-observables)  
    标签：评分：7.0/10、query:pinn
-   evidence：参数化偏微分方程的数据驱动模型降阶
-2. [Spatiotemporal System Forecasting with Irregular Time Steps via Masked Autoencoder](/202603/28/2603.25597v1-spatiotemporal-system-forecasting-with-irregular-time-steps-via-masked-autoencoder)  
+   evidence：学习动力系统控制方程的代理模型
+2. [Neural ODE and SDE Models for Adaptation and Planning in Model-Based Reinforcement Learning](/202603/29/2603.23245v1-neural-ode-and-sde-models-for-adaptation-and-planning-in-model-based-reinforcement-learning)  
    标签：评分：7.0/10、query:pinn
-   evidence：用于动力系统的物理时空掩码自编码器
-3. [Enhancing Future Prediction of Linear and Nonlinear Reduced-Order Models for Transport-Dominated Problems Using Lagrangian Data](/202603/28/2603.19702v1-enhancing-future-prediction-of-linear-and-nonlinear-reduced-order-models-for-transport-dominated-problems-using-lagrangian-data)  
+   evidence：神经常微分和随机微分方程
+3. [Process-Aware AI for Rainfall-Runoff Modeling: A Mass-Conserving Neural Framework with Hydrological Process Constraints](/202603/29/2603.25093v1-process-aware-ai-for-rainfall-runoff-modeling-a-mass-conserving-neural-framework-with-hydrological-process-constraints)  
+   标签：评分：7.0/10、query:pinn
+   evidence：具有水文约束的质量守恒神经网络框架
+4. [A Schrödinger Eigenfunction Method for Long-Horizon Stochastic Optimal Control](/202603/29/2603.23173v1-a-schrdinger-eigenfunction-method-for-long-horizon-stochastic-optimal-control)  
    标签：评分：6.0/10、query:pinn
-   evidence：针对输运主导问题的自编码器非线性降阶模型
-4. [A unified machine learning framework for ab initio multiscale modeling of liquids](/202603/28/2603.20493v1-a-unified-machine-learning-framework-for-ab-initio-multiscale-modeling-of-liquids)  
+   evidence：由算子控制的线性偏微分方程
+5. [How unconstrained machine-learning models learn physical symmetries](/202603/29/2603.24638v1-how-unconstrained-machine-learning-models-learn-physical-symmetries)  
    标签：评分：6.0/10、query:pinn
-   evidence：用于多尺度建模的神经经典密度泛函理论
-5. [A Distribution-to-Distribution Neural Probabilistic Forecasting Framework for Dynamical Systems](/202603/28/2603.25370v1-a-distribution-to-distribution-neural-probabilistic-forecasting-framework-for-dynamical-systems)  
-   标签：评分：6.0/10、query:pinn
-   evidence：动力系统的神经概率预测
-6. [Fast and Accurate CP-HIFI Tensor Decompositions: Exploiting Kronecker Structure](/202603/28/2603.25691v1-fast-and-accurate-cp-hifi-tensor-decompositions-exploiting-kronecker-structure)  
-   标签：评分：6.0/10、query:pinn
-   evidence：使用张量分解进行参数化偏微分方程的代理建模
+   evidence：物理模拟的机器学习模型
 
 
 <div class="dpr-home-promo-card">

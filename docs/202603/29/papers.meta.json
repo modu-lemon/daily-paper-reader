@@ -1,0 +1,93 @@
+{
+  "label": "2026-03-29",
+  "date": "2026-03-29",
+  "generated_at": "2026-03-29T19:33:17",
+  "count": 6,
+  "papers": [
+    {
+      "paper_id": "202603/29/2603.20541v1-watch-an-ai-weather-model-learn-and-unlearn-tropical-cyclones",
+      "section": "deep",
+      "title_en": "Watch an AI Weather Model Learn (and Unlearn) Tropical Cyclones",
+      "authors": "Rebecca Baiman, Ankur Mahesh, Elizabeth A. Barnes",
+      "date": "2026-03-20",
+      "pdf": "https://arxiv.org/pdf/2603.20541v1",
+      "score": "10.0",
+      "evidence": "用于天气预报的球面傅里叶神经算子分析",
+      "tldr": "本研究探讨了人工智能天气模型在学习极端天气事件（如热带气旋）时的动态过程。通过分析球面傅里叶神经算子（SFNO）训练过程中的所有检查点，研究人员发现模型在训练后期会出现对气旋强度信息的“遗忘”现象。这种遗忘与异常潮湿的环境有关，揭示了模型在处理水分与强度关系时的局限性。该工作为理解AI天气模型的学习机制提供了新视角。",
+      "tags": "query:pinn",
+      "abstract_en": "In a changing climate, artificial intelligence (AI) weather models have the potential to provide cheaper, faster, and more accurate forecasts of high-impact weather events. To realize this potential and gauge trustworthiness, there is a need for more research on how models learn extreme events and how that learning might be improved. Here, we investigate how a Spherical Fourier Neural Operator (SFNO) learns tropical cyclones (TCs) by saving every checkpoint from training and analyzing storm specific metrics. We find evidence that for some storms the SFNO learns information about TC intensity that it loses later in training. This unlearning pattern is associated with anomalously moist environments and may be due to the model unlearning the relationship between moisture and TC intensity. This work provides a first example of leveraging task-specific training dynamics to further our understanding of how AI weather models learn extreme events.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/29/2603.20467v1-goal-oriented-learning-of-stochastic-dynamical-systems-using-error-bounds-on-path-space-observables",
+      "section": "quick",
+      "title_en": "Goal-oriented learning of stochastic dynamical systems using error bounds on path-space observables",
+      "authors": "Joanna Zou, Han Cheng Lie, Youssef Marzouk",
+      "date": "2026-03-20",
+      "pdf": "https://arxiv.org/pdf/2603.20467v1",
+      "score": "7.0",
+      "evidence": "学习动力系统控制方程的代理模型",
+      "tldr": "针对随机动力系统大规模模拟成本高的问题，本文提出了一种面向目标的学习方法。通过引入路径空间观测量的误差界限作为变分损失函数，该方法能有效预测路径相关观测量（如平均首次到达时间）。研究推导了损失函数的解析梯度，并在过阻尼朗之万系统中验证了其在预测精度和分布偏移鲁棒性方面的优势，为复杂动力系统的代理建模提供了理论保障。",
+      "tags": "query:pinn",
+      "abstract_en": "The governing equations of stochastic dynamical systems often become cost-prohibitive for numerical simulation at large scales. Surrogate models of the governing equations, learned from data of the high-fidelity system, are routinely used to predict key observables with greater efficiency. However, standard choices of loss function for learning the surrogate model fail to provide error guarantees in path-dependent observables, such as reaction rates of molecular dynamical systems. This paper introduces an error bound for path-space observables and employs it as a novel variational loss for the goal-oriented learning of a stochastic dynamical system. We show the error bound holds for a broad class of observables, including mean first hitting times on unbounded time domains. We derive an analytical gradient of the goal-oriented loss function by leveraging the formula for Frechet derivatives of expected path functionals, which remains tractable for implementation in stochastic gradient descent schemes. We demonstrate that surrogate models of overdamped Langevin systems developed via goal-oriented learning achieve improved accuracy in predicting the statistics of a first hitting time observable and robustness to distributional shift in the data.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/29/2603.23245v1-neural-ode-and-sde-models-for-adaptation-and-planning-in-model-based-reinforcement-learning",
+      "section": "quick",
+      "title_en": "Neural ODE and SDE Models for Adaptation and Planning in Model-Based Reinforcement Learning",
+      "authors": "Chao Han, Stefanos Ioannou, Luca Manneschi, T. J. Hayward, Michael Mangan, Aditya Gilra, Eleni Vasilaki",
+      "date": "2026-03-24",
+      "pdf": "https://arxiv.org/pdf/2603.23245v1",
+      "score": "7.0",
+      "evidence": "神经常微分和随机微分方程",
+      "tldr": "本研究探讨了在基于模型的强化学习（MBRL）中使用神经常微分方程（Neural ODEs）和随机微分方程（Neural SDEs）来建模全观测和部分观测环境下的随机动力学。通过引入潜空间SDE模型（结合ODE与GAN训练的随机组件），该方法能有效捕捉动力学中的固有随机性，并通过逆模型实现高效的策略自适应。实验证明，该方法在随机连续控制基准测试中表现优异，显著提升了样本效率和规划能力。",
+      "tags": "query:pinn",
+      "abstract_en": "We investigate neural ordinary and stochastic differential equations (neural ODEs and SDEs) to model stochastic dynamics in fully and partially observed environments within a model-based reinforcement learning (RL) framework. Through a sequence of simulations, we show that neural SDEs more effectively capture the inherent stochasticity of transition dynamics, enabling high-performing policies with improved sample efficiency in challenging scenarios. We leverage neural ODEs and SDEs for efficient policy adaptation to changes in environment dynamics via inverse models, requiring only limited interactions with the new environment. To address partial observability, we introduce a latent SDE model that combines an ODE with a GAN-trained stochastic component in latent space. Policies derived from this model provide a strong baseline, outperforming or matching general model-based and model-free approaches across stochastic continuous-control benchmarks. This work demonstrates the applicability of action-conditional latent SDEs for RL planning in environments with stochastic transitions. Our code is available at: https://github.com/ChaoHan-UoS/NeuralRL",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/29/2603.25093v1-process-aware-ai-for-rainfall-runoff-modeling-a-mass-conserving-neural-framework-with-hydrological-process-constraints",
+      "section": "quick",
+      "title_en": "Process-Aware AI for Rainfall-Runoff Modeling: A Mass-Conserving Neural Framework with Hydrological Process Constraints",
+      "authors": "Mohammad A. Farmani, Hoshin V. Gupta, Ali Behrangi, Muhammad Jawad, Sadaf Moghisi, Guo-Yue Niu",
+      "date": "2026-03-26",
+      "pdf": "https://arxiv.org/pdf/2603.25093v1",
+      "score": "7.0",
+      "evidence": "具有水文约束的质量守恒神经网络框架",
+      "tldr": "本研究针对机器学习在水文建模中缺乏物理可解释性的问题，提出了一种基于质量守恒感知器（MCP）的物理感知人工智能框架。通过在MCP存储单元中逐步嵌入土壤储水、入渗、垂直排水等水文过程约束，构建了一系列过程感知模型。在15个流域的评估表明，该框架在保持物理可解释性的同时，预测精度接近LSTM基准，为构建可解释的水文模型提供了新路径。",
+      "tags": "query:pinn",
+      "abstract_en": "Machine learning models can achieve high predictive accuracy in hydrological applications but often lack physical interpretability. The Mass-Conserving Perceptron (MCP) provides a physics-aware artificial intelligence (AI) framework that enforces conservation principles while allowing hydrological process relationships to be learned from data. In this study, we investigate how progressively embedding physically meaningful representations of hydrological processes within a single MCP storage unit improves predictive skill and interpretability in rainfall-runoff modeling. Starting from a minimal MCP formulation, we sequentially introduce bounded soil storage, state-dependent conductivity, variable porosity, infiltration capacity, surface ponding, vertical drainage, and nonlinear water-table dynamics. The resulting hierarchy of process-aware MCP models is evaluated across 15 catchments spanning five hydroclimatic regions of the continental United States using daily streamflow prediction as the target. Results show that progressively augmenting the internal physical structure of the MCP unit generally improves predictive performance. The influence of these process representations is strongly hydroclimate dependent: vertical drainage substantially improves model skill in arid and snow-dominated basins but reduces performance in rainfall-dominated regions, while surface ponding has comparatively small effects. The best-performing MCP configurations approach the predictive skill of a Long Short-Term Memory benchmark while maintaining explicit physical interpretability. These results demonstrate that embedding hydrological process constraints within AI architectures provides a promising pathway toward interpretable and process-aware rainfall-runoff modeling.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/29/2603.23173v1-a-schrdinger-eigenfunction-method-for-long-horizon-stochastic-optimal-control",
+      "section": "quick",
+      "title_en": "A Schrödinger Eigenfunction Method for Long-Horizon Stochastic Optimal Control",
+      "authors": "Louis Claeys, Artur Goldman, Zebang Shen, Niao He",
+      "date": "2026-03-24",
+      "pdf": "https://arxiv.org/pdf/2603.23173v1",
+      "score": "6.0",
+      "evidence": "由算子控制的线性偏微分方程",
+      "tldr": "针对长时域高维随机最优控制（SOC）中性能随时间指数下降且计算复杂度随时间线性增长的问题，本文提出一种基于薛定谔特征函数的方法。通过将线性可解SOC的HJB方程转化为具有离散谱的薛定谔算子，利用特征系统描述长时域控制。该方法在对称LQR中可获得解析解，在一般场景下通过神经网络学习特征系统，将计算复杂度从O(Td)降至O(d)，显著提升了长时域控制的精度和效率。",
+      "tags": "query:pinn",
+      "abstract_en": "High-dimensional stochastic optimal control (SOC) becomes harder with longer planning horizons: existing methods scale linearly in the horizon $T$, with performance often deteriorating exponentially. We overcome these limitations for a subclass of linearly-solvable SOC problems-those whose uncontrolled drift is the gradient of a potential. In this setting, the Hamilton-Jacobi-Bellman equation reduces to a linear PDE governed by an operator $\\mathcal{L}$. We prove that, under the gradient drift assumption, $\\mathcal{L}$ is unitarily equivalent to a Schrödinger operator $\\mathcal{S} = -Δ+ \\mathcal{V}$ with purely discrete spectrum, allowing the long-horizon control to be efficiently described via the eigensystem of $\\mathcal{L}$. This connection provides two key results: first, for a symmetric linear-quadratic regulator (LQR), $\\mathcal{S}$ matches the Hamiltonian of a quantum harmonic oscillator, whose closed-form eigensystem yields an analytic solution to the symmetric LQR with \\emph{arbitrary} terminal cost. Second, in a more general setting, we learn the eigensystem of $\\mathcal{L}$ using neural networks. We identify implicit reweighting issues with existing eigenfunction learning losses that degrade performance in control tasks, and propose a novel loss function to mitigate this. We evaluate our method on several long-horizon benchmarks, achieving an order-of-magnitude improvement in control accuracy compared to state-of-the-art methods, while reducing memory usage and runtime complexity from $\\mathcal{O}(Td)$ to $\\mathcal{O}(d)$.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/29/2603.24638v1-how-unconstrained-machine-learning-models-learn-physical-symmetries",
+      "section": "quick",
+      "title_en": "How unconstrained machine-learning models learn physical symmetries",
+      "authors": "Michelangelo Domina, Joseph William Abbott, Paolo Pegolo, Filippo Bigi, Michele Ceriotti",
+      "date": "2026-03-25",
+      "pdf": "https://arxiv.org/pdf/2603.24638v1",
+      "score": "6.0",
+      "evidence": "物理模拟的机器学习模型",
+      "tldr": "本研究探讨了无约束机器学习模型如何学习物理对称性。虽然物理模拟通常依赖硬性约束模型，但无约束模型通过数据增强也能达到极高精度。作者引入了严谨的度量标准来评估模型内部表示和输出的对称性，并分析了Transformer架构在原子模拟和粒子物理中的表现。研究揭示了对称性信息的层级处理过程，并提出通过注入最小归纳偏置来平衡模型的表达能力与物理保真度。",
+      "tags": "query:pinn",
+      "abstract_en": "The requirement of generating predictions that exactly fulfill the fundamental symmetry of the corresponding physical quantities has profoundly shaped the development of machine-learning models for physical simulations. In many cases, models are built using constrained mathematical forms that ensure that symmetries are enforced exactly. However, unconstrained models that do not obey rotational symmetries are often found to have competitive performance, and to be able to \\emph{learn} to a high level of accuracy an approximate equivariant behavior with a simple data augmentation strategy. In this paper, we introduce rigorous metrics to measure the symmetry content of the learned representations in such models, and assess the accuracy by which the outputs fulfill the equivariant condition. We apply these metrics to two unconstrained, transformer-based models operating on decorated point clouds (a graph neural network for atomistic simulations and a PointNet-style architecture for particle physics) to investigate how symmetry information is processed across architectural layers and is learned during training. Based on these insights, we establish a rigorous framework for diagnosing spectral failure modes in ML models. Enabled by this analysis, we demonstrate that one can achieve superior stability and accuracy by strategically injecting the minimum required inductive biases, preserving the high expressivity and scalability of unconstrained architectures while guaranteeing physical fidelity.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
