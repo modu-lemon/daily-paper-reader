@@ -1,0 +1,1156 @@
+Title: A Neural Score-Based Particle Method for the Vlasov-Maxwell-Landau System
+
+URL Source: https://arxiv.org/pdf/2603.25832v1
+
+Published Time: Mon, 30 Mar 2026 00:13:18 GMT
+
+Number of Pages: 28
+
+Markdown Content:
+# A Neural Score-Based Particle Method for the Vlasov–Maxwell–Landau System 
+
+## Vasily Ilin ∗ Jingwei Hu †
+
+## March 30, 2026 
+
+Abstract 
+
+Plasma modeling is central to the design of nuclear fusion reactors, yet simulating collisional plasma kinetics from first principles remains a formidable computational challenge: the Vlasov– Maxwell–Landau (VML) system describes six-dimensional phase-space transport under self-consistent electromagnetic fields together with the nonlinear, nonlocal Landau collision operator. A recent deterministic particle method for the full VML system [1] estimates the velocity score function via the blob method, a kernel-based approximation with O(n2) cost. In this work, we replace the blob score estimator with score-based transport modeling (SBTM), in which a neural network is trained on-the-fly via implicit score matching at O(n) cost. We prove that the approximated collision operator preserves momentum and kinetic energy, and dissipates an estimated entropy. We also characterize the unique global steady state of the VML system and its electrostatic reduction, providing the ground truth for numerical validation. On three canonical benchmarks – Landau damping, two-stream instability, and Weibel instability – SBTM is more accurate than the blob method, achieves correct long-time relaxation to Maxwellian equilibrium where the blob method fails, and delivers 50% faster runtime with 4 × lower peak memory. 
+
+# 1 Introduction 
+
+Controlled nuclear fusion promises a virtually limitless source of clean energy, but achieving it requires confining a plasma – an ionized gas of electrons and ions – at temperatures exceeding 10 8 K, where charged particles undergo frequent Coulomb collisions while generating and responding to electromagnetic fields [11]. Accurate numerical simulation of such plasmas is essential for reactor design and remains one of the grand challenges in computational physics. The Vlasov–Maxwell–Landau (VML) system provides the first-principles kinetic description [23, 31], coupling six-dimensional phase-space transport with self-consistent electromagnetic fields and the Landau collision operator. Solving the VML equations is exceptionally challenging due to the high dimensionality, multiscale dynamics, and the need to preserve conservation laws and entropy structure. Particle-in-cell (PIC) methods [3, 14] are the dominant approach for high-dimensional kinetic simula-tions: particles are advanced in the Lagrangian frame while fields are solved on a spatial grid. However, incorporating the Landau collision operator into PIC is nontrivial. Classical Monte Carlo approaches [2, 25, 29] introduce statistical noise, and because they are not compatible with the standard Lagrangian formulation of PIC, collisions must be incorporated in a time-splitting manner, resulting in additional discretization errors. A deterministic alternative is possible because the Landau collision operator can be rewritten as a 
+
+transport equation driven by the velocity score function s(x, v ) = ∇v log f (x, v ) [30], reducing the problem 
+
+> ∗Department of Mathematics, University of Washington, Seattle, WA, USA. vilin@uw.edu.
+> †Department of Applied Mathematics, University of Washington, Seattle, WA, USA. hujw@uw.edu.
+
+1
+
+> arXiv:2603.25832v1 [math.NA] 26 Mar 2026
+
+to estimating the score from particle data. The first deterministic particle method for the homogeneous Landau equation was introduced in [7], where the score was estimated via a kernel density estimate (the “blob method”). This approach was extended to the full VML system in [1]. By viewing the Landau operator as a “collision force” in velocity space, the method naturally incorporates collisions into the velocity update of the standard PIC framework, preserving the main physical structures. However, the blob method requires regularization with a kernel in velocity space. Choosing an appropriate bandwidth for the kernel can be challenging. A poor choice could lead to inaccurate scores in low-density tail regions, causing systematic artifacts in long-time relaxation to equilibrium. Furthermore, the blob method requires computing a few pairwise kernel sums over all n particles in each spatial cell, resulting in O(n2)computational cost and memory usage. In fact, due to the high computational cost, [1] employs a random batch method to reduce the per-step cost to O(n2/R ) [9], but this comes at the expense of introducing additional random error. Score-based transport modeling (SBTM) [4] offers an alternative: a neural network sθ is trained on-the-fly to approximate the score by minimizing an implicit score matching loss [17], at O(n) cost per gradient step. This was applied to the spatially homogeneous Landau equation in [15, 20], demonstrat-ing superior accuracy especially in sparse particle regimes, and error bounds for SBTM with Coulomb collisions were established in [18]. 
+
+Other related work. A convergence analysis of the blob method for the homogeneous Landau equation was conducted in [6]. Score matching [17] was introduced for learning unnormalized statistical models. SBTM has been applied to various (spatially homogeneous) Fokker-Planck equations [24, 26, 27] and density sampling [22]. [21] proposed DiScoFormer, a pretrained Transformer for score estimation without per-distribution retraining. 
+
+Contributions. Our contributions are as follows: 
+
+• We apply SBTM to the full Vlasov–Maxwell–Landau system, extending the spatially homogeneous work [20] to the spatially inhomogeneous case with electromagnetic field coupling. Our implemen-tation builds on the collisional PIC framework of [1], replacing only the score estimation module. This extension requires spatial localization of the score network via the hat kernel ψη , coupling to the Maxwell field solver, and handling distinct velocity distributions across spatial cells with a single network. 
+
+• We prove that the approximated collision operator preserves momentum and kinetic energy exactly, and dissipates an estimated entropy (Theorem 2.3). 
+
+• We characterize the unique global steady state of both the full VML system (Theorem 2.1) and its electrostatic reduction, the VPL system (Theorem 2.2), providing the theoretical ground truth against which we validate our numerical results. A formal verification of Theorem 2.1 in the Lean 4 proof assistant is carried out in [19]. 
+
+• Through experiments on three canonical benchmarks, we demonstrate that SBTM achieves correct long-time relaxation to Maxwellian equilibrium (where the blob method fails), converges faster in the number of particles , and delivers ∼50% faster runtime with 2–4 × lower peak memory. 
+
+# 2 Background and Method 
+
+Notation. We write x ∈ Ωx ⊂ Rdx for spatial position, v ∈ Rdv for velocity, and f (t, x, v ) for the particle distribution function. The spatial domain is discretized into M cells of width η = L/M , with ψη
+
+denoting the hat kernel used for spatial localization. The system contains n particles with positions xp,velocities vp, and weights wp. The collision frequency is ν, and K denotes the number of implicit score 2matching (ISM) gradient steps per time step ∆ t. We use s(x, v ) = ∇v log f (x, v ) for the velocity score function and sθ for its neural network approximation. 
+
+## 2.1 The Vlasov–Maxwell–Landau System 
+
+The Vlasov–Maxwell–Landau (VML) system describes the evolution of a collisional, magnetized plasma. After non-dimensionalization, for a single electron species with an immobile neutralizing ion background, the distribution function f (t, x, v ) evolves according to 
+
+∂tf + v · ∇ xf + ( E + v × B) · ∇ v f = ν Q [f, f ], (2.1) 
+
+∂tE = ∇x × B − J, ∂tB = −∇ x × E, ∇x · E = ρ − ρion , ∇x · B = 0 , (2.2) where t ≥ 0 is the time, x ∈ Ωx ⊂ Rdx is the position, and v ∈ Rdv is the particle velocity. The electric and magnetic fields E(t, x ) and B(t, x ) in (2.1) are determined by the Maxwell’s equations (2.2), where 
+
+ρ(t, x ) = R 
+
+> Rdv
+
+f dv and J(t, x ) = R 
+
+> Rdv
+
+vf dv are the charge density and current density, and ρion is the uniform background ion density satisfying R 
+
+> Ωx
+
+(ρ − ρion ) dx = 0. Finally, ν ≥ 0 is the collision frequency and Q[f, f ] is the Landau operator modeling particle collisions [23]: 
+
+Q[f, f ]( t, x, v ) = ∇v ·
+
+Z
+
+> Rdv
+
+A(v − w)f (t, x, w )∇v f (t, x, v ) − f (t, x, v )∇wf (t, x, w ) dw, (2.3) where the collision kernel A is given by A(z) = |z|γ+2 Π( z) with Π( z) = Idv − zz ⊤/|z|2, and γ = −dv
+
+corresponds to the Coulomb interaction ( γ = −3 for dv = 3 and γ = −2 for dv = 2). In the electrostatic case, B = 0, so E is curl free. Then (2.1)-(2.2) reduce to the Vlasov–Poisson– Landau (VPL) system: 
+
+∂tf + v · ∇ xf + E · ∇ v f = ν Q [f, f ], (2.4) 
+
+∂tE = −J, E = −∇ xϕ, −∆xϕ = ρ − ρion . (2.5) The VML system (2.1)-(2.2) possesses many important physical properties. We highlight a few that are relevant to the following discussion. First, the Landau operator (2.3) satisfies local conservation of mass, momentum, and energy, as well as the H-theorem [31]: 
+
+Z
+
+> Rdv
+
+Q[f, f ] dv =
+
+Z
+
+> Rdv
+
+Q[f, f ]vi dv =
+
+Z
+
+> Rdv
+
+Q[f, f ]|v|2 dv = 0 ,
+
+Z
+
+> Rdv
+
+Q[f, f ] log f dv ≤ 0, (2.6) where vi is the i-th component of v. Using these properties, together with periodic boundary conditions in x, one can derive global entropy decay and conservation of mass and energy: 
+
+∂t
+
+Z Z 
+
+> Ωx×Rdv
+
+f log f dv dx ≤ 0, ∂t
+
+Z Z 
+
+> Ωx×Rdv
+
+f dv dx = 0 , (2.7) 
+
+∂t
+
+Z Z 
+
+> Ωx×Rdv
+
+12 |v|2f dv dx + 12
+
+Z
+
+> Ωx
+
+(|E|2 + |B|2) dx 
+
+
+
+= 0 . (2.8) Regarding momentum, one has 
+
+∂t
+
+Z Z 
+
+> Ωx×Rdv
+
+vf dv dx +
+
+Z
+
+> Ωx
+
+(E × B) dx 
+
+
+
+=
+
+Z
+
+> Ωx
+
+ρion E dx, 
+
+so momentum is generally not conserved, except in the electrostatic case B = 0, where E = −∇ xϕ and 
+
+ρion is constant. In this case, 
+
+∂t
+
+Z Z 
+
+> Ωx×Rdv
+
+vf dv dx = 0 . (2.9) Due to the complexity of the VML system, constructing analytical solutions for numerical validation is challenging. As a result, the long-time behavior – namely, the equilibrium distribution corresponding 3to a given initial condition – serves as an important metric. We therefore establish the following theorems characterizing the steady state of the VML system and its reduced VPL version. Although the proofs are elementary, we have not found them in standard textbooks or the existing literature; we therefore provide complete proofs in Appendix A. 
+
+Theorem 2.1 (Global steady state of the VML system) . Consider the Vlasov–Maxwell–Landau system 
+
+(2.1) -(2.2) with collision frequency ν > 0, periodic spatial domain x ∈ T3, v ∈ R3, and a uniform neutralizing background ion density ρion > 0. Let f (x, v ) > 0 be a sufficiently smooth steady-state solution with finite total energy and finite entropy, and f and its derivatives decay sufficiently fast as |v| → ∞ .Then f must be a spatially uniform, zero-drift global Maxwellian: 
+
+f∞(v) = ρion 
+
+(2 πT ∞)3/2 exp 
+
+
+
+− |v|2
+
+2T∞
+
+
+
+, E∞ = 0 , B∞ = 1
+
+|T3|
+
+Z
+
+> T3
+
+Binit (x) dx, 
+
+where B∞ is the spatial mean of the initial magnetic field (a conserved quantity), and the equilibrium temperature is 
+
+T∞ = 23 ρion |T3|
+
+
+
+E0 − |B∞|2
+
+2 |T3|
+
+
+
+> 0,
+
+with E0 = RR 12 |v|2finit dv dx + 12
+
+R (|Einit |2 + |Binit |2) dx denoting the initial total energy. 
+
+In the electrostatic case ( B = 0), the VML system reduces to the VPL system. The argument above requires a genuine modification: the bulk velocity is no longer forced to vanish. 
+
+Theorem 2.2 (Global steady state of the VPL system) . Consider the Vlasov–Poisson–Landau system 
+
+(2.4) -(2.5) with ν > 0, x ∈ T3, v ∈ R3, and a uniform neutralizing background ρion > 0. Under the same regularity and decay assumptions as in Theorem 2.1, every steady-state solution is a spatially uniform, drifting global Maxwellian: 
+
+f∞(v) = ρion 
+
+(2 πT ∞)3/2 exp 
+
+
+
+− |v − u∞|2
+
+2T∞
+
+
+
+, E∞ = 0 ,
+
+where the bulk drift and temperature are determined by the initial conditions: 
+
+u∞ =
+
+RR v f init dv dx ρion |T3| , T∞ = 23 ρion |T3|
+
+
+
+E0 − 12 ρion |u∞|2 |T3|
+
+
+
+> 0,
+
+with E0 = RR 12 |v|2finit dv dx + 12
+
+R |Einit |2 dx denoting the initial total energy. 
+
+## 2.2 Regularized Landau Operator and Particle Method 
+
+In this section, we introduce the particle method for the VML system (2.1)-(2.2). For convenience of presentation, we assume a one-dimensional spatial domain Ω x = [0 , L ] with periodic boundary conditions, while the velocity domain remains Rdv , where dv = 2 or 3. Our discussion can be straightforwardly extended to multiple spatial dimensions. The Landau collision operator (2.3) can be rewritten in terms of the velocity score ∇v log f [7, 30]: 
+
+Q[f, f ]( t, x, v ) = ∇v ·
+
+
+
+f (t, x, v )
+
+Z
+
+> Rdv
+
+A(v − w) ∇v log f (t, x, v ) − ∇ w log f (t, x, w )f (t, x, w ) dw 
+
+
+
+:= ∇v ·
+
+
+
+f (t, x, v )U (t, x, v )
+
+
+
+.
+
+This formulation forms the basis of the particle method: the collision operator can be viewed as a transport operator with “collision force” U (t, x, v ), which depends only on the score function rather than the distribution function itself. 4However, the spatial dependence in U (t, x, v ) does not admit a direct particle approximation. Follow-ing the idea in [1], we introduce a regularized “collision force”: 
+
+U η (t, x, v ) := 
+
+Z Z 
+
+> Ωx×Rdv
+
+ψη (x − y)A(v − w) ∇v log f (t, x, v ) − ∇ w log f (t, y, w )f (t, y, w ) dw dy, 
+
+where ψη is a symmetric, positive kernel function used for spatial localization. Typical choices include B-spline kernels. This localization allows only particles within a certain neighborhood to undergo collisions. It is an easy exercise to show that the regularized Landau collision operator Qη [f, f ] := ∇v · { f U η }
+
+satisfies conservation of mass, momentum, and energy: 
+
+Z Z 
+
+Qη [f, f ] dv dx =
+
+Z Z 
+
+Qη [f, f ]vi dv dx =
+
+Z Z 
+
+Qη [f, f ]|v|2 dv dx = 0 ,
+
+as well as the H-theorem: Z Z 
+
+Qη [f, f ] log f dv dx ≤ 0.
+
+However, note the difference from (2.6). With the above regularization, (2.1) can be written in conservative form: 
+
+∂tf + ∇x · (vf ) + ∇v · (( E + v × B)f ) = ν ∇v · (U η f ). (2.10) We now represent the distribution function f as a sum of n weighted particles: 
+
+f (t, x, v ) ≈
+
+> n
+
+X
+
+> p=1
+
+wp δ(x − xp(t)) δ(v − vp(t)) . (2.11) (2.11) is a weak solution to (2.10) provided that the particle positions xp and velocities vp evolve according to the coupled ODE system (where v1,p denotes the first component of vp): 
+
+dx p
+
+dt = v1,p (mod L), (2.12) 
+
+dv p
+
+dt =  E(xp) + vp × B(xp) − νU η (xp, v p). (2.13) Here, the collision force U η (xp, v p) is given by 
+
+U η (xp, v p) := 
+
+> n
+
+X
+
+> q=1
+
+wq ψη (xp − xq ) A(vp − vq )s(xp, v p) − s(xq , v q ), (2.14) where s(x, v ) = ∇v log f (x, v ) is the velocity score function . The score function is the key quantity in the algorithm, and its approximation will be discussed in Section 2.3. For the moment, we assume that, given particles {xp, v p}np=1 , a good estimator {s(xp, v p)}np=1 is available. To couple the ODE system (2.12)-(2.13) with the Maxwell’s equations (2.2), we adopt the standard particle-in-cell (PIC) procedure. We partition the spatial domain [0 , L ] into M cells of size η = L/M ,with cell centers xj = ( j − 12 )η, j = 1 , . . . , M . In the collision operator, we choose ψη as the degree-1 B-spline (hat function): 
+
+ψη (x) = 1
+
+η
+
+
+
+1 − |x|
+
+η
+
+
+
+> +
+
+, (z)+ = max( z, 0) .
+
+Since ψη has compact support [ −η, η ], only particles within distance η of each other undergo collisions, thereby localizing interactions to particles in the same or adjacent spatial cells. The same ψη is used to deposit charge and current densities: 
+
+ρj =
+
+> n
+
+X
+
+> p=1
+
+wpψη (xj − xp), Ji,j =
+
+> n
+
+X
+
+> p=1
+
+wpvi,p ψη (xj − xp), i = 1 , . . . , d v .
+
+5We then solve the Maxwell’s equations using the grid values ρj and Ji,j . The updated electric and magnetic fields Ej and Bj are then interpolated back to the particle positions via 
+
+E(xp) = η
+
+> M
+
+X
+
+> j=1
+
+ψη (xp − xj ) Ej , B(xp) = η
+
+> M
+
+X
+
+> j=1
+
+ψη (xp − xj ) Bj .
+
+The proposed discretization of the collision force (2.14) inherits the main physical properties of the regularized Landau operator, such as conservation and entropy decay. This is most naturally seen through the weak formulation : for any test function ϕ(x, v ) ∈ Rdv ,
+
+ν X
+
+> p
+
+wpϕ(xp, v p) · U η (xp, v p) = ν X
+
+> p,q
+
+wpwq ψη (xp − xq )ϕ(xp, v p)⊤A(vp − vq ) [ s(xp, v p) − s(xq , v q )] = ν
+
+2
+
+X
+
+> p,q
+
+wpwq ψη (xp − xq )ϕ(xp, v p) − ϕ(xq , v q )⊤A(vp − vq ) [ s(xp, v p) − s(xq , v q )] , (2.15) where the last line is obtained by swapping p ↔ q in the double sum and averaging. We can state the following result. 
+
+Theorem 2.3. For any score approximation s(x, v ) and approximate force U η defined by (2.14) , the following properties hold: (i) Conservation of momentum and energy: 
+
+X
+
+> p
+
+wp U η (xp, v p) = 0 , X
+
+> p
+
+wp vp · U η (xp, v p) = 0 .
+
+(ii) Estimated entropy dissipation: 
+
+−ν X
+
+> p
+
+wps(xp, v p) · U η (xp, v p) ≤ 0.
+
+Proof. (i) Using (2.15) with ϕ(x, v ) = ei, conservation of momentum is immediate. Conservation of energy follows from ( vp − vq )⊤A(vp − vq ) = 0, since for any z ∈ Rdv ,
+
+z⊤A(z) = |z|γ+2 z⊤Π( z) = |z|γ+2 z⊤
+
+
+
+Idv − zz ⊤
+
+|z|2
+
+
+
+= 0 ⊤.
+
+(ii) Taking ϕ(x, v ) = s(x, v ) in (2.15), we obtain 
+
+ν X
+
+> p
+
+wpϕ(xp, v p) · U η (xp, v p) ≥ 0,
+
+since A(z) is positive semidefinite. 
+
+Remark 2.4. The above theorem guarantees that the contribution from the collision term to the particle method is physically consistent. In particular, provided that Maxwell’s equations are solved appropriately (e.g., using Yee’s finite difference scheme [32]), the semi-discrete particle method (2.12) -(2.13) preserves the total energy of the system. In addition, an energy-conserving second-order explicit time discretization scheme has recently been developed [33], which can be readily combined with the present particle method to achieve fully discrete energy conservation. However, since this approach requires two or three evaluations of the collision operator per time step, we opt for the simpler forward Euler for efficiency. 
+
+62.3 Score Estimation 
+
+To estimate the score function s(x, v ) = ∇v log f (x, v ) using particles, we employ score-based transport modeling (SBTM) [4, 20] in a spatially inhomogeneous setting. SBTM trains a neural network sθ : R1+ dv → Rdv to approximate the score via implicit score matching (ISM) [17]. The ideal objective is to minimize the expected squared error Ef [∥sθ −∇ v log f ∥2]. Expanding the square yields Ef [∥sθ ∥2] − 2Ef [sθ · ∇ v log f ] + C, where C is independent of θ. For the cross term, integration by parts gives 
+
+Z Z 
+
+> Ωx×Rdv
+
+sθ · (∇v log f ) f dv dx =
+
+Z Z 
+
+> Ωx×Rdv
+
+sθ · ∇ v f dv dx = −
+
+Z Z 
+
+> Ωx×Rdv
+
+(∇v · sθ ) f dv dx, 
+
+so the unknown true score drops out, leaving the equivalent ISM loss. Replacing the expectation with a particle average gives 
+
+L(θ) = 
+
+> n
+
+X
+
+> p=1
+
+wp
+
+h
+
+|sθ (xp, v p)|2 + 2 ∇v · sθ (xp, v p)
+
+i
+
+.
+
+The divergence ∇v · sθ is estimated via Hutchinson’s trace estimator [16] with Rademacher random vectors: 
+
+∇v · sθ (x, v ) ≈ z⊤ ∇v sθ (x, v )z, z ∼ Rademacher( ±1) dv ,
+
+where the Jacobian-vector product ( ∇v sθ )z is computed via a single forward-mode automatic differenti-ation pass. We use a two-layer MLP with softsign activation (hidden dimension 256 for Landau damping and two-stream instability, and 512 for Weibel instability). At t = 0, the network is pretrained on the known analytic score of the initial condition. At each subsequent time step, K gradient steps on L(θ) are performed using AdamW with learning rate 2 × 10 −4. Importantly, each gradient descent step is only 
+
+O(n) in runtime and memory, delivering significant speedups at the scale of n = O(10 6) particles. The full SBTM-PIC method is summarized in Algorithm 1. We assume that E = ( E1(t, x ), E 2(t, x ), 0) and B = (0 , 0, B 3(t, x )), in which case Maxwell’s equations reduce to: 
+
+∂tE1 = −J1, ∂tE2 = −∂xB3 − J2, ∂tB3 = −∂xE2.
+
+Both E and B are discretized at the cell centers xj and updated using centered second-order finite differences. 
+
+Comparison with the blob method . The blob method [1, 7, 8] is an alternative approach for score estimation based on a regularized kernel approximation. While several variants exist, the formulation in [1] employs a regularization consisting of a leading kernel density estimation (KDE) term together with a correction that ensures regularized entropy dissipation; see [1, Eq. (2.25)]. For a thorough comparison, we implement this method. Since the correction is roughly four orders of magnitude smaller than the KDE term in our experiments and has a negligible effect on particle trajectories, we use only the KDE-based score: 
+
+sKDE (x, v ) = ∇v log 
+
+ X
+
+> q
+
+wq Kh(v − vq ) ψη (x − xq )
+
+
+
+, (2.16) where Kh is a Gaussian kernel with bandwidth h. This formula is approximately twice as fast as comput-ing the full blob score as in [1], while yielding empirically identical trajectories. Selecting an appropriate bandwidth h can be challenging, especially when the velocity dimension dv is high; in this work, we use Silverman’s rule [28]. The blob method uses exactly the same Algorithm 1, except that the ISM training (lines 9 – 12) is replaced by the KDE formula (2.16). Evaluating (2.16) requires O(n2) pairwise computations within each spatial cell and O(n2) memory. 7Algorithm 1 SBTM-PIC for the Vlasov–Maxwell–Landau system 
+
+Require: Particles {xp, v p}np=1 with weights wp, grid fields Ej , Bj , time step ∆ t, final time tfinal , collision frequency ν, ISM steps K, spatial kernel ψη , collision kernel A 
+
+> 1:
+
+Pretrain sθ on the analytic score of the initial condition  
+
+> 2:
+
+t ← 0 
+
+> 3:
+
+while t < t final do  
+
+> 4:
+
+Ep ← η P 
+
+> j
+
+ψη (xp−xj ) Ej , Bp ← η P 
+
+> j
+
+ψη (xp−xj ) Bj (grid → particle)  
+
+> 5:
+
+vp ← vp + ∆ t (Ep + vp × Bp) (Lorentz push)  
+
+> 6:
+
+xp ← xp + ∆ t v 1,p (mod L) (position advance)  
+
+> 7:
+
+ρj ← P 
+
+> p
+
+wp ψη (xj − xp), Ji,j ← P 
+
+> p
+
+wp vi,p ψη (xj −xp) (particle → grid)  
+
+> 8:
+
+E1,j ← E1,j − ∆t J 1,j ; E2,j ← E2,j − ∆t (( B3,j +1 − B3,j −1)/(2∆ x) + J2,j ); 
+
+B3,j ← B3,j − ∆t (E2,j +1 − E2,j −1)/(2∆ x); (field update)  
+
+> 9:
+
+for k = 1 , . . . , K do  
+
+> 10:
+
+Draw z ∼ Rademacher( ±1) dv 
+
+> 11:
+
+θ ← θ − α ∇θ
+
+hP 
+
+> p
+
+wp
+
+ |sθ (xp, v p)|2 + 2 z⊤(∇v sθ (xp, v p)) zi
+
+(ISM)  
+
+> 12:
+
+end for  
+
+> 13:
+
+vp ← vp − ∆t ν P 
+
+> q
+
+wq ψη (xp−xq ) A(vp−vq )sθ (xp, v p) − sθ (xq , v q ) (collision)  
+
+> 14:
+
+t ← t + ∆ t 
+
+> 15:
+
+end while 
+
+# 3 Numerical Experiments 
+
+## 3.1 Setup 
+
+All experiments use the 1D-dv V setting ( dv ∈ { 2, 3}). The spatial domain [0 , L ] is discretized into M
+
+grid cells with spacing η = L/M and periodic boundary conditions. In each experiment, n particles are initialized by sampling positions from the spatial marginal of f0 and velocities from the velocity marginal; each particle carries equal weight wp = L/n . The first two examples (Landau damping and two-stream instability) are electrostatic cases, where we solve the VPL system (2.4)-(2.5). The last example (Weibel instability) is an electromagnetic case, where we solve the VML system (2.1)-(2.2). We compare two score estimation methods – blob (KDE) and SBTM – within the same PIC framework. The only difference between the two methods is how the score ∇v log f is estimated. The code is implemented in JAX [5] with double precision and is available at https://github.com/ Vilin97/Vlasov-Landau-SBTM . All experiments were run on NVIDIA L40S and H200 GPUs on the University of Washington Hyak and Tillicum clusters. 
+
+Diagnostic quantities. We monitor the following discrete analogues of energy conservation and entropy dissipation (2.7)-(2.8). The total energy is defined as 
+
+EK = 12
+
+> n
+
+X
+
+> p=1
+
+wp|vp|2, EE = η
+
+2
+
+> M
+
+X
+
+> j=1
+
+|Ej |2, EB = η
+
+2
+
+> M
+
+X
+
+> j=1
+
+|Bj |2, E = EK + EE + EB ,
+
+where EK is the kinetic energy, EE is the electric field energy, and EB is the magnetic field energy (present only in the electromagnetic case). The total energy E is conserved at the semi-discrete level by Theorem 2.3 (i) and Remark 2.4. The estimated entropy production is defined as ˙H =
+
+> n
+
+X
+
+> p=1
+
+wps(xp, v p) · U η (xp, v p),
+
+which is non-negative by Theorem 2.3 (ii). This quantity is expected to vanish at equilibrium. 83.2 Landau Damping 
+
+Setup. A small spatial perturbation on a Maxwellian equilibrium: 
+
+f0(x, v ) = 1 + α cos( kx )(2 π)dv /2 exp 
+
+
+
+− |v|2
+
+2
+
+
+
+,
+
+with wavenumber k = 0 .5 and domain L = 2 π/k . We use α = 0 .1, dv = 3, M = 100, ∆ t = 0 .02, ν = 0 .4, 
+
+tfinal = 15, and K = 100, sweeping n ∈ { 5 × 10 5, 10 6, 3 × 10 6}.
+
+Estimated entropy production and total energy. Figure 1 shows the estimated entropy produc-tion and total energy evolution. SBTM produces consistent estimated entropy production curves across all particle counts, while the blob method overestimates especially at lower n (plot (a)). Since the system relaxes to a Maxwellian equilibrium (Theorem 2.2), the true entropy production must vanish at long times; SBTM’s decay toward zero is the physically correct behavior, while the blob method’s estimated entropy production remains elevated due to persistent score estimation errors in low-density regions. At 
+
+n = 3 × 10 6 the blob prediction moves closer to SBTM but remains far from the SBTM curve, indi-cating that blob convergence requires substantially more particles. Although neither method conserves energy exactly at the fully discrete level – the forward Euler time stepping and spatial discretization both introduce energy errors – the blob method exhibits visibly larger energy drift than SBTM (plot (b)).  
+
+> (a) Estimated entropy production (log scale) (b) Total energy (kinetic + electromagnetic)
+
+Figure 1: Landau damping at ν = 0 .4: estimated entropy production and total energy across particle counts. SBTM (red) dissipates estimated entropy consistently and maintains near-constant total energy. The blob method (blue) overestimates estimated entropy production and exhibits energy drift. 
+
+Electric field decay. Figure 2 shows the L2 norm of the electric field over time for the blob method and SBTM, along with the computed decay rate and the linear theory damping rate (plotted for reference). At this collision frequency ( ν = 0 .4), the theoretical decay rate is not known. However, we observe that the SBTM rate remains nearly constant as n varies from 5 × 10 5 to 3 × 10 6, whereas the blob method’s rate changes with n, approaching the SBTM rate at higher n. This demonstrates that SBTM converges faster with a relatively small number of particles, while the blob method requires significantly more particles to achieve convergence. 
+
+Velocity space distribution and equilibration. Figure 3 shows ( v1, v 2) phase space heatmaps and v2-marginal densities at n = 10 6 for ν ∈ { 0.4, 1.0}. SBTM produces smooth Gaussian tails for both collision frequencies, while the blob method exhibits sharp cutoffs in low-density regions. By Theorem 2.2, the system relaxes to a Maxwellian at temperature T∞ determined by total energy conservation. The initial electric field energy is EE = α2L 
+
+> 4k2
+
+≈ 0.13, while the initial kinetic energy is EK = dv 
+
+> 2
+
+L ≈ 18 .85. Since EE /EK = α2/(2 dv k2) ≈ 0.67%, the equilibrium temperature T∞ = 1 + α2/(2 dv k2) ≈ 1.007 is nearly indistinguishable from the initial temperature T = 1. This is consistent with Figure 3 (d) and (h), where the v2-marginal matches a standard Gaussian at all times. 9(a) Blob (KDE), n = 5 × 10 5 (b) SBTM, n = 5 × 10 5              
+
+> (c) Blob (KDE), n= 10 6(d) SBTM, n= 10 6
+> (e) Blob (KDE), n= 3 ×10 6(f) SBTM, n= 3 ×10 6
+
+Figure 2: Landau damping: L2 norm of the electric field over time at ν = 0 .4. The linear theory damping rate is shown for reference (at ν = 0 .4 it is not expected to be accurate). The blob method’s damping rate varies with n (compare (a), (c), and (e)), converging toward the SBTM rate. The SBTM rate is consistent across all particle counts (b), (d), (f). 10 (a) Blob, ν = 0 .4 (b) SBTM, ν = 0 .4
+
+(c) Blob, v2-marginal (log), ν = 0 .4 (d) SBTM, v2-marginal (log), ν = 0 .4
+
+(e) Blob, ν = 1 .0 (f) SBTM, ν = 1 .0
+
+(g) Blob, v2-marginal (log), ν = 1 .0 (h) SBTM, v2-marginal (log), ν = 1 .0
+
+Figure 3: Landau damping: velocity-space distributions at n = 10 6. Rows 1–2: ν = 0 .4 (heatmaps and 
+
+v2-marginal). Rows 3–4: ν = 1 .0. SBTM maintains smooth Gaussian tails; the blob method shows unphysical sharp cutoffs at |v2| ≈ 3. 11 3.3 Two-Stream Instability 
+
+Setup. Two counter-streaming Maxwellian beams with a small spatial perturbation: 
+
+f0(x, v ) = 1 + α cos( kx )2 [N (v1; c, 1) + N (v1; −c, 1)] Y
+
+> j≥2
+
+N (vj ; 0 , 1) ,
+
+with beam speed c = 2 .4, wavenumber k = 1 /5, perturbation α = 1 /200, domain L = 2 π/k , M = 100, ∆t = 0 .05, dv = 3, ν = 0 .32, tfinal = 50, and K = 100 ISM steps per time step. We test n ∈{5 × 10 5, 10 6, 3 × 10 6}.
+
+Estimated entropy production and total energy. Figure 4 shows the estimated entropy production and total energy evolution. As in the Landau damping case, SBTM dissipates estimated entropy consistently at all particle counts – the SBTM curves nearly coincide (plot (d)) – while the blob method overestimates entropy production, especially at lower n. The blob method also introduces visibly larger energy drift than SBTM (plot (c)).   
+
+> (a) Electric field energy (b) Kinetic energy
+> (c) Total energy (d) Estimated entropy production
+
+Figure 4: Two-stream instability: energy and estimated entropy diagnostics at ν = 0 .32. Blob (blue) vs SBTM (red) at n = 5 × 10 5 (solid), 10 6 (dashed), 3 × 10 6 (dotted). 
+
+Phase space dynamics. Figure 5 compares ( x, v 1) phase space snapshots across methods and particle counts. The phase space vortex formed by the two-stream instability should dissipate by t = 50. SBTM achieves full vortex dissipation at all particle counts, while the blob method requires n = 3 × 10 6
+
+to approach the same level of dissipation. 
+
+Score estimation quality. Figure 6 shows score quiver plots at n = 10 6. At t = 0, where the true score is known analytically, SBTM achieves low mean squared error (MSE) while the blob method has substantially higher MSE. At t = tfinal , SBTM scores are smooth and physically consistent: the score vectors point toward the origin with magnitude increasing away from it, as expected for a near-Maxwellian 12 (a) Blob, n = 5 × 10 5 (b) SBTM, n = 5 × 10 5              
+
+> (c) Blob, n= 10 6(d) SBTM, n= 10 6
+> (e) Blob, n= 3 ×10 6(f) SBTM, n= 3 ×10 6
+
+Figure 5: Two-stream instability: ( x, v 1) phase space at ν = 0 .32 across particle counts. SBTM achieves full vortex dissipation at all particle counts, while the blob method requires n = 3 × 10 6 to approach the same level of dissipation. distribution ( ∇v log f ≈ − v/σ 2). The blob method produces noisy, incoherent scores in low-density tail regions. 
+
+Collision force quiver plots. Figure 7 shows the collision force U η (xp, v p) at six times for blob and SBTM at n = 5 × 10 5. SBTM produces a physically consistent collision field: it preserves the vertical (v1 → − v1) and horizontal ( v2 → − v2) symmetry of the two-stream initial condition and vanishes by 
+
+t = 50 as the system equilibrates. The blob method’s collision field is noisy and incoherent, breaks these symmetries, and persists at t = 50 even though the system should be near equilibrium. 13 (a) Blob, t = 0 (b) SBTM, t = 0 
+
+(c) Blob, t = tfinal (d) SBTM, t = tfinal 
+
+Figure 6: Two-stream instability: score quiver plots at ν = 0 .24, n = 10 6. Top: initial time (true score in red; MSE in legend). Bottom: final time. SBTM produces smooth, physically consistent scores; the blob method has high MSE, particularly in low-density tail regions. 14 (a) Blob, t = 0 (b) Blob, t = 10 (c) Blob, t = 20                         
+
+> (d) Blob, t= 30 (e) Blob, t= 40 (f) Blob, t= 50
+> (g) SBTM, t= 0 (h) SBTM, t= 10 (i) SBTM, t= 20
+> (j) SBTM, t= 30 (k) SBTM, t= 40 (l) SBTM, t= 50
+
+Figure 7: Two-stream instability: collision force at ν = 0 .24, n = 5 × 10 5. Top two rows: blob (noisy, incoherent fields that worsen as fine structure develops). Bottom two rows: SBTM (smooth, coherent fields at all times). 15 3.4 Weibel Instability 
+
+Setup. An anisotropic bi-Maxwellian with a small magnetic perturbation: 
+
+f0(x, v ) ∝ exp 
+
+
+
+− v21
+
+β
+
+  
+
+exp 
+
+
+
+− (v2 − c)2
+
+β
+
+
+
++ exp 
+
+
+
+− (v2 + c)2
+
+β
+
+ Y
+
+> j≥3
+
+exp − v2
+
+> j
+
+β
+
+!
+
+,
+
+with c = 0 .3, β = 0 .01, B3(0 , x ) = αB sin( kx ), αB = 10 −3, k = 1 /5, domain L = 2 π/k = 10 π,
+
+M = 100, ∆ t = 0 .1, dv = 3, n = 10 6, tfinal = 125, and K = 100 ISM steps per time step. We sweep 
+
+ν ∈ { 10 −4, 2 × 10 −4, 4 × 10 −4, 8 × 10 −4}.
+
+Velocity distribution and equilibration. By Theorem 2.1, the collision operator drives the dis-tribution toward a Maxwellian f∞ ∝ exp( −| v|2/(2 T∞)), where T∞ = 0 .035 is determined by total energy conservation. Figure 8 shows the v2-marginal density at ν = 8 × 10 −4 on both logarithmic and linear scales. SBTM converges to the expected Maxwellian with smooth Gaussian tails. The blob method produces sharp, unphysical cutoffs in the tails at v2 ≈ ± 0.55: the KDE score estimate truncates the distribution rather than allowing the smooth tails predicted by kinetic theory. On a linear scale both methods appear similar, but the blob method produces a slightly broader distribution at late times; the log-scale version reveals the sharp tail cutoff. Table 1 quantifies equilibration by the L2 distance of the 
+
+v2-marginal to N (0 , T ∞) at t = tfinal . SBTM is 1 .2–3 .5× closer to this Maxwellian across all collision frequencies. 
+
+ν Blob SBTM 2 × 10 −4 0.325 0.265 
+
+4 × 10 −4 0.134 0.053 
+
+8 × 10 −4 0.070 0.020 
+
+Table 1: Weibel instability: L2 distance of the v2-marginal to N (0 , T ∞) at tfinal = 125 ( n = 10 6, dv = 3). Lower is better. SBTM relaxes closer to the Maxwellian steady state across all ν.
+
+Phase space and velocity-space slices. Figure 9 shows the ( v1, v 2)-marginal density at several times for two collision frequencies, along with ( v1, v 2) density slices at x = 0. At low ν, both methods are similar; at higher ν, the blob method produces a non-Gaussian density while SBTM equilibrates correctly. At ν = 0 (no collisions), both methods produce identical density slices, confirming that the PIC framework is the same. At ν = 10 −4, the blob method already over-smooths the distribution, while SBTM retains the fine structures observed in the collisionless case. 
+
+Score estimation quality. Figure 10 shows quiver plots of the estimated score in ( v1, v 2) at the initial and final times. At t = 0, SBTM achieves low MSE against the known analytic score; the blob method has substantially higher MSE. At t = tfinal , SBTM scores are consistent with the expected linear score of a Gaussian ( s(x, v ) ∝ − v), while the blob method produces noisy scores in the tails. 
+
+Estimated entropy production. Figure 11 shows the estimated entropy production over time. SBTM correctly decays toward zero at all collision frequencies, with higher ν producing faster decay. The blob method plateaus at nonzero values due to persistent score errors in low-density tail regions. At fixed ν = 8 × 10 −4, the blob plateau decreases with n, converging toward SBTM. 
+
+Phase space sweep over ν and dv . Figures 12 and 13 show ( v1, v 2)-marginal density snapshots for the Weibel instability across collision frequencies ν ∈ { 0, 10 −4, 2 × 10 −4, 4 × 10 −4, 8 × 10 −4} in dv = 2 and dv = 3 dimensions, respectively. At ν = 0, both methods are identical. As ν increases, the blob method increasingly produces non-Gaussian densities, while SBTM equilibrates correctly. The effect is more pronounced in dv = 3, indicating better dimension scaling of SBTM. 16 (a) Blob, log scale (b) SBTM, log scale  
+
+> (c) Blob, linear scale (d) SBTM, linear scale
+
+Figure 8: Weibel instability: v2-marginal density evolution at ν = 8 × 10 −4. Top: log scale; bottom: linear scale. The dashed black curve is a Gaussian/Maxwellian. SBTM converges to it with smooth Gaussian tails, while the blob method exhibits sharp, unphysical cutoffs at v2 ≈ ± 0.55. 17 (a) Blob, ν = 10 −4 (b) SBTM, ν = 10 −4
+
+(c) Blob, ν = 8 × 10 −4 (d) SBTM, ν = 8 × 10 −4
+
+(e) Blob, ν = 0 (f) SBTM, ν = 0 
+
+(g) Blob, ν = 10 −4 (h) SBTM, ν = 10 −4
+
+Figure 9: Weibel instability: ( v1, v 2)-marginal density. (a)–(d): phase space snapshots at ν = 10 −4 and 
+
+ν = 8 × 10 −4. (e)–(h): ( v1, v 2) density slices at x = 0. At ν = 0 (e, f), both methods are identical. At 
+
+ν = 10 −4 (g, h), the blob method over-smooths while SBTM preserves fine structures. 18 (a) Blob, t = 0 (b) SBTM, t = 0 
+
+(c) Blob, t = tfinal (d) SBTM, t = tfinal 
+
+Figure 10: Weibel instability: score quiver plots at ν = 10 −4. Top: initial time (true score in red; MSE in legend). Bottom: final time (true score unavailable). SBTM produces smooth, physically consistent scores; the blob method has high MSE at t = 0 and noisy scores at t = tfinal .19 (a) Sweep over ν (n = 10 6) (b) Sweep over n (ν = 8 × 10 −4)
+
+Figure 11: Weibel instability: estimated entropy production for blob (blue) and SBTM (red). Left: across collision frequencies; SBTM correctly decays to zero while the blob method plateaus. Right: across particle counts at ν = 8 × 10 −4; the blob plateau decreases with n, converging toward SBTM. 20 (a) Blob, ν = 0 (b) SBTM, ν = 0 
+
+(c) Blob, ν = 10 −4 (d) SBTM, ν = 10 −4
+
+(e) Blob, ν = 2 × 10 −4 (f) SBTM, ν = 2 × 10 −4
+
+(g) Blob, ν = 4 × 10 −4 (h) SBTM, ν = 4 × 10 −4
+
+(i) Blob, ν = 8 × 10 −4 (j) SBTM, ν = 8 × 10 −4
+
+Figure 12: Weibel instability, dv = 2: ( v1, v 2)-marginal density across collision frequencies. At ν = 0 both methods are identical. As ν increases, the blob method produces increasingly non-Gaussian densities, while SBTM equilibrates correctly. 21 (a) Blob, ν = 0 (b) SBTM, ν = 0 
+
+(c) Blob, ν = 10 −4 (d) SBTM, ν = 10 −4
+
+(e) Blob, ν = 2 × 10 −4 (f) SBTM, ν = 2 × 10 −4
+
+(g) Blob, ν = 4 × 10 −4 (h) SBTM, ν = 4 × 10 −4
+
+(i) Blob, ν = 8 × 10 −4 (j) SBTM, ν = 8 × 10 −4
+
+Figure 13: Weibel instability, dv = 3: (v1, v 2)-marginal density across collision frequencies. The blob method’s equilibration failure is more pronounced than in dv = 2 (Figure 12), indicating that SBTM scales better to higher dimensions. 22 3.5 Computational Efficiency 
+
+Table 2 compares runtime and peak GPU memory for the two-stream instability test case. Both methods share the same O(n2) collision force evaluation (per spatial cell), which dominates the overall cost. The difference lies in score estimation: the blob method requires forming and storing pairwise kernel evaluations ( O(n2) memory per cell), whereas SBTM amortizes the score via a neural network with O(1) memory in n. As a result, SBTM achieves a 1 .57 × speedup at n = 10 6 and uses 2 – 4 × less memory across all particle counts, with the memory advantage growing at larger n.
+
+Runtime (n = 10 6) Peak Memory (GB) Method Time Speedup n = 10 6 n = 3 × 10 6
+
+Blob (KDE) 11h 27m – 16.4 65.1 SBTM 7h 17m 1.57 × 4.4 17.2 Table 2: Runtime and memory comparison for the two-stream instability test case ( M = 100, ∆ t = 0 .05, 
+
+dv = 3, tfinal = 50). 
+
+# 4 Conclusion 
+
+We introduced SBTM as a drop-in replacement for the blob method in deterministic particle simu-lations of the Vlasov–Maxwell–Landau system. The two methods share the same PIC framework and differ only in how the velocity score is estimated: a kernel density estimate (blob) versus a neural network trained on-the-fly via implicit score matching (SBTM). This single change yields consistent improvements across all three benchmarks: SBTM relaxes correctly to Maxwellian equilibrium, converges with fewer particles, and runs faster with lower memory. On the theoretical side, we proved that the discretized collision operator preserves momentum and kinetic energy for any score approximation, characterized the unique global steady states of the VML and VPL systems (Theorems 2.1 and 2.2), and formally verified Theorem 2.1 in the Lean 4 proof assistant [19]. Several limitations of the current work suggest natural directions for future research. The time integration uses forward Euler, which does not conserve energy at the fully discrete level; adopting the energy-conserving explicit scheme of [33] would address this at the cost of additional collision operator evaluations per time step. All experiments are restricted to the 1D-in-space setting with a single electron species and an immobile ion background; extensions to multiple spatial dimensions and multi-species plasmas are important for practical applications. 
+
+# Declaration of generative AI use 
+
+The proofs of Theorems 2.1 and 2.2 were obtained with the assistance of Gemini DeepThink. 
+
+# Acknowledgement 
+
+The work of J. Hu was partially supported by DOE grant DE-SC0023164, NSF grants DMS-2409858 and IIS-2433957, and DoD MURI grant FA9550-24-1-0254. 23 A Proofs of Equilibrium Theorems 
+
+In this appendix, we provide complete proofs of Theorems 2.1 and 2.2. The formal verification of Theorem 2.1 in the Lean 4 proof assistant is carried out in [19]. 
+
+Proof of Theorem 2.1. The proof proceeds in two stages: (1) the Landau entropy dissipation forces f
+
+to be a local Maxwellian in v, and (2) the Vlasov–Maxwell equations constrain the spatial dependence, forcing a global Maxwellian. 
+
+Step 1: Entropy dissipation and the local Maxwellian. At equilibrium, ∂tf = ∂tE = ∂tB = 0, and the equation (2.1) reduces to 
+
+v · ∇ xf + ( E + v × B) · ∇ v f = ν Q [f, f ].
+
+Multiply by log f and integrate over phase space T3 × R3:
+
+Z Z 
+
+> T3×R3
+
+h
+
+v · ∇ xf + ( E + v × B) · ∇ v f
+
+i
+
+log f dv dx = ν
+
+Z Z 
+
+> T3×R3
+
+Q[f, f ] log f dv dx. 
+
+Using ∇(f log f − f ) = log f ∇f , the spatial transport term integrates to zero by the divergence theorem on the periodic domain T3. Integrating the Lorentz force term by parts with respect to v yields a factor 
+
+∇v · (E + v × B); since ∇v · E = 0 and ∇v · (v × B) = 0, the entire left-hand side vanishes, leaving the global entropy production constraint: 
+
+Z
+
+> T3
+
+Z 
+
+> R3
+
+Q[f, f ] log f dv 
+
+
+
+dx = 0 .
+
+By the H-theorem (2.7) for the Landau operator, R 
+
+> R3
+
+Q[f, f ] log f dv ≤ 0 pointwise in x. Since its spatial integral is zero, it must vanish identically. The null space of the Landau operator is spanned by the collisional invariants {1, v, |v|2} [31], meaning log f must be a linear combination of these: log f (x, v ) = a(x) + b(x) · v + c(x)|v|2.
+
+By mapping the coefficients a(x), b(x), and c(x) to the macroscopic fluid fields, we rewrite this as a local Maxwellian [10, Ch. II.7, Eq. 7.8]: 
+
+f (x, v ) = ρ(x)(2 πT (x)) 3/2 exp 
+
+
+
+− |v − u(x)|2
+
+2T (x)
+
+
+
+,
+
+with density ρ(x) = R 
+
+> R3
+
+f dv > 0, bulk velocity u(x) = 1
+
+> ρ
+
+R 
+
+> R3
+
+vf dv , and temperature T (x) = 13ρ
+
+R 
+
+> R3
+
+|v −
+
+u|2f dv > 0. 
+
+Step 2: Vlasov kinematics (polynomial matching). Since f is a local Maxwellian, Q[f, f ] = 0. The Vlasov equation simplifies to 
+
+v · ∇ x(log f ) + ( E + v × B) · ∇ v (log f ) = 0 .
+
+Substituting log f = a(x) + b(x) · v + c(x)|v|2 and computing the gradients, noting that ( v × B) · v = 0 and ( v × B) · b = v · (B × b), the equation reduces to a polynomial in v:(v · ∇ xc)|v|2 +
+
+> 3
+
+X
+
+> i,j =1
+
+vivj ∂xi bj + v ·(∇xa + 2 c E + B × b) + E · b = 0 . (A.1) Since the magnetic component of the Lorentz force is perpendicular to v, it contributes nothing to the quadratic or cubic velocity terms. Therefore, matching the highest-order coefficients follows the standard unforced kinematic derivation [10, Ch. III.10, Eqs. 10.6–10.7]. For this to hold for all v ∈ R3, the coefficient of every homogeneous degree of v must vanish identically. 24 Step 3: Enforcing macroscopic uniformity. (a) O(|v|3) terms: temperature is constant. The cubic terms give v · ∇ xc = 0, hence ∇xc = 0 [10, Eq. 10.7]. Since c = −1/(2 T ), we conclude T (x) ≡ T∞ is globally constant. 
+
+(b) O(|v|2) terms: bulk velocity is constant. With c constant, the quadratic terms give 
+
+P 
+
+> i,j
+
+vivj ∂xi bj = 0. This yields Killing’s equation ∂xi bj + ∂xj bi = 0 [10, Eq. 10.6]. Integrating the sum of squares of these derivatives over T3 and integrating by parts shows that ∂xi bj = 0 everywhere. Thus b(x) is constant, meaning the bulk velocity u(x) ≡ u∞ is uniform. 
+
+(c) O(|v|1) terms: force balance. With constant T∞ and u∞, substituting c = −1/(2 T∞) and 
+
+b = u∞/T ∞ yields the macroscopic force balance: 
+
+∇x log ρ = 1
+
+T∞
+
+(E + u∞ × B). (A.2) 
+
+Step 4: Amp` ere’s law and the nullification of bulk velocity. Since u∞ is constant, the current density is J(x) = ρ(x) u∞. Amp` ere’s law at steady state gives ∇x × B = J = ρ(x) u∞ [cf. 12, Eqs. 60–62]. Taking the dot product with u∞:
+
+u∞ · (∇x × B) = ρ(x)|u∞|2.
+
+Using the vector identity ∇x · (B × u∞) = u∞ · (∇x × B) − B · (∇x × u∞) and noting ∇x × u∞ = 0: 
+
+∇x · (B × u∞) = ρ(x)|u∞|2.
+
+Integrating over the periodic domain T3, the exact divergence vanishes: 0 = |u∞|2
+
+Z
+
+> T3
+
+ρ(x) dx. 
+
+Because ρ(x) > 0 strictly, the integral is positive. Therefore |u∞|2 = 0, i.e., the bulk velocity vanishes: 
+
+u∞ = 0. 
+
+Step 5: Electrostatic balance and the maximum principle. With u∞ = 0, the force bal-ance (A.2) reduces to ∇x log ρ = E/T ∞. Taking the divergence and substituting Gauss’s law ∇x · E =
+
+ρ − ρion yields an elliptic PDE for the density [cf. 13, Eq. 142]: 
+
+T∞ ∆x(log ρ) = ρ(x) − ρion . (A.3) Because the periodic domain T3 is compact and ρ(x) is smooth and strictly positive, ρ achieves a global maximum and a global minimum. 
+
+• At the global maximum xmax : ∆ x log ρ ≤ 0, so ρ(xmax ) ≤ ρion .
+
+• At the global minimum xmin : ∆ x log ρ ≥ 0, so ρ(xmin ) ≥ ρion .Combining: ρion ≤ ρ(xmin ) ≤ ρ(x) ≤ ρ(xmax ) ≤ ρion , forcing ρ(x) ≡ ρion . Since the density is constant, 
+
+∇x log ρ = 0, and plugging back into the force balance gives E(x) = 0 everywhere. 
+
+Step 6: Uniformity of the magnetic field. With u∞ = 0, the macroscopic current J = 0, so Amp` ere’s law reduces to ∇x × B = 0. Coupled with ∇x · B = 0, the vector Laplacian is ∆xB = ∇x(∇x · B) − ∇ x × (∇x × B) = 0 .
+
+Multiplying by B and integrating over T3 yields − R |∇ xB|2 dx = 0, so ∇xB = 0. The magnetic field is a global constant: B(x) ≡ B∞.A uniform magnetic field exerts no net force on the isotropic Maxwellian equilibrium: since ∇v f∞ ∝
+
+v f ∞, the magnetic force term ( v × B∞) · ∇ v f∞ ∝ (v × B∞) · v = 0 vanishes identically for any B∞ ∈ R3.Thus the steady-state Vlasov equation admits a one-parameter family of equilibria indexed by B∞.
+
+Step 7: Determination of T∞ and B∞. The specific equilibrium selected by the dynamics is uniquely fixed by two conservation laws. First, Faraday’s law ∂tB = −∇ x × E implies that the spatial 25 mean of B is conserved: ddt 
+
+R 
+
+> T3
+
+B dx = − R 
+
+> T3
+
+∇x × E dx = 0 by periodicity [cf. 12, p. 596]. At equilibrium 
+
+B ≡ B∞, so 
+
+B∞ = 1
+
+|T3|
+
+Z
+
+> T3
+
+Binit (x) dx. 
+
+Second, with E = 0 and B ≡ B∞, the total energy is 
+
+E =
+
+Z Z |v|2
+
+2 f∞ dv dx + |B∞|2
+
+2 |T3| = 32 ρion T∞ |T3| + |B∞|2
+
+2 |T3|.
+
+Since E is conserved (2.8) and B∞ is fixed by the initial data, T∞ is uniquely determined: 
+
+T∞ = 23 ρion |T3|
+
+
+
+E − |B∞|2
+
+2 |T3|
+
+
+
+.
+
+Positivity of T∞ is guaranteed by Jensen’s inequality: |B∞|2 ≤ 1
+
+> |T3|
+
+R |Binit |2 dx , so the magnetic energy of the uniform field is at most the initial magnetic energy. 
+
+Proof of Theorem 2.2. Steps 1–3 of the proof of Theorem 2.1 carry over verbatim with B = 0: the mag-netic field plays no role in the entropy dissipation argument (Step 1), and the magnetic force contributes nothing to the O(|v|3) and O(|v|2) terms of the polynomial matching (Steps 2–3). Thus the steady state is again a local Maxwellian with globally constant temperature T∞ and uniform bulk velocity u∞,satisfying the force balance 
+
+∇x log ρ = ET∞
+
+. (A.4) 
+
+Step 4 breaks. In the VML system, Amp` ere’s law ∇x × B = ρ u ∞ forces u∞ = 0 (by integrating over T3). In the VPL system there is no magnetic field and no Amp` ere’s law. Instead, the O(|v|0) term of the polynomial (A.1) (with B = 0) gives E · u∞/T ∞ = 0. But this imposes no constraint on u∞ once we establish E = 0. 
+
+Step 5 carries over. The electrostatic balance and maximum principle argument is identical: from (A.4) and Gauss’s law ∇x · E = ρ − ρion , we obtain the same Poisson-Boltzmann equation (A.3), and the maximum principle forces ρ ≡ ρion and E = 0. 
+
+Step 6 is absent (no magnetic field to constrain). 
+
+Determination of u∞ and T∞. The VPL system is Galilean invariant (unlike the full VML system, which is Lorentz invariant), so a uniform bulk drift generates no back-reacting magnetic field. Since the momentum is conserved (2.9), equating the equilibrium momentum to the initial value gives u∞ =
+
+RR v f init dv dx/ (ρion |T3|). The equilibrium temperature then follows from conservation of total energy: 
+
+T∞ = 23 ρion |T3| (E0 − 12 ρion |u∞|2|T3|). 
+
+# References 
+
+[1] Rafael Bailo, Jos´ e A. Carrillo, and Jingwei Hu. The collisional particle-in-cell method for the Vlasov-Maxwell-Landau equations. Journal of Plasma Physics , 90:905900415, 2024. [2] Graeme A Bird. Molecular Gas Dynamics and the Direct Simulation of Gas Flows . Clarendon Press, Oxford, 1994. [3] Charles K Birdsall and A Bruce Langdon. Plasma Physics via Computer Simulation . CRC Press, 2018. [4] Nicholas M Boffi and Eric Vanden-Eijnden. Probability flow solution of the Fokker-Planck equation. 
+
+Machine Learning: Science and Technology , 4(3):035012, 2023. 26 [5] James Bradbury, Roy Frostig, Peter Hawkins, Matthew James Johnson, Chris Leary, Dougal Maclau-rin, George Necula, Adam Paszke, Jake VanderPlas, Skye Wanderman-Milne, et al. Jax: composable transformations of python+ numpy programs. 2018. [6] Jos´ e A Carrillo, Matias G Delgadino, and Jeremy S.H. Wu. Convergence of a particle method for a regularized spatially homogeneous Landau equation. Mathematical Models and Methods in Applied Sciences , 33(05):971–1008, 2023. [7] Jos´ e A Carrillo, Jingwei Hu, Li Wang, and Jeremy Wu. A particle method for the homogeneous Landau equation. Journal of Computational Physics: X , 7:100066, 2020. [8] Jos´ e Antonio Carrillo, Katy Craig, and Francesco S Patacchini. A blob method for diffusion. Calculus of Variations and Partial Differential Equations , 58:1–53, 2019. [9] Jos´ e Antonio Carrillo, Shi Jin, and Yijia Tang. Random batch particle methods for the homogeneous Landau equation. Communications in Computational Physics , 31(4):997–1019, 2022. [10] Carlo Cercignani. The Boltzmann Equation and Its Applications . Springer, 1988. [11] Francis F Chen. Introduction to Plasma Physics and Controlled Fusion . Springer International Publishing, 2016. [12] Yan Guo. The Vlasov-Maxwell-Boltzmann system near Maxwellians. Inventiones Mathematicae ,153(3):593–630, 2003. [13] Yan Guo. The Vlasov-Poisson-Landau system in a periodic box. Journal of the American Mathe-matical Society , 25(3):759–812, 2012. [14] Roger W Hockney and James W Eastwood. Computer Simulation Using Particles . CRC Press, 1988. [15] Yan Huang and Li Wang. A score-based particle method for homogeneous Landau equation. arXiv preprint arXiv:2405.05187 , 2024. [16] Michael F Hutchinson. A stochastic estimator of the trace of the influence matrix for Laplacian smoothing splines. Communications in Statistics—Simulation and Computation , 18(3):1059–1076, 1989. [17] Aapo Hyv¨ arinen. Estimation of non-normalized statistical models by score matching. Journal of Machine Learning Research , 6(24):695–709, 2005. [18] Vasily Ilin. Stability of the spatially homogeneous landau equation in relative entropy and applica-tions to score-based numerical methods. arXiv preprint arXiv:2510.15089 , 2025. [19] Vasily Ilin. Semi-autonomous formalization of the Vlasov-Maxwell-Landau equilibrium. arXiv preprint arXiv:2603.15929 , 2026. [20] Vasily Ilin, Jingwei Hu, and Zhenfu Wang. Transport based particle methods for the Fokker-Planck-Landau equation. Communications in Mathematical Sciences , 23(7):1763–1788, 2025. [21] Vasily Ilin and Peter Sushko. Discoformer: Plug-in density and score estimation with transformers. 
+
+arXiv preprint arXiv:2511.05924 , 2026. [22] Vasily Ilin, Peter Sushko, and Jingwei Hu. Score-based deterministic density sampling. arXiv preprint arXiv:2504.18130 , 2025. [23] Lev D Landau. Die kinetische Gleichung f¨ ur den Fall Coulombscher Wechselwirkung. Physikalische Zeitschrift der Sowjetunion , 10(2):154–164, 1936. 27 [24] Jianfeng Lu, Yue Wu, and Yang Xiang. Score-based transport modeling for mean-field Fokker-Planck equations. Journal of Computational Physics , 503:112859, 2024. [25] Wallace M Manheimer, Martin Lampe, and Glenn Joyce. Langevin representation of Coulomb collisions in PIC simulations. Journal of Computational Physics , 138(2):563–584, 1997. [26] Zebang Shen and Zhenfu Wang. Entropy-dissipation informed neural network for McKean-Vlasov type PDEs. In 37th Conference on Neural Information Processing Systems (NeurIPS) , 2023. [27] Zebang Shen, Zhenfu Wang, Satyen Kale, Alejandro Ribeiro, Amin Karbasi, and Hamed Hassani. Self-consistency of the Fokker-Planck equation. In Conference on Learning Theory , pages 817–841. PMLR, 2022. [28] Bernard W Silverman. Density estimation for statistics and data analysis . Routledge, 2018. [29] Tomonor Takizuka and Hirotada Abe. A binary collision model for plasma simulation with a particle code. Journal of Computational Physics , 25(3):205–219, 1977. [30] C´ edric Villani. On the spatially homogeneous Landau equation for Maxwellian molecules. Mathe-matical Models and Methods in Applied Sciences , 8(06):957–983, 1998. [31] C´ edric Villani. A review of mathematical topics in collisional kinetic theory. In S Friedlander and D Serre, editors, Handbook of Mathematical Fluid Mechanics , volume I, pages 71–305. North-Holland, 2002. [32] K. Yee. Numerical solution of initial boundary value problems involving Maxwell’s equations in istropic media. IEEE Trans. Antennas Propag. , 14:302–307, 1966. [33] Jiyoung Yoo, Jingwei Hu, and Lee F Ricketson. An explicit energy-conserving particle method for the Vlasov-Fokker-Planck equation. arXiv preprint arXiv:2510.03960 , 2025. 28

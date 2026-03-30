@@ -1,0 +1,1327 @@
+Title: The internal law of a material can be discovered from its boundary
+
+URL Source: https://arxiv.org/pdf/2603.26517v1
+
+Published Time: Mon, 30 Mar 2026 01:08:29 GMT
+
+Number of Pages: 31
+
+Markdown Content:
+# The internal law of a material can be discovered from its boundary 
+
+# Francesco Regazzoni 1 
+
+> 1MOX, Department of Mathematics, Politecnico di Milano, Milan, Italy
+
+Abstract 
+
+Since the earliest stages of human civilization, advances in technology have been tightly linked to our ability to understand and predict the mechanical behavior of materials. In recent years, this challenge has increasingly been framed within the broader paradigm of data-driven scientific discovery, where governing laws are inferred directly from observations. However, existing methods require either stress-strain pairs or full-field displacement measurements, which are often inaccessible in practice. We introduce Neural-DFEM, a method that enables unsupervised discovery of hyperelastic material laws even from partial observations, such as boundary-only measurements. The method embeds a differentiable finite element solver within the learning loop, directly linking candidate energy functionals to available measurements. To guarantee thermodynamic consistency and mathematical well-posedness throughout training, the method employs Hyperelastic Neural Networks, a novel structure-preserving neural architecture that enforces frame indifference, material symmetry, polyconvexity, and coercivity by design. The resulting framework enables robust material model discovery in both two- and three-dimensional settings, including scenarios with boundary-only measurements. Neural-DFEM allows for generalization across geometries and loading conditions, and exhibits unprecedented accuracy and strong resilience to measurement noise. Our results demonstrate that reliable identification of material laws is achievable even under partial observability when strong physical inductive biases are embedded in the learning architecture. 
+
+# 1 Introduction 
+
+Materials have shaped technological development throughout human history, from the Stone and Iron Ages to the modern era of silicon and engineered matter. As a matter of fact, the ability to understand and predict the mechanical response of deformable bodies underpins progress in fields spanning structural engi-neering, soft matter physics, biomechanics, and geophysics [44, 57]. Within modern sciences, this challenge has traditionally been addressed through mathematical models, known as constitutive laws [2, 21]. The parameters of these models are typically calibrated using experimental measurements, but their functional forms are typically human-defined and only partially informed by experimental evidence. More recently, a new data-driven paradigm has emerged, which bypasses predefined functional forms and instead learns the material response directly from data [32, 40, 25]. This shift aligns with a broader movement toward the automated discovery of governing physical laws from data [29, 5, 59, 8, 28], spanning approaches such as sparse identification of nonlinear dynamics [4, 5], symbolic regression [55], and neural networks [46, 7]. Constitutive law identification can be naturally cast as a constrained inverse problem, where the unknown is the governing material law, which must be inferred from observations of the system response. Within this paradigm, a distinction is commonly made between model-free and model discovery approaches. Model-free methods [32, 6, 33, 49] do not yield an explicit constitutive relationship; instead, a collection of recorded strain–stress pairs is used to infer the material response online, by locally approximating the behavior based on data points closest to the current state of each material point. While effective in certain settings, these approaches cannot readily leverage a priori physical knowledge and are typically both data-hungry and memory-intensive, as the full dataset must be queried during the simulation. In contrast, model discovery methods aim to identify an explicit constitutive model in the classical sense, yet without prescribing its functional form a priori . Such models may be based on symbolic regression techniques [12, 38, 13, 14, 15], where the constitutive law is discovered by combining elements from a library 1
+
+> arXiv:2603.26517v1 [math.NA] 27 Mar 2026
+
+of simple mathematical expressions, or on machine learning models such as neural networks [48, 37, 26, 52], Gaussian processes [16], or neural ordinary differential equations [50]. Symbolic approaches offer enhanced interpretability, whereas machine learning models provide superior expressive power. Moreover, several architectures have been proposed to automatically embed physical and mathematical constraints into the learned model, thereby restricting the hypothesis space a priori [38, 50]. Regardless of whether the model is symbolic or black-box, existing methods also differ in the type of data they require. The majority of approaches are supervised in nature, as they rely on paired strain–stress data [39, 39]. However, such data are often unrealistic to obtain in practice: stress measurements are typically available only in simple mechanical tests, such as uniaxial tension, which fail to capture the full complexity of constitutive behavior. As a matter of fact, the simultaneous measurement of all tensorial components of strain and stress is practically infeasible. A more realistic experimental setting involves direct measurements of the displacement field of a specimen, for instance obtained via digital image correlation (DIC) techniques [18], together with global force measure-ments recorded during the deformation process. The Virtual Field Method (VFM) [20] has been leveraged for addressing material discovery problems in this setting [26, 12, 13]. The VFM identifies the constitutive model that minimizes the residual of the force balance, given the measured displacement field. Despite the significant progress enabled by this approach, important limitations remain. Since the displacement field is directly used in the fitting procedure, measurement noise can severely affect the results, making denoising techniques necessary. More critically, the method requires access to the complete displacement field, which prevents its application to scenarios involving partial measurements, such as surface-only observations in three-dimensional specimens, where internal displacement measurements are challenging. As a consequence, this class of methods has so far been restricted to two-dimensional benchmark problems under plane strain or plane stress assumptions, and realistic three-dimensional applications capturing complex material behavior remain largely out of reach. This work fills this gap, by introducing the first material model discovery method capable of operating in a fully unsupervised setting while explicitly handling partial or defective data, such as boundary-only observations. The proposed approach, termed Neural Differentiable Finite Element Method (Neural-DFEM), embeds a differentiable finite element solver for the equilibrium equations directly into the training process, thereby establishing a direct link between candidate constitutive laws and the resulting deformation fields. By formulating the loss function in terms of the discrepancy between available measurements and model predictions on the training specimens, Neural-DFEM enables constitutive model discovery from limited data and exhibits exceptional robustness to measurement noise. Embedding a differentiable solver within the training loop introduces two main challenges. The first chal-lenge arises from the requirement that the elastostatic equilibrium problem associated with each intermediate candidate model remain solvable throughout the optimization process; failure of the finite element solver at any stage would lead in fact to training breakdown. To this end, we here introduce a novel neural-network-based constitutive model ansatz, termed Hyperelastic Neural Network (HNN) which, for the first time in the literature, provides mathematically provable guarantees of physical and thermodynamic consistency, as well as mathematical well-posedness of the associated equilibrium problem. The second challenge concerns computational cost. This issue is addressed through the use of a quasi-Newton optimization strategy, which significantly reduces the number of training epochs required for conver-gence, combined with a continuation strategy during the initial stages of training. In addition, to mitigate the local convergence properties of the Newton solver employed for equilibrium, a backtracking strategy is incorporated into the line search of the quasi-Newton training algorithm, automatically rejecting parameter updates that would move the system outside the Newton basin of attraction. These numerical strategies together ensure robustness and computational efficiency of Neural-DFEM. The contributions of this work are threefold: 
+
+• A computational framework for unsupervised constitutive discovery under partial observability, en-abling material identification from boundary-only measurements. 
+
+• A structure-preserving neural constitutive class (HNN) with provable physical consistency and well-posedness guarantees. 2Training data 
+
+> Differentiable Finite Element solver with HNN constitutive model
+> HNN
+> automatic differentiation
+
+Material model discovery (training) 
+
+> •Full -field / boundary
+> displacement measurements:
+> •Global reaction forces:
+> •Displacement field:
+> •Global reaction forces:
+> Loss function:
+> Numerical solution:
+
+Testing 
+
+> New specimen:
+> Finite Element solver
+> with
+> HNN constitutive model
+> Numerical solution:
+> generalization to different geometries
+> generalization to different external loads
+> generalization to different boundary conditions
+
+Architecture 
+
+> training
+
+Nexp experiments: 
+
+a
+
+b c
+
+d
+
+> x
+
+Polyconvex Neural Network    
+
+> weights:
+> positive
+> activation function:
+> arbitrary
+> •continuous
+> •convex
+> •non -decreasing
+> +
+
+Hyperelastic Neural Network (HNN)  
+
+> polyconvexity residual stress -free condition
+> coercivity
+> extreme compression growth
+> residual energy condition
+> frame indifference
+> material symmetry
+
+Figure 1: Overview of the Neural-DFEM framework. (a) HNNs constitute a novel family of neural networks designed to approximate the strain energy density functional of a hyperelastic isotropic material. By construction, an HNN satisfies the seven physical and mathematical requirements necessary for well-posedness and physical consistency, as indicated in the figure alongside the architectural components that enforce them. The figure highlights the main design traits of HNNs, including weights with controlled sign, and a specific choice of the activation function. Optionally, HNNs can include skip connections, although they are not represented in the figure. (b) The training data consist of (possibly partial) displacement measurements and global reaction forces, coming from Nexp experiments. (c) Training is performed by embedding a differentiable finite element solver within the loss evaluation. The loss measures the discrepancy between predicted and observed data, while the Piola-Kirchhoff stress tensor is obtained by differentiating the HNN output with respect to the deformation gradient. (d) Once trained, the HNN can be integrated into standard finite element solvers to predict the deformation of new specimens, enabling generalization across geometries, loading conditions, and boundary conditions. 3• An efficient solver-in-the-loop training strategy that efficient resolution of the inverse problem. The resulting framework is validated across multiple two- and three-dimensional test cases, demonstrating robustness to substantial measurement noise and generalization across geometries and loading conditions. An overview of the Neural-DFEM framework is shown in Fig. 1. 
+
+# 2 Methods 
+
+# 2.1 Notation 
+
+We denote with capital bold letters matrices, e.g., A, B ∈ Rn×n, and by lowercase bold letters vectors, e.g., 
+
+a, b ∈ Rn. The Frobenius norm is denoted by | · | , that is |A| = tr( AT A)1/2 = ( P 
+
+> i,j
+
+A2 
+
+> ij
+
+)1/2. With a ⪰ b
+
+we mean that each component of a is greater or equal to the corresponding component of b. We denote by 
+
+1n ∈ Rn the n-dimensional vector with all entries equal to 1, and by 1n×m ∈ Rn×m the n × m matrix with all entries equal to 1. We denote by d = 3 the space dimension. I ∈ Rd×d is the identity tensor, 0 ∈ Rd×d is the zero tensor. The set of second order tensors with positive determinant is denoted as GL +(d) = {A ∈ Rd×d | det A > 0}.The special orthogonal group is denoted as SO( d) = {A ∈ Rd×d | AT A = I, det A = 1 }.
+
+# 2.2 Material model discovery: problem setting 
+
+Let us consider a bounded domain Ω ⊂ R3, representing the stress-free reference configuration of an elastic body, and χ : Ω → R3 the deformation map such that χ(Ω) is the deformed configuration. We denote by 
+
+d(x) = χ(x) − x the displacement field, by F = ∇χ = I + ∇d the deformation gradient tensor, and by 
+
+J = det F its determinant. We denote by C = FT F the right Cauchy-Green tensor, and its invariants by 
+
+I1 = tr C and I2 = 12 (tr( C)2 − tr( C2)). Moreover, we denote the isochoric invariants as ¯I1 = J−2/3I1 and ¯I2 = J−4/3I2.We consider a hyperelastic material, characterized by a strain energy density functional W : GL +(d) →
+
+R ∪ { +∞} , such that the Piola-Kirchhoff stress tensors is given by P(F) = ∂W 
+
+> ∂F
+
+. In such a way, the strain energy density W characterizes the material constitutive law. The knowledge of W allows to predict the material response to deformations. The goal of this work is to reverse this process, that is to discover the function W by observing the deformation of specimens of the considered materials. The following differential problem models the configuration assumed by a body when subject to a dis-tributed load f , to a boundary load h on Γ N ⊂ ∂Ω and assigned displacement g on Γ D ⊂ ∂Ω (where Γ N
+
+and Γ D form a disjoint partition of ∂Ω): 
+
+−∇ · P(F) = f in Ω ,
+
+P(F)n = h on Γ N ,
+
+d = g on Γ D ,
+
+(1) where n denotes the outward normal vector to Γ N . Notice that method proposed in this work extends to different kind of boundary conditions (such as follower loads, spring-like boundary conditions, sliding conditions, symmetric conditions), but, for the sake of brevity, we will carry on the presentation restricting ourselves to the case of (1). We assume that Nexp experiments are conducted, each corresponding to a potentially different specimen geometry Ω i, boundary conditions type, and loads f i, hi, gi. Let di : Ω i → R3 denote the displacement field resulting from the i-th experiment, for i = 1 , . . . , N exp . For each experiment, we dispose of measurements of the displacement at a collection of N i 
+
+> pts
+
+points. Specifically, we denote by dij  
+
+> obs
+
+≃ di(xij ) a (typically noisy) measurement of the displacement of the i-th experiment at the j-th point (denoted by xij ∈ Ωi), for 
+
+j = 1 , . . . , N i
+
+> pts
+
+.Furthermore, typical experimental setups allow to measure the global reaction forces acting on the boundaries where prescribed displacements are assigned, that is correspondence of Dirichlet boundary con-ditions. Suppose that the i-th experiment has N i 
+
+> reac
+
+Dirichlet boundary segments, denoted by Γ ik D ⊂ ∂Ωi,4for k = 1 , . . . , N i
+
+> reac
+
+. Then, we denote by Rik the function that maps a displacement field into the associated reaction force: 
+
+Rik (d) := 
+
+Z
+
+> Γik D
+
+P(I + ∇d)n · n dσ. 
+
+Using this notation, we denote by Rik  
+
+> obs
+
+≃ Rik (di) the (typically noisy) measured reaction force. To summarize, the full set of training data is given by: 
+
+{dij 
+
+> obs
+
+}j=1 ,...,N i 
+
+> pts
+> i=1 ,...,N exp
+
+, {Rik 
+
+> obs
+
+}k=1 ,...,N i 
+
+> reac
+> i=1 ,...,N exp
+
+.
+
+2.2.1 Finite element approximation 
+
+Considering problem (1), let us introduce the space of kinematically admissible displacements V , and the space of admissible variations (test function space) V0:
+
+V := {d ∈ [H1(Ω)] 3 s.t. d = g on Γ D },V0 := {d ∈ [H1(Ω)] 3 s.t. d = 0 on Γ D }.
+
+The equilibrium residual r : V × V0 → R is given by: 
+
+r(d, v) = 
+
+Z
+
+> Ω
+
+P(F) : ∇v dV −
+
+Z
+
+> Ω
+
+f · v dV −
+
+Z
+
+> ΓN
+
+h · v dσ. 
+
+The weak formulation of problem (1) reads as finding d ∈ V such that r(d, v) = 0 for all v ∈ V0.Let us consider a finite element space Vh ⊂ V , defined on a triangulation of the domain Ω, and let us define Vh, 0 = Vh ∩ V0. Let {φn}Nh 
+
+> n=1
+
+be a basis for Vh, 0. Then, each function of Vh can be expressed as 
+
+dh(x) = PNh 
+
+> n=1
+
+diφn(x) + gh, where gh ∈ Vh is the lifting of the boundary datum g. By using this notation, the finite element approximation of problem (1) consists of finding dh ∈ Vh such that r(dh, vh) = 0 for all 
+
+vh ∈ Vh, 0, or, equivalently, such that r(dh, φn) = 0 for n = 1 , . . . , N h. In what follows, we will employ the superscript i to denote the variables associated with the i-th experiment (e.g., V ih , dih, N ih, φin). 
+
+2.2.2 Material law discovery 
+
+We introduce an hypothesis space H ⊂ {W : GL +(d) → R ∪ { +∞}} , that is a set of candidate material laws. The issue of designing a convenient hypothesis space, sufficiently rich but at the same time numerically tractable, will be addressed below. For the moment, let us assume this space to be given. Unsupervised material discovery consists in finding the material law W ∈ H that is, in a suitable sense, most consistent with the observations dij  
+
+> obs
+
+and Rik 
+
+> obs
+
+. Such material discovery problem can be formulated in different manners. A first possibility is to rely on the VFM formulation (such in [12]), which consists in looking for the material law such that the equilibrium residual is minimized: 
+
+W∗ = argmin 
+
+> W∈H
+
+
+
+> Nexp
+
+X 
+
+> i=1
+> Nih
+
+X
+
+> n=1
+
+∥r(dih, obs , φin)∥2 + αRNexp 
+
+X 
+
+> i=1
+> Ni
+> reac
+
+X
+
+> k=1
+
+∥Rik  
+
+> obs
+
+− Rik (dih, obs )∥2
+
+ ,
+
+where dih, obs ∈ V ih is a suitably denoised projection of the observed displacement {dij 
+
+> obs
+
+}j=1 ,...,N i 
+
+> pts
+
+onto the finite element space V ih , and where αR > 0 is a weight constant. Clearly, this approach is valid only when the observed displacement {dij 
+
+> obs
+
+}j=1 ,...,N i 
+
+> pts
+
+covers the whole domain Ω i, otherwise the equilibrium residual cannot be computed. Instead, we propose to change the role of the equilibrium condition from a penalization term to a con-straint, and using the observed displacement as a penalization. Our proposed formulation thus reads: 
+
+W∗ = argmin 
+
+> W∈H
+
+
+
+> Nexp
+
+X 
+
+> i=1
+> Ni
+> pts
+
+X
+
+> j=1
+
+∥dij  
+
+> obs
+
+− dih(xij )∥2 + αRNexp 
+
+X 
+
+> i=1
+> Ni
+> reac
+
+X
+
+> k=1
+
+∥Rik  
+
+> obs
+
+− Rik (dih)∥2
+
+ , (2) 5subject to the constraints r(dih, vih) = 0 for all vih ∈ V ih, 0. In this work, the normalization constant is defined as 
+
+αR =
+
+PNexp 
+
+> i=1
+
+PN i 
+
+> pts
+> j=1
+
+∥dij 
+
+> obs
+
+∥2
+
+PNexp 
+
+> i=1
+
+PN i 
+
+> reac
+> k=1
+
+∥Rik 
+
+> obs
+
+∥2
+
+so as to balance the relative contributions of the displacement and reaction terms in the objective function. A third alternative is to treat both the equilibrium condition and the displacement observations as penalization terms. In this case, both the constitutive law W and the displacement fields di are variables of the optimization problem. This formulation, when neural networks are used as ansatz for the displacement fields and the equilibrium condition is expressed in strong form, takes the form of a Physics-Informed Neural Network (PINN) [45]. As preliminary investigations with this techniques highlighted very little stability of the training process and serious difficulties in convergence, we decided not to proceed further, and focus on the second approach only. 
+
+# 2.3 Designing the hypothesis space 
+
+In this section we address the issue of designing an hypothesis space H of candidate constitutive laws that is sufficiently rich to encompass a wide range of possible materials, while being computationally tractable. 
+
+2.3.1 Constitutive modeling requirements 
+
+To define a suitable hypothesis space H, let us first review the requirements that the strain energy den-sity functional W : GL +(d) → R ∪ { +∞} must satisfy for physical meaningfulness and mathematical well-posedness of the equilibrium equation (1) [54, 2, 21]. R1 Residual energy condition: W(I) = 0. This condition fixes the zero of the energy and ensures uniqueness of the energy reference. Although the energy always appears under differentiation in the stress, having a reference value is convenient for consistency. R2 Residual stress free condition: P(I) = 0.This ensures that, in the rest configuration ( d = 0), no residual stress is present. R3 Frame indifference: W(RF ) = W(F) ∀F ∈ GL +(d), R ∈ SO( d). This expresses the requirement, also known as objectivity, that the material response is independent of rigid-body rotations of the current configuration. Physically, the internal energy of the material does not change if the body is rotated as a whole. R4 Material symmetry: W(FR ) = W(F) ∀F ∈ GL +(d), R ∈ G ,where G ⊆ SO( d) is the material symmetry group, i.e., the set of all rotations that leave the material response invariant. For isotropic materials, G = SO( d). R5 Polyconvexity: W(F) = g(F, cof F, det F) for some convex g : R3×3 × R3×3 × R → R ∪ { +∞} .This condition, together with suitable growth and coercivity conditions (see next points), ensures existence of weak solutions to the equilibrium equation (1), as proved by John Ball [3]. Notice that polyconvexity can be relaxed to the weaker notion of quasiconvexity (a necessary condition for the existence of solutions) [3], but the latter is untractable and difficult to verify in practice, as it is a global property which cannot be reformulated as a local one [35]. R6 Extreme compression growth: W(F) → +∞ as J → 0+.This condition ensures physically realistic behavior under extreme compression and prevents interpen-etration of matter, reflecting that infinite energy would be required to collapse a volume element to zero. 6R7 Coercivity: W(F) ≥ c0(|F|2 + | cof F|3/2) + c1 ∀ F ∈ GL +(d) for some c0 > 0, c 1 ∈ R.Similarly to the previous condition, this ensures that the extreme strains should be maintained by infinite stresses. From the mathematical viewpoint, this condition is key for the application of the direct method of the calculus of variations to the proof of existence, as it guarantees that minimizing sequences remain bounded and that a weakly convergent subsequence exists, allowing the attainment of a minimizer. The coercivity condition considered in this work is a weaker version of the original one used by [3], and is due to M¨ uller [42]. The frame indifference requirement R3 is equivalent to asking that W can be expressed as a function of the right Cauchy-Green tensor C = FT F. Furthermore, for isotropic material ( G = SO( d) in R4), W can be expressed as a function of the invariants I1 = tr C, I2 = 12 (tr( C)2 − tr( C2)) and J, that is there exists a function W¯I : [0 , +∞) × [0 , +∞) × [0 , +∞) → R ∪ { +∞} such that W(F) = WI(I1, I 2, J ). 
+
+2.3.2 Structure preserving general form 
+
+Several neural network architectures have been proposed in the literature to satisfy subsets of the require-ments outlined above; however, to the best of our knowledge, no practically usable architecture has yet been shown to satisfy all of them simultaneously. For instance, the approach in [11] guarantees frame indifference and material symmetry, but polyconvexity may be violated. In [56], some of the constraints are enforced only weakly through penalty terms in the loss function and are therefore not guaranteed throughout the training process. The work of [34] represents the first neural-network-based constitutive model in which polyconvexity is enforced by design; however, this is achieved at the expense of exactly satisfying either frame indifference or the residual-stress-free condition. In [50], Neural ODEs are employed to guarantee convexity with respect to individual invariants, but under the assumption of an additive decomposition of the energy into terms depending on a single invariant, which precludes the representation of energies in-volving interactions among multiple invariants. In [52], polyconvexity and the residual-stress-free condition are jointly enforced; nevertheless, coercivity is not guaranteed by construction. Moreover, a convex and monotonically increasing dependence on the Jacobian J is imposed, whereas convexity alone would suffice, thereby unnecessarily restricting the admissible hypothesis space. Finally, the isochoric invariant ¯I2 is used as a network input; since this invariant is not polyconvex [22, Lemma 2.4], the overall polyconvexity of the strain energy density is not strictly guaranteed. To define a general strain energy formulation that fully preserves the structure imposed by the require-ments listed in the previous section, we observe that, when the strain energy density is expressed as a function of the invariants, the Piola–Kirchhoff stress tensor admits the following representation: 
+
+P(F) = ∂W(F)
+
+∂F = ∂WI
+
+∂I 1
+
+∂I 1
+
+∂F + ∂WI
+
+∂I 2
+
+∂I 2
+
+∂F + ∂WI
+
+∂J ∂J ∂F
+
+= ∂WI
+
+∂I 1
+
+2F + ∂WI
+
+∂I 2
+
+2( I1F − FF T F) + ∂WI
+
+∂J cof F
+
+If follows that, in the reference configuration F = I:
+
+P(I) = 
+
+
+
+2 ∂WI
+
+∂I 1
+
++ 4 ∂WI
+
+∂I 2
+
++ ∂WI
+
+∂J 
+
+
+
+> F=I
+
+I (3) Hence a practical way of guarantee the residual stress free condition R2 is to let the term inside the parenthesis in (3) vanish. Based on the above observations, we express the candidate strain energy density functionals in the general form of the next theorem. 
+
+Theorem 1. Consider the strain energy density functional: 
+
+WI(I1, I 2, J ) = Wbase (I1, I 2, J ) + Wvol (J) + ω(J − 1) − W 0, (4) 
+
+where: 
+
+7• Wbase is a polyconvex energy density; 
+
+• Wvol : [0 , +∞) → [0 , +∞) is a convex, C1 function such that Wvol (1) = W′
+
+> vol
+
+(1) = 0 .
+
+• ω ∈ R is a constant defined as: ω = −
+
+
+
+2 ∂Wbase  
+
+> ∂I 1
+
++ 4 ∂Wbase  
+
+> ∂I 2
+
++ ∂Wbase 
+
+> ∂J
+
+
+
+> F=I
+
+;
+
+• W0 ∈ R is a constant defined as: W0 = Wbase |F=I.Then, the material model (4) satisfies the requirements R1–R5. Proof. Requirements R1–R2–R3–R4 are easy to verify. Polyconvexity follows from the fact that the sum of polyconvex functions is polyconvex, and that a convex function of J is trivially polyconvex. Theorem 1 provides a systematic mechanism to enforce most of the requirements listed in Sec. 2.3.1, while retaining substantial flexibility in the choice of Wbase . In particular, the construction reduces the design of the constitutive model to ensuring polyconvexity of Wbase and the satisfaction of the associated growth and coercivity conditions for the resulting strain energy density functional. 
+
+Remark 1. To ensure the residual stress free requirement R2, the term ω(J − 1) could be equivalently replaced either by 12 ω(I1 − 3) or by 14 ω(I2 − 3), or by linear combinations of these three terms. However, this would render more tricky to ensure polyconvexity. Indeed, polyconvexity requires that the strain energy be a convex function of F, cof F, and det F. While J is directly one of the polyconvex arguments and thus adding a term proportional to ( J − 1) preserves polyconvexity regardless of the sign of the coefficient, the invariants I1 and I2 are convex functions of F and cof F, respectively. Hence, polyconvexity is preserved provided that I1 and I2 are composed with a convex non-decreasing function (see Proposition 1). However, ensuring that the corresponding coefficient ω is non-negative is not straightforward if Wbase is allowed to take general expressions. 
+
+2.3.3 Polyconvex Neural Networks 
+
+We introduce here a neural network architecture that satisfies polyconvexity by design, termed Polyconvex Neural Network. Similarly to other architectures proposed in the literature, PNNs are inspired by Input-Convex Neural Networks (ICNNs), introduced in [1], which are built upon two fundamental principles: (i) non-negative weighted sums of convex functions are themselves convex, and (ii) the composition of a convex function with a convex, non-decreasing function preserves convexity. 
+
+Definition 1. A Polyconvex Neural Network (PNN) with L ≥ 1 hidden neuron layers and n1, . . . , n L neurons per layer is a function WPNN : [0 , +∞) × [0 , +∞) × [0 , +∞) → R, mapping ( I1, I 2, J ) 7 → zout as recursively defined below: 
+
+
+
+z1 = ρ(w11(I1 − 3) + w21(I2 − 3) + wJ 
+
+> 1
+
+(J − 1) + b1),
+
+zi = ρ(w1 
+
+> i
+
+(I1 − 3) + w2 
+
+> i
+
+(I2 − 3) + wJi (J − 1) + Wi−1zi−1 + bi), for i = 2 , . . . , L zout = W wout · zL.
+
+(5) Here, zi ∈ Rni denotes the vector of neuron activations of the i-th layer, for i = 1 , . . . , L . The activation function ρ : R → R is a convex, non-decreasing, non-constant and C1 function, while W > 0 is a fixed scaling constant. The trainable parameters of the network are w1 
+
+> i
+
+, w2 
+
+> i
+
+, wJi , bi ∈ Rni , for i = 1 , . . . , L ;
+
+Wi ∈ Rni+1 ×ni , for i = 1 , . . . , L − 1; wout ∈ RnL . To ensure polyconvexity, the parameters must satisfy the positivity constraints w1 
+
+> i
+
+⪰ 0, w2 
+
+> i
+
+⪰ 0, Wi ⪰ 0, wout ⪰ 0 for any i.Following the design of ICNNs [1], two architectural choices are made: first, positivity is required for most of the weights; second, the activation function ρ is chosen to be a convex and non-decreasing. As we prove below (see Theorem 3), these two choices combined together ensure that WPNN is polyconvex. We notice that the weight that directly multiplies J is not required to be positive. In fact, as observed in Remark 1, while I1 and I2 are convex functions of the the triplet ( F, cof F, J ), and hence can be multiplied only by 8nonnegative weights to preserve polyconvexity, J is part of the triplet itself, and so can safely be multiplied by negative weights. The constant W > 0 is a dimensional hyperparameter necessary to recover the physical dimension of an energy density (e.g. Pa). Its value could be set based on a prior estimate of the material overall stiffness, to provide the model with the suitable order of magnitude. We notice that, for the sake of generality, we have included skip connections in (5), allowing each layer to directly depend on the invariants I1, I2 and J, through the weights w1 
+
+> i
+
+, w2 
+
+> i
+
+and wJi for i ≥ 2. However, these terms can be removed without compromising the validity of the theoretical results stated below. 
+
+Theorem 2. Let us consider the strain energy density functional WPNN of Definition 1. Then, for any choice of the neural network hyperparameters and parameters satisfying the positivity constrains listed in the definition, WPNN is polyconvex. Proof. First, we observe that 
+
+I1 = tr C = tr( FT F) = |F|2,I2 = tr(cof C) = tr((cof F)T cof F) = | cof F|2, (6) where we have exploited the identity cof C = J2C−T = J2F−1F−T = (cof F)T cof F. This shows that I1
+
+and I2 are convex functions of F and cof F, respectively. Each entry of the argument of ρ in the first layer is polyconvex, being the sum of polyconvex functions. Hence, each neuron of the first layer in the network is also polyconvex, being the composition between a polyconvex function with a convex non-decreasing function. By similar arguments, also neurons in successive layers are polyconvex. Finally, WPNN is polyconvex being the positive-weighted sum of polyconvex functions. 
+
+2.3.4 Hyperelastic Neural Networks 
+
+We are ready to introduce the hypothesis space H used within this work. 
+
+Definition 2. A Hyperelastic Neural Network (HNN) is a function WHNN : [0 , +∞)×[0 , +∞)×[0 , +∞) → R,defined as in (4), by setting Wbase = WPNN , with WPNN being a PNN, and where ω and W0 are defined as in Theorem 1. The following results shows that, for an HNN, all the requirements R1–R7 are satisfied by design, provided that the volumetric term Wvol satisfies two additional hypothesis (growth at J → 0+, and superlinear growth at J → +∞). 
+
+Theorem 3. Let us consider a HNN, where Wvol satisfies the hypotheses of Theorem 1 with the additional hypotheses: 
+
+lim  
+
+> J→0+
+
+Wvol (J) = + ∞, lim 
+
+> J→+∞
+
+Wvol (J)
+
+J = + ∞. (7) 
+
+Then, for any choice of the neural network hyperparameters and parameters, the strain energy density func-tional satisfies all the requirements R1–R7. Proof. Requirements R1–R5 follow from Theorem 1 and Theorem 2. To prove requirement R6, it suffices to observe that WPNN is non-decreasing in both I1 and I2, being the composition of non-decreasing functions. Therefore WPNN (I1, I 2, J ) ≥ W PNN (0 , 0, J ), which has clearly a finite limit when J → 0+. Hence, thanks to (7), requirement R6 holds true. To prove coercivity (requirement R7), we start by observing that, as ρ is C1 convex and non-decreasing but non-constant, we have that ρ(y) ≥ ay + b for some a > 0 and b ∈ R. It follows that the first layer of 
+
+WPNN satisfies: 
+
+∃ a > 0, b ∈ R, c ∈ R s.t. z1 ⪰ a(I1 + I2) + bJ + c. 
+
+9By the same argument, all successive layers zi satisfy the same inequality. Therefore, we have: 
+
+∃ a > 0, b ∈ R, c ∈ R s.t. WPNN (I1, I 2, J ) ≥ a(I1 + I2) + bJ + c. 
+
+Then: 
+
+∃ a > 0, b ∈ R, c ∈ R s.t. WHNN (I1, I 2, J ) ≥ a(I1 + I2) + bJ + Wvol (J) + c. 
+
+The function J 7 → bJ + Wvol (J) is continuous and tends to + ∞ both for J → 0+ and J → +∞ (thanks to the super-linear growth of Wvol ), and hence it is bounded from below. It follows that 
+
+∃ a > 0, b ∈ R, c ∈ R s.t. WHNN (I1, I 2, J ) ≥ a(I1 + I2) + c = a(|F|2 + | cof F|2) + c, 
+
+where we have exploited (6). This entails the coercivity of the strain energy density functional. The term Wvol (J) determines the behavior of the energy for J → 0+ and J → +∞. In principle, we could think of learning Wvol (J), by designing an architecture that satisfies all the associated hypotheses. However, this would be poorly constrained by the training data, as both extreme regimes of volumetric compression and expansion are not observed in experiments. Indeed, the role of Wvol (J) is mainly to ensure the mathematical well-posedness of the problem and the finite element solvability along the whole optimization process. Therefore, we prefer to chose a priori the shape of Wvol (J), and limit ourselves to learn a multiplicative parameter. Specifically, we set Wvol (J) = 12 wvol (J − 1) log J, where wvol > 0 is a trainable parameter. Notice that this choice is very conservative, as is has a very mild growth both for J → 0+
+
+(logarithmic) and for J → +∞ (∼ J log J, considering that superlinear growth is required by Theorem 3). 
+
+Remark 2. An alternative to the architecture described in Definition 1 consists in replacing the invariants 
+
+I1 and I2 with their isochoric counterparts. More precisely, we can replace I1 by ¯I1. However, it is not convenient to use ¯I2, since it is not polyconvex (see Lemma 2.4 in [22]), and therefore the proof of Theorem 2 would no longer apply. As an alternative, one may use ¯I3/22 as an input of the neural network, since this quantity is proven to be polyconvex (Corollary 2.3 in [22]). With this choice, the result of Theorem 2 remains valid. On the other hand, the corresponding HNN is no longer strictly coercive in the sense of requirement R7, but only coercive on sublevel sets of the form ( J < J max ), as can be readily shown by revisiting the proof of Theorem 3. Nevertheless, the volumetric term Wvol (J) prevents excessive growth of 
+
+J in practice, and therefore this formulation can still be safely employed in applications. 
+
+# 2.4 Initialization and parametrization of HNNs 
+
+The initialization of trainable parameters plays a crucial role in the successful training of any neural network architecture. Poor initialization may result in slow convergence or cause the optimizer to become trapped in undesirable regions of the parameter space [19, 36]. Whenever a novel neural architecture is introduced, a carefully designed initialization strategy is therefore essential. Typically, initialization schemes aim to control the magnitude of activations and gradients, avoiding both explosion and collapse, while preventing saturation of the activation functions, typically by keeping pre-activations in a neighborhood of zero [19, 24]. Moreover, in the HNN architecture several weights are constrained to assume positive values in order to preserve polyconvexity. Since most training algorithms are designed for working in unconstrained parameter spaces, a reparametrization is required to convert the constrained optimization problem into an unconstrained one. In this section, we describe the proposed strategy that jointly addresses the parametrization and initialization of the HNN trainable parameters. First, we select an activation function satisfying ρ(0) = 0. Specifically, thorough this work, we employ the shifted softplus function ρ(z) = log(1 + ez ) − log(2), which is convex, non-decreasing, C1, non-constant, and therefore satisfies the assumptions of Definition 1. Moreover, we initialize all biases bi to zero. These conditions together ensure that, in the rest configuration (i.e. F = I), all the activations in Eq. (5) vanish. Consequently, around the rest configuration, the activation function operates in the vicinity of z ≈ 0, where its response is well-conditioned. 10 Controlling the activations alone, however, does not guarantee that the initialized constitutive model exhibits physically meaningful properties. Indeed, since the Piola-Kirchhoff stress tensor is obtained by differentiating the strain energy density W with respect to the deformation gradient F, it is essential to ensure that the gradients of the network with respect to its inputs neither vanish – leading to an excessively compliant material – nor blow up – resulting in an unrealistically stiff response. This issue is particularly delicate for the derivatives with respect to the invariants I1 and I2, whose associated coefficients are constrained to be non-negative: because the linear layers also involve non-negative weights, successive layers may accumulate positive contributions, potentially amplifying gradients as the number of neurons increases. To counteract this effect, we scale each linear layer by the inverse of the number of incoming neurons, as we detail below. Moreover, to enforce positivity of the constrained weights, we adopt a standard reparametrization in which each constrained weight is expressed as the composition of an unconstrained trainable variable with a smooth positivity-enforcing function τ : R → (0 , +∞). Specifically, we use the softplus function τ (w) = log(1 + ew). In conclusion, the resulting parametrization (for i = 1 , . . . , L ) reads: 
+
+w1 
+
+> i
+
+= τ ( ew1 
+
+> i
+
+), w2 
+
+> i
+
+= τ ( ew2 
+
+> i
+
+), Wi = 1
+
+ni
+
+τ ( fWi), wout = 1
+
+nL
+
+τ ( ewout ),
+
+where ew1 
+
+> i
+
+, ew2 
+
+> i
+
+, wJi , fWi, ewout are initialized independently according to Gaussian distributions with zero mean and standard deviation σinit > 0. Similarly, we parametrize wvol as τ ( ewvol ), with ewvol initialized to zero. In Section C, we show analytically that, thanks to the proposed scaling and parametrization, the expected value of the derivatives of the hyperelastic energy with respect to the invariants, evaluated at the reference configuration, is kept under control (i.e., it does not vanish nor it blows up) as the number of neurons increases. 
+
+# 2.5 Neural-DFEM 
+
+Our proposed material discovery method is based on the formulation (2) wherein the HNN architecture described in Sec. 2.3.4 is employed to define the hypothesis space H. The HNN parameters are learned by minimizing the loss function (2), whose evaluation involves the solution of a set of finite element equilibrium problems, one for each training experiment. Crucially, the training procedure exploits a differentiable finite element solver, allowing gradients to be propagated through the equilibrium solution itself. As a result, the parameter updates explicitly account for the effect of the constitutive model on the mechanical response of the training specimens. We refer to this approach as Neural Differentiable Finite Element Method (Neural-DFEM). The practical realization of this framework entails a number of nontrivial challenges that must be ad-dressed to ensure scalability and robustness. In the following, we outline these challenges and describe how they are resolved within the Neural-DFEM framework. 
+
+• The first challenge concerns the differentiation of the finite element solver. Since the governing equilib-rium problem is nonlinear and solved via an iterative Newton scheme, gradients cannot be conveniently obtained by directly differentiating the solver iterations. Instead, we rely on the solution of the cor-responding algebraic adjoint system associated with the discretized equilibrium equations [10]. This approach requires solving one sparse linear system per training experiment to compute the gradients with respect to the constitutive parameters. 
+
+• A second challenge arises from the computational cost associated with the evaluation of the loss func-tion, which requires solving multiple finite element problems – one for each training experiment – at every training epoch. This may potentially lead to a significant per-epoch cost. To mitigate this ef-fect, we reduce the total number of training epochs by adopting a quasi-Newton optimization strategy, specifically the BFGS method [43]. This choice is particularly effective in the present setting, as the neural constitutive model operates in a low-dimensional space (e.g., the space of strain invariants), resulting in a relatively small number of trainable parameters. Consequently, the linear systems in-volved in the BFGS updates do not constitute a computational bottleneck. As a stopping criterion, 11 the optimization is terminated when the relative improvement of the loss over the last 50 iterations falls below 10 −4.In addition, the cost of the initial training phase is controlled through a load continuation strategy, which is used to compute a suitable initial equilibrium solution. During subsequent training epochs, the finite element solver is warm-started using the equilibrium solution from the previous epoch. Since the constitutive response evolves smoothly over the course of training, the equilibrium solution changes only marginally between consecutive epochs, leading to a modest cost for each finite element problem. 
+
+• A further challenge stems from the fact that the loss function depends on the solution of the equi-librium problem, which must remain well posed throughout the entire optimization process, from the initial parameter guess to the final learned model. This requires mathematical well-posedness to be ensured over the whole hypothesis space explored during training. In Neural-DFEM, this requirement is satisfied by the HNN architecture introduced in Sec. 2.3.4, which is constructed to inherently enforce the fundamental principles of hyperelasticity. As proved therein, the HNN guarantees physical mean-ingfulness and mathematical well-posedness of the equilibrium problem for all admissible parameter values. 
+
+• Despite the mathematical well-posedness of the equilibrium problem, convergence of the finite element solver cannot be guaranteed in all cases, as the Newton method guarantees only local convergence. Two strategies can, in principle, be adopted to address this issue. A first option consists in introduc-ing a continuation procedure to gradually transition between successive equilibrium solutions. While effective, this approach increases the computational complexity of the training process. In Neural-DFEM, we instead adopt a more conservative strategy, to prevent parameter updates from moving the system outside the region in the parameter space of approximate linearity, where gradient-based directions remain reliable. This is achieved by leveraging the backtracking mechanism embedded in the line search of the BFGS algorithm, so that trial steps leading to non-convergence of the Newton solver are automatically rejected. As a result, the optimization proceeds while remaining within the basin of attraction of the equilibrium solution, without requiring additional continuation steps during training. 
+
+# 2.6 Hyperparameters tuning 
+
+In this work, the following hyperparameters of the HNNs are tuned via a grid search over finite sets of candidate values, listed below: 
+
+• the number of layers, L ∈ { 1, 2, 3};
+
+• the number of neurons in each layer, ni ∈ { 5, 10 , 20 };
+
+• the presence or absence of skip connections; 
+
+• the choice of input invariants, either the native set ( I1, I 2, J ) or the isochoric set ( ¯I1, ¯I3/22 , J ), where the exponent 3 /2 ensures polyconvexity, as discussed in Remark 2; 
+
+• the initialization standard deviation, σinit ∈ { 0.05 , 0.1, 0.2, 0.5, 0.8};
+
+• the dimensional scaling constant, W ∈ { 1, 5, 10 , 20 }.The optimal configuration is selected as the one achieving, for σnoise = 10 −3, the lowest training loss. Owing to the strong structural priors embedded in the HNN architecture, which substantially restrict the admissible hypothesis space, we do not employ cross-validation for hyperparameters tuning, as discussed in the Results. The selected hyperparameters values are reported in Section D. 12 2.7 Test cases 
+
+In this section, we provide details regarding the test cases implemented to test the capabilities of the proposed method. 
+
+2.7.1 Material models 
+
+We consider the following ground-truth constitutive laws. 
+
+• Ishihara (IH) [27], with C1 = 0 .5, C2 = 1, C3 = 3, K = 1 .5: 
+
+W(F) = C1( ¯I1 − 3) + C2( ¯I2 − 3) + C3( ¯I1 − 3) 2 + K(J − 1) 2;
+
+• Mooney-Rivlin (MR) [41, 47], with C1 = 1 .0, C2 = 0 .8, K = 1: 
+
+W(F) = C1(I1 − 3 − 2 log J) + C2(I2 − 3 − 4 log J) + 12 K(J − 1) log J;
+
+• Fung (FU) [17], with C = 1, b = 3, K = 1 .5: 
+
+W(F) = C
+
+2b
+
+
+
+eb( ¯I1−3) − 1
+
+
+
++ K
+
+4 (( J − 1) 2 + log( J)2).
+
+2.7.2 Mechanical setups Setup 1. Setup 1, taken from [12], consists of a square plate with edge length 2 containing a central circular hole of radius 0.1, as shown in Fig. 2a. The mesh consists of 1441 nodes. The plate is subjected to asymmetric, displacement-controlled biaxial tension, with prescribed displacements of δ in the vertical direction and δ/ 2 in the horizontal direction, with δ ∈ { 0.1, 0.2, . . . , 0.8}. For computational convenience, only the top-left quarter of the plate is simulated, with symmetry boundary conditions applied to account for the remaining portion of the domain. Specifically, the following boundary conditions are applied: 
+
+d · n = 0 , (I − n ⊗ n)( Pn ) = 0 on Γ left ∪ Γdown ,
+
+d · n = δ, (I − n ⊗ n)( Pn ) = 0 on Γ up ,
+
+d · n = δ/ 2, (I − n ⊗ n)( Pn ) = 0 on Γ right ,
+
+Pn = 0 on ∂Ω \ (Γ down ∪ Γright ∪ Γup ∪ Γleft ).
+
+Setup 2. Setup 2, also from [12], consists of square plate with two ellipsoidal holes, as shown in Fig. 2b. The mesh has 4334 nodes. The specimen is subjected to displacement-controlled uniaxial tension in the vertical direction, with displacement δ ∈ { 0.1, 0.2, . . . , 1.0}, while the remaining portions of the boundary sides (including those of the inner holes) are traction-free. The boundary conditions read as follows: 
+
+d = 0 on Γ down ,
+
+d =
+
+0
+
+δ
+
+
+
+on Γ up ,
+
+Pn = 0 on ∂Ω \ (Γ down ∪ Γup ).
+
+Setup 3. Setup 3, adapted from [58], consists of 10 distinct domains, each defined as a square plate of unit edge length containing a random number of circular holes – ranging from 1 to 3 – with randomly sampled sizes and positions. Some samples are displayed in Fig. 2c. The number of mesh nodes per each geometry ranges between 5300 and 6000. The plates are subjected to normal-spring boundary conditions (with constant k⊥ = 0 .01) and loaded on the two vertical sides by a uniformly distributed traction F ∈
+
+13 0.125       
+
+> 0.5
+> 0.25
+> 0.125
+> 0.125 0.5 0.25 0.125
+> 0.2 0.9 0.0 1.0
+
+# a b
+
+# c
+
+> 0.00
+> 0.15
+
+# d Setup 1  Setup 2  Setup 3 
+
+> Isihara Mooney -Rivlin Fung
+
+Setup 1 
+
+> uniaxial
+> tension or
+> compression
+> biaxial
+> tension or
+> compression
+> simple
+> shear
+> Setup 1
+> Setup 2
+> Setup 3
+
+Setup 2 
+
+Setup 3 Figure 2: 2D setups. (a)–(b)–(c): Graphical representation of Setups 1–2–3 (left), and corresponding sam-ple solutions obtained with the IH model (right). For Setup 3, six representative domains are shown. Light blue arrows represent displacement-controlled loads, whereas light orange arrows denote applied forces per unit surface. (d): Statistical distributions of the principal stretches for the three setups considered. The scatter plots in the first column show the relative location, in the principal-stretch plane, of the deformation states obtained for the three setups, while the remaining three columns detail the principal-stretch distri-butions for each setup, displayed via kernel density estimation. For clarity of visualization, the principal stretches are plotted without enforcing an ordering, i.e. treating the two stretches symmetrically. Black lines correspond to canonical deformations described in Section B. 14 {− 0.1, 0.1, 0.2, 0.3}, where negative values correspond to compressive loading and positive values to tensile loading. More precisely, the boundary conditions are given by: 
+
+Pn + k⊥(n ⊗ n)d = 0 on Γ top ∪ Γdown ,
+
+Pn + k⊥(n ⊗ n)d = F n on Γ left ∪ Γright ,
+
+Pn = 0 on ∂Ω \ (Γ down ∪ Γright ∪ Γup ∪ Γleft ).
+
+Setup 4. Setup 4 (see Fig. 3a) represents a three-dimensional generalization of the bi-dimensional Setup 1. It consists of a cube with an edge length 2 and a circular hole with radius 0.5. The mesh consists of 7093 nodes. Similarly to Setup 1, for symmetry reasons we simulate only 1/8 of the domain. The specimen is subjected to asymmetric, displacement-controlled triaxial tension, with prescribed displacements of δ, δ/ 2and δ/ 4 in the three orthogonal directions, with δ ∈ { 0.1, 0.2, . . . , 0.5}. The boundary conditions hence read as follows: 
+
+d · n = 0 , (I − n ⊗ n)( Pn ) = 0 on Γ left ∪ Γdown ∪ Γfront ,
+
+d · n = δ, (I − n ⊗ n)( Pn ) = 0 on Γ right ,
+
+d · n = δ/ 2, (I − n ⊗ n)( Pn ) = 0 on Γ back ,
+
+d · n = δ/ 4, (I − n ⊗ n)( Pn ) = 0 on Γ up ,
+
+Pn = 0 on ∂Ω \ (Γ up ∪ Γdown ∪ Γleft ∪ Γright ∪ Γfront ∪ Γback ).
+
+Setup 5. Setup 5 consists of a cubic specimen featuring an oblique through-hole, as illustrated in Fig. 3b, based on a 2585-node mesh. One face of the specimen is fully constrained by imposing zero displace-ment, while the opposite face is subjected to a displacement-controlled load combining two components: a uniaxial traction of magnitude δ and a torsional deformation with rotation angle θ = 2π 
+
+> 5
+
+δ, where δ ∈{0.1, 0.2, . . . , 0.5}. Specifically, the applied boundary conditions are defined as follows, where x = ( x, y, z )T
+
+denotes the spatial coordinates, with the z-axis oriented along the vertical direction: 
+
+d = 0 on Γ down ,
+
+d =
+
+
+
+(cos θ − 1) x − sin θ y 
+
+sin θ x + (cos θ − 1) yδ
+
+ on Γ up ,
+
+Pn = 0 on ∂Ω \ (Γ down ∪ Γup ).
+
+Setup 6. Setup 6 involves a more complex geometry than the previous cases, based on a three-dimensional mounting clip from a publicly available open-source CAD model [53]. This setup is designed to assess the generalization capability of the proposed method to markedly different geometries and mixed boundary conditions, representative of nontrivial, real-world-inspired configurations. The mesh features 12729 nodes. The geometry, shown in Fig. 3c, is constrained by imposing zero vertical displacement on the bottom surface, corresponding to a roller-type (sliding) boundary condition. The two arms of the clip are actuated by a follower load of magnitude F ∈ { 0.01 , 0.02 , . . . , 0.06 }, which tends to open them, as illustrated in the figure, while a uniformly distributed forward load (i.e. in the direction efront ) of magnitude F/ 5 is simultaneously applied. In addition, the body is subjected to normal-spring boundary conditions on both the front surface, with spring constant kfront = 0 .01, and the surface of the central hole, with spring constant khole = 0 .1. These elastic supports are introduced to induce nontrivial internal stress states when the clip is pushed forward. To summarize, the boundary conditions are are follows: 
+
+d · n = 0 , (I − n ⊗ n)( Pn ) = 0 on Γ down ,
+
+Pn + kfront (n ⊗ n)d = 0 on Γ front ,
+
+Pn + khole (n ⊗ n)d = 0 on Γ hole ,
+
+Pn = −F J F−T n − F/ 5 efront on Γ back ,
+
+Pn = 0 on ∂Ω \ (Γ up ∪ Γdown ∪ Γfront ∪ Γhole ∪ Γback ).
+
+15 d
+
+# a b cSetup 4  Setup 5  Setup 6 
+
+Setup 4  Setup 5  Setup 6   
+
+> uniaxial tension or compression Setup 1 Setup 2 Setup 3
+> 0.12
+> 0.57
+> 0.00
+> 0.66
+> 3.6
+> 20
+
+Figure 3: 3D setups. (a)–(b)–(c): Graphical representation of Setups 4–5–6 (top), and corresponding sample solutions obtained with the IH model (bottom). Light blue arrows represent displacement-controlled loads, whereas light orange arrows denote applied forces per unit surface. (d): Statistical distributions of the principal stretches for the three setups considered. The three scatter plots in the first row show the relative location, in principal-stretch space, of the deformation states obtained for the three setups, for the principal stretch triplet ( λ1, λ 2, λ 3), and for the ( λ1, λ 2) and ( λ1, λ 3) pairs, respectively. The second row shows the corresponding principal-stretch distributions for each setup, for the ( λ1, λ 2) and ( λ1, λ 3) pairs, displayed via kernel density estimation. For clarity of visualization, the principal stretches are plotted without enforcing an ordering, i.e. treating the stretches symmetrically. Black lines correspond to the canonical uniaxial tension or compression deformations. 16 3 Results 
+
+To investigate the capabilities of the proposed methods, we consider several synthetic test cases, starting from two-dimensional domains deformed under plane strain conditions, then moving to three-dimensional domains. To generate training and testing data, we employ the finite element method, and we compute numerically the equilibrium configuration resulting from known hyperelastic models. Specifically, we consider three ground truth material models, namely the Ishihara (IH) [27], the Mooney-Rivlin (MR) [41, 47], and the Fung (FU) [17] hyperelastic constitutive laws. To take into account the measurement error that unavoidably affects any source of experimental data, we add an artificial independent Gaussian noise with prescribed standard deviation σnoise , that we will refer to as the noise level. To quantify the discrepancy between model predictions and ground-truth data, we consider the root mean square error normalized by the displacement variance square root (vRMSE): by construction, a na¨ ıve predictor that outputs the mean value at each point attains vRMSE = 1, whereas a perfect predictor with zero error yields vRMSE = 0 (see Section A for precise definitions). 
+
+# 3.1 Plane strain deformations with full displacement field observation 
+
+We first consider the case of two-dimensional domains with deformations taking place under plane strain conditions. Here we assume that the displacement field is measured over the whole domain (full displacement field observation). We take as benchmark cases the mechanical setups proposed in [12], and later considered in subsequent works [13, 14, 52]. Specifically, the models are trained based on the displacement field recorded from a square plate with a circular hole, subjected to a asymmetrical displacement-controlled biaxial tension with varying loading, hereafter referred to as Setup 1 (Fig. 2a). The discovered models are then tested on a different geometry, namely a square plate with two ellipsoidal holes, and subjected to displacement-controlled uniaxial tension in the vertical direction, while horizontal sides are stress-free (Setup 2, see Fig. 2b). First, we consider the IH model with a noise magnitude σnoise = 10 −3, representative of modern DIC setups [52]. For the proposed method, we tune the hyperparameters using a simple grid search, selecting the configuration with the lowest training loss (more details in the Section 2.6). Notably, the presence of strong structural priors and the consequent robustness to overfitting allows us to rely on this straightforward selection criterion, eliminating the need for cross-validation, which is typically required to control overfitting. For the selected architecture, we train 5 models by varying the random seed used to initialize the trainable parameters, and we select the model with lowest training loss. We benchmark our method with the only available method in the literature allowing to discover a material model from these data (unsupervised model discovery), namely the VFM. In particular, we rely on the EUCLID approach [52], based on the VFM. To provide a further reference, we also consider a traditional identification approach in which the functional form of the hyperelastic law is fixed a priori – here chosen as Neo-Hookean – and only its material parameters are calibrated on the training data. To provide a fair comparison, we consider the same training data and the same optimization algorithm as for Neural-DFEM. In Fig. 4a, we report boxplots of the error, obtained on the test specimen, as a function of the applied load. The results show that the model discovery methods (i.e. VFM and Neural-DFEM) achieve much better results than the calibrated Neo-Hookean model. Notably, Neural-DFEM consistently provides the most accurate results across all load values, with an average vRMSE of 2 .16 × 10 −3 against 1 .36 × 10 −2 of the VFM method (6.3 times smaller). 
+
+# 3.2 Noise robustness 
+
+Next, we investigate the noise robustness of Neural-DFEM, by considering noise levels up to two orders of magnitude larger than the one considered in the previous section (i.e. up to σnoise = 10 −1), for the three ground truth material models, namely IH, MR and FU. In Fig. 5a we show the load-reaction curves of Setup 2, obtained for different noise levels and com-pared with the ground truth. Except for the highest noise level in the FU case, the curves is practically indistinguishable, from a visual standpoint, from that obtained with the ground-truth model. 17 a    
+
+> Isihara Mooney -Rivlin Fung
+> 1.4·10 -306.5·10 -504.3·10 -30
+
+# bFigure 4: Results of 2D test cases (training on Setup 1, testing on Setup 2). (a) Boxplots of the displacement errors, normalized by the standard deviation of the ground-truth displacement, shown as a function of the applied load. The training data are generated using Setup 1 with σnoise = 10 −3, while the test data correspond to Setup 2. Three approaches are compared: classical parameter fitting of a Neo-Hookean material; EUCLID [52], based on the VFM; and the proposed Neural-DFEM. (b) Spatial distribution of the local displacement error for Setup 2 obtained with Neural-DFEM at the largest applied load (i.e., δ = 1) and with σnoise = 10 −3, for the three material models considered. Note the different color scales used in the three cases. Besides Setup 2, we challenge the discovered models to predict the displacement under conditions that are even farther to the training ones. To this aim, we introduce Setup 3 (see Fig. 2c), consisting of 10 different perforated plates with a random number of holes – ranging from 1 to 3 – with random sizes and positions, as in [58]. On the sides of the plates, normal spring boundary conditions are applied, and two opposite sides are loaded with normal traction with varying magnitude, taking both positive (traction) and negative (compression) sign. In Fig. 5b, we report boxplots of the errors in both the displacement and the reaction force, as a function of the noise level, for the three materials considered. The figure shows the errors obtained not only for the training setup (Setup 1), but also for the two testing mechanical setups (Setups 2 and 3). The results indicate that the constitutive laws discovered from Setup 1 generalize well to Setup 2 and Setup 3. Indeed, for sufficiently low noise levels, a normalized error on the order of 10 −2 or smaller is achieved in all cases. As expected, the lower the noise in the training data, the more accurate is the model learned by Neural-DFEM. Furthermore, Neural-DFEM exhibits excellent robustness to noise even at relatively high noise levels, which here reach up to two orders of magnitude higher than those considered reasonable in previous works and in typical applications [52]. Among the three materials, the highest accuracy is achieved for the MR model, suggesting that certain material behaviors may be more easily represented within the considered hypothesis space. Moreover, gen-eralization from Setup 1 to Setup 3 appears more challenging than to Setup 2, as indicated by the larger errors. This aspect is further investigated in the next section. 
+
+# 3.3 Distributional shift in strain-state space and generalization 
+
+To shed light on the generalization capabilities of models discovered from a setup to a different setup, it is instructive to consider the strain state of the deformation involved. Indeed, because the domain shape differs from a setup to another, to provide a portrait of the strain state that is comparable from one setup to 18 a Isihara  Mooney -Rivlin  Fung 
+
+# bFigure 5: Results of 2D test cases (training on Setup 1, testing on Setup 2 and Setup 3). (a) Predicted reaction force on the top boundary of Setup 2 as a function of the applied load and of the training data noise σnoise , compared with the reference reaction force obtained using the ground-truth material model. The insets show a magnified view of the force peak. (b) Boxplots of displacement and reaction force errors, both normalized by the standard deviation of the corresponding ground-truth, shown as a function of the training noise level σnoise ∈ { 10 −1, 10 −2, 10 −3, 10 −4, 0}. Results are reported for the three material models considered (indicated at the top of each column) and for both the full-field and boundary observation cases (see the legend in the bottom-right panel). The three rows correspond to Setups 1–2–3, respectively. Hence, while the first row shows the performance in the training setting (fitting regime), the second and third rows assess the ability of Neural-DFEM to generalize to mechanical setups different from those observed at training time. For Setup 3, no reaction force is defined, since no Dirichlet boundary conditions are prescribed. 19 another, we propose to consider the statistical distribution of the principal stretches ( λ1, λ2). As shown in Fig. 2d, the training data coming from Setup 1 mainly lay in a region comprised within the state of perfect biaxial tension ( λ1 = λ2 > 1) and uniaxial tension ( λ1 > 1, λ2 = 1). This is not surprising, considering that the macroscopic tension state is an asymmetrical biaxial tension of the specimen. In Setup 2, the macroscopic uniaxial tension translates at the microscopic level in a strain distribution that lies in proximity of the perfect uniaxial tension state. As for Setup 3, the presence of compression load, not present in the first two setups, introduces a significant presence of microscopic strain states close to the perfect uniaxial compression state ( λ1 = 1, λ2 < 1). Moreover, while Setup 1 and 2 employ a displacement-controlled load, Setup 3 is based on a tension-controlled load, with the loaded sides free to compress in the tangent direction due to the volumetric changes penalization of the materials, thus favouring the introduction microscopic strain states close to the simple shear state ( λ1 · λ2 = 1). As a consequence, the overall strain distribution in the specimens of the training setup (Setup 1) is closer to Setup 2 than to Setup 3. This explains the higher accuracy achieved in predicting the displacement for Setup 2 compared to Setup 3. To quantify the distributional shift between training and test deformation regimes, we compute the Sinkhorn divergence between the empirical distributions of the principal stretches. The Sinkhorn divergence provides a measure of distributional mismatch based on entropy-regularized optimal transport [9]. The results confirm that larger divergence values consistently correspond to test cases exhibiting stronger generalization gaps, thus supporting the interpretation that generalization performance is influenced by the coverage of the strain-state manifold during training. In particular, comparing Setup 2 with Setup 3, the divergence increases from 0.17 to 0.32 for IH, from 0.24 to 0.39 for MR, and from 0.15 to 0.27 for the FU model. 
+
+# 3.4 Plane strain deformations with boundary observation 
+
+We consider now the case when the training specimen displacement field is measured only at the boundary of the domain. Remarkably, this case cannot be handled with VFM-based approaches, as the full displacement field should be available to evaluate the loss function. Instead, the proposed method allows – with a minor modification of the loss function with respect to the case with full-field observation – to handle this case too. We run again the same tests above, for the same noise levels. The results, reported in Fig. 5b, show that a virtually identical accuracy as for the full-field observation condition is obtained in all the cases considered, both for Setup 2 and Setup 3. More precisely, the vRMSE ratio between full-field and boundary observation cases is 1 .03 ± 0.67 (mean ± standard deviation). This remarkable result provides evidence that the full-field deformation is not necessary to learn the material response, but a partial observation, such as the boundary displacement, can be sufficient. 
+
+# 3.5 3D specimens with boundary observations 
+
+Finally, we consider three-dimensional specimens, which allow for a full range of deformation modes that were partially constrained in the previous plane-strain configurations. For training, we consider Setup 4 (see Fig. 3a), a three-dimensional generalization of Setup 1, consisting of a cube containing a spherical inclusion and subjected to asymmetric triaxial displacement-controlled loads. The learned models are then tested on two additional setups designed to challenge them under markedly different deformation regimes. In Setup 5 (see Fig. 3b), the specimen is a cube with an oblique through-hole, subjected to a displacement-controlled load combining tension and torsion, while the remaining faces are stress-free. In Setup 6 (see Fig. 3c), we consider a more complex, real-world-inspired geometry based on a three-dimensional mounting clip from an open-source CAD model [53]. The clip is constrained by a roller-type condition on the bottom surface and subjected to combined follower and distributed forward loads. Additionally, normal-spring boundary conditions are imposed on selected surfaces to generate nontrivial internal stress states during loading. This setup is designed to assess generalization to markedly different geometries and mixed boundary conditions. In Fig. 6a, we report the load-reaction curves obtained for Setup 5 at different noise levels with a boundary-only observation, while Figure 6b shows the boxplots of the displacement reconstruction error as a function of the noise level, both for the training setup and for the two testing setups. The results show 20 that Neural-DFEM successfully learns constitutive laws that generalize well across different configurations, also in the case of three-dimensional specimens. Remarkably, and consistently with the two-dimensional plane-strain experiments, the accuracy obtained with boundary-only observations is nearly identical to that achieved with full-field data (vRMSE ratio 1 .03 ±0.41). These results show that boundary-only measurements can be sufficient for effective material discovery even in fully three-dimensional settings. Taking σnoise = 10 −3
+
+and the boundary-only observation case as a reference, the vRMSE in Setups 5 and 6 is equal to 6 .79 × 10 −3
+
+and 1 .54 × 10 −2 for IH, 9 .25 × 10 −4 and 4 .21 × 10 −4 for MR, and 1 .22 × 10 −3 and 1 .41 × 10 −3 for FU, respectively. In all cases, the method exhibits strong robustness to noise. For the IH material model, reducing the noise level in the training set leads to a saturation of the error, indicating that Neural-DFEM is unable to extract additional information from cleaner data. This behavior is explained by the fact that the IH model is not polyconvex (as can be readily shown using [22, Lemma 2.4]) and therefore cannot be approximated with arbitrary accuracy by a HNN, which is polyconvex by construction. This behavior was not apparent in the plane-strain case, where the kinematics are restricted to a subset of deformations and the three invariants are no longer independent, effectively masking the non-polyconvex character of the IH model. Consequently, Neural-DFEM identifies the closest polyconvex, thermodynamically admissible surrogate consistent with the observed boundary responses. Importantly, despite this representational restriction, the identified surrogate still reproduces the macroscopic mechanical response with good accuracy (error of the order of 10 −2). In contrast, for the MR and FU material models, which are polyconvex, the approximation error decreases consistently as the noise level is reduced, confirming that Neural-DFEM can recover the underlying constitutive behavior with increasing accuracy when it is not far from the considered hypothesis class. Similarly to the two-dimensional case, the slightly larger error observed in Setup 6 compared to Setup 5 is explained by the fact that, as shown in Fig. 3d, the microscopic strain states in Setup 5 are closer to those of the training setup (Setup 4) than those in Setup 6. Quantitatively, the Sinkhorn divergence from the empirical distribution of the principal stretches observed during training increases from Setup 5 to Setup 6: from 0.08 to 0.16 for IH, from 0.10 to 0.16 for MR, and from 0.08 to 0.15 for the FU model. This supports that generalization can be analyzed through the lens of the distributional shift in the strain distribution from the training to the test set. 
+
+# 4 Discussion 
+
+This work shows, for the first time in the literature, that material model discovery can be successfully performed in a fully unsupervised setting even under partial observation regimes, relying solely on measured specimen boundary deformations and without paired strain–stress data. These results provide evidence that experimentally viable material discovery under partial observability may be feasible, although validation on real experimental data remains an important direction for future work. The proposed computational framework is built upon a differentiable finite element solver embedded within the learning process. This design choice allows us to establishes a direct link between candidate constitutive laws and the resulting deformation fields, enabling a high flexibility in the formulation of the loss function, including, for instance, mean squared error terms evaluated on arbitrary subsets of the domain. Such flexibility is not attainable neither with supervised material discovery methods, which require paired strain-stress data, nor with standard VFM, which requires full-field displacement data to be known a priori .Moreover, because VFM relies on differentiating measured displacement fields – an operation that amplifies measurement noise – it typically necessitates a dedicated denoising stage. In contrast, the proposed approach avoids this requirement entirely, resulting in a learning process that is inherently robust to noisy observations. Neural-DFEM relies on a novel neural-network-based constitutive ansatz, represented by the class of HNNs, which provides mathematically provable guarantees of physical and thermodynamic consistency, as well as mathematical well-posedness of the associated equilibrium problem. These properties are essential for Neural-DFEM, as convergence of the embedded solver must be ensured throughout the entire training tra-jectory, rather than only at the final learned solution. Finally, the proposed framework incorporates a set of carefully designed numerical strategies – including quasi-Newton optimization schemes, continuation meth-21 a Isihara  Mooney -Rivlin  Fung 
+
+# bFigure 6: Results of 3D test cases (training on Setup 4, testing on Setup 5 and Setup 6). (a) Predicted reaction force on the top boundary of Setup 5 as a function of the applied load and of the training data noise σnoise , compared with the reference reaction force obtained using the ground-truth material model. The insets show a magnified view of the force peak. (b) Boxplots of displacement and reaction force errors, both normalized by the standard deviation of the corresponding ground-truth, shown as a function of the training noise level σnoise ∈ { 10 −1, 10 −2, 10 −3, 10 −4, 0}, and of the observation type (full-fields vs boundary only, see legend). Results are reported for the three material models considered (indicated at the top of each column) and for both the full-field and boundary observation cases (see the legend in the bottom-right panel). The three rows correspond to Setups 4–5–6, respectively. Hence, while the first row shows the performance in the training setting (fitting regime), the second and third rows assess the ability of Neural-DFEM to generalize to mechanical setups different from those observed at training time. For Setup 6, no reaction force is defined, since no Dirichlet boundary conditions are prescribed. 22 ods, a backtracking line search that enforces convergence of the nonlinear solver, and a purposely designed initialization strategy for the neural network parameters – which together ensure robustness and computa-tional efficiency of the overall approach. As a result, training can be carried with limited computational resources. More precisely, all experiments were executed on a single CPU core of an AMD processor (up to 3.63 GHz), and training took on average 7.38 h (IH), 1.84 h (MR) and 1.38 h (FU) in the two-dimensional case; 20.16 h (IH), 8.26 h (MR) and 24.79 h (FU) in the three-dimensional case. An alternative paradigm that could, in principle, enable material discovery from partial observations is that of Physics-Informed Neural Networks (PINNs). However, our initial investigations (not reported here) revealed severe convergence difficulties for PINNs in this class of problems, even for comparatively simple configurations. While further studies may be warranted, these observations suggest that approaches based on differentiable solvers are more suitable for constitutive model discovery in mechanics. In parallel with advances in material discovery, a growing body of work has focused on operator learn-ing methods aimed at predicting the deformation of elastic bodies directly from data. Examples include approaches based on autoencoders [31] graph neural networks [51], PointNet architectures [30], Universal Solution Manifold Networks [58], and DeepONets [23]. While these methods can deliver extremely rapid predictions at inference time, they typically require large training datasets and often struggle to generalize to geometries and boundary conditions that differ substantially from those encountered during training. As such, these methods primarily function as surrogate models, acting as accelerators of numerical solvers trained on extensive sets of precomputed simulations that provide the dominant learning bias. By contrast, Neural-DFEM relies on strong inductive biases rooted in fundamental physical principles: the momentum balance equation is enforced explicitly at every training epoch through the finite element solver, and the constitutive model is constrained by requirements such as frame indifference, polyconvexity, and coercivity, thanks to the newly introduced architecture. These ingredients reduce the dependence on purely data-driven learning bias and promote generalization across geometries and boundary conditions well beyond those used during training, provided that they induce strain states sufficiently represented during training, as illustrated by the numerical experiments. From this perspective, the learning task shifts from approximating the global, macroscopic response of a body to identifying its local, microscopic material behavior. Consequently, within this framework, concepts such as generalization and extrapolation are most natu-rally interpreted at the level of local strain states. In particular, generalization across experimental setups can be understood as a form of distributional shift in the space of strain invariants. Our results indicate that predictive accuracy deteriorates as the strain-state distribution encountered at test time departs from that sampled during training, consistently with the broader machine-learning literature on out-of-distribution generalization. This behavior is not specific to the present method but reflects a fundamental limitation of data-driven material discovery: when local deformation states are insufficiently represented in the training data, the inferred surrogate is constrained only by the inductive biases embedded in the hypothesis class, but too strong structural priors typically sacrifice expressivity. Therefore, analyzing the statistical distribution of local strain states and quantifying their distributional mismatch relative to the training regime provides a physically grounded lens through which generalization performance can be interpreted. Such analysis may serve as an a posteriori diagnostic of prediction reliability and suggests a potential guideline for designing informative training configurations. A limitation of the present work is its restriction to isotropic materials. Nevertheless, the proposed HNN framework can be extended in a straightforward manner to anisotropic settings by incorporating anisotropic invariants into the model input. If the directions of anisotropy are known a priori , the extension is immediate; if they are unknown, they may be introduced as additional variables to be inferred within the optimization process. Ultimately, this study highlights the importance of incorporating fundamental physical principles as inductive biases directly into computational frameworks for scientific discovery. Constraining the hypothe-sis space to thermodynamically consistent constitutive laws and enforcing equilibrium throughout training structurally regularizes the inverse problem, enabling reliable and robust generalization even under partial observability. 23 Acknowledgements 
+
+The present research has received support from the project FIS, MUR, Italy 2025-2028, Project code: FIS-2023-02228, CUP: D53C24005440001, “SYNERGIZE: Synergizing Numerical Methods and Machine Learning for a new generation of computational models”. The author acknowledges MUR, grant Dipartimento di Eccellenza 2023-2027. The author is member of GNCS, “Gruppo Nazionale per il Calcolo Scientifico” (National Group for Scientific Computing) of INdAM (Istituto Nazionale di Alta Matematica). 
+
+# Appendix A Error metrics 
+
+Given a collection of N points, and associated displacement vectors di, for i = 1 , . . . , N , we define the average displacement as 
+
+d = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+di,
+
+and the displacement variance as Var( d) = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+∥di − d∥2.
+
+Now, let us consider a collection of reference displacements ˆdi, for i = 1 , . . . , N . We define the root mean square error (RMSE) between {di}i and {ˆdi}i as: RMSE = 
+
+vuut 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+∥di − ˆdi∥2.
+
+Consequently, we define the variance-normalized root mean square error (vRMSE) as: vRMSE = RMSE 
+
+q
+
+Var( ˆd)
+
+.
+
+This definition is such that a na¨ ıve predictor, predicting the average displacement in each point, would score vRMSE = 1, while a perfect predictor achieving zero error satisfies vRMSE = 0. 
+
+# B Canonical deformations 
+
+In Fig. 2c, in addition to the distribution of principal stretches corresponding to the considered mechanical setups, the principal stretches associated with the following canonical deformations are shown for reference: 
+
+• Uniaxial tension: F =
+
+1 + δ 00 1
+
+
+
+;
+
+• Uniaxial compression: F =
+
+ 11+ δ 00 1
+
+
+
+;
+
+• Biaxial tension: F =
+
+1 + δ 00 1 + δ
+
+
+
+;24 • Biaxial compression: F =
+
+ 11+ δ 00 11+ δ
+
+
+
+;
+
+• Simple shear: F =
+
+1 δ
+
+0 1
+
+
+
+.In all cases, the range δ ∈ [0 , 0.5] is represented in the figure. 
+
+# C HNN initialization 
+
+In this section, we analytically prove that, under the proposed parametrization and initialization strategy, the derivative of a HNN with respect to the invariants I1 and I2 at the reference configuration remains bounded as the number of neurons increases. For brevity, we present the derivation for I1 only, as the same arguments apply to I2.
+
+Case with skip connections. Consider first the architecture including skip connections. From (5), we obtain 
+
+
+
+∂z1
+
+∂I 1
+
+= w11 ⊙ ρ′(w11(I1 − 3) + w21(I2 − 3) + wJ 
+
+> 1
+
+(J − 1) + b1),∂zi
+
+∂I 1
+
+=
+
+
+
+w1 
+
+> i
+
++ Wi−1
+
+∂zi−1
+
+∂I 1
+
+
+
+⊙ ρ′(w1 
+
+> i
+
+(I1 − 3) + w2 
+
+> i
+
+(I2 − 3) + wJi (J − 1) + Wi−1zi−1 + bi), for i = 2 , . . . , L ∂z out 
+
+∂I 1
+
+= W wout · ∂zL
+
+∂I 1
+
+,
+
+where ⊙ denotes tha Hadamard (i.e., componentwise) product. In the reference configuration ( F = I), all pre-activations vanish, hence ρ′(·) = ρ′(0). Therefore, 
+
+
+
+∂z1
+
+∂I 1
+
+= w11ρ′(0) ,∂zi
+
+∂I 1
+
+=
+
+
+
+w1 
+
+> i
+
++ Wi−1
+
+∂zi−1
+
+∂I 1
+
+
+
+ρ′(0) , for i = 2 , . . . , L ∂z out 
+
+∂I 1
+
+= W wout · ∂zL
+
+∂I 1
+
+.
+
+Taking expectations with respect to the random initialization (leveraging independence and identical dis-tributions of the trainable parameters), and denoting E [τ (σinit Z)] = w, where Z ∼ N (0 , 1) is a standard Gaussian random variable, we obtain the recurrence: 
+
+
+
+E
+
+ ∂z1
+
+∂I 1
+
+
+
+= wρ ′(0) 1n1 ,
+
+E
+
+ ∂zi
+
+∂I 1
+
+
+
+= wρ ′(0) 
+
+
+
+1ni + 1
+
+ni−1
+
+1ni×ni−1 E
+
+ ∂zi−1
+
+∂I 1
+
+ 
+
+, for i = 2 , . . . , L 
+
+E
+
+ ∂z out 
+
+∂I 1
+
+
+
+= W w 1
+
+nL
+
+1nL · E
+
+ ∂zL
+
+∂I 1
+
+
+
+.
+
+25 By defining the constant γ = wρ ′(0), we have by induction: 
+
+E
+
+ ∂z2
+
+∂I 1
+
+
+
+= γ (1 + γ) 1n2
+
+E
+
+ ∂z3
+
+∂I 1
+
+
+
+= γ (1 + γ (1 + γ)) 1n3
+
+...
+
+E
+
+ ∂zi
+
+∂I 1
+
+
+
+=
+
+> i
+
+X
+
+> k=1
+
+(γ)k 1ni = γ
+
+1 − γ
+
+ 1 − γi 1ni
+
+where the last equation holds for any i = 1 , . . . , L . In the above calculation, we have exploited the identity  
+
+> 1
+> ni−1
+
+1ni×ni−1 1ni−1 = 1ni . Finally, the derivative of the output neuron with respect to I1 reads: 
+
+E
+
+ ∂z out 
+
+∂I 1
+
+
+
+= W w γ
+
+1 − γ
+
+ 1 − γL (8) This means that the expected value of the derivative with respect to I1 is independent of the number of neurons of each layer. It instead depends on the number of layers. However, Eq. (8) provides a guideline to avoid blows up of this quantity when deep architecture are employed: indeed, σinit and ρ must be chosen so that the constant γ = wρ ′(0) is smaller than one. In this case, indeed, we have a finite limit: 
+
+E
+
+ ∂z out 
+
+∂I 1
+
+
+
+−−−−−→ 
+
+> L→+∞
+
+W w γ
+
+1 − γ
+
+Case without skip connections. Let us now consider the case when skip connections are not employed, that is when the terms w1 
+
+> i
+
+, w2 
+
+> i
+
+and wJi for i ≥ 2 are removed. By proceeding similarly to above, we have: 
+
+
+
+E
+
+ ∂z1
+
+∂I 1
+
+
+
+= γ1n1 ,
+
+E
+
+ ∂zi
+
+∂I 1
+
+
+
+= γ 1
+
+ni−1
+
+1ni×ni−1 E
+
+ ∂zi−1
+
+∂I 1
+
+
+
+, for i = 2 , . . . , L 
+
+E
+
+ ∂z out 
+
+∂I 1
+
+
+
+= W w 1
+
+nL
+
+1nL · E
+
+ ∂zL
+
+∂I 1
+
+
+
+.
+
+This entails that 
+
+E
+
+ ∂zi
+
+∂I 1
+
+
+
+= γi1ni ,
+
+and, in conclusion 
+
+E
+
+ ∂z out 
+
+∂I 1
+
+
+
+= W w γ L.
+
+In this case, the expected derivative is again independent of the number of neurons per layer. For deep architectures, choosing γ close to one prevents both vanishing and blow-up of the gradient. 
+
+# D Hyperparameters values 
+
+The values of hyperparameters selected as described in Sec. 2.6 are reported in Tab. 1. 26 2D specimens 3D specimens Hyperparameter IH MR FU IH MR FU Number of layers L 2 1 1 1 1 2Number of neurons per layer ni 5 5 5 5 5 5Skip connections ✗ - - - - ✗
+
+Isochoric input invariants ✗ ✗ ✗ ✗ ✗ ✓
+
+Initialization std. σinit 0.6 0.1 0.1 0.1 0.1 0.6 Scaling constant W 1 10 10 10 10 1Table 1: Selected hyperparameters for the HNN models. 
+
+# E Basic lemmas on convex functions 
+
+In this section we collect standard definitions and results an convex functions, employed in this work. 
+
+Definition 3. A function f : Rn → R is convex if for all x, y ∈ Rn and λ ∈ [0 , 1]: 
+
+f (λx + (1 − λ)y) ≤ λf (x) + (1 − λ)f (y). (9) 
+
+Proposition 1. Consider a convex function f : Rn → R and a convex, non-decreasing function g : R → R.Then the composition g ◦ f : Rn → R is also convex. Proof. Let x, y ∈ Rn and λ ∈ [0 , 1]. Since g is non-decreasing, we can apply it to both sides of (9): 
+
+g(f (λx + (1 − λ)y)) ≤ g(λf (x) + (1 − λ)f (y)) 
+
+≤ λg (f (x)) + (1 − λ)g(f (y)) ,
+
+where in the last line we have used the convexity of g. This proves that g ◦ f is convex. 
+
+Lemma 1. Let f : R → R be a C1 function which is convex, non-decreasing, and non-constant. Then there exist constants a > 0 and b ∈ R such that 
+
+f (x) ≥ ax − b, ∀x ∈ R.
+
+Proof. Since f is C1, non-decreasing but non-constant, then there exists x0 ∈ R such that f ′(x0) > 0. Moreover, as f is convex, we have 
+
+f (x) ≥ f (x0) + f ′(x0)( x − x0), ∀ x ∈ R,
+
+which proves the thesis. 
+
+# References 
+
+[1] Brandon Amos, Lei Xu, and J Zico Kolter. Input convex neural networks. In International Conference on Machine Learning , pages 146–155. PMLR, 2017. [2] Stuart S Antman. Nonlinear Problems of Elasticity . Springer, 2005. [3] John M Ball. Convexity conditions and existence theorems in nonlinear elasticity. Archive for Rational Mechanics and Analysis , 63(4):337–403, 1976. [4] Steven L Brunton, Joshua L Proctor, and J Nathan Kutz. Discovering governing equations from data by sparse identification of nonlinear dynamical systems. Proceedings of the National Academy of Sciences ,113(15):3932–3937, 2016. 27 [5] Kathleen Champion, Bethany Lusch, J Nathan Kutz, and Steven L Brunton. Data-driven discovery of coordinates and governing equations. Proceedings of the National Academy of Sciences , 116(45):22445– 22451, 2019. [6] Sergio Conti, Stefan M¨ uller, and Michael Ortiz. Data-driven problems in elasticity. Archive for Rational Mechanics and Analysis , 229(1):79–123, 2018. [7] Miles Cranmer, Sam Greydanus, Stephan Hoyer, Peter Battaglia, David Spergel, and Shirley Ho. La-grangian neural networks. arXiv preprint arXiv:2003.04630 , 2020. [8] Miles Cranmer, Alvaro Sanchez Gonzalez, Peter Battaglia, Rui Xu, Kyle Cranmer, David Spergel, and Shirley Ho. Discovering symbolic models from deep learning with inductive biases. 34th Conference on Neural Information Processing Systems (NeurIPS) , 33:17429–17442, 2020. [9] Marco Cuturi. Sinkhorn distances: Lightspeed computation of optimal transport. Advances in Neural Information Processing Systems , 26, 2013. [10] Patrick E Farrell, David A Ham, Simon W Funke, and Marie E Rognes. Automated derivation of the adjoint of high-level transient finite element programs. SIAM Journal on Scientific Computing ,35(4):C369–C393, 2013. [11] Mauricio Fern´ andez, Mostafa Jamshidian, Thomas B¨ ohlke, Kristian Kersting, and Oliver Weeger. Anisotropic hyperelastic constitutive models for finite deformations combining material theory and data-driven approaches with application to cubic lattice metamaterials. Computational Mechanics ,67(2):653–677, 2021. [12] Moritz Flaschel, Siddhant Kumar, and Laura De Lorenzis. Unsupervised discovery of interpretable hyperelastic constitutive laws. Computer Methods in Applied Mechanics and Engineering , 381:113852, 2021. [13] Moritz Flaschel, Siddhant Kumar, and Laura De Lorenzis. Discovering plasticity models without stress data. npj Computational Materials , 8(1):91, 2022. [14] Moritz Flaschel, Siddhant Kumar, and Laura De Lorenzis. Automated discovery of generalized standard material models with euclid. Computer Methods in Applied Mechanics and Engineering , 405:115867, 2023. [15] Moritz Flaschel, Huitian Yu, Nina Reiter, Jan Hinrichsen, Silvia Budday, Paul Steinmann, Siddhant Kumar, and Laura De Lorenzis. Automated discovery of interpretable hyperelastic material models for human brain tissue with euclid. Journal of the Mechanics and Physics of Solids , 180:105404, 2023. [16] Ari L Frankel, Reese E Jones, and Laura P Swiler. Tensor basis gaussian process models of hyperelastic materials. Journal of Machine Learning for Modeling and Computing , 1(1), 2020. [17] Yuan-cheng Fung. Biomechanics: Mechanical Properties of Living Tissues . Springer Science & Business Media, 2013. [18] Emmanuel E. Gdoutos. Digital Image Correlation (DIC) , pages 251–259. Springer International Pub-lishing, Cham, 2022. [19] Xavier Glorot and Yoshua Bengio. Understanding the difficulty of training deep feedforward neural networks. In Proceedings of the thirteenth international conference on artificial intelligence and statistics ,pages 249–256. JMLR Workshop and Conference Proceedings, 2010. [20] Michel Grediac, Fabrice Pierron, St´ ephane Avril, and Evelyne Toussaint. The virtual fields method for extracting constitutive parameters from full-field measurements: a review. Strain , 42(4):233–253, 2006. 28 [21] Morton E Gurtin, Eliot Fried, and Lallit Anand. The Mechanics and Thermodynamics of Continua .Cambridge University Press, 2010. [22] Stefan Hartmann and Patrizio Neff. Polyconvexity of generalized polynomial-type hyperelastic strain energy functions for near-incompressibility. International Journal of Solids and Structures , 40(11):2767– 2791, 2003. [23] Junyan He, Seid Koric, Shashank Kushwaha, Jaewan Park, Diab Abueidda, and Iwona Jasiuk. Novel deeponet architecture to predict stresses in elastoplastic structures with variable complex geometries and loads. Computer Methods in Applied Mechanics and Engineering , 415:116277, 2023. [24] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Delving deep into rectifiers: Surpassing human-level performance on imagenet classification. In Proceedings of the IEEE International Confer-ence on Computer Vision , pages 1026–1034, 2015. [25] Hagen Holthusen, Kevin Linka, Ellen Kuhl, and Tim Brepols. A generalized dual potential for inelastic constitutive artificial neural networks: A jax implementation at finite strains. Journal of the Mechanics and Physics of Solids , page 106337, 2025. [26] Daniel Z Huang, Kailai Xu, Charbel Farhat, and Eric Darve. Learning constitutive relations from indirect observations using deep neural networks. Journal of Computational Physics , 416:109491, 2020. [27] Akira Ishihara. Statistical theory of rubber-like elasticity (the network structure). Journal of the Physical Society of Japan , 3(5-6):289–291, 1948. [28] Raban Iten, Tony Metger, Henrik Wilming, L´ ıdia Del Rio, and Renato Renner. Discovering physical concepts with neural networks. Physical Review Letters , 124(1):010508, 2020. [29] George Em Karniadakis, Ioannis G Kevrekidis, Lu Lu, Paris Perdikaris, Sifan Wang, and Liu Yang. Physics-informed machine learning. Nature Reviews Physics , 3(6):422–440, 2021. [30] Ali Kashefi, Leonidas J Guibas, and Tapan Mukerji. Physics-informed pointnet: On how many irregular geometries can it solve an inverse problem simultaneously? application to linear elasticity. Journal of Machine Learning for Modeling and Computing , 4(4), 2023. [31] Jannick Kehls, Ellen Kuhl, Tim Brepols, Kevin Linka, and Hagen Holthusen. Autoencoder-based non-intrusive model order reduction in continuum mechanics. arXiv preprint arXiv:2509.02237 , 2025. [32] Trenton Kirchdoerfer and Michael Ortiz. Data-driven computational mechanics. Computer Methods in Applied Mechanics and Engineering , 304:81–101, 2016. [33] Trenton Kirchdoerfer and Michael Ortiz. Data-driven computing in dynamics. International Journal for Numerical Methods in Engineering , 113(11):1697–1710, 2018. [34] Dominik K Klein, Mauricio Fern´ andez, Robert J Martin, Patrizio Neff, and Oliver Weeger. Polyconvex anisotropic hyperelasticity with neural networks. Journal of the Mechanics and Physics of Solids ,159:104703, 2022. [35] Jan Kristensen. On the non-locality of quasiconvexity. Annales de l’Institut Henri Poincar´ e C, Analyse non lin´ eaire , 16(1):1–13, 1999. [36] Yann LeCun, L´ eon Bottou, Genevieve B Orr, and Klaus-Robert M¨ uller. Efficient backprop. In Neural networks: Tricks of the trade , pages 9–50. Springer, 2002. [37] Guanghui Liang and K Chandrashekhara. Neural network based constitutive model for elastomeric foams. Engineering Structures , 30(7):2002–2011, 2008. 29 [38] Kevin Linka, Markus Hillg¨ artner, Kian P Abdolazizi, Roland C Aydin, Mikhail Itskov, and Christian J Cyron. Constitutive artificial neural networks: A fast and general approach to predictive data-driven constitutive modeling by deep learning. Journal of Computational Physics , 429:110010, 2021. [39] Kevin Linka and Ellen Kuhl. A new family of constitutive artificial neural networks towards automated model discovery. Computer Methods in Applied Mechanics and Engineering , 403:115731, 2023. [40] Mohammadamin Mahmoudabadbozchelou, Krutarth M Kamani, Simon A Rogers, and Safa Jamali. Unbiased construction of constitutive relations for soft materials from experiments via rheology-informed neural networks. Proceedings of the National Academy of Sciences , 121(2):e2313658121, 2024. [41] Melvin Mooney. A theory of large elastic deformation. Journal of Applied Physics , 11(9):582–592, 1940. [42] Stefan M¨ uller, Tang Qi, and BS Yan. On a new class of elastic deformations not allowing for cavitation. 
+
+Annales de l’Institut Henri Poincar´ e C, Analyse non lin´ eaire , 11(2):217–243, 1994. [43] Jorge Nocedal and Stephen J Wright. Numerical Optimization . Springer, 2006. [44] Gregory B Olson. Designing a new material world. Science , 288(5468):993–998, 2000. [45] Maziar Raissi, Paris Perdikaris, and George Em Karniadakis. Physics-informed neural networks: Adeep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. Journal of Computational Physics , 378:686–707, 2019. [46] Maziar Raissi, Alireza Yazdani, and George Em Karniadakis. Hidden fluid mechanics: Learning velocity and pressure fields from flow visualizations. Science , 367(6481):1026–1030, 2020. [47] RSl Rivlin. Large elastic deformations of isotropic materials. i. fundamental concepts. Philosoph-ical Transactions of the Royal Society of London. Series A, Mathematical and Physical Sciences ,240(822):459–490, 1948. [48] Yuelin Shen, K Chandrashekhara, WF Breig, and LR Oliver. Neural network based constitutive model for rubber material. Rubber Chemistry and Technology , 77(2):257–277, 2004. [49] Laurent Stainier, Adrien Leygue, and Michael Ortiz. Model-free data-driven methods in mechanics: material data identification and solvers. Computational Mechanics , 64(2):381–393, 2019. [50] Vahidullah Tac, Francisco Sahli Costabal, and Adrian B Tepole. Data-driven tissue mechanics with polyconvex neural ordinary differential equations. Computer Methods in Applied Mechanics and Engi-neering , 398:115248, 2022. [51] Mehdi Taghizadeh, Mohammad Amin Nabian, and Negin Alemazkoor. Multifidelity graph neural net-works for efficient and accurate mesh-based partial differential equations surrogate modeling. Computer-Aided Civil and Infrastructure Engineering , 40(7):841–858, 2025. [52] Prakash Thakolkaran, Akshay Joshi, Yiwen Zheng, Moritz Flaschel, Laura De Lorenzis, and Siddhant Kumar. Nn-euclid: Deep-learning hyperelasticity without stress data. Journal of the Mechanics and Physics of Solids , 169:105076, 2022. [53] Thingiverse. https://www.thingiverse.com/thing:379894, 2019. Accessed: 2026-02-23. Licensed under Creative Commons. [54] Clifford Truesdell and Walter Noll. The Non-Linear Field Theories of Mechanics . Springer, 2004. [55] Silviu-Marian Udrescu and Max Tegmark. Ai feynman: A physics-inspired method for symbolic regres-sion. Science Advances , 6(16):eaay2631, 2020. 30 [56] Nikolaos N Vlassis, Ran Ma, and WaiChing Sun. Geometric deep learning for computational me-chanics part I: Anisotropic hyperelasticity. Computer Methods in Applied Mechanics and Engineering ,371:113299, 2020. [57] Sidney Yip and Michael P Short. Multiscale materials modelling at the mesoscale. Nature Materials ,12(9):774–777, 2013. [58] Linying Zhang, Stefano Pagani, Jun Zhang, and Francesco Regazzoni. Shape-informed surrogate models based on signed distance function domain encoding. Journal of Computational Physics , page 114178, 2025. [59] Quan Zhou, Peizhe Tang, Shenxiu Liu, Jinbo Pan, Qimin Yan, and Shou-Cheng Zhang. Learning atoms for materials discovery. Proceedings of the National Academy of Sciences , 115(28):E6411–E6417, 2018. 31

@@ -1,0 +1,731 @@
+Title: Constitutive parameterized deep energy method for solid mechanics problems with random material parameters
+
+URL Source: https://arxiv.org/pdf/2603.26030v1
+
+Published Time: Mon, 30 Mar 2026 00:28:50 GMT
+
+Number of Pages: 23
+
+Markdown Content:
+# Constitutive parameterized deep energy method for solid mechanics problems with random material parameters 
+
+Zhangyong Liang a, Huanhuan Gao b,c, 
+
+> aNational Center for Applied Mathematics, Tianjin University, Tianjin, 300072, China
+> bKey Laboratory of CNC Equipment Reliability, Ministry of Education \National Key Laboratory of Automotive Chassis Integration and Bionics, School of Mechanical and Aerospace Engineering, Jilin University, Renmin Street 5988, 130025, Changchun, China
+> cSchool of Mechanical and Aerospace Engineering, Jilin University, Renmin Street 5988, 130025, Changchun, China
+
+Abstract 
+
+In practical structural design and solid mechanics simulations, material properties inherently exhibit random variations within bounded intervals. However, evaluating mechanical responses under continuous material uncertainty remains a persistent challenge. Traditional numerical approaches, such as the Finite Element Method (FEM), incur prohibitive computational costs as they require repeated mesh discretization and equation solving for every parametric realization. Similarly, data-driven surrogate models depend heavily on massive, high-fidelity datasets, while standard physics-informed frameworks (e.g., the Deep Energy Method) strictly demand complete retraining from scratch whenever material parameters change. To bridge this critical gap, we propose the Constitutive Parameterized Deep Energy Method (CPDEM). In this purely physics-driven framework, the strain energy density functional is reformulated by encoding a latent representation of stochastic constitutive parameters. By embedding material parameters directly into the neural network alongside spatial coordinates, CPDEM transforms conventional spatial collocation points into parameter-aware material points. Trained in an unsupervised manner via expected energy minimization over the parameter domain, the pre-trained model continuously learns the solution manifold. Consequently, it enables zero-shot, real-time inference of displacement fields for unknown material parameters without requiring any dataset generation or model retraining. The proposed method is rigorously validated across diverse benchmarks, including linear elasticity, finite-strain hyperelasticity, and complex highly nonlinear contact mechanics. To the best of our knowledge, CPDEM represents the first purely physics-driven deep learning paradigm capable of simultaneously and effi ciently handling continuous multi-parameter variations in solid mechanics. 
+
+Keywords: Random material field, Parameterized deep energy method, Hyperelasticity problems, Contact mechanics 
+
+1. Introduction 
+
+With scientific and technological advancements, computational mechanics has not only made profound progress in theory and methodology but has also been widely applied in engineering practice. Classical numerical simulation algorithms, such as the Finite Element Method (FEM) [1, 2], Finite Volume Method (FVM) [3], Meshless Methods [3], and the Lattice Boltzmann Method (LBM) [4], have achieved remarkable application results, fostering the thriving development of fields like civil construction, bridges and tunnels, vehicle and transportation engineering, as well as aerospace engineering. However, complex mechanical problems—such as material and geometric nonlinearities [5, 6], contact and friction [7], fluid-structure interactions [8, 9], and multiphysics coupling [10] have given rise to a new wave of paradigmatic and methodological innovations in computational mechanics. Over the past decade, with the introduction of Artificial Intelligence (AI), notably deep learning [11, 12], com-putational mechanics has sought to integrate physical information, experimental and simulation data, establishing an entirely new paradigm. This approach has been tested and validated in areas such as nonlinear mechanical behavior [13, 14], dynamics [15], fluid mechanics [16], and heat transfer [17], demonstrating immense value in both theoretical    
+
+> Email address: gao_huanhuan@jlu.edu.cn (Huanhuan Gao)
+> Preprint submitted to Computer Methods in Applied Mechanics and Engineering March 30, 2026
+> arXiv:2603.26030v1 [cs.LG] 27 Mar 2026
+
+development and practical applications. The AI technologies have introduced into computational mechanics, forming three main research paradigms: Pure Data-Driven [18], Pure Physics-Driven [19, 20], and Hybrid Data-Physics-Driven [21]. These paradigms represent distinct research approaches ranging from "black-box" to "white-box" per-spectives. The Pure Data-Driven paradigm completely discards traditional physical modeling formulas, directly leveraging large amounts of experimental or high-fidelity simulation data for learning. A classic representation of this paradigm was proposed by Kirchdoerfer and Ortiz [22], who introduced a method that constructs a computational framework directly from experimental material data without requiring an explicit material model. This type of method typically employs Deep Neural Networks (DNNs) [23] or Convolutional Neural Networks (CNNs) [24] to establish input-output mappings, treating computational mechanics as a high-dimensional function approximation problem. Once trained, inference is extremely fast, suitable for real-time simulation and large-scale design space exploration. With su ffi cient material data, neural network inference can be an order of magnitude faster than traditional finite element solvers. However, this method is highly sensitive to data quality and has limited extrapolation capabilities. The pure physics-driven paradigm continues to adhere strictly to the di ff erential equations of classical mechanics (such as the Navier-Stokes equations and the Cauchy equations), while leveraging AI to address the pain points in traditional numerical methods. This approach utilizes AI to accelerate or enhance specific numerical steps, such as mesh generation, pre-conditioners, or solvers, all while preserving the integrity of the physical equations and ensuring that the results maintain rigorous physical interpret ability. The quintessential examples of this approach are Physics-Informed Neural Networks (PINNs) [14, 19, 20] and the Deep Energy Method (DEM) [13, 25, 26]. This class of methods embeds the di ff erential equations directly into the loss function of a neural network, enabling the solution of complex partial di ff erential equations without any labeled data. The deep Ritz method [27] constructs a functional with automatic di ff erentiation approximating derivatives of the trial function, and numerical integration, which sets the minimization objective as a functional. The deep Galerkin method (DGM) [28] and physics-informed neural networks (PINNs) [29] are very similar, both of which use the residual error of the strong form as part of the loss function, deriving the residual term with automatic di ff erentiation. Besides, both of them also treat the boundary conditions as penalty terms. For solid mechanics, [30] trained PINNs for small-strain elasticity and elastoplasticity, [31] applied the method to solve coupled Biot’s equations, and [32] explored a mixed formulation for regular PINNs in small-strain elastodynamics problems. [33] utilized the residual formulation of PINNs to study linear elasticity, hyperelasticity, and plasticity. Recently, the Deep Energy Method (DEM) was introduced, which defines the loss function not based on residual equations but based on principles of energy minimization [34, 35]. Compared to classical PINN, this method has advantages because it requires only first-order di ff erentiation through the neural network. On the other hand, it relies on accurate numerical integration techniques. With this technique [35] solves two and three-dimensional finite-strain hyperelastic problems. [36] introduced an extension of DEM named mixed Deep Energy Method (mDEM) that enhances the training capability of the network by taking the stress components as additional outputs. However, this approach requires higher computational resources due to additional input and the computation of the first Piola-Kirchho ff stress tensor. [37] introduced a framework that combined the strong form and the weak form of the system, and employed the coe ffi cient of variation weighting scheme to enhance the accuracy of the model. [38] used Bayesian optimization algorithms and random search to identify optimal values for hyperparameters when using DEM. [39] proposed an extension of DEM designed for multi-physics simulation, named adversarial Deep Energy Method (adversarial DEM) for solving saddle point problems with electromechanical coupling. [40] compared the PDE-based approach and the energy-based approach in the problem of predicting the mechanical responses of elastic plates. The third paradigm is the Hybrid Data-Physics-Driven Paradigm [41, 42]. This is currently one of the most cutting-edge and promising research directions. It attempts to combine the e ffi ciency of pure data-driven approaches with the rigor of pure physics-driven methods, using physical laws to constrain the learning process of AI models or using AI models to correct the shortcomings of physical models. This significantly reduces the reliance on massive datasets and enhances the model’s generalization capability. However, balancing physical prior knowledge with the degrees of freedom in data-driven methods is a core challenge. The biggest di ffi culty lies in fully leveraging the flexibility of data without violating physical laws. Scholars are exploring various strategies to advance this approach, such as using physical constraints to reduce the cumbersome task of labeling massive datasets, incorporating physical knowledge to improve model stability and robustness in unknown scenarios, or employing AI for adaptive adjustments to enhance precision. 2Operator Learning is an emerging deep learning paradigm aimed at directly learning mappings from functions to functions (i.e., operators), such as mapping from initial conditions to solutions of partial di ff erential equations (PDEs). This technique is particularly crucial in computational mechanics because it breaks the dimensional constraints of tra-ditional numerical methods (like the Finite Element Method), enabling a universal solver that works across scales and geometric shapes. Neural operator learning models can give predictions over a whole parameter set of parameterized PDEs. Neural operators refer to specific neural network architectures designed for operator learning. In computational mechanics, operator learning is primarily realized through two major neural network architectures: The DeepONet [43, 44] and Fourier Neural Operator (FNO) [45–47]. Inspired by system identification principles in control theory, DeepONet encodes the input function (e.g., boundary conditions) and spatial coordinates into separate networks, then combines them via a dot product to produce the output, while FNO directly parameterizes the integral kernel in the frequency domain, achieving global convolution through Fast Fourier Transform (FFT) [48], which e ffi ciently han-dles periodic boundary conditions and uniform grid problems. Neural operator learning enables the model to learn the operator between two function spaces. According to the type of input and output of the neural networks, the existing architectures of neural operators can be divided into two categories: Inspired by the universal approximation theorem for operators [49], Deep Operator Network (DeepONet) [50] is a representative architecture. It receives the parameter field and a query point as input and then outputs the solution at the query points in the computational domain. Deep-ONet consists of a branch net for encoding the discrete function space and a trunk net for encoding the coordinate information of the query points. The output is the inner product of the outputs from both nets. Following work based on DeepONet includes learning multiple-input operators [51], combining DeepONet with physics-informed machine learning [52], and replacing the trunk net with basis functions precomputed by proper orthogonal decomposition [53]. Recently, a general neural operator transformer (GNOT) [54] is proposed, with a heterogeneous normalized attention layer design, and GNOT is also designed to handle multiple input functions and irregular meshes. Fourier neural operators (FNO) [55] parameterize the integral kernel in the Fourier space and utilize the idea of shortcut connection, producing a powerful Fourier layer. The implicit Fourier neural operator (IFNO) [56] implicitly utilizes the Fourier layer, allowing the data flow to pass through the Fourier layer recurrently and resulting in better training stability. The factorized Fourier neural operator (F-FNO) [57] employs Fourier factorization and a range of other techniques for network design and training strategy to enhance model performance. Operator learning o ff ers inference speeds significantly faster than traditional solvers, making it suitable for real-time simulations. A single operator learning model can handle di ff erent structural scales, from microscopic materials to macroscopic structures, and is not con-strained by mesh discretization, enabling rapid predictions across various geometries. However, challenges remain in generalizing to non-uniform meshes or irregular geometries, and it typically requires a large amount of high-quality simulation data for training. In practical structure analysis, material parameters are critical elements in structural simulation, directly related to the intrinsic properties of the material. Once these parameters are determined, various numerical methods can be applied to obtain the numerical solutions. However, random variations in material parameters will lead to noticeable and statistically significant deviations in performance metrics. These deviations can occur across di ff erent batches or even within the same batch of materials. The calibration of material parameters is typically performed using interval calibration. This method involves limited sampling of the produced material to obtain the minimum and maximum values of its properties. These values form an interval, from which the average value and the range of variation are determined. However, mechanical simulations require specific material parameters to simulate deformation and perform finite element method and physics-driven methods for structural designs. Changes in material parameters necessitate re-discretizing the finite element model, which introduces a significant computational burden. This brings up the study of material parameters and sensitivity analysis in mechanical problems. These analyses help optimize designs by identifying the best configurations and evaluating system robustness against variations in input parameters. In this paper, we propose the constitutive parameterized deep energy method (CPDEM), a novel paradigm for solving mechanical problems in linear elasticity and hyperelasticity. This method addresses random material parame-ters within the empirical range using purely physics-informed approaches, without requiring any numerical data. The main contributions of this work are summarized as follows: 
+
+• We explicitly encode the constitutive parameters required for constructing the potential energy in DEM as latent features. We introduce the concept of random material parameterization, which enables the extension for solv-ing mechanical problems from single-parameter to multi-parameter scenarios, marking a novel advancement. 3• Compared to FEM, our method can directly infer mechanical problems with unknown material parameters within the given range. It eliminates the need for repetitive mesh discretization, sti ff ness matrix assembly, and deformation solving. 
+
+• Our approach does not require retraining for variations in random material parameter perturbations as compared to existing collocation point methods. 
+
+• Moreover, our method does not rely on the large amount of high-fidelity simulation data required in neural operator learning. In particular, acquiring these data for random material parameters entails substantial compu-tational cost. The structure of this paper is as follows. In Section 2, we introduce the mathematical formulation of random material problems and discuss the finite-strain mechanics problems commonly addressed by DEM. In Section 3, we present the proposed Constitutive Parameterized Deep Energy Method (CPDEM) and its formulation. This section also includes the pre-training and fast fine-tuning strategies for CPDEM. In Section 4, we validate our framework through academic solid mechanics case studies in linear elasticity and hyperelasticity, and evaluate the performance of CPDEM. Finally, conclusions and prospects are provided in Section 5. 
+
+2. Problem formulation 
+
+2.1. Random material problems 
+
+In classical deterministic computational solid mechanics, the constitutive properties of a physical body Ω ⊂ Rd
+
+(d = 1, 2, 3) in its initial configuration are typically treated as fixed, deterministic constants, such as a nominal Young’s modulus E0 and Poisson’s ratio ν0. However, in realistic engineering practice and manufacturing processes, material properties intrinsically exhibit statistical dispersion and uncertainty due to microstructural variations, environmental eff ects, or measurement tolerances. To systematically formulate this variability within a continuum mechanics frame-work, we must transition from deterministic boundary value problems (BVPs) to parameterized stochastic BVPs. Let us define a complete probability space ( Θ, F , P), where ω ∈ Θ represents a specific random event correspond-ing to a material realization. We introduce a multi-dimensional random vector η(ω) characterizing the stochastic constitutive parameters. For the isotropic elastic and hyperelastic materials considered in this study, we define: 
+
+η(ω) = [E(ω), ν (ω)] ⊤ ∈ P , (1) where P ⊂ R2 represents the continuous, bounded parameter space. To maintain physical and thermodynamic consis-tency, these parameters are strictly bounded within empirical intervals: 
+
+E ∈ [Emin , Emax ], ν ∈ [νmin , ν max ], (2) The occurrence of these parameters is governed by a joint probability density function (PDF), denoted as p(η). Based on empirical mechanical testing, p(η) is typically modeled as a continuous uniform distribution U when no prior statistical knowledge is available, or a truncated Gaussian distribution Ntrunc (μ, Σ) reflecting the central tendency of batch manufacturing: 
+
+η ∼ N trunc (μ, Σ) η∈P , (3) where μ and Σ are the mean vector and covariance matrix of the material properties, respectively. Due to the introduction of the random vector η, the mechanical response of the system—namely the displacement field u, the strain tensor ϵ (or deformation gradient F in finite kinematics), and the stress tensor σ (or the first Piola-Kirchho ff stress P)—is no longer a purely spatial mapping. Instead, it becomes a parameterized stochastic field defined over the product space Ω × P :
+
+u(X, η) : Ω × P → Rd, (4) Consequently, the governing equilibrium equations and the strain energy density function Ψ become explicitly parameterized by η, denoted as Ψ(F(X, η); η). The fundamental objective of the stochastic boundary value problem 4shifts from finding a single deterministic displacement mapping to finding a generalized, continuous solution manifold 
+
+u(X, η) that satisfies the stationary principle of potential energy for almost every material realization η ∈ P .In the context of an energy-based formulation, this objective requires minimizing the expected value of the total potential energy Π over the entire parameter space: 
+
+J(u) = Eη∼p(η)[Π(u(X, η); η)] =
+
+Z
+
+> P
+
+Π(u(X, η); η)p(η)dη. (5) Solving this high-dimensional, parameterized functional directly bypasses the intractable computational burden of repeated Monte Carlo simulations (e.g., re-meshing and repeated matrix inversions) required by standard numerical solvers. This mathematical transformation forms the core theoretical foundation for the CPDEM framework proposed in this study. 
+
+2.2. Random finite deformation Linear elasticity problem. In this section, the neural network is developed to solve the governing PDEs for linear-elastic problems using our proposed CPDEM approach with random material parameters. The solution of the dis-placement field is obtained by minimizing the elastic strain energy of the system. The problem statement is written as: Minimize: E(u) =
+
+Z
+
+> Ω
+
+Ψ(ϵ)dΩ −
+
+Z
+
+> Ω
+
+fb · udΩ −
+
+Z
+
+> ∂ΩN
+
+tN · udΓ,
+
+where: Ψ(ϵ) = 12 ϵ : C : ϵ,
+
+subject to: u = ¯u on ∂ΩD,
+
+and σ · n = tN on ∂ΩN
+
+(6) where Ψ(ϵ) denotes the stored elastic strain energy density of the system expressed in terms of the strain tensor ϵ(u), 
+
+C represents the constitutive elastic matrix, ¯ u is the prescribed displacement on the Dirichlet boundary ∂ΩD and tN is the prescribed boundary forces on the Neumann boundary ∂ΩN .
+
+Hyperelasticity. In the context of the elastostatics at finite deformation, the equilibrium equation, along with the boundary conditions, for an initial configuration, is given as: Equilibrium: ∇ · P + fb = 0, (7) Dirichlet boundary : u = ¯u on ∂ΩD, (8) Neumann boundary : P · n = ¯t on ∂ΩN , (9) in which ¯ u and ¯ t are prescribed values on the Dirichlet boundary and the Neumann boundary, respectively. Therein, the boundaries have to fulfill ∂ΩD ∪ ∂ΩN = ∂Ω, ∂ΩD ∩ ∂ΩN = ∅. The outward normal unit vector is denoted by n.The 1 st Piola-Kirchho ff stress tensor P is related to its power conjugate F, so-called deformation gradient tensor, by a constitutive equation P = ∂Ψ/∂ F. The deformation gradient is defined as follows 
+
+F = Grad φ(X), (10) where φ denotes the mapping of material points in the initial configuration to the current configuration. It is defined as: 
+
+φ(X) : = x = X + u. (11) We can calculate the first Piola-Kirchho ff stress P as: 
+
+P = ∂Ψ
+
+∂F (12) where Ψ is the strain energy density function. 5The hyperelastic deformation governing equation can be given as: 
+
+∇X · P + fb = 0 (13) In this work, we firstly utilize the Neo-Hookean hyperelastic constitutive model which can be expressed as: 
+
+Ψ(I1, J) = 12 λ[ln( J)] 2 − μ ln( J) + 12 μ(I1 − 3) (14) where the first invariant I1 is defined as I1 = tr( C) in which C denotes the right Cauchy-Green tensor and defined as: 
+
+C = FT F (15) In Eq. 14, the second invariant is defined as J = |F|. The parameters of λ and μ can be obtained by: 
+
+λ = Eν
+
+(1 + ν)(1 − 2ν)
+
+μ = E
+
+2(1 + ν)(16) where E and ν are Young’s modulus and Poisson’s ratio of the hyperelastic material, respectively. Another hyperelastic deformation constitutive law used in this paper is Mooney-Rivlin, which can be written as: 
+
+Ψ(I1, I2) = C1(I1 − 3) + C2(I2 − 3) (17) where I1 and I2 are the first and second order invariants, respectively. C1 and C2 are material constants. The potential energy of the deformation system with the Neo-Hookean model can be formulated as: 
+
+L(φ(X)) = 12
+
+Z
+
+> Ω
+
+Ψ(F)dΩ −
+
+Z
+
+> Ω
+
+fb · φ(X)dΩ −
+
+Z
+
+> ∂ΩN
+
+¯t · φ(X)dΓ (18) The condition of steady-state hyperelastic deformation is formulated as 
+
+δL(φ(X)) = 0 (19) where δL(φ(X)) is the variation of the potential energy functional with respect to φ(X). When Eq. 19 holds, the potential energy of the whole system has reached the lowest stationary point, as a result, the final displacement solution can be obtained by minimizing the overall potential energy of the structural system, which writes: min : L(φ(X)) s.t. : φ(X) = ¯φ(X) on ∂ΩD
+
+(20) 
+
+3. Methodology 
+
+3.1. The deep energy method (DEM) 
+
+The DEM [34] employs neural networks to approximate the displacement solution by reformulating the governing equations into a variational framework. Instead of enforcing the strong form, DEM searches for the displacement field that makes the total potential energy stationary, following the fundamental variational principle in solid mechanics. This allows the learning task to be posed as an unconstrained optimization problem, where the potential energy serves as the loss function. Moreover, the method applies to both linear elasticity and nonlinear hyperelasticity, provided a suitable energy density is defined. The DEM formulation can thus be written as: 
+
+L( ˆ u; θc)
+
+| {z }
+
+> Potential energy
+
+= U( ˆ u; θc)
+
+| {z }
+
+> Internal energy
+
+− W( ˆ u; θc)
+
+| {z }
+
+> External energy
+
+, (21) 6coord param ˆ( , ; ) ([ ; ])  ggu X g h h Potential 
+
+> energy
+> Internal
+> energy
+> External
+> energy
+
+ˆ( , ; )gu X  
+
+> B.C
+
+X
+
+> argmin
+> yes
+> no
+
+{ , , }c p g 
+
+ ˆ ( , )
+
+> g
+
+u X Figure 1: CPDEM architecture. The two encoders gθp and gθc are added to generate better representations for the material parameters and the collocation points coordinate. We also customize the manifold network gθg .
+
+where the hat symbols denote the solution yielded by the deep neural network. Here, θc represents the vector of trainable parameters of the neural network, which is optimized over a set of randomly sampled collocation points. 
+
+U( ˆ u; θc) indicates the internal energy, namely the deformation energy. W( ˆ u; θc) denotes the external energy resulted by the external loads. In a static structural deformation problem, the overall potential energy will reach its lowest point, thus: 
+
+θ∗ 
+
+> c
+
+= argmin 
+
+> θc
+
+L( ˆ u; θc). (22) However, a fundamental limitation of DEM lies in its treatment of material parameters. In DEM, the material prop-erties (e.g., Young’s modulus E, Poisson’s ratio ν) are embedded as constants within the internal energy functional; consequently, the trained neural network is inherently specific to a single, fixed set of material parameters. When material randomness or parametric uncertainty is of interest, e.g., when considering spatially varying material fields or a distribution of material properties across di ff erent realizations, DEM cannot handle this within a single trained model. Instead, one must retrain a new network from scratch for each distinct material configuration, which is com-putationally expensive and impractical for problems involving continuous or high-dimensional material parameter spaces. 
+
+3.2. Constitutive parameterized deep energy method (CPDEM) 
+
+In this section, we introduce our proposed constitutive parameterized deep energy method (CPDEM). In essence, our goal is to design a neural network architecture that e ff ectively emulates the solution function u(X, η) of the governing equations in mechanics under random material parameters. 
+
+3.2.1. Parameterized architecture 
+
+In CPDEM, the material parameters are characterized by η = [E, ν ]⊤, where E denotes Young’s modulus and ν
+
+denotes Poisson’s ratio. We propose a modularized design of the neural network uΘ(X, η), which consists of three 7parts, i.e., two separate encoders gθp and gθc , and a manifold network gθg such that 
+
+uΘ(X, η) = gθg ([ gθc (X); gθp (η)]) , (23) where Θ = {θc, θ p, θ g} denotes the set of model parameters. The two encoders, gθc and gθp , take the collocation points coordinate X and the material parameters η as inputs and extract hidden representations such that hcoord = gθc (X) and 
+
+hparam = gθp (η). The two extracted hidden representations are then concatenated and fed into the manifold network to infer the solution of the PDE with the parameters η at the coordinate X, i.e., ˆ u(X, η) = gθg ([ hcoord ; hparam ]). The important design choice here is that we explicitly encode the material parameters into a hidden representa-tion as opposed to treating the governing equation parameters merely as a coordinate in the parameter domain, e.g., (X, η) is combined. With the abuse of notation, CPDEM can be expressed as a function of X, parameterized by the hidden representation: uΘ(X, η) = u{θc,θ g}(X, hparam ). This expression emphasizes our intention to explicitly utilize the material parameters to characterize the behavior of the solution neural network. A key aspect of our design is the explicit treatment of material parameters as intrinsic physical inputs rather than merely appending them to the spatial coordinates in the parameter space (e.g., ( X, η)). Instead of viewing the PDE parameters as passive coordinates, we embed the material parameters into a dedicated hidden representation that captures their influence on the mechanical response. With a slight abuse of notation, the CPDEM formulation can therefore be written as a function of the spatial variable X, parameterized by the material-aware latent representation: 
+
+uΘ(X, η) = u{θc,θ g}(X, hparam ). (24) where hparam encodes the constitutive characteristics of the material. This formulation highlights our intent to explic-itly leverage material parameters to guide the solution network and to accurately represent the underlying mechanics. The theoretical foundation of CPDEM rests on two complementary viewpoints. On one hand, neural networks are universal function approximators capable of representing arbitrary continuous mappings. On the other hand, deep networks using the rectified linear unit (ReLU) activation, defined as ReLU( x) = max(0 , x), have been shown to exactly reproduce piecewise-linear finite element spaces on arbitrary meshes. This equivalence establishes a direct bridge between the classical FE method and modern deep learning architectures. In what follows, we first review this FE-to-DNN correspondence in a one-dimensional setting, and then extend it to the parameterized setting of CPDEM, where material properties serve as additional inputs to the network. Consider a discretization of the interval [0 , l] on the real line: x0 < x1 < · · · < xn, where x0 = 0 and xn = l. A parameterized FEM approximation of a function u(x; η) on [0 , l], valid for arbitrary material configurations η ∈ P ,takes the form: 
+
+uh(x, η) =
+
+> n
+
+X
+
+> i=0
+
+ui(η) Ni(x), (25) where Ni(x) is the spatial hat function as before, and ui(η) denotes the nodal displacement at node i for a given material configuration η. Crucially, ui is no longer a scalar unknown but a function of η, reflecting how the deformation field changes continuously across the material parameter space. For intermediate nodes, Ni(x) can be expressed in terms of ReLU functions as follows: 
+
+Ni(x) = ReLU( x − xi−1) − ReLU( x − xi)
+
+hi
+
+− ReLU( x − xi) − ReLU( x − xi+1)
+
+hi+1
+
+, (26) where hi = xi − xi−1. Expanding and collecting terms gives: 
+
+Ni(x) = 1
+
+hi
+
+ReLU( x − xi−1) − 1
+
+hi
+
++ 1
+
+hi+1
+
+!
+
+ReLU( x − xi) + 1
+
+hi+1
+
+ReLU( x − xi+1). (27) Substituting Eq. 27 into Eq. 25 and collecting coe ffi cients of ReLU( x − xi) yields: 
+
+uh(x, η) = u0(η) +
+
+> n−1
+
+X
+
+> i=0
+
+∆i+1(η)
+
+hi+1
+
+− ∆i(η)
+
+hi
+
+!
+
+ReLU( x − xi), (28) 8where ∆i(η) = ui(η) − ui−1(η) for i = 1, 2, . . . , n, and ∆0(η) = 0. Defining the η-dependent weight function 
+
+wi(η) = ∆i+1(η)
+
+hi+1
+
+− ∆i(η)
+
+hi
+
+, (29) we arrive at the compact parameterized ReLU representation: 
+
+uh(x, η) = u0(η) +
+
+> n−1
+
+X
+
+> i=0
+
+wi(η) ReLU( x − xi). (30) Equation (30) is the parameterized counterpart of the standard FE-to-shallow-network correspondence. It shows that 
+
+uh is a shallow ANN with input ( x, η), spatial biases at node positions xi, and weights wi(η) that vary continuously with the material configuration. For any fixed η = η0, Eq. (30) reduces exactly to the standard FE ReLU form; for varying η, the same architecture continuously interpolates the FE solution across the entire material parameter space 
+
+P.Now we connect this directly to the CPDEM architecture. Recall that CPDEM maps η to a material-aware latent representation hparam = gθp (η), and the full network takes the form uΘ(X, η) = u{θc,θ g}(X, hparam ). Comparing with Eq. (30), we identify the weight function wi(η) with a scalar function of hparam , i.e., wi(η) = ϕi(gθp (η)), where each 
+
+ϕi(·) is realized as a sub-network within gθg . In this view, the spatial encoder gθc produces the hidden representation corresponding to the shared spatial bases {ReLU( x− xi)}, while the material encoder gθp drives the coe ffi cient functions 
+
+{ϕi}. The full CPDEM network on a one-dimensional domain therefore reads: 
+
+uh
+
+> Θ
+
+(x, η) = u0(η) +
+
+> n−1
+
+X
+
+> i=0
+
+ϕi(gθp (η)) ReLU( x − xi) = gθg
+
+ [gθc (x); gθp (η)] . (31) This reformulation reveals that CPDEM can be interpreted as a parameterized FE solver: a fixed spatial discretization is shared across all material configurations, and a neural material encoder adaptively adjusts the FE coe ffi cients wi(η)through the latent representation hparam , without requiring a separate mesh or solve for each η.This parameterization o ff ers a decisive advantage over the conventional FE approach. In standard FE, each distinct material configuration ( C, ν, . . . ) defines a separate boundary value problem requiring its own mesh, assembly, and solve. Even in an adaptive or multi-mesh framework, the mesh topology must adapt individually for each η, making parametric studies computationally intensive. CPDEM addresses this by encoding η into the shared latent representa-tion hparam , so that a single set of spatial bases {ReLU( x − xi)} is shared across all material configurations while the coe ffi cients {wi} are adapted through the material encoder. The neural network thus learns a continuous mapping from the material parameter space P to the space of displacement solutions, e ff ectively interpolating across configurations that were never explicitly trained, a capability fundamentally inaccessible to standard FE. With the parameterized approximation established, the one-dimensional linear elastic energy functional becomes: 
+
+E(Θ; P) = Eη∼p(η)
+
+"Z l
+
+> 0
+
+Ψ ϵ(uh
+
+> Θ
+
+(x, η))  dx 
+
+#
+
+, (32) where the expectation means the energy is simultaneously minimized over all material configurations in the parameter space. The training objective then reads: 
+
+Θ∗ = arg min  
+
+> Θ
+
+E(Θ; P). (33) which replaces the per-configuration FE solve of standard elasticity with a single optimization over the full parametric space, leveraging the shared spatial basis and material-aware weights of the CPDEM network. 
+
+3.2.2. Encoder for material parameters 
+
+The equation encoder gθp reads the material parameters and generates a hidden representation of the equation, denoted as hparam . We employ the following fully-connected (FC) structure for the encoder: 
+
+hparam = σ(FC Dp · · · (σ(FC 2(σ(FC 1(η)))))) , (34) 9where σ denotes a non-linear activation, such as ReLU and tanh, and FC i denotes the i-th FC layer of the encoder. 
+
+Dp means the number of FC layers. We note that hparam has a size larger than that of η in our design to encode the space and time-dependent character-istics of the parameterized PDE. Since highly non-linear PDEs show di ff erent characteristics at di ff erent spatial and temporal coordinates, we intentionally employ relatively high-dimensional encoding. In the CPDEM, η may contain various material parameters, depending on the specific mechanical problem under consideration. For instance, η can simultaneously include quantities such as the Young’s modulus E and the Poisson’s ratio ν, among other constitutive parameters. 
+
+3.2.3. Encoder for collocation points 
+
+The collocation points encoder gθc generates a hidden representation hcoord for X. This encoder has the following FC layer structure: 
+
+hcoord = σ(FC Dc · · · (σ(FC 2(σ(FC 1(X)))))) , (35) where FC i and Dc denote the i-th FC layer of this encoder and the number of FC layers, respectively. 
+
+3.2.4. Manifold subspace network 
+
+The manifold network gθg reads the two hidden representations, hparam and hcoord , and infer the input equation’s solution at X, denoted as ˆ u(X; η). With the inferred solution ˆ u, we construct two losses, Lu and L f . The manifold network can have various forms but we use the following form: ˆu(X; η) = σ(FC Dg · · · σ(FC 1(hconcat ))) , (36) where hconcat = hcoord ⊕ hparam , and ⊕ is the concatenation of the two vectors; Dg denotes the number of FC layers. 
+
+3.3. Parameterized energy formation 
+
+Building upon the parameterized architecture, we now reformulate the energy-based loss function to incorporate material parameters as explicit network inputs. In contrast to DEM, where material properties are embedded as constants in the energy functional, CPDEM treats them as learnable inputs η, enabling the network to reason about the mechanical response across the entire material parameter space within a single model. Analogous to the DEM formulation, the parameterized energy loss in CPDEM takes the following form: 
+
+LCPDEM ( ˆ u; Θ)
+
+| {z }
+
+> Parameterized potential energy
+
+= U( ˆ u, η; Θ)
+
+| {z }
+
+> Internal energy
+
+− W( ˆ u, η; Θ)
+
+| {z }
+
+> External energy
+
+, (37) where Θ = {θc, θ p, θ g} is the full set of trainable network parameters. In CPDEM, the neural network ˆ u(X, η) explicitly accepts the spatial coordinate X and the material parameter vector η = [E, ν ]⊤ as joint inputs, such that the inferred displacement field adapts automatically to di ff erent material configurations. For linear elasticity, the internal energy functional can be expressed as 
+
+U( ˆ u, η; Θ) =
+
+Z
+
+> Ω
+
+12 σ( ˆ u, η) : ϵ( ˆ u) dΩ, (38) where the stress σ depends on both the inferred displacement field ˆ u(X, η) and the material parameters η through the constitutive relation σ = C(η) : ϵ, with C(η) being the elasticity tensor parameterized by η. Similarly, the external energy W captures the work done by body forces and prescribed tractions, and remains a functional of ˆ u.The parameterization of C by η is precisely what allows the same network to handle di ff erent material configurations without retraining. With the parameterized energy functional established, the training objective becomes: 
+
+Θ∗ = argmin 
+
+> Θ
+
+LCPDEM ( ˆ u; Θ), s.t. ˆu(X, η) = gθg ([ gθc (X); gθp (η)]) . (39) Equation (39) encapsulates the core idea of CPDEM: the neural network is trained to simultaneously satisfy the variational equilibrium condition for all material configurations η within the prescribed range, by explicitly encoding the constitutive parameters into the hidden representation hparam = gθp (η). This replaces the need for repeated, per-configuration training required by DEM. 10 Figure 2: The 1D bar example. 
+
+3.4. Pre-training over parameter space 
+
+In the context of CPDEM, pre-training strictly refers to the unsupervised optimization of the neural network over the continuous material parameter space P. Instead of training a model for a single deterministic boundary value problem, the network learns a universal solution manifold by minimizing the expected potential energy across the entire parameter distribution. By uniformly sampling material parameters η ∼ p(η) alongside spatial collocation points X during each epoch, the model develops a sophisticated internal representation of how material properties influence the physical displacement field. For optimization, the neural network is trained by using a combination of the Adam optimizer [58] for rapid initial descent and the second-order limited-memory quasi-Newton method (L-BFGS) [59] to enforce strict physical equilibrium. This global optimization endows the network with rich, physical-informed feature extractors, ensuring that it converges to a highly generalizable optimum that robustly captures the underlying mechanics for any parameter realization within the prescribed bounds. The pre-training stage of CPDEM e ff ectively replaces the exhaustive and computationally prohibitive repeated sampling required by data-driven surrogate models. 
+
+3.5. Fast fine-tuning for specific configurations 
+
+While the pre-trained CPDEM model can instantly perform zero-shot inference for any unknown material param-eters within the trained range, real-world engineering tasks (e.g., structural health monitoring or precise digital twins) often require extreme precision for a specifically observed material configuration η∗. Fast fine-tuning is introduced to achieve this without the prohibitive computational cost of full retraining. By freezing the majority of the network’s weights—particularly the spatial and material encoders gθc and gθp —and updating only a small fraction of the manifold network parameters using a few L-BFGS iterations, the model rapidly descends into a highly accurate local minimum specifically tailored for the target parameter η∗. This process dramat-ically reduces computational overhead, memory footprint, and time, transitioning the paradigm from costly repeated simulations to e ffi cient, parameter-specific adaptation. This fine-tuning essentially acts as a localized projection onto the exact solution space, maximizing the inference capability and reliability of our method in real-world deterministic scenarios. 
+
+4. Numerical examples 
+
+The proposed CPDEM framework is validated through a series of numerical experiments, encompassing linear elasticity, nonlinear hyperelasticity, and contact problems. 
+
+4.1. Linear elasticity problems 
+
+We first consider two linear elasticity problems to benchmark the CPDEM framework. 
+
+1-D elastic bar. As illustrated in Fig.2, a one-dimensional bar of length L with constant cross-sectional area A is fixed at its left end ( X = 0) and subjected to a linearly distributed body force f (X) = X along the axial direction. The Young’s modulus E is modelled as a random material parameter: CPDEM learns a single parametric displacement field ˆ u(X; E) that satisfies the equilibrium for all realisations of E drawn from the prescribed range. For each fixed E,the analytical axial displacement u(X; E) = L2 X/(2 EA ) − X3/(6 EA ) is used as the ground truth. 11 Figure 3: CPDEM results for the 1D linear elastic bar with parametric Young’s modulus E. Three representative moduli             
+
+> E∈ { 0.50 ,1.50 ,3.00 }are shown (top to bottom). For each E, the analytical displacement (left), the CPDEM prediction (middle), and the pointwise absolute error |upred −uref |(right) are plotted along the axial coordinate; the relative L2error is reported in the title of the error panel.
+
+To quantify accuracy over the whole material parameter interval—not only at the three representative moduli in Fig. 3—Fig. 4 summarises the CPDEM solution for Young’s modulus E densely sampled in [0 .5, 3.0]. Figure 4 shows that, for each displayed E, the predicted displacement tracks the analytical profile (left panel). The pointwise errors (middle panel) remain small throughout the domain, typically between 10 −5 and 10 −3 on the logarithmic scale, with occasional dips below 10 −6. The relative L2 errors in the right panel stay below about 0 .15% for most values of E and remain under 0 .45% even as E approaches 3 .0, with only a mild growth toward the sti ff 
+
+end of the interval. Together with Fig. 3, these results demonstrate that a single CPDEM network trained over the parameter space delivers uniformly accurate responses for parametric realisations of E within the prescribed range, without problem-specific retraining. 
+
+2-D elastic beam. As illustrated in Fig.5, a two-dimensional plane-strain cantilever beam of length L and height 
+
+H is fixed at its left end ( x1 = 0) and subjected to a uniform downward traction ¯ t = −5 at the right end ( x1 = L). The left end is fully constrained, imposing zero displacement and rotation. The beam is made of a homogeneous isotropic linear elastic material with Young’s modulus E and Poisson’s ratio ν. Since no analytical solution is available for this configuration, the finite element method (FEM) with a su ffi ciently refined mesh (150 × 50 nodes) is adopted as the reference solution. CPDEM approximates the parametric displacement field ˆ u(x1, x2; E, ν ) for ( E, ν ) in the prescribed 12 Figure 4: CPDEM parametric performance for the 1D linear elastic bar across the parameter range of E. Left: exact and predicted displacement u(x) for several moduli (increasing E reduces the maximum displacement). Middle: pointwise absolute error |upred − uref | on a logarithmic scale. Right: relative L2 error (%) versus E for many sampled moduli in the trained range.  
+
+> Figure 5: The 2D bending beam example.
+
+range using a single trained network. Figure 6 shows that the predicted displacement fields are visually indistinguishable from the FEM ground truth for all three material pairs: the free-end deflection decreases as E increases, as expected under fixed traction, while 
+
+ν varies across the rows together with E. The spatial distributions of absolute error remain small relative to the maximum displacement in each case (order 10 −2 versus O(1)– O(10) displacement magnitudes), indicating that one CPDEM model generalises across the tested constitutive parameters without separate solves or retraining per ( E, ν ). 
+
+4.2. Hyperelasticity problems 
+
+1-D hyperelastic bar. As illustrated in Fig.2, a one-dimensional bar of length L with constant cross-sectional area 
+
+A is fixed at its left end ( X = 0) and subjected to a linearly distributed body force f (X) = X along the axial direction. The governing equilibrium equation reads: 
+
+dN (X)
+
+dX + f (X) = 0, (40) where N(X) denotes the axial force. Substituting f (X) = X and integrating with the Neumann boundary condition 
+
+N(L) = 0 yields N(X) = (L2 − X2)/2. By Hooke’s law ϵ = N/(EA ) and ϵ = du /dX , the exact displacement solution is obtained as u(X) = (L2 X/(2 EA ) − X3/(6 EA )). After applying f (X) = X, one can get: 
+
+dN (X)
+
+dX = −X (41) It is easy to obtain: 
+
+N(X) = − 12 X2 + D (42) 13 0.0 
+
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> y
+> E = 100,  ν = 0.25
+
+Ground Truth Prediction Absolute Error                         
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> y
+> E = 223,  ν = 0.30
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+> x
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> y
+> E = 500,  ν = 0.35
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+> x
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+> x
+> 0.00
+> 1.00
+> 2.00
+> 3.00
+> 4.00
+> 5.00
+> 0.00
+> 1.00
+> 2.00
+> 3.00
+> 4.00
+> 5.00
+> 0.000
+> 0.010
+> 0.020
+> 0.030
+> 0.040
+> 0.050
+> 0.00
+> 0.50
+> 1.00
+> 1.50
+> 2.00
+> 0.00
+> 0.50
+> 1.00
+> 1.50
+> 2.00
+> 0.000
+> 0.002
+> 0.004
+> 0.006
+> 0.008
+> 0.010
+> 0.012
+> 0.00
+> 0.20
+> 0.40
+> 0.60
+> 0.80
+> 0.00
+> 0.20
+> 0.40
+> 0.60
+> 0.80
+> 0.000
+> 0.005
+> 0.010
+> 0.015
+> 0.020
+> 0.025
+
+Figure 6: CPDEM versus FEM for the 2D linear elastic cantilever under parametric (E, ν ). Three rows correspond to ( E, ν ) = (100 , 0.25), (223 , 0.30), and (500 , 0.35) (units consistent with the traction and geometry in Fig. 5). Columns: FEM reference displacement magnitude (left), CPDEM prediction (middle), and pointwise absolute error (right) on the beam domain. 
+
+where D is a constant. After utilizing the Neumann boundary condition N(L) = 0, we can get: 
+
+N(X) = − 12 X2 + 12 L2 = L2 − X2
+
+2 (43) According to the Hookean law, the strain ϵ(X) satisfies: 
+
+ϵ(X) = du (X)
+
+dX = N(X)
+
+EA (44) thus 
+
+u(X) =
+
+Z X
+
+0
+
+N(ξ)
+
+EA dξ = L2 X
+
+2EA − X3
+
+6EA (45) In the finite-strain Neo-Hookean setting based on the constitutive model in Section 2, Young’s modulus E is treated as a random material parameter and CPDEM seeks a single field ˆ u(X; E) that minimises the Neo-Hookean potential energy across the sampled range of E. Because no closed-form displacement is used alongside finite strains, a converged finite element solution is taken as the reference uref (X; E) for each tested modulus. Figure 7 shows that the CPDEM predictions closely track the reference profiles: increasing E sti ff ens the bar and reduces the end displacement, in line with physical expectations. The relative L2 errors are 4 .196 × 10 −3, 1 .448 × 10 −2,and 2 .737 × 10 −2 for E = 0.50, E = 1.50, and E = 3.00, respectively, while the pointwise absolute error remains below 10 −2 over the domain. The relative error increases somewhat as E grows, which is consistent with smaller displacement magnitudes in the sti ff er regime. These results confirm that one CPDEM model can capture the nonlinear parametric dependence on E without retraining for each material realisation. 
+
+2-D hyperelastic beam. As illustrated in Fig.5, we investigate the parametric uncertainty in a two-dimensional hyperelastic plane strain bending beam, with dimensions L = 3 m (length) and H = 1 m (height). The Young’s modulus E and Poisson’s ratio ν are prescribed as independent random fields, each following a uniform distribution over the intervals E ∈ [800 , 1200] and ν ∈ [0 .25 , 0.35], respectively. The beam is clamped on its left side and subjected to a uniform downward traction ¯ t = −5 N at the right end. 14 Figure 7: CPDEM results for the 1D Neo-Hookean hyperelastic bar with parametric Young’s modulus E. Representative moduli             
+
+> E∈ { 0.50 ,1.50 ,3.00 }are shown from top to bottom. For each E, the reference displacement (left), the CPDEM prediction (middle), and the pointwise absolute error |upred −uref |(right) are plotted along the axial coordinate; the relative L2error is reported in the title of the error panel.
+
+Since no analytical solution is available for this configuration, the FEM with a uniform mesh of 150 × 50 nodes is adopted as the reference benchmark. The proposed CPDEM employs collocation points distributed normally with 
+
+Nx = 150 and Ny = 50, as shown in Fig. 5. Optimisation follows the two-stage strategy in Section 3.4: Adam with learning rate 0 .5 in an initial phase, then L-BFGS refinement. Figure 8 records the loss evolution over 120 epochs for a representative training run. The deep neural network architecture in CPDEM comprises [2 , 20 , 20 , 2] neurons in the input, hidden, and output layers. Under the Dirichlet boundary conditions, the admissible solution takes the following form: ˆu1(x1, x2) = x1 ˆz1(x1, x2; η),
+
+ˆu2(x1, x2) = x1 ˆz2(x1, x2; η). (46) Figure 8 shows that the total loss and the energy loss follow nearly the same trajectory, indicating that the potential-energy term dominates the objective. During the Adam phase, the loss decreases rapidly at first with noticeable oscillations, then decays more gently and levels o ff near 10 0. Immediately after switching to L-BFGS, both total and energy losses exhibit a sharp drop and then remain nearly constant for the remaining epochs, which is characteristic of e ffi cient local minimisation by a quasi-Newton method once the iterate lies in a convex-like basin. The boundary 15 Figure 8: Training loss convergence for the 2D Neo-Hookean cantilever (CPDEM). Total loss (left), energy loss (centre), and boundary loss (right) versus epoch; vertical axes use logarithmic scales. The dashed vertical line marks the switch from Adam to L-BFGS (approximately epoch 96). 
+
+loss (right panel) is negligible on the plotted scale for most of the Adam stage—consistent with the essential boundary conditions being embedded in the ansatz (46)—and is only resolved at the lower end of the scale after the L-BFGS stage. Overall, the curves corroborate stable convergence of the Neo-Hookean 2D beam training and the benefit of the Adam-then-L-BFGS schedule advocated for CPDEM. Figure 9 compares the converged CPDEM displacement field with the FEM reference for three representative constitutive pairs ( E, ν ) = (800 , 0.25), (979 , 0.30), and (1200 , 0.35) drawn from the intervals stated above. Figure 9 shows that the predicted fields are visually indistinguishable from the FEM ground truth in each row. The free-end response sti ff ens as E increases from 800 to 1200 while ν increases in tandem, which is consistent with the prescribed traction and Neo-Hookean plane-strain response. The spatial distribution of absolute error remains small relative to the maximum displacement in every case (e.g. peak errors on the order of 10 −2 against O(10 −1) displacement magnitudes), with localised larger deviations near highly strained regions such as the loaded corner, as is typical for collocation-based energy minimisation. Together with Fig. 8, these results indicate that the trained CPDEM surrogate accurately propagates parametric variations in ( E, ν ) into the finite-strain displacement field without separate high-fidelity solves for each material realisation. 
+
+3-D hyperelastic beam. As illustrated in Fig.10, a 3D bending beam of length L = 3m, height H = 1m and width W = 1m is considered. The left end of the beam is fully fixed, while a uniform traction of ¯ t = −5N is applied on the right end surface. The stochastic material parameters are characterised by a set of random variables η defined over the parameter space, forming a parametric family of material realisations. Within the CPDEM framework, the training points are sampled as 90 × 30 × 30 over the spatial domain and the parameter space, as illustrated in Fig. 10; the learning rate and the total iteration number are set to 0 .5 and 50, respectively. A four-layer FNN with architecture 3 × 30 × 30 × 3 is adopted to approximate the parametric displacement field z(x1, x2, x3; η). Considering the Dirichlet boundary conditions, the modified displacement field function is formulated as ˆu1(x1, x2, x3) = x1 ˆz1(x1, x2, x3; η),
+
+ˆu2(x1, x2, x3) = x1 ˆz2(x1, x2, x3; η),
+
+ˆu3(x1, x2, x3) = x1 ˆz3(x1, x2, x3; η).
+
+(47) 
+
+4.3. Contact problems 
+
+The ironing problem is adopted here to assess the capability of CPDEM in handling parametric uncertainty in frictionless contact problems under large deformation. As illustrated in Fig. 11, the problem consists of a half cylinder (rubber) placed on a rigid slab, where the cylinder is first compressed vertically and then slid horizontally. Both the half cylinder and the slab are characterized as hyperelastic materials with stochastic material parameters. Throughout the whole modelling, the bottom boundary of the slab is fixed. For the half cylinder, during compress-ing, a vertical displacement of Vt = −0.5 m is applied by five uniform loading steps, while the horizontal displacement 16 0.0                           
+
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> y
+> E = 800,  ν = 0.25
+> Ground Truth Prediction Absolute Error
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> y
+> E = 979,  ν = 0.30
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+> x
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> y
+> E = 1200,  ν = 0.35
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+> x
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+> x
+> 0.00
+> 0.10
+> 0.20
+> 0.30
+> 0.40
+> 0.50
+> 0.60
+> 0.00
+> 0.10
+> 0.20
+> 0.30
+> 0.40
+> 0.50
+> 0.60
+> 0.000
+> 0.010
+> 0.020
+> 0.030
+> 0.040
+> 0.00
+> 0.10
+> 0.20
+> 0.30
+> 0.40
+> 0.50
+> 0.00
+> 0.10
+> 0.20
+> 0.30
+> 0.40
+> 0.50
+> 0.000
+> 0.002
+> 0.004
+> 0.006
+> 0.00
+> 0.10
+> 0.20
+> 0.30
+> 0.00
+> 0.10
+> 0.20
+> 0.30
+> 0.000
+> 0.002
+> 0.004
+> 0.006
+> 0.008
+
+Figure 9: CPDEM versus FEM for the 2D Neo-Hookean cantilever under parametric (E, ν ). Three rows correspond to ( E, ν ) = (800 , 0.25), (979 , 0.30), and (1200 , 0.35). Columns: FEM reference displacement magnitude (left), CPDEM prediction (middle), and pointwise absolute error (right) on the beam domain (geometry as in Fig. 5). 
+
+is fixed. During sliding, a horizontal displacement of Ut = 2.5 m is achieved by 25 uniform loading steps, while the compressing is remained. The Young’s modulus for the half cylinder rubber and the slab are 3 × 10 2 Pa and 1 × 10 2
+
+Pa, respectively, and their Poisson ratios are 0 .3. Four FNNs are established with 3 hidden layers and 30 neurons per layer. To impose the displacement boundary conditions, the outputs of neural networks are constructed by 
+
+Uc = (y − 3) uc(x, y) + Ut,
+
+Vc = (y − 3) vc(x, y) + Vt,
+
+Us = yu s(x, y),
+
+Vs = yv s(x, y).
+
+(48) We note that each loading step is trained by 10 training sessions and 2 × 10 3 epochs per session. The contact sample points on the half cylinder and the slab are placed with a spacing of r0 = 1 × 10 −2 m. The pre-defined potential constant ϕ0 = 1 × 10 2. The penalty factor is κ = 1 × 10 4.
+
+4.4. Scaling experiments 
+
+In computational solid mechanics, applications such as uncertainty quantification (UQ), structural reliability anal-ysis, and digital twin development necessitate evaluating the mechanical response across thousands of di ff erent mate-rial configurations. To demonstrate the scalability of the proposed CPDEM, we analyze its computational complexity and e ffi ciency compared to the FEM and the DEM. Let Nq denote the number of query material parameter realizations sampled from the continuous parameter space 
+
+P. For standard FEM, each query requires a distinct mesh assembly and global sti ff ness matrix inversion. Thus, the total computational time scales strictly linearly with the number of queries, O(Nq · TFEM ). Furthermore, if the spatial resolution (number of degrees of freedom, Ndof ) increases, TFEM grows non-linearly, typically O(Nα
+
+dof ) where 1.5 ≤ α ≤ 3, leading to a severe computational bottleneck for 3D finite-strain hyperelasticity. Similarly, the conventional DEM embeds material constants explicitly into its loss function, mandating a complete retraining from scratch for every new parameter set. Its computational cost also scales linearly as O(Nq · Ttrain ), which is prohibitive since Ttrain ≫ TFEM .17 Figure 10: The 3D torsion beam example.  
+
+> Figure 11: The rubber contact and sliding example.
+
+In stark contrast, CPDEM fundamentally alters this scaling behavior. By explicitly parameterizing the constitutive variables within the network architecture, CPDEM requires only a single, o ffl ine pre-training phase taking Tpre-train .Once the global parametric solution manifold is learned, querying a new, unseen material configuration η∗ reduces to a simple forward pass through the neural network. The total computational time for CPDEM scales as: 
+
+TCPDEM = Tpre-train + O(Nq · Tinfer ) (49) Because the network inference time Tinfer is heavily parallelized on GPUs and typically on the order of milliseconds, it is practically negligible compared to matrix inversions or network training ( Tinfer ≪ TFEM ). Consequently, as 
+
+Nq exponentially increases, the amortized computational cost per query approaches zero. Additionally, increasing the spatial collocation point density scales linearly O(Nc) during inference, entirely avoiding the O(Nα
+
+> dof
+
+) complexity penalty inherent to dense FEM meshes. This scaling property unequivocally indicates that CPDEM is exceptionally well-suited for large-scale parametric sweeps and high-throughput solid mechanics evaluations. 
+
+4.5. Generalization benefits 
+
+A fundamental vulnerability of purely data-driven surrogate models (e.g., standard operator learning) is their sus-ceptibility to catastrophic failure when confronted with out-of-distribution (OOD) data. In this section, we investigate the generalization capabilities of the purely physics-driven CPDEM when subjected to unseen, unknown material parameters. 18 Zero-shot In-Distribution (ID) Generalization: During the pre-training phase, CPDEM optimizes the expected potential energy over a continuous probability distribution p(η) within the bounded space P. Because the loss land-scape is strictly governed by physical kinematic and constitutive laws rather than data-fitting errors, the latent material encoder gθp learns a smooth, thermodynamically consistent manifold. When queried with any unknown parameter combination η∗ ∈ P that was never explicitly sampled during training, CPDEM demonstrates robust zero-shot gen-eralization. It instantly outputs a high-fidelity displacement field that strictly satisfies the equilibrium constraints, maintaining relative L2 errors comparable to the training set without requiring a single step of gradient update or retraining. 
+
+Out-of-Distribution (OOD) Extrapolation and Fast Fine-Tuning: To push the boundaries of the model, we further evaluate CPDEM on material parameters strictly outside the pre-training domain (e.g., ηOOD < P, representing materials 10% − 20% sti ff er or softer than the established training bounds). Unlike purely data-driven operators that typically yield non-physical artifacts and intersecting deformations when extrapolating, CPDEM retains structural integrity due to the strong inductive bias of continuous energy minimization. Although the direct zero-shot error naturally increases for OOD parameters due to the geometric shift in the parameter manifold, the parameterized architecture allows for seamless integration with the Fast Fine-Tuning strategy previously introduced in Section 3.5. By freezing the weights of the spatial and material encoders ( gθc and gθp ) and running a minimal number of L-BFGS optimization steps (e.g., fewer than 50 iterations) exclusively on the manifold network gθg , the energy functional rapidly descends into the exact energetic minimum for the target OOD parameter. This adaptation demands merely a fraction of a second, saving over 95% of the computational time compared to training a new DEM model from scratch. This generalization benefit proves that CPDEM is not merely a curve-fitting tool bounded by a fixed training domain, but a robust, deployable neural solver capable of adapting to continuous material fluctuations and unprecedented configurations in real-world structural designs. 
+
+5. Conclusions 
+
+In this paper, we introduced the Constitutive Parameterized Deep Energy Method (CPDEM), a novel physics-driven deep learning framework designed to solve solid mechanics problems characterized by random and uncertain material parameters. By explicitly parameterizing constitutive properties—such as Young’s modulus and Poisson’s ratio—and embedding them as highly expressive latent representations within the energy minimization functional, CPDEM successfully overcomes the limitations of the traditional Deep Energy Method (DEM), which is strictly confined to fixed material configurations. Our comprehensive numerical investigations—spanning 1D to 3D linear elasticity, Neo-Hookean and Mooney-Rivlin finite-strain hyperelasticity, and large-deformation frictionless contact problems—demonstrate that CPDEM can accurately and instantaneously infer physical displacement fields across a continuous material parameter space. Compared to conventional approaches, CPDEM o ff ers three distinct advantages: (1) it is purely physics-driven, elim-inating the prohibitive computational cost of generating large-scale numerical datasets required by neural operators; (2) it entirely circumvents the need for repeated mesh discretization and matrix re-assembly under parameter vari-ations inherent in FEM; and (3) it avoids the computationally expensive retraining process required by traditional physics-informed neural networks. 
+
+Prospects: Looking forward, the success of the CPDEM architecture opens several promising avenues for future research. While the current framework assumes homogeneous random material parameters, an immediate extension would be to model spatially varying stochastic material fields (e.g., functionally graded materials or multi-phase heterogeneous composites) by coupling CPDEM with Karhunen-Loève (KL) expansions. Furthermore, extending the parameterized energy functional to account for path-dependent inelastic behaviors, such as elastoplasticity or damage mechanics, remains a critical challenge. Ultimately, integrating CPDEM with fast fine-tuning strategies presents a highly e ffi cient paradigm for real-time uncertainty quantification and digital twin technologies in modern engineering. 
+
+Acknowledgment 
+
+The authors gratefully acknowledge the financial support from the National Natural Science Foundation of China (12202157). We also express our sincere thanks to the Exploration Foundation of the Key Laboratory of CNC Equip-19 ment Reliability, Ministry of Education and the National Key Laboratory of Automotive Chassis Integration and Bionics, School of Mechanical and Aerospace Engineering, Jilin University. 
+
+References 
+
+[1] A. Quarteroni, A. Valli, Numerical approximation of partial di ff erential equations, volume 23, Springer Science & Business Media, 2008. [2] W. F. Ames, Numerical methods for partial di ff erential equations, Academic press, 2014. [3] K.-Y. He, Y.-F. Jin, X.-W. Zhou, Z.-Y. Yin, X. Chen, An improved mpm formulation for free surface flow problems based on finite volume method, Computer Methods in Applied Mechanics and Engineering 446 (2025) 118264. URL: https://www.sciencedirect.com/science/article/pii/S0045782525005365 .doi:https: // doi.org /10.1016 /j.cma.2025.118264. [4] Y. Chen, X. Liu, Z. Chai, B. Shi, Regularized lattice boltzmann method based maximum principle and energy stability preserving finite-di ff erence scheme for the allen-cahn equation, Journal of Computational Physics 528 (2025) 113831. URL: https://www.sciencedirect.com/science/article/pii/S0021999125001147 .doi:https: // doi.org /10.1016 /j.jcp.2025.113831. [5] S. Zhou, M. Ben Bettaieb, F. Abed-Meraim, A crystal plasticity-damage coupled finite element framework for predicting mechanical behavior and ductility limits of thin metal sheets, International Journal of Plasticity 187 (2025) 104267. URL: https://www.sciencedirect.com/science/article/pii/S0749641925000270 .doi:https: // doi.org /10.1016 /j.ijplas.2025.104267. [6] S. He, C.-T. Ng, C. Yeung, Time-domain spectral finite element method for modeling sec-ond harmonic generation of guided waves induced by material, geometric and contact non-linearities in beams, International Journal of Structural Stability and Dynamics 20 (2020) 2042005. URL: https://doi.org/10.1142/S0219455420420055 . doi:10.1142 /S0219455420420055. 
+
+arXiv:https://doi.org/10.1142/S0219455420420055 .[7] C. He, Z. Yang, P. Zhang, R. Dollevoet, Z. Li, Thermomechanical finite element mod-elling of wheel-rail contact and experimental validation, Tribology International 209 (2025) 110666. URL: https://www.sciencedirect.com/science/article/pii/S0301679X25001616 .doi:https: // doi.org /10.1016 /j.triboint.2025.110666. [8] D. Vivaldi, A. Papukchiev, C. Viron, S. Gra ff , M. Kountchou, Fluid–structure in-teractions in nuclear power plants: Review of some main phenomena and analy-sis of the related safety aspects, Nuclear Engineering and Design 441 (2025) 114121. URL: https://www.sciencedirect.com/science/article/pii/S0029549325002985 .doi:https: // doi.org /10.1016 /j.nucengdes.2025.114121. [9] H. Lerogeron, V. Faucher, P. Boivin, J. Favier, Lbm-based partitioned coupling for fast transient fluid-structure dynamics, Applied Mathematical Modelling 149 (2026) 116274. URL: https://www.sciencedirect.com/science/article/pii/S0307904X2500349X .doi:https: // doi.org /10.1016 /j.apm.2025.116274. [10] X. Wu, G. Si, Y. Jing, Z. Yu, T. Ren, P. Mostaghimi, Indicator gases under thermal e ff ect in a mul-tiphysics coupling model of longwall goaf during coal self-heating, Applied Thermal Engineering 264 (2025) 125513. URL: https://www.sciencedirect.com/science/article/pii/S1359431125001048 .doi:https: // doi.org /10.1016 /j.applthermaleng.2025.125513. [11] Y. LeCun, Y. Bengio, G. Hinton, Deep learning, NATURE 521 (2015) 436–444. doi:10.1038 /nature14539. [12] Y. Xu, T. M. Khan, Y. Song, E. Meijering, Edge deep learning in computer vision and medical diagnostics: a comprehensive survey, ARTIFICIAL INTELLIGENCE REVIEW 58 (2025). doi:10.1007 /s10462-024-11033-5. 20 [13] V. M. Nguyen-Thanh, X. Zhuang, T. Rabczuk, A deep energy method for finite deformation hyperelasticity, European Journal of Mechanics-A /Solids 80 (2020) 103874. [14] Z. Liang, H. Gao, T. Li, Sem: a shallow energy method for finite deformation hyperelasticity problems, ACTA MECHANICA 233 (2022) 1739–1755. doi:10.1007 /s00707-022-03174-x. [15] P. Goyal, P. Benner, Generalized quadratic embeddings for nonlinear dynam-ics using deep learning, Physica D: Nonlinear Phenomena 463 (2024) 134158. URL: https://www.sciencedirect.com/science/article/pii/S016727892400109X .doi:https: // doi.org /10.1016 /j.physd.2024.134158. [16] M. Lino, S. Fotiadis, A. A. Bharath, C. D. Cantwell, Current and emerging deep-learning methods for the simulation of fluid dynamics, PROCEEDINGS OF THE ROYAL SOCIETY A-MATHEMATICAL PHYSICAL AND ENGINEERING SCIENCES 479 (2023). doi:10.1098 /rspa.2023.0058. [17] H. Gao, W. Zuo, Z. Feng, J. Yang, T. Li, P. Hu, Dhem: a deep heat energy method for steady-state heat conduction problems, JOURNAL OF MECHANICAL SCIENCE AND TECHNOLOGY 36 (2022) 5777–5791. doi:10.1007 /s12206-022-1039-0. [18] L. Wu, L. Adam, L. Noels, Micro-mechanics and data-driven based reduced order models for multi-scale anal-yses of woven composites, COMPOSITE STRUCTURES 270 (2021). doi:10.1016 /j.compstruct.2021.114058. [19] M. Raissi, P. Perdikaris, G. E. Karniadakis, Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial di ff erential equations, Journal of Computa-tional Physics 378 (2019) 686–707. [20] G. E. Karniadakis, I. G. Kevrekidis, L. Lu, P. Perdikaris, S. Wang, L. Yang, Physics-informed machine learning, Nature Reviews Physics 3 (2021) 422–440. [21] N. Song, C. Wang, H. Peng, J. Zhao, A study of mechanism-data hybrid-driven method for multibody system via physics-informed neural network, ACTA MECHANICA SINICA 41 (2025). doi:10.1007 /s10409-024-24159-x. [22] T. Kirchdoerfer, M. Ortiz, Data-driven computing in dynamics, INTERNATIONAL JOURNAL FOR NUMER-ICAL METHODS IN ENGINEERING 113 (2018) 1697–1710. doi:10.1002 /nme.5716. [23] E. Egrioglu, E. Bas, A new deep neural network for forecasting: Deep dendritic artificial neural network, ARTIFICIAL INTELLIGENCE REVIEW 57 (2024). doi:10.1007 /s10462-024-10790-7. [24] D. Finol, Y. Lu, V. Mahadevan, A. Srivastava, Deep convolutional neural networks for eigenvalue problems in mechanics, INTERNATIONAL JOURNAL FOR NUMERICAL METHODS IN ENGINEERING 118 (2019) 258–275. doi:10.1002 /nme.6012. [25] E. Samaniego, C. Anitescu, S. Goswami, V. M. Nguyen-Thanh, H. Guo, K. Hamdia, X. Zhuang, T. Rabczuk, An energy approach to the solution of partial di ff erential equations in computational mechanics via machine learn-ing: Concepts, implementation and applications, Computer Methods in Applied Mechanics and Engineering 362 (2020) 112790. [26] V. M. Nguyen-Thanh, C. Anitescu, N. Alajlan, T. Rabczuk, X. Zhuang, Parametric deep energy approach for elasticity accounting for strain gradient e ff ects, Computer Methods in Applied Mechanics and Engineering 386 (2021) 114096. [27] B. Yu, et al., The deep ritz method: a deep learning-based numerical algorithm for solving variational problems, Communications in Mathematics and Statistics 6 (2018) 1–12. [28] J. Sirignano, K. Spiliopoulos, Dgm: A deep learning algorithm for solving partial di ff erential equations, Journal of computational physics 375 (2018) 1339–1364. 21 [29] M. Raissi, P. Perdikaris, G. E. Karniadakis, Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial di ff erential equations, Journal of Computa-tional physics 378 (2019) 686–707. [30] E. Haghighat, M. Raissi, A. Moure, H. Gomez, R. Juanes, A physics-informed deep learning framework for inversion and surrogate modeling in solid mechanics, Computer Methods in Applied Mechanics and Engineering 379 (2021) 113741. [31] T. Kadeethum, T. M. Jørgensen, H. M. Nick, Physics-informed neural networks for solving nonlinear di ff usivity and biot’s equations, PloS one 15 (2020) e0232683. [32] C. Rao, H. Sun, Y. Liu, Physics informed deep learning for computational elastodynamics without labeled data, arXiv preprint arXiv:2006.08472 (2020). [33] D. W. Abueidda, Q. Lu, S. Koric, Deep learning collocation method for solid mechanics: Linear elasticity, hyperelasticity, and plasticity as examples, arXiv preprint arXiv:2012.01547 (2020). [34] E. Samaniego, C. Anitescu, S. Goswami, V. M. Nguyen-Thanh, H. Guo, K. Hamdia, X. Zhuang, T. Rabczuk, An energy approach to the solution of partial di ff erential equations in computational mechanics via machine learn-ing: Concepts, implementation and applications, Computer Methods in Applied Mechanics and Engineering 362 (2020) 112790. [35] V. M. Nguyen-Thanh, X. Zhuang, T. Rabczuk, A deep energy method for finite deformation hyperelasticity, European Journal of Mechanics-A /Solids 80 (2020) 103874. [36] J. N. Fuhg, N. Bouklas, The mixed deep energy method for resolving concentration features in finite strain hyperelasticity, Journal of Computational Physics 451 (2022) 110839. [37] D. W. Abueidda, S. Koric, E. Guleryuz, N. A. Sobh, Enhanced physics-informed neural networks for hyperelas-ticity, International Journal for Numerical Methods in Engineering 124 (2023) 1585–1601. [38] C. Chadha, D. Abueidda, S. Koric, E. Guleryuz, I. Jasiuk, Optimizing hyperparameters and architecture of deep energy method (2022). [39] S.-W. Lee, C. Truong-Quoc, Y. Ro, D.-N. Kim, Adversarial deep energy method for solving saddle point problems involving dielectric elastomers, Computer Methods in Applied Mechanics and Engineering 421 (2024) 116825. [40] W. Li, M. Z. Bazant, J. Zhu, A physics-guided neural network framework for elastic plates: Comparison of governing equations-based and energy-based approaches, Computer Methods in Applied Mechanics and Engineering 383 (2021) 113933. [41] C. Gao, P. Wu, J. Xu, K. Wang, Y. Song, F. Blaabjerg, Hybrid data-physics-driven modeling method for real-time simulation of cascaded power electronics systems, IEEE TRANSACTIONS ON POWER ELECTRONICS 41 (2026) 3666–3680. doi:10.1109 /TPEL.2025.3597458. [42] Y. Yu, J. Fish, Data-physics driven reduced order homogenization for continuum damage mechanics at multiple scales, INTERNATIONAL JOURNAL FOR MULTISCALE COMPUTATIONAL ENGINEERING 22 (2024) 1–14. doi:10.1615 /IntJMultCompEng.2023049164. [43] J. Chen, H. Yu, B. Li, H. Zhang, X. Jin, S. Meng, H. Liu, H. Wu, Deeponet-embedded physics-informed neural network for production prediction of multiscale shale matrix-fracture system, PHYSICS OF FLUIDS 37 (2025). doi:10.1063 /5.0245212. [44] G. Zhang, T. Xu, J. Xu, H. Wang, A graph-structured, physics-informed deeponet neural network for complex structural analysis, MACHINE LEARNING AND KNOWLEDGE EXTRACTION 7 (2025). doi:10.3390 /make7040137. 22 [45] F. Lehmann, F. Gatti, D. Clouteau, Multiple-input fourier neural operator (mifno) for source-dependent 3d elastodynamics, JOURNAL OF COMPUTATIONAL PHYSICS 527 (2025). doi:10.1016 /j.jcp.2025.113813. [46] F. Lehmann, F. Gatti, M. Bertin, D. Clouteau, 3d elastic wave propagation with a factorized fourier neural operator (f-fno), COMPUTER METHODS IN APPLIED MECHANICS AND ENGINEERING 420 (2024). doi:10.1016 /j.cma.2023.116718. [47] L. Jiang, X. Feng, Q. Xu, Prediction of compressor blade cascade flow field based on fourier neural operator, AEROSPACE SCIENCE AND TECHNOLOGY 163 (2025). doi:10.1016 /j.ast.2025.110208. [48] M. S. Bespalov, Indexing in the good-thomas fast fourier transform algorithm, COMPUTATIONAL MATHE-MATICS AND MATHEMATICAL PHYSICS 65 (2025) 449–456. doi:10.1134 /S0965542524702099. [49] N. Kovachki, S. Lanthaler, S. Mishra, On universal approximation and error bounds for fourier neural operators, Journal of Machine Learning Research 22 (2021) 1–76. [50] L. Lu, P. Jin, G. Pang, Z. Zhang, G. E. Karniadakis, Learning nonlinear operators via deeponet based on the universal approximation theorem of operators, Nature machine intelligence 3 (2021) 218–229. [51] P. Jin, S. Meng, L. Lu, Mionet: Learning multiple-input operators via tensor product, SIAM Journal on Scientific Computing 44 (2022) A3490–A3514. [52] S. Wang, H. Wang, P. Perdikaris, Learning the solution operator of parametric partial di ff erential equations with physics-informed deeponets, Science advances 7 (2021) eabi8605. [53] S. Brivio, S. Fresca, N. R. Franco, A. Manzoni, Error estimates for pod-dl-roms: a deep learning framework for reduced order modeling of nonlinear parametrized pdes enhanced by proper orthogonal decomposition, Ad-vances in Computational Mathematics 50 (2024) 33. [54] Z. Hao, Z. Wang, H. Su, C. Ying, Y. Dong, S. Liu, Z. Cheng, J. Song, J. Zhu, Gnot: A general neural operator transformer for operator learning, in: International Conference on Machine Learning, PMLR, 2023, pp. 12556– 12569. [55] Z. Li, N. Kovachki, K. Azizzadenesheli, B. Liu, K. Bhattacharya, A. Stuart, A. Anandkumar, Fourier neural operator for parametric partial di ff erential equations, arXiv preprint arXiv:2010.08895 (2020). [56] H. You, Q. Zhang, C. J. Ross, C.-H. Lee, Y. Yu, Learning deep implicit fourier neural operators (ifnos) with applications to heterogeneous material modeling, Computer Methods in Applied Mechanics and Engineering 398 (2022) 115296. [57] A. Tran, A. Mathews, L. Xie, C. S. Ong, Factorized fourier neural operators, arXiv preprint arXiv:2111.13802 (2021). [58] D. P. Kingma, Adam: A method for stochastic optimization, arXiv preprint arXiv:1412.6980 (2014). [59] D. C. Liu, J. Nocedal, On the limited memory bfgs method for large scale optimization, Mathematical program-ming 45 (1989) 503–528. 23

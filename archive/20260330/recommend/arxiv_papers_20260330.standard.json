@@ -1,0 +1,346 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-30T19:46:15.653401+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 4,
+    "deep_cap": 6,
+    "deep_selected": 4,
+    "quick_candidates": 5,
+    "quick_skim_target": 11,
+    "quick_selected": 5
+  },
+  "deep_dive": [
+    {
+      "id": "2603.26245v1",
+      "title": "Physics-Informed Neural Networks and Sequence Encoder: Application to heating and early cooling of thermo-stamping process",
+      "abstract": "In a previous work (Elaarabi et al., 2025b), the Sequence Encoder for online dynamical system identification (Elaarabi et al., 2025a) and its combination with PINN (PINN-SE) were introduced and tested on both synthetic and real data case scenarios. The sequence encoder is able to effectively encode time series into feature vectors, which the PINN then uses to map to dynamical behavior, predicting system response under changes in parameters, ICs and BCs. Previously (Elaarabi et al., 2025b), the tests on real data were limited to simple 1D problems and only 1D time series inputs of the Sequence Encoder. In this work, the possibility of applying PINN-SE to a more realistic case is investigated: heating and early cooling of the thermo-stamping process, which is a critical stage in the forming process of continuous fiber reinforced composite materials with thermoplastic polymer. The possibility of extending the PINN-SE inputs to multimodal data, such as sequences of temporal 2D images and to scenarios involving variable geometries, is also explored. The results show that combining multiple encoders with the previously proposed method (Elaarabi et al., 2025b) is feasible, we also show that training the model on synthetic data generated based on experimental data can help the model to generalize well for real experimental data, unseen during the training phase.",
+      "authors": [
+        "Mouad Elaarabi",
+        "Domenico Borzacchiello",
+        "Philippe Le Bot",
+        "Nathan Lauzeral",
+        "Sebastien Comas-Cardona"
+      ],
+      "primary_category": "cs.CE",
+      "categories": [
+        "cs.CE",
+        "cs.AI"
+      ],
+      "published": "2026-03-27T10:09:09+00:00",
+      "link": "https://arxiv.org/pdf/2603.26245v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "PINN application to thermo-stamping process",
+      "llm_evidence_cn": "PINN在热冲压过程中的应用",
+      "llm_evidence": "PINN在热冲压过程中的应用",
+      "canonical_evidence": "PINN在热冲压过程中的应用",
+      "llm_tldr_en": "Combines PINNs with sequence encoders to predict dynamical behavior in realistic thermo-stamping heating processes.",
+      "llm_tldr_cn": "将PINN与序列编码器结合，预测现实热冲压加热过程中的动力学行为。",
+      "llm_tldr": "将PINN与序列编码器结合，预测现实热冲压加热过程中的动力学行为。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Physics-informed neural networks for partial differential equations",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.26418v1",
+      "title": "Kantorovich--Kernel Neural Operators: Approximation Theory, Asymptotics, and Neural Network Interpretation",
+      "abstract": "This paper studies a class of multivariate Kantorovich-kernel neural network operators, including the deep Kantorovich-type neural network operators studied by Sharma and Singh. We prove density results, establish quantitative convergence estimates, derive Voronovskaya-type theorems, analyze the limits of partial differential equations for deep composite operators, prove Korovkin-type theorems, and propose inversion theorems. This paper studies a class of multivariate Kantorovich-kernel neural network operators, including the deep Kantorovich-type neural network operators studied by Sharma and Singh. We prove density results, establish quantitative convergence estimates, derive Voronovskaya-type theorems, analyze the limits of partial differential equations for deep composite operators, prove Korovkin-type theorems, and propose inversion theorems. Furthermore, this paper discusses the connection between neural network architectures and the classical positive operators proposed by Chui, Hsu, He, Lorentz, and Korovkin.",
+      "authors": [
+        "Tian-Xiao He"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG",
+        "math.FA"
+      ],
+      "published": "2026-03-27T13:46:37+00:00",
+      "link": "https://arxiv.org/pdf/2603.26418v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Theory of Kantorovich-kernel neural network operators",
+      "llm_evidence_cn": "Kantorovich核神经网络算子理论",
+      "llm_evidence": "Kantorovich核神经网络算子理论",
+      "canonical_evidence": "Kantorovich核神经网络算子理论",
+      "llm_tldr_en": "Provides approximation theory and PDE limit analysis for a class of neural network operators.",
+      "llm_tldr_cn": "为一类神经网络算子提供逼近理论和偏微分方程极限分析。",
+      "llm_tldr": "为一类神经网络算子提供逼近理论和偏微分方程极限分析。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Neural operator methods for solving PDEs",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.26030v1",
+      "title": "Constitutive parameterized deep energy method for solid mechanics problems with random material parameters",
+      "abstract": "In practical structural design and solid mechanics simulations, material properties inherently exhibit random variations within bounded intervals. However, evaluating mechanical responses under continuous material uncertainty remains a persistent challenge. Traditional numerical approaches, such as the Finite Element Method (FEM), incur prohibitive computational costs as they require repeated mesh discretization and equation solving for every parametric realization. Similarly, data-driven surrogate models depend heavily on massive, high-fidelity datasets, while standard physics-informed frameworks (e.g., the Deep Energy Method) strictly demand complete retraining from scratch whenever material parameters change. To bridge this critical gap, we propose the Constitutive Parameterized Deep Energy Method (CPDEM). In this purely physics-driven framework, the strain energy density functional is reformulated by encoding a latent representation of stochastic constitutive parameters. By embedding material parameters directly into the neural network alongside spatial coordinates, CPDEM transforms conventional spatial collocation points into parameter-aware material points. Trained in an unsupervised manner via expected energy minimization over the parameter domain, the pre-trained model continuously learns the solution manifold. Consequently, it enables zero-shot, real-time inference of displacement fields for unknown material parameters without requiring any dataset generation or model retraining. The proposed method is rigorously validated across diverse benchmarks, including linear elasticity, finite-strain hyperelasticity, and complex highly nonlinear contact mechanics. To the best of our knowledge, CPDEM represents the first purely physics-driven deep learning paradigm capable of simultaneously and efficiently handling continuous multi-parameter variations in solid mechanics.",
+      "authors": [
+        "Zhangyong Liang",
+        "Huanhuan Gao"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-27T02:59:32+00:00",
+      "link": "https://arxiv.org/pdf/2603.26030v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "physics-informed framework for solid mechanics",
+      "llm_evidence_cn": "固体力学的物理信息框架",
+      "llm_evidence": "固体力学的物理信息框架",
+      "canonical_evidence": "固体力学的物理信息框架",
+      "llm_tldr_en": "Proposes a constitutive parameterized deep energy method for solid mechanics with random material parameters.",
+      "llm_tldr_cn": "提出了一种用于具有随机材料参数的固体力学问题的本构参数化深度能量方法。",
+      "llm_tldr": "提出了一种用于具有随机材料参数的固体力学问题的本构参数化深度能量方法。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Physics-informed neural networks for partial differential equations",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.26643v1",
+      "title": "Boundary neuron method for solving partial differential equations",
+      "abstract": "We propose a boundary neuron method with random features (BNM-RF) for solving partial differential equations. The method approximates the unknown boundary function by a shallow network within the boundary integral formulation. With randomly sampled and fixed hidden parameters, the computation reduces to a linear least squares problem for the output coefficients, which avoids gradient based nonconvex optimization. This construction retains the dimensionality reduction of boundary integral equations and the linear solution structure of the random feature method. For elliptic problems, we establish convergence analysis by combining kernel-based method with random feature approximation, and obtain error bounds on both the boundary and the interior solution. Numerical experiments on Laplace and Helmholtz problems, including interior and exterior cases, show that the proposed method achieves competitive accuracy relative to the boundary element method and favorable performance relative to boundary integral neural networks in the tested settings with only few neurons. Overall, the proposed method provides a practical framework for combining boundary integral equations with neural network for problems on complex geometries and unbounded domains.",
+      "authors": [
+        "Ye Lin",
+        "Wentao Liu",
+        "Young Ju Lee",
+        "Jiwei Jia"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-27T17:46:24+00:00",
+      "link": "https://arxiv.org/pdf/2603.26643v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Boundary neuron method for solving partial differential equations",
+      "llm_evidence_cn": "求解偏微分方程的边界神经元方法",
+      "llm_evidence": "求解偏微分方程的边界神经元方法",
+      "canonical_evidence": "求解偏微分方程的边界神经元方法",
+      "llm_tldr_en": "Introduces a boundary neuron method with random features to solve PDEs via boundary integral formulations.",
+      "llm_tldr_cn": "引入一种具有随机特征的边界神经元方法，通过边界积分公式求解偏微分方程。",
+      "llm_tldr": "引入一种具有随机特征的边界神经元方法，通过边界积分公式求解偏微分方程。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.20984v1",
+      "title": "Joint Surrogate Learning of Objectives, Constraints, and Sensitivities for Efficient Multi-objective Optimization of Neural Dynamical Systems",
+      "abstract": "Biophysical neural system simulations are among the most computationally demanding scientific applications, and their optimization requires navigating high-dimensional parameter spaces under numerous constraints that impose a binary feasible/infeasible partition with no gradient signal to guide the search. Here, we introduce DMOSOPT, a scalable optimization framework that leverages a unified, jointly learned surrogate model to capture the interplay between objectives, constraints, and parameter sensitivities. By learning a smooth approximation of both the objective landscape and the feasibility boundary, the joint surrogate provides a unified gradient that simultaneously steers the search toward improved objective values and greater constraint satisfaction, while its partial derivatives yield per-parameter sensitivity estimates that enable more targeted exploration. We validate the framework from single-cell dynamics to population-level network activity, spanning incremental stages of a neural circuit modeling workflow, and demonstrate efficient, effective optimization of highly constrained problems at supercomputing scale with substantially fewer problem evaluations. While motivated by and demonstrated in the context of computational neuroscience, the framework is general and applicable to constrained multi-objective optimization problems across scientific and engineering domains.",
+      "authors": [
+        "Frithjof Gressmann",
+        "Ivan Georgiev Raikov",
+        "Seung Hyun Kim",
+        "Mattia Gazzola",
+        "Lawrence Rauchwerger",
+        "Ivan Soltesz"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-22T00:06:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.20984v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Surrogate learning for neural dynamical systems",
+      "llm_evidence_cn": "神经动力系统的代理学习",
+      "llm_evidence": "神经动力系统的代理学习",
+      "canonical_evidence": "神经动力系统的代理学习",
+      "llm_tldr_en": "Develops a joint surrogate model for optimizing high-dimensional biophysical neural system simulations.",
+      "llm_tldr_cn": "开发了一种联合代理模型，用于优化高维生物物理神经系统模拟。",
+      "llm_tldr": "开发了一种联合代理模型，用于优化高维生物物理神经系统模拟。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.26396v1",
+      "title": "Domain decomposition of large neural network surrogate models",
+      "abstract": "Neural networks (NNs) have gained significant attention across various engineering disciplines, particularly in design optimization, where they are used to build surrogate models for high-dimensional regression problems. Despite their power as global approximators, NNs often fail to accurately capture local nonlinearities without relying on a large number of training parameters. To address these limitations, in this paper we propose domain decomposition methods (DDM), which divide the input feature space into multiple local subdomains, each modeled by a simpler NN, trained in parallel. To recover the accuracy of a global approximation, interface constraints are introduced in the local loss functions to enforce continuity between subdomains. The interface constraints are enforced with two different approaches, by utilizing Lagrange multiplier or augmented Lagrange multiplier methods. Both approaches are validated using synthetic data from 2D and 3D linear compression problems, numerically solved using the finite element method. The study investigates computational time and accuracy across varying numbers of subdomains to identify optimal partitioning strategies. Compared to unconstrained approximations, both methods significantly improve continuity across subdomain interfaces. Also, the use of DDMs improves approximation accuracy in nonlinear regions when compared to standard global NN training. The augmented Lagrange method outperforms the standard Lagrange formulation by converging faster due to lower convergence requirements, albeit with a slightly lower accuracy. Its scalability makes it the preferred choice for large-scale problems, as the faster convergence outweighs the minor loss in accuracy. Overall, these results highlight the augmented Lagrange method as a promising DDM approach for training efficient and scalable NN surrogate models.",
+      "authors": [
+        "Timm Gödde",
+        "Eisso H. Atzema",
+        "Bojana Rosić"
+      ],
+      "primary_category": "cs.CE",
+      "categories": [
+        "cs.CE"
+      ],
+      "published": "2026-03-27T13:22:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.26396v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Domain decomposition for neural network surrogate models",
+      "llm_evidence_cn": "神经网络代理模型的区域分解方法",
+      "llm_evidence": "神经网络代理模型的区域分解方法",
+      "canonical_evidence": "神经网络代理模型的区域分解方法",
+      "llm_tldr_en": "Proposes domain decomposition to improve neural network surrogate model accuracy and scalability.",
+      "llm_tldr_cn": "提出区域分解方法以提高神经网络代理模型的精度和可扩展性。",
+      "llm_tldr": "提出区域分解方法以提高神经网络代理模型的精度和可扩展性。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25832v1",
+      "title": "A Neural Score-Based Particle Method for the Vlasov-Maxwell-Landau System",
+      "abstract": "Plasma modeling is central to the design of nuclear fusion reactors, yet simulating collisional plasma kinetics from first principles remains a formidable computational challenge: the Vlasov-Maxwell-Landau (VML) system describes six-dimensional phase-space transport under self-consistent electromagnetic fields together with the nonlinear, nonlocal Landau collision operator. A recent deterministic particle method for the full VML system estimates the velocity score function via the blob method, a kernel-based approximation with $O(n^2)$ cost. In this work, we replace the blob score estimator with score-based transport modeling (SBTM), in which a neural network is trained on-the-fly via implicit score matching at $O(n)$ cost. We prove that the approximated collision operator preserves momentum and kinetic energy, and dissipates an estimated entropy. We also characterize the unique global steady state of the VML system and its electrostatic reduction, providing the ground truth for numerical validation. On three canonical benchmarks -- Landau damping, two-stream instability, and Weibel instability -- SBTM is more accurate than the blob method, achieves correct long-time relaxation to Maxwellian equilibrium where the blob method fails, and delivers $50\\%$ faster runtime with $4\\times$ lower peak memory.",
+      "authors": [
+        "Vasily Ilin",
+        "Jingwei Hu"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA",
+        "cs.LG",
+        "math.AP"
+      ],
+      "published": "2026-03-26T18:55:44+00:00",
+      "link": "https://arxiv.org/pdf/2603.25832v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Neural network for Vlasov-Maxwell-Landau system",
+      "llm_evidence_cn": "用于Vlasov-Maxwell-Landau系统的神经网络",
+      "llm_evidence": "用于Vlasov-Maxwell-Landau系统的神经网络",
+      "canonical_evidence": "用于Vlasov-Maxwell-Landau系统的神经网络",
+      "llm_tldr_en": "Proposes a neural score-based particle method for simulating complex plasma kinetics at reduced computational cost.",
+      "llm_tldr_cn": "提出一种基于神经评分的粒子方法，以较低计算成本模拟复杂的等离子体动力学。",
+      "llm_tldr": "提出一种基于神经评分的粒子方法，以较低计算成本模拟复杂的等离子体动力学。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.26149v1",
+      "title": "Graph-Based Meshfree Multi-scale Coarse Space Approximation for Two-Level Schwarz Methods",
+      "abstract": "Efficient simulation of Darcy flow in highly heterogeneous porous media requires iterative solvers that remain robust under large permeability contrasts and mixed boundary conditions. Spectral coarse spaces in two-level overlapping Schwarz methods provide such robustness, but their practical use is often limited by an expensive setup phase dominated by many local generalized eigenvalue solves. We propose a purely algebraic, coarse-space approximation that avoids these repeated local eigensolves by using a graph neural network operating on the system-matrix graph. On the analysis side, we introduce a coefficient-weighted subspace-distance measure to quantify the discrepancy between the approximated and target local multiscale coarse spaces, and we derive a condition-number bound for the resulting preconditioned operator in terms of this distance. This bound yields a principled supervised-training objective and links learning error to solver performance. Numerical experiments on 2D and 3D high-contrast Darcy systems with varying mixed boundary conditions demonstrate that the proposed approach substantially reduces setup cost and improves end-to-end time-to-solution, while preserving robust convergence across the tested contrasts and boundary configurations.",
+      "authors": [
+        "Yucheng Liu",
+        "Tak Shing Au Yeung",
+        "Eric T. Chung",
+        "Simon See"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-27T08:08:08+00:00",
+      "link": "https://arxiv.org/pdf/2603.26149v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Graph neural network for coarse space approximation in PDE solvers",
+      "llm_evidence_cn": "用于偏微分方程求解器粗空间近似的图神经网络",
+      "llm_evidence": "用于偏微分方程求解器粗空间近似的图神经网络",
+      "canonical_evidence": "用于偏微分方程求解器粗空间近似的图神经网络",
+      "llm_tldr_en": "Uses graph neural networks to approximate coarse spaces in iterative solvers for Darcy flow simulations.",
+      "llm_tldr_cn": "使用图神经网络在达西流模拟的迭代求解器中近似粗空间，提高计算效率。",
+      "llm_tldr": "使用图神经网络在达西流模拟的迭代求解器中近似粗空间，提高计算效率。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Deep learning based partial differential equation solvers",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.26517v1",
+      "title": "The internal law of a material can be discovered from its boundary",
+      "abstract": "Since the earliest stages of human civilization, advances in technology have been tightly linked to our ability to understand and predict the mechanical behavior of materials. In recent years, this challenge has increasingly been framed within the broader paradigm of data-driven scientific discovery, where governing laws are inferred directly from observations. However, existing methods require either stress-strain pairs or full-field displacement measurements, which are often inaccessible in practice. We introduce Neural-DFEM, a method that enables unsupervised discovery of hyperelastic material laws even from partial observations, such as boundary-only measurements. The method embeds a differentiable finite element solver within the learning loop, directly linking candidate energy functionals to available measurements. To guarantee thermodynamic consistency and mathematical well-posedness throughout training, the method employs Hyperelastic Neural Networks, a novel structure-preserving neural architecture that enforces frame indifference, material symmetry, polyconvexity, and coercivity by design. The resulting framework enables robust material model discovery in both two- and three-dimensional settings, including scenarios with boundary-only measurements. Neural-DFEM allows for generalization across geometries and loading conditions, and exhibits unprecedented accuracy and strong resilience to measurement noise. Our results demonstrate that reliable identification of material laws is achievable even under partial observability when strong physical inductive biases are embedded in the learning architecture.",
+      "authors": [
+        "Francesco Regazzoni"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA",
+        "cs.CE",
+        "cs.LG"
+      ],
+      "published": "2026-03-27T15:27:04+00:00",
+      "link": "https://arxiv.org/pdf/2603.26517v1",
+      "tags": [
+        "keyword:PINN",
+        "query:PINN"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Unsupervised discovery of material laws using differentiable solvers",
+      "llm_evidence_cn": "使用可微求解器无监督发现材料定律",
+      "llm_evidence": "使用可微求解器无监督发现材料定律",
+      "canonical_evidence": "使用可微求解器无监督发现材料定律",
+      "llm_tldr_en": "Embeds a differentiable finite element solver to discover hyperelastic material laws from boundary data.",
+      "llm_tldr_cn": "嵌入可微有限元求解器，从边界数据中发现超弹性材料定律。",
+      "llm_tldr": "嵌入可微有限元求解器，从边界数据中发现超弹性材料定律。",
+      "llm_tags": [
+        "query:pinn"
+      ],
+      "matched_query_tag": "query:pinn",
+      "matched_query_text": "Hybrid physics informed machine learning for differential equations",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
